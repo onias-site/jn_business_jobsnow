@@ -1,8 +1,8 @@
 package com.jn.exceptions;
 
 @SuppressWarnings("serial")
-public class JnSupportLanguageIsMissing extends RuntimeException {
-	public JnSupportLanguageIsMissing() {
+public class JnErrorSupportLanguageIsMissing extends RuntimeException {
+	public JnErrorSupportLanguageIsMissing() {
 		super("It is missing the configuration 'supportLanguage'");
 	}
 }

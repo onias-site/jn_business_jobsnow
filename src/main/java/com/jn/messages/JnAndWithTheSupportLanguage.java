@@ -2,13 +2,13 @@ package com.jn.messages;
 
 import com.ccp.decorators.CcpJsonRepresentation;
 
-public class AndWithTheSupportLanguage {
+public class JnAndWithTheSupportLanguage {
 
-	final AndWithTheJsonValues andWithJsonValues;
+	final JnAndWithTheJsonValues andWithJsonValues;
 	
 	final String supportLanguage;
 
-	AndWithTheSupportLanguage(AndWithTheJsonValues andWithJsonValues, String supportLanguage) {
+	JnAndWithTheSupportLanguage(JnAndWithTheJsonValues andWithJsonValues, String supportLanguage) {
 		this.andWithJsonValues = andWithJsonValues;
 		this.supportLanguage = supportLanguage;
 	}

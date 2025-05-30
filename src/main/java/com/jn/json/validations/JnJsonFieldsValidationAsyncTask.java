@@ -1,14 +1,14 @@
-package com.jn.json.fields.validations;
+package com.jn.json.validations;
 
-import com.ccp.validation.annotations.SimpleObject;
+import com.ccp.validation.annotations.CcpSimpleObject;
 import com.ccp.validation.annotations.CcpJsonFieldsValidation;
-import com.ccp.validation.enums.SimpleObjectValidations;
+import com.ccp.validation.enums.CcpSimpleObjectValidations;
 
 @CcpJsonFieldsValidation(
 		simpleObject = {
-				@SimpleObject(
+				@CcpSimpleObject(
 						fields = {"topic", "request", "success", "response"},
-						rule = SimpleObjectValidations.requiredFields
+						rule = CcpSimpleObjectValidations.requiredFields
 						)
 		}
 //		,

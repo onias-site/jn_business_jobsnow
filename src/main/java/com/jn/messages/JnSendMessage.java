@@ -10,7 +10,7 @@ import com.ccp.dependency.injection.CcpDependencyInjection;
 import com.ccp.especifications.db.crud.CcpCrud;
 import com.ccp.especifications.db.crud.CcpSelectUnionAll;
 import com.ccp.especifications.db.utils.CcpEntity;
-import com.ccp.exceptions.http.CcpHttpError;
+import com.ccp.exceptions.http.CcpErrorHttp;
 import com.jn.business.commons.JnBusinessSendEmailMessage;
 import com.jn.business.commons.JnBusinessTryToSendInstantMessage;
 import com.jn.entities.JnEntityEmailParametersToSend;
@@ -28,19 +28,19 @@ public class JnSendMessage {
 	
 	private final List<CcpEntity> messageEntities = new ArrayList<>();
 	
-	public CreateStep createStep() {
-		return new CreateStep(this);
+	public JnCreateStep createStep() {
+		return new JnCreateStep(this);
 	}
 	
-	public AddDefaultStep addDefaultProcessForEmailSending() {
+	public JnAddDefaultStep addDefaultProcessForEmailSending() {
 		JnSendMessage addOneStep = this.addOneStep(JnBusinessSendEmailMessage.INSTANCE, JnEntityEmailParametersToSend.ENTITY, JnEntityEmailTemplateMessage.ENTITY);
-		return new AddDefaultStep(addOneStep);
+		return new JnAddDefaultStep(addOneStep);
 	}
 
 	
-	public AddDefaultStep addDefaultStepForTelegramSending() {
+	public JnAddDefaultStep addDefaultStepForTelegramSending() {
 		JnSendMessage addOneStep = this.addOneStep(JnBusinessTryToSendInstantMessage.INSTANCE, JnEntityInstantMessengerParametersToSend.ENTITY, JnEntityInstantMessengerTemplateMessage.ENTITY);
-		return new AddDefaultStep(addOneStep);
+		return new JnAddDefaultStep(addOneStep);
 	}
 	
 	JnSendMessage addOneStep(Function<CcpJsonRepresentation, CcpJsonRepresentation> process, CcpEntity parameterEntity, CcpEntity messageEntity) {
@@ -102,8 +102,8 @@ public class JnSendMessage {
 			Function<CcpJsonRepresentation, CcpJsonRepresentation> process = this.process.get(k);
 			try {
 				process.apply(messageToSend);
-			} catch (CcpHttpError e) {
-
+			} catch (CcpErrorHttp e) {
+				e.printStackTrace();
 			}
 			k++;
 		}

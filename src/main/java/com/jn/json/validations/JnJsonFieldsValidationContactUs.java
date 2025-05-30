@@ -1,4 +1,4 @@
-package com.jn.json.fields.validations;
+package com.jn.json.validations;
 
 import com.ccp.validation.annotations.CcpJsonFieldsValidation;
 

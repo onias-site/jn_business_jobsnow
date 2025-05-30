@@ -8,11 +8,11 @@ import com.ccp.especifications.db.bulk.CcpBulkItem;
 import com.ccp.especifications.db.bulk.CcpBulkOperationResult;
 import com.jn.entities.JnEntityRecordToReprocess;
 
-class ReprocessMapper implements Function<CcpBulkOperationResult, CcpJsonRepresentation>{
+class FunctionReprocessMapper implements Function<CcpBulkOperationResult, CcpJsonRepresentation>{
 
-	public static final ReprocessMapper INSTANCE = new ReprocessMapper();
+	public static final FunctionReprocessMapper INSTANCE = new FunctionReprocessMapper();
 	
-	private ReprocessMapper() {}
+	private FunctionReprocessMapper() {}
 
 	public CcpJsonRepresentation apply(CcpBulkOperationResult result) {
 		long currentTimeMillis = System.currentTimeMillis();

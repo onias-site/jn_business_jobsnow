@@ -2,7 +2,7 @@ package com.jn.status.login;
 
 import com.ccp.process.CcpProcessStatus;
 
-public enum JnStatusSaveAnswers implements CcpProcessStatus{
+public enum JnProcessStatusSaveAnswers implements CcpProcessStatus{
 	invalidEmail(400),
 	lockedToken(403),
 	tokenFaltando(404),
@@ -16,7 +16,7 @@ public enum JnStatusSaveAnswers implements CcpProcessStatus{
 	
 	
 	
-	private JnStatusSaveAnswers(int status) {
+	private JnProcessStatusSaveAnswers(int status) {
 		this.status = status;
 	}
 

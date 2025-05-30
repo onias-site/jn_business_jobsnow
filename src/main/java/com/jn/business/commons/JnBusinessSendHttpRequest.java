@@ -4,9 +4,9 @@ import java.util.function.Function;
 
 import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.decorators.CcpTimeDecorator;
-import com.ccp.exceptions.http.CcpHttpClientError;
-import com.ccp.exceptions.http.CcpHttpError;
-import com.ccp.exceptions.http.CcpHttpServerError;
+import com.ccp.exceptions.http.CcpErrorHttpClient;
+import com.ccp.exceptions.http.CcpErrorHttp;
+import com.ccp.exceptions.http.CcpErrorHttpServer;
 import com.jn.entities.JnEntityHttpApiErrorClient;
 import com.jn.entities.JnEntityHttpApiErrorServer;
 import com.jn.entities.JnEntityHttpApiParameters;
@@ -25,12 +25,12 @@ public class JnBusinessSendHttpRequest {
 		try {
 			CcpJsonRepresentation apply = processThatSendsHttpRequest.apply(jsonWithHttpApiParameters);
 			return apply;
-		}catch (CcpHttpServerError e) {
+		}catch (CcpErrorHttpServer e) {
 			String details = jsonWithHttpApiParameters.getJsonPiece(keys).asUgglyJson();
 			CcpJsonRepresentation httpErrorDetails = e.entity.putAll(jsonWithHttpApiParameters).put(JnEntityHttpApiErrorClient.Fields.details.name(), details);
 			CcpJsonRepresentation retryToSendIntantMessage = this.retryToSendIntantMessage(e, json, httpErrorDetails, processThatSendsHttpRequest, httpRequestType, keys);
 			return retryToSendIntantMessage;
-		}catch (CcpHttpClientError e) {
+		}catch (CcpErrorHttpClient e) {
 			String details = jsonWithHttpApiParameters.getJsonPiece(keys).asUgglyJson();
 			CcpJsonRepresentation httpErrorDetails = e.entity.putAll(jsonWithHttpApiParameters).put(JnEntityHttpApiErrorClient.Fields.details.name(), details);
 			String request = httpErrorDetails.getAsString(JnEntityHttpApiErrorClient.Fields.request.name());
@@ -40,7 +40,7 @@ public class JnBusinessSendHttpRequest {
 		}
 	}
 	
-	private CcpJsonRepresentation retryToSendIntantMessage(CcpHttpError e, CcpJsonRepresentation json, CcpJsonRepresentation httpErrorDetails, Function<CcpJsonRepresentation, CcpJsonRepresentation> processThatSendsHttpRequest, JnBusinessHttpRequestType httpRequestType, String... keys) {
+	private CcpJsonRepresentation retryToSendIntantMessage(CcpErrorHttp e, CcpJsonRepresentation json, CcpJsonRepresentation httpErrorDetails, Function<CcpJsonRepresentation, CcpJsonRepresentation> processThatSendsHttpRequest, JnBusinessHttpRequestType httpRequestType, String... keys) {
 		//LATER RENOMEAR ENTIDADES E CAMPOS
 		Integer maxTries = httpErrorDetails.getAsIntegerNumber(JnEntityHttpApiParameters.Fields.maxTries.name());
 		boolean exceededTries = JnEntityHttpApiRetrySendRequest.exceededTries(httpErrorDetails, JnEntityHttpApiRetrySendRequest.Fields.tries.name(), maxTries);

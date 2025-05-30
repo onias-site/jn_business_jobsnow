@@ -6,7 +6,7 @@ import com.ccp.especifications.mensageria.receiver.CcpTopic;
 public interface JnTopic extends CcpTopic{
 	
 	default CcpJsonRepresentation sendToMensageria(CcpJsonRepresentation json) {
-		JnMensageriaSender jms = new JnMensageriaSender(this);
+		JnFunctionMensageriaSender jms = new JnFunctionMensageriaSender(this);
 		CcpJsonRepresentation apply = jms.apply(json);
 		return apply;
 	}

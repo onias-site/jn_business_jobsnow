@@ -82,7 +82,7 @@ public class JnExecuteBulkOperation implements CcpExecuteBulkOperation{
 
 		List<CcpBulkOperationResult> allResults = dbBulkExecutor.getBulkOperationResult();
 		List<CcpBulkOperationResult> errors = allResults.stream().filter(x -> x.hasError()).collect(Collectors.toList());
-		List<CcpBulkItem> collect = errors.stream().map(x -> x.getReprocess(ReprocessMapper.INSTANCE, JnEntityRecordToReprocess.ENTITY)).collect(Collectors.toList());
+		List<CcpBulkItem> collect = errors.stream().map(x -> x.getReprocess(FunctionReprocessMapper.INSTANCE, JnEntityRecordToReprocess.ENTITY)).collect(Collectors.toList());
 		this.executeBulk(collect);
 		JnExecuteBulkOperation deleteKeysFromCache = this.deleteKeysFromCache(allResults);
 		return deleteKeysFromCache; 

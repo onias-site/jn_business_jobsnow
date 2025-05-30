@@ -23,7 +23,7 @@ import com.ccp.especifications.mensageria.sender.CcpMensageriaSender;
 import com.jn.db.bulk.JnExecuteBulkOperation;
 import com.jn.entities.JnEntityAsyncTask;
 
-public class JnMensageriaSender implements Function<CcpJsonRepresentation, CcpJsonRepresentation> {
+public class JnFunctionMensageriaSender implements Function<CcpJsonRepresentation, CcpJsonRepresentation> {
 	
 	private final CcpMensageriaSender mensageriaSender = CcpDependencyInjection.getDependency(CcpMensageriaSender.class);
 	
@@ -31,19 +31,19 @@ public class JnMensageriaSender implements Function<CcpJsonRepresentation, CcpJs
 	private final String operation;
 	private final String topic;
 	
-	public JnMensageriaSender(CcpTopic topic) {
-		this.topic = topic.getClass().getSimpleName();
+	public JnFunctionMensageriaSender(CcpTopic topic) {
+		this.topic = topic.getClass().getName();
 		this.operation = CcpEntityCrudOperationType.none.name();
 		this.operationType = CcpMensageriaOperationType.none.name();
 	}
 
-	public JnMensageriaSender(CcpEntity entity, CcpEntityCrudOperationType operation) {
+	public JnFunctionMensageriaSender(CcpEntity entity, CcpEntityCrudOperationType operation) {
 		this.operationType = CcpMensageriaOperationType.entityCrud.name();
 		this.topic = entity.getClass().getSimpleName();
 		this.operation = operation.name();
 	}
 
-	public JnMensageriaSender(CcpEntity entity, CcpBulkHandlers operation) {
+	public JnFunctionMensageriaSender(CcpEntity entity, CcpBulkHandlers operation) {
 		this.operationType = CcpMensageriaOperationType.entityBulkHandler.name();
 		this.topic = entity.getClass().getSimpleName();
 		this.operation = operation.name();
@@ -101,7 +101,7 @@ public class JnMensageriaSender implements Function<CcpJsonRepresentation, CcpJs
 		return canSave;
 	}
 	
-	public JnMensageriaSender send(CcpEntity entity, CcpJsonRepresentation... messages) {
+	public JnFunctionMensageriaSender send(CcpEntity entity, CcpJsonRepresentation... messages) {
 		List<CcpJsonRepresentation> msgs = Arrays.asList(messages).stream().map(json -> this.getMessageDetails(json)).collect(Collectors.toList());
 		List<CcpBulkItem> bulkItems = msgs.stream().filter(x -> this.canSave(x)).map(msg -> this.toBulkItem(entity, msg)).collect(Collectors.toList());
 		JnExecuteBulkOperation.INSTANCE.executeBulk(bulkItems);
@@ -109,12 +109,12 @@ public class JnMensageriaSender implements Function<CcpJsonRepresentation, CcpJs
 		return this;
 	}
 	
-	public JnMensageriaSender send(List<CcpJsonRepresentation> messages) {
+	public JnFunctionMensageriaSender send(List<CcpJsonRepresentation> messages) {
 		
 		int size = messages.size();
 		CcpJsonRepresentation[] a = new CcpJsonRepresentation[size];
 		CcpJsonRepresentation[] array = messages.toArray(a);
-		JnMensageriaSender send = this.send(JnEntityAsyncTask.ENTITY, array);
+		JnFunctionMensageriaSender send = this.send(JnEntityAsyncTask.ENTITY, array);
 		return send;
 	}
 

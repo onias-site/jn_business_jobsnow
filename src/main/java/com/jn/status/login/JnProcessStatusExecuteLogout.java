@@ -2,7 +2,7 @@ package com.jn.status.login;
 
 import com.ccp.process.CcpProcessStatus;
 
-public enum JnStatusExecuteLogout implements CcpProcessStatus{
+public enum JnProcessStatusExecuteLogout implements CcpProcessStatus{
 	invalidEmail(400),
 	missingLogin(404),
 	expectedStatus(200),
@@ -12,7 +12,7 @@ public enum JnStatusExecuteLogout implements CcpProcessStatus{
 	
 	
 	
-	private JnStatusExecuteLogout(int status) {
+	private JnProcessStatusExecuteLogout(int status) {
 		this.status = status;
 	}
 

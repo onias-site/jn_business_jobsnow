@@ -15,7 +15,7 @@ import com.ccp.especifications.db.utils.decorators.configurations.CcpIgnoreField
 import com.ccp.especifications.db.utils.decorators.engine.CcpEntityConfigurator;
 import com.ccp.especifications.db.utils.decorators.engine.CcpEntityFactory;
 import com.jn.entities.decorators.JnEntityVersionable;
-import com.jn.json.transformers.JnDefaultEntityFields;
+import com.jn.json.transformers.JnJsonTransformersDefaultEntityFields;
 
 @CcpEntityTwin(twinEntityName = "jobsnow_solved_error")
 @CcpEntityDecorators(decorators = JnEntityVersionable.class)
@@ -49,7 +49,7 @@ public class JnEntityJobsnowPenddingError implements CcpEntityConfigurator {
 		}
 		
 		public Function<CcpJsonRepresentation, CcpJsonRepresentation> getTransformer() {
-			return this.transformer == CcpOtherConstants.DO_NOTHING ? JnDefaultEntityFields.getTransformer(this) : this.transformer;
+			return this.transformer == CcpOtherConstants.DO_NOTHING ? JnJsonTransformersDefaultEntityFields.getTransformer(this) : this.transformer;
 		}
 		public boolean isPrimaryKey() {
 			return this.primaryKey;

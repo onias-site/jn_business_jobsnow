@@ -2,7 +2,7 @@ package com.jn.status.login;
 
 import com.ccp.process.CcpProcessStatus;
 
-public enum JnStatusExecuteLogin implements CcpProcessStatus{
+public enum JnProcessStatusExecuteLogin implements CcpProcessStatus{
 	passwordLockedRecently(429),
 	missingSessionToken(401),
 	missingSavePassword(202),
@@ -21,7 +21,7 @@ public enum JnStatusExecuteLogin implements CcpProcessStatus{
 	
 	
 	
-	private JnStatusExecuteLogin(int status) {
+	private JnProcessStatusExecuteLogin(int status) {
 		this.status = status;
 	}
 

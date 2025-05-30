@@ -7,9 +7,9 @@ import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.dependency.injection.CcpDependencyInjection;
 import com.ccp.especifications.db.utils.CcpEntity;
 import com.ccp.especifications.password.CcpPasswordHandler;
-import com.ccp.exceptions.process.CcpFlowDisturb;
+import com.ccp.exceptions.process.CcpErrorFlowDisturb;
 import com.ccp.process.CcpProcessStatus;
-import com.jn.mensageria.JnMensageriaSender;
+import com.jn.mensageria.JnFunctionMensageriaSender;
 
 public class JnBusinessEvaluateAttempts implements Function<CcpJsonRepresentation, CcpJsonRepresentation>{
 
@@ -26,9 +26,9 @@ public class JnBusinessEvaluateAttempts implements Function<CcpJsonRepresentatio
 	
 	private final CcpProcessStatus statusToReturnWhenExceedAttempts;
 	
-	private final JnMensageriaSender topicToRegisterSuccess;
+	private final JnFunctionMensageriaSender topicToRegisterSuccess;
 
-	private final JnMensageriaSender topicToCreateTheLockWhenExceedTries;
+	private final JnFunctionMensageriaSender topicToCreateTheLockWhenExceedTries;
 	
 	private final String fieldAttempsName;
 	
@@ -41,8 +41,8 @@ public class JnBusinessEvaluateAttempts implements Function<CcpJsonRepresentatio
 			String userFieldName, 
 			CcpProcessStatus statusToReturnWhenExceedAttempts, 
 			CcpProcessStatus statusToReturnWhenWrongType,
-			JnMensageriaSender topicToCreateTheLockWhenExceedTries,
-			JnMensageriaSender topicToRegisterSuccess,
+			JnFunctionMensageriaSender topicToCreateTheLockWhenExceedTries,
+			JnFunctionMensageriaSender topicToRegisterSuccess,
 			String fieldAttempsName,
 			String fieldEmailName
 			) { 
@@ -84,7 +84,7 @@ public class JnBusinessEvaluateAttempts implements Function<CcpJsonRepresentatio
 		boolean exceededAttempts = attemptsFromDatabase >= 3;
 		if(exceededAttempts) {
 			this.topicToCreateTheLockWhenExceedTries.apply(toReturn);
-			throw new CcpFlowDisturb(toReturn, this.statusToReturnWhenExceedAttempts);
+			throw new CcpErrorFlowDisturb(toReturn, this.statusToReturnWhenExceedAttempts);
 		}
 		
 		String email = json.getAsString(this.fieldEmailName);
@@ -93,7 +93,7 @@ public class JnBusinessEvaluateAttempts implements Function<CcpJsonRepresentatio
 				.put(this.fieldEmailName, email)
 				;
 		this.entityToGetTheAttempts.createOrUpdate(put);
-		throw new CcpFlowDisturb(toReturn, this.statusToReturnWhenWrongType);
+		throw new CcpErrorFlowDisturb(toReturn, this.statusToReturnWhenWrongType);
 	}
 	
 	

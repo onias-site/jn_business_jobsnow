@@ -21,15 +21,15 @@ import com.jn.entities.JnEntityLoginSessionValidation;
 import com.jn.entities.JnEntityLoginStats;
 import com.jn.entities.JnEntityLoginToken;
 import com.jn.entities.JnEntityLoginTokenAttempts;
-import com.jn.json.transformers.JnDefaultEntityFields;
-import com.jn.mensageria.JnMensageriaSender;
-import com.jn.status.login.JnStatusCreateLoginEmail;
-import com.jn.status.login.JnStatusCreateLoginToken;
-import com.jn.status.login.JnStatusExecuteLogin;
-import com.jn.status.login.JnStatusExecuteLogout;
-import com.jn.status.login.JnStatusExistsLoginEmail;
-import com.jn.status.login.JnStatusSaveAnswers;
-import com.jn.status.login.JnStatusUpdatePassword;
+import com.jn.json.transformers.JnJsonTransformersDefaultEntityFields;
+import com.jn.mensageria.JnFunctionMensageriaSender;
+import com.jn.status.login.JnProcessStatusCreateLoginEmail;
+import com.jn.status.login.JnProcessStatusCreateLoginToken;
+import com.jn.status.login.JnProcessStatusExecuteLogin;
+import com.jn.status.login.JnProcessStatusExecuteLogout;
+import com.jn.status.login.JnProcessStatusExistsLoginEmail;
+import com.jn.status.login.JnProcessStatusSaveAnswers;
+import com.jn.status.login.JnProcessStatusUpdatePassword;
 import com.jn.utils.JnDeleteKeysFromCache;
 
 public class JnServiceLogin{
@@ -40,16 +40,16 @@ public class JnServiceLogin{
 	
 	public CcpJsonRepresentation executeLogin(CcpJsonRepresentation json){
 		
-		JnMensageriaSender lockPassword = new JnMensageriaSender(JnEntityLoginPassword.ENTITY, CcpBulkHandlers.transferToReverseEntity);
-		JnMensageriaSender executeLogin = new JnMensageriaSender(JnBusinessExecuteLogin.INSTANCE);
+		JnFunctionMensageriaSender lockPassword = new JnFunctionMensageriaSender(JnEntityLoginPassword.ENTITY, CcpBulkHandlers.transferToReverseEntity);
+		JnFunctionMensageriaSender executeLogin = new JnFunctionMensageriaSender(JnBusinessExecuteLogin.INSTANCE);
 		Function<CcpJsonRepresentation, CcpJsonRepresentation> evaluateTries =
 				new JnBusinessEvaluateAttempts(
 						JnEntityLoginPasswordAttempts.ENTITY, 
 						JnEntityLoginPassword.ENTITY,  
 						JnEntityLoginPassword.Fields.password.name(), 
 						JnEntityLoginPassword.Fields.password.name(), 
-						JnStatusExecuteLogin.passwordLockedRecently,
-						JnStatusExecuteLogin.wrongPassword, 
+						JnProcessStatusExecuteLogin.passwordLockedRecently,
+						JnProcessStatusExecuteLogin.wrongPassword, 
 						lockPassword, 
 						executeLogin, 
 						JnEntityLoginPasswordAttempts.Fields.attempts.name(),
@@ -57,7 +57,7 @@ public class JnServiceLogin{
 						);
 
 		CcpJsonRepresentation transformedJson = json
-				.getTransformedJson(JnDefaultEntityFields.tokenHash)
+				.getTransformedJson(JnJsonTransformersDefaultEntityFields.tokenHash)
 				.duplicateValueFromField("originalToken", "sessionToken")
 				;
 		CcpJsonRepresentation findById =  new CcpGetEntityId(transformedJson)
@@ -65,18 +65,18 @@ public class JnServiceLogin{
 			.loadThisIdFromEntity(JnEntityLoginPassword.ENTITY).and()
 			.loadThisIdFromEntity(JnEntityLoginStats.INSTANCE).and()
 			.loadThisIdFromEntity(JnEntityLoginPasswordAttempts.ENTITY).and()
-			.ifThisIdIsPresentInEntity(JnEntityLoginToken.ENTITY.getTwinEntity()).returnStatus(JnStatusExecuteLogin.lockedToken).and()
-			.ifThisIdIsNotPresentInEntity(JnEntityLoginEmail.ENTITY).returnStatus(JnStatusExecuteLogin.missingSavingEmail).and()
-			.ifThisIdIsPresentInEntity(JnEntityLoginPassword.ENTITY.getTwinEntity()).returnStatus(JnStatusExecuteLogin.lockedPassword).and()
-			.ifThisIdIsPresentInEntity(JnEntityLoginSessionConflict.ENTITY).returnStatus(JnStatusExecuteLogin.loginConflict).and()
-			.ifThisIdIsNotPresentInEntity(JnEntityLoginPassword.ENTITY).returnStatus(JnStatusExecuteLogin.missingSavePassword).and()
+			.ifThisIdIsPresentInEntity(JnEntityLoginToken.ENTITY.getTwinEntity()).returnStatus(JnProcessStatusExecuteLogin.lockedToken).and()
+			.ifThisIdIsNotPresentInEntity(JnEntityLoginEmail.ENTITY).returnStatus(JnProcessStatusExecuteLogin.missingSavingEmail).and()
+			.ifThisIdIsPresentInEntity(JnEntityLoginPassword.ENTITY.getTwinEntity()).returnStatus(JnProcessStatusExecuteLogin.lockedPassword).and()
+			.ifThisIdIsPresentInEntity(JnEntityLoginSessionConflict.ENTITY).returnStatus(JnProcessStatusExecuteLogin.loginConflict).and()
+			.ifThisIdIsNotPresentInEntity(JnEntityLoginPassword.ENTITY).returnStatus(JnProcessStatusExecuteLogin.missingSavePassword).and()
 			.ifThisIdIsPresentInEntity(JnEntityLoginPassword.ENTITY).executeAction(evaluateTries).andFinallyReturningTheseFields(
 					JnEntityLoginToken.Fields.userAgent.name(),
 					JnEntityLoginToken.Fields.email.name(),
 					JnEntityLoginToken.Fields.ip.name(),
 					"sessionToken" 
 					)
-		.endThisProcedureRetrievingTheResultingData(CcpOtherConstants.DO_NOTHING, JnDeleteKeysFromCache.INSTANCE)
+		.endThisProcedureRetrievingTheResultingData(new Object(){}.getClass().getEnclosingMethod().getName(), CcpOtherConstants.DO_NOTHING, JnDeleteKeysFromCache.INSTANCE)
 		;
 		return findById; 
 	}
@@ -87,13 +87,13 @@ public class JnServiceLogin{
 
 		CcpJsonRepresentation result = new CcpGetEntityId(json)
 		.toBeginProcedureAnd()
-			.ifThisIdIsPresentInEntity(JnEntityLoginToken.ENTITY.getTwinEntity()).returnStatus(JnStatusCreateLoginEmail.lockedToken).and()
-			.ifThisIdIsPresentInEntity(JnEntityLoginPassword.ENTITY.getTwinEntity()).returnStatus(JnStatusCreateLoginEmail.lockedPassword).and()
-			.ifThisIdIsPresentInEntity(JnEntityLoginSessionConflict.ENTITY).returnStatus(JnStatusCreateLoginEmail.loginConflict).and()
+			.ifThisIdIsPresentInEntity(JnEntityLoginToken.ENTITY.getTwinEntity()).returnStatus(JnProcessStatusCreateLoginEmail.lockedToken).and()
+			.ifThisIdIsPresentInEntity(JnEntityLoginPassword.ENTITY.getTwinEntity()).returnStatus(JnProcessStatusCreateLoginEmail.lockedPassword).and()
+			.ifThisIdIsPresentInEntity(JnEntityLoginSessionConflict.ENTITY).returnStatus(JnProcessStatusCreateLoginEmail.loginConflict).and()
 			.ifThisIdIsNotPresentInEntity(JnEntityLoginEmail.ENTITY).executeAction(action).and()
-			.ifThisIdIsNotPresentInEntity(JnEntityLoginPassword.ENTITY).returnStatus(JnStatusCreateLoginEmail.missingSavePassword).and()
-			.ifThisIdIsNotPresentInEntity(JnEntityLoginAnswers.ENTITY).returnStatus(JnStatusCreateLoginEmail.missingSaveAnswers).andFinallyReturningTheseFields("x")
-		.endThisProcedureRetrievingTheResultingData(CcpOtherConstants.DO_NOTHING, JnDeleteKeysFromCache.INSTANCE);
+			.ifThisIdIsNotPresentInEntity(JnEntityLoginPassword.ENTITY).returnStatus(JnProcessStatusCreateLoginEmail.missingSavePassword).and()
+			.ifThisIdIsNotPresentInEntity(JnEntityLoginAnswers.ENTITY).returnStatus(JnProcessStatusCreateLoginEmail.missingSaveAnswers).andFinallyReturningTheseFields("x")
+		.endThisProcedureRetrievingTheResultingData(new Object(){}.getClass().getEnclosingMethod().getName(), CcpOtherConstants.DO_NOTHING, JnDeleteKeysFromCache.INSTANCE);
 
 		return result;
 	}
@@ -102,24 +102,24 @@ public class JnServiceLogin{
 		
 		 new CcpGetEntityId(json) 
 		.toBeginProcedureAnd()
-			.ifThisIdIsPresentInEntity(JnEntityLoginToken.ENTITY.getTwinEntity()).returnStatus(JnStatusExistsLoginEmail.lockedToken).and()
-			.ifThisIdIsNotPresentInEntity(JnEntityLoginEmail.ENTITY).returnStatus(JnStatusExistsLoginEmail.missingEmail).and()
-			.ifThisIdIsPresentInEntity(JnEntityLoginPassword.ENTITY.getTwinEntity()).returnStatus(JnStatusExistsLoginEmail.lockedPassword).and()
-			.ifThisIdIsPresentInEntity(JnEntityLoginSessionConflict.ENTITY).returnStatus(JnStatusExistsLoginEmail.loginConflict).and()
-			.ifThisIdIsNotPresentInEntity(JnEntityLoginAnswers.ENTITY).returnStatus(JnStatusExistsLoginEmail.missingAnswers).and()
-			.ifThisIdIsNotPresentInEntity(JnEntityLoginPassword.ENTITY).returnStatus(JnStatusExistsLoginEmail.missingPassword).andFinallyReturningTheseFields("x")
-		.endThisProcedure(CcpOtherConstants.DO_NOTHING, JnDeleteKeysFromCache.INSTANCE)
+			.ifThisIdIsPresentInEntity(JnEntityLoginToken.ENTITY.getTwinEntity()).returnStatus(JnProcessStatusExistsLoginEmail.lockedToken).and()
+			.ifThisIdIsNotPresentInEntity(JnEntityLoginEmail.ENTITY).returnStatus(JnProcessStatusExistsLoginEmail.missingEmail).and()
+			.ifThisIdIsPresentInEntity(JnEntityLoginPassword.ENTITY.getTwinEntity()).returnStatus(JnProcessStatusExistsLoginEmail.lockedPassword).and()
+			.ifThisIdIsPresentInEntity(JnEntityLoginSessionConflict.ENTITY).returnStatus(JnProcessStatusExistsLoginEmail.loginConflict).and()
+			.ifThisIdIsNotPresentInEntity(JnEntityLoginAnswers.ENTITY).returnStatus(JnProcessStatusExistsLoginEmail.missingAnswers).and()
+			.ifThisIdIsNotPresentInEntity(JnEntityLoginPassword.ENTITY).returnStatus(JnProcessStatusExistsLoginEmail.missingPassword).andFinallyReturningTheseFields("x")
+		.endThisProcedure(new Object(){}.getClass().getEnclosingMethod().getName(), CcpOtherConstants.DO_NOTHING, JnDeleteKeysFromCache.INSTANCE)
 		;
 	 return json;
 	}
 	public CcpJsonRepresentation executeLogout(CcpJsonRepresentation json){
-		Function<CcpJsonRepresentation, CcpJsonRepresentation> action = new JnMensageriaSender(JnBusinessExecuteLogout.INSTANCE);
+		Function<CcpJsonRepresentation, CcpJsonRepresentation> action = new JnFunctionMensageriaSender(JnBusinessExecuteLogout.INSTANCE);
 		
 		 new CcpGetEntityId(json) 
 		.toBeginProcedureAnd()
-			.ifThisIdIsNotPresentInEntity(JnEntityLoginSessionConflict.ENTITY).returnStatus(JnStatusExecuteLogout.missingLogin).and()
+			.ifThisIdIsNotPresentInEntity(JnEntityLoginSessionConflict.ENTITY).returnStatus(JnProcessStatusExecuteLogout.missingLogin).and()
 			.ifThisIdIsPresentInEntity(JnEntityLoginSessionValidation.ENTITY).executeAction(action).andFinallyReturningTheseFields("x")
-		.endThisProcedure(CcpOtherConstants.DO_NOTHING, JnDeleteKeysFromCache.INSTANCE)
+		.endThisProcedure(new Object(){}.getClass().getEnclosingMethod().getName(), CcpOtherConstants.DO_NOTHING, JnDeleteKeysFromCache.INSTANCE)
 		;
 		 
 		return json;
@@ -130,15 +130,15 @@ public class JnServiceLogin{
 		Function<CcpJsonRepresentation, CcpJsonRepresentation> action = JnEntityLoginAnswers.ENTITY.getOperationCallback(CcpEntityCrudOperationType.save);
 		 new CcpGetEntityId(json)
 		.toBeginProcedureAnd()
-			.ifThisIdIsPresentInEntity(JnEntityLoginToken.ENTITY.getTwinEntity()).returnStatus(JnStatusSaveAnswers.lockedToken).and()
-			.ifThisIdIsNotPresentInEntity(JnEntityLoginEmail.ENTITY).returnStatus(JnStatusSaveAnswers.tokenFaltando).and()
-			.ifThisIdIsPresentInEntity(JnEntityLoginSessionConflict.ENTITY).returnStatus(JnStatusSaveAnswers.loginConflict).and()
-			.ifThisIdIsPresentInEntity(JnEntityLoginPassword.ENTITY.getTwinEntity()).returnStatus(JnStatusSaveAnswers.lockedPassword).and()
+			.ifThisIdIsPresentInEntity(JnEntityLoginToken.ENTITY.getTwinEntity()).returnStatus(JnProcessStatusSaveAnswers.lockedToken).and()
+			.ifThisIdIsNotPresentInEntity(JnEntityLoginEmail.ENTITY).returnStatus(JnProcessStatusSaveAnswers.tokenFaltando).and()
+			.ifThisIdIsPresentInEntity(JnEntityLoginSessionConflict.ENTITY).returnStatus(JnProcessStatusSaveAnswers.loginConflict).and()
+			.ifThisIdIsPresentInEntity(JnEntityLoginPassword.ENTITY.getTwinEntity()).returnStatus(JnProcessStatusSaveAnswers.lockedPassword).and()
 			.ifThisIdIsNotPresentInEntity(JnEntityLoginAnswers.ENTITY).executeAction(action)
- 			.and().ifThisIdIsNotPresentInEntity(JnEntityLoginPassword.ENTITY).returnStatus(JnStatusSaveAnswers.missingPassword)
+ 			.and().ifThisIdIsNotPresentInEntity(JnEntityLoginPassword.ENTITY).returnStatus(JnProcessStatusSaveAnswers.missingPassword)
 			
 			.andFinallyReturningTheseFields("x")
-		.endThisProcedure(CcpOtherConstants.DO_NOTHING, JnDeleteKeysFromCache.INSTANCE)
+		.endThisProcedure(new Object(){}.getClass().getEnclosingMethod().getName(), CcpOtherConstants.DO_NOTHING, JnDeleteKeysFromCache.INSTANCE)
 		;
 		return json; 
 	}
@@ -147,35 +147,35 @@ public class JnServiceLogin{
 		
 		CcpJsonRepresentation result = new CcpGetEntityId(json)
 		.toBeginProcedureAnd()
-			.ifThisIdIsPresentInEntity(JnEntityLoginToken.ENTITY.getTwinEntity()).returnStatus(JnStatusCreateLoginToken.statusLockedToken).and()
-			.ifThisIdIsNotPresentInEntity(JnEntityLoginEmail.ENTITY).returnStatus(JnStatusUpdatePassword.missingEmail).and()
-			.ifThisIdIsNotPresentInEntity(JnEntityLoginAnswers.ENTITY).returnStatus(JnStatusCreateLoginToken.missingSaveAnswers).and()
-			.ifThisIdIsPresentInEntity(JnEntityLoginToken.ENTITY).returnStatus(JnStatusCreateLoginToken.statusAlreadySentToken).and()
-			.ifThisIdIsNotPresentInEntity(JnEntityLoginToken.ENTITY).executeAction(new JnMensageriaSender(JnBusinessSendUserToken.INSTANCE))
+			.ifThisIdIsPresentInEntity(JnEntityLoginToken.ENTITY.getTwinEntity()).returnStatus(JnProcessStatusCreateLoginToken.statusLockedToken).and()
+			.ifThisIdIsNotPresentInEntity(JnEntityLoginEmail.ENTITY).returnStatus(JnProcessStatusUpdatePassword.missingEmail).and()
+			.ifThisIdIsNotPresentInEntity(JnEntityLoginAnswers.ENTITY).returnStatus(JnProcessStatusCreateLoginToken.missingSaveAnswers).and()
+			.ifThisIdIsPresentInEntity(JnEntityLoginToken.ENTITY).returnStatus(JnProcessStatusCreateLoginToken.statusAlreadySentToken).and()
+			.ifThisIdIsNotPresentInEntity(JnEntityLoginToken.ENTITY).executeAction(new JnFunctionMensageriaSender(JnBusinessSendUserToken.INSTANCE))
 			.andFinallyReturningTheseFields(json.fieldSet())
-		.endThisProcedureRetrievingTheResultingData(CcpOtherConstants.DO_NOTHING, JnDeleteKeysFromCache.INSTANCE);
+		.endThisProcedureRetrievingTheResultingData(new Object(){}.getClass().getEnclosingMethod().getName(), CcpOtherConstants.DO_NOTHING, JnDeleteKeysFromCache.INSTANCE);
 
 		return result;
 	}
 
 	public CcpJsonRepresentation savePassword(CcpJsonRepresentation json){
-		JnMensageriaSender lockToken = new JnMensageriaSender(JnEntityLoginToken.ENTITY, CcpBulkHandlers.transferToReverseEntity);
-		JnMensageriaSender updatePassword = new JnMensageriaSender(JnBusinessUpdatePassword.INSTANCE);
+		JnFunctionMensageriaSender lockToken = new JnFunctionMensageriaSender(JnEntityLoginToken.ENTITY, CcpBulkHandlers.transferToReverseEntity);
+		JnFunctionMensageriaSender updatePassword = new JnFunctionMensageriaSender(JnBusinessUpdatePassword.INSTANCE);
 		Function<CcpJsonRepresentation, CcpJsonRepresentation> evaluateAttempts =
 				new JnBusinessEvaluateAttempts(
 						JnEntityLoginTokenAttempts.ENTITY, 
 						JnEntityLoginToken.ENTITY, 
 						JnEntityLoginToken.Fields.token.name(),
 						JnEntityLoginToken.Fields.token.name(),
-						JnStatusUpdatePassword.tokenLockedRecently,
-						JnStatusUpdatePassword.wrongToken, 
+						JnProcessStatusUpdatePassword.tokenLockedRecently,
+						JnProcessStatusUpdatePassword.wrongToken, 
 						lockToken,
 						updatePassword, 
 						JnEntityLoginTokenAttempts.Fields.attempts.name(),
 						JnEntityLoginToken.Fields.email.name()
 						);
 		CcpJsonRepresentation renameField = CcpOtherConstants.EMPTY_JSON
-				.getTransformedJson(JnDefaultEntityFields.tokenHash).renameField("originalToken", "sessionToken")
+				.getTransformedJson(JnJsonTransformersDefaultEntityFields.tokenHash).renameField("originalToken", "sessionToken")
 				.removeField(JnEntityLoginSessionValidation.Fields.token.name())
 				;
 		CcpJsonRepresentation putAll = json.putAll(renameField);
@@ -183,16 +183,16 @@ public class JnServiceLogin{
 		.toBeginProcedureAnd()
 			.loadThisIdFromEntity(JnEntityLoginStats.INSTANCE).and()
 			.loadThisIdFromEntity(JnEntityLoginTokenAttempts.ENTITY).and()
-			.ifThisIdIsPresentInEntity(JnEntityLoginToken.ENTITY.getTwinEntity()).returnStatus(JnStatusUpdatePassword.lockedToken).and()
-			.ifThisIdIsNotPresentInEntity(JnEntityLoginEmail.ENTITY).returnStatus(JnStatusUpdatePassword.missingEmail).and()
-			.ifThisIdIsNotPresentInEntity(JnEntityLoginToken.ENTITY).returnStatus(JnStatusUpdatePassword.missingToken).and()
+			.ifThisIdIsPresentInEntity(JnEntityLoginToken.ENTITY.getTwinEntity()).returnStatus(JnProcessStatusUpdatePassword.lockedToken).and()
+			.ifThisIdIsNotPresentInEntity(JnEntityLoginEmail.ENTITY).returnStatus(JnProcessStatusUpdatePassword.missingEmail).and()
+			.ifThisIdIsNotPresentInEntity(JnEntityLoginToken.ENTITY).returnStatus(JnProcessStatusUpdatePassword.missingToken).and()
 			.executeAction(evaluateAttempts).andFinallyReturningTheseFields(
 					JnEntityLoginToken.Fields.userAgent.name(),
 					JnEntityLoginToken.Fields.email.name(),
 					JnEntityLoginToken.Fields.ip.name(),
 					"sessionToken" 
 					)	
-		.endThisProcedureRetrievingTheResultingData(CcpOtherConstants.DO_NOTHING, JnDeleteKeysFromCache.INSTANCE);
+		.endThisProcedureRetrievingTheResultingData(new Object(){}.getClass().getEnclosingMethod().getName(), CcpOtherConstants.DO_NOTHING, JnDeleteKeysFromCache.INSTANCE);
 		
 		return result;
 	}

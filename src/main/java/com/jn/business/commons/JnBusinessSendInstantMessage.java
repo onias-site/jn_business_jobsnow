@@ -7,12 +7,12 @@ import com.ccp.dependency.injection.CcpDependencyInjection;
 import com.ccp.especifications.db.crud.CcpCrud;
 import com.ccp.especifications.db.crud.CcpSelectUnionAll;
 import com.ccp.especifications.instant.messenger.CcpInstantMessenger;
-import com.ccp.exceptions.instant.messenger.CcpInstantMessageThisBotWasBlockedByThisUser;
-import com.ccp.exceptions.instant.messenger.CcpTooManyRequests;
+import com.ccp.exceptions.instant.messenger.CcpErrorInstantMessageThisBotWasBlockedByThisUser;
+import com.ccp.exceptions.instant.messenger.CcpErrorInstantMessageTooManyRequests;
 import com.jn.entities.JnEntityHttpApiParameters;
 import com.jn.entities.JnEntityInstantMessengerBotLocked;
 import com.jn.entities.JnEntityInstantMessengerMessageSent;
-import com.jn.exceptions.JnUnableToSendInstantMessage;
+import com.jn.exceptions.JnErrorUnableToSendInstantMessage;
 import com.jn.utils.JnDeleteKeysFromCache;
 
 
@@ -55,11 +55,11 @@ public class JnBusinessSendInstantMessage {
 			CcpJsonRepresentation instantMessageSent = json.putAll(instantMessengerData);
 			JnEntityInstantMessengerMessageSent.ENTITY.createOrUpdate(instantMessageSent);
 			return json;
-		} catch (CcpTooManyRequests e) {
+		} catch (CcpErrorInstantMessageTooManyRequests e) {
 			
 			return this.retryToSendMessage(json);
 			
-		} catch(CcpInstantMessageThisBotWasBlockedByThisUser e) {
+		} catch(CcpErrorInstantMessageThisBotWasBlockedByThisUser e) {
 			return saveBlockedBot(json, e.token);
 		}
 	}
@@ -70,7 +70,7 @@ public class JnBusinessSendInstantMessage {
 		Integer triesToSendMessage = json.getOrDefault("triesToSendMessage", 1);
 		
 		if(triesToSendMessage >= maxTriesToSendMessage) {
-			throw new JnUnableToSendInstantMessage(json);
+			throw new JnErrorUnableToSendInstantMessage(json);
 		}
 		
 		Integer sleepToSendMessage = json.getAsIntegerNumber("sleepToSendMessage");

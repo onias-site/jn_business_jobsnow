@@ -20,7 +20,7 @@ import com.ccp.especifications.db.utils.CcpEntityCrudOperationType;
 import com.ccp.especifications.db.utils.decorators.engine.CcpEntityDelegator;
 import com.ccp.especifications.db.utils.decorators.engine.CcpEntityExpurgableFactory;
 import com.ccp.especifications.db.utils.decorators.engine.CcpEntityExpurgableOptions;
-import com.ccp.exceptions.db.utils.CcpEntityRecordNotFound;
+import com.ccp.exceptions.db.utils.CcpErrorBulkEntityRecordNotFound;
 import com.ccp.utils.CcpHashAlgorithm;
 import com.jn.db.bulk.JnExecuteBulkOperation;
 import com.jn.entities.JnEntityDisposableRecord;
@@ -362,7 +362,7 @@ public final class JnEntityExpurgable extends CcpEntityDelegator implements CcpE
 		boolean isInvalid = this.isValidTimestamp(recordFromDisposable) == false;
 	
 		if(isInvalid) {
-			throw new CcpEntityRecordNotFound(this, expurgableId);
+			throw new CcpErrorBulkEntityRecordNotFound(this, expurgableId);
 		}
 		
 		CcpJsonRepresentation innerJson = recordFromDisposable.getInnerJson(JnEntityDisposableRecord.Fields.json.name());

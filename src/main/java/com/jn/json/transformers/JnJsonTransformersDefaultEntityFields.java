@@ -20,9 +20,9 @@ import com.ccp.utils.CcpHashAlgorithm;
 import com.jn.entities.JnEntityLoginPassword;
 import com.jn.entities.JnEntityLoginSessionValidation;
 import com.jn.entities.JnEntityLoginToken;
-import com.jn.exceptions.JnIsNotAnEmail;
+import com.jn.exceptions.JnErrorIsNotAnEmail;
 
-public enum JnDefaultEntityFields implements Function<CcpJsonRepresentation, CcpJsonRepresentation> {
+public enum JnJsonTransformersDefaultEntityFields implements Function<CcpJsonRepresentation, CcpJsonRepresentation> {
 	email {
 
 		public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
@@ -34,7 +34,7 @@ public enum JnDefaultEntityFields implements Function<CcpJsonRepresentation, Ccp
 			boolean isNotAnEmail = email.isValid() == false;
 			
 			if(isNotAnEmail) {
-				throw new JnIsNotAnEmail(value, json);
+				throw new JnErrorIsNotAnEmail(value, json);
 			}
 			
 			CcpHashDecorator hash2 = email.hash();
@@ -114,7 +114,7 @@ public enum JnDefaultEntityFields implements Function<CcpJsonRepresentation, Ccp
 	
 	public static Function<CcpJsonRepresentation, CcpJsonRepresentation> getTransformer(CcpEntityField field){
 		 
-		Optional<JnDefaultEntityFields> findFirst = Arrays.asList(JnDefaultEntityFields.values()).stream().filter(x -> x.name().equals(field.name())).findFirst();
+		Optional<JnJsonTransformersDefaultEntityFields> findFirst = Arrays.asList(JnJsonTransformersDefaultEntityFields.values()).stream().filter(x -> x.name().equals(field.name())).findFirst();
 		 
 		 boolean notFound = findFirst.isPresent() == false;
 
@@ -122,7 +122,7 @@ public enum JnDefaultEntityFields implements Function<CcpJsonRepresentation, Ccp
 			 return CcpOtherConstants.DO_NOTHING;
 		 }
 		 
-		 JnDefaultEntityFields jnDefaultEntityFields = findFirst.get();
+		 JnJsonTransformersDefaultEntityFields jnDefaultEntityFields = findFirst.get();
 		
 		 return jnDefaultEntityFields;
 	}

@@ -12,7 +12,7 @@ import com.ccp.especifications.db.utils.decorators.configurations.CcpEntityTrans
 import com.ccp.especifications.db.utils.decorators.configurations.CcpIgnoreFieldsValidation;
 import com.ccp.especifications.db.utils.decorators.engine.CcpEntityConfigurator;
 import com.ccp.especifications.db.utils.decorators.engine.CcpEntityFactory;
-import com.jn.json.transformers.JnDefaultEntityFields;
+import com.jn.json.transformers.JnJsonTransformersDefaultEntityFields;
 
 @CcpEntitySpecifications(
 		classWithFieldsValidationsRules = CcpIgnoreFieldsValidation.class,
@@ -47,7 +47,7 @@ public class JnEntityRecordToReprocess implements CcpEntityConfigurator {
 		}
 		
 		public Function<CcpJsonRepresentation, CcpJsonRepresentation> getTransformer() {
-			return this.transformer == CcpOtherConstants.DO_NOTHING ? JnDefaultEntityFields.getTransformer(this) : this.transformer;
+			return this.transformer == CcpOtherConstants.DO_NOTHING ? JnJsonTransformersDefaultEntityFields.getTransformer(this) : this.transformer;
 		}
 		public boolean isPrimaryKey() {
 			return this.primaryKey;

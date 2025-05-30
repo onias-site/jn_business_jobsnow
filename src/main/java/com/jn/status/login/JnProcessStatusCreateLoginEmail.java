@@ -2,13 +2,14 @@ package com.jn.status.login;
 
 import com.ccp.process.CcpProcessStatus;
 
-public enum JnStatusUpdatePassword implements CcpProcessStatus{
+public enum JnProcessStatusCreateLoginEmail implements CcpProcessStatus{
 	invalidEmail(400),
 	lockedToken(403),
 	missingEmail(404),
-	missingToken(404),
-	wrongToken(421),
-	tokenLockedRecently(429),
+	lockedPassword(421),
+	loginConflict(409),
+	missingSavePassword(202),
+	missingSaveAnswers(201),
 	expectedStatus(200),
 	;
 
@@ -16,7 +17,7 @@ public enum JnStatusUpdatePassword implements CcpProcessStatus{
 	
 	
 	
-	private JnStatusUpdatePassword(int status) {
+	private JnProcessStatusCreateLoginEmail(int status) {
 		this.status = status;
 	}
 
