@@ -60,6 +60,7 @@ public class JnServiceLogin{
 				.getTransformedJson(JnJsonTransformersDefaultEntityFields.tokenHash)
 				.duplicateValueFromField("originalToken", "sessionToken")
 				;
+		String methodName = new Object(){}.getClass().getEnclosingMethod().getName();
 		CcpJsonRepresentation findById =  new CcpGetEntityId(transformedJson)
 		.toBeginProcedureAnd()
 			.loadThisIdFromEntity(JnEntityLoginPassword.ENTITY).and()
@@ -76,7 +77,7 @@ public class JnServiceLogin{
 					JnEntityLoginToken.Fields.ip.name(),
 					"sessionToken" 
 					)
-		.endThisProcedureRetrievingTheResultingData(new Object(){}.getClass().getEnclosingMethod().getName(), CcpOtherConstants.DO_NOTHING, JnDeleteKeysFromCache.INSTANCE)
+		.endThisProcedureRetrievingTheResultingData(methodName, CcpOtherConstants.DO_NOTHING, JnDeleteKeysFromCache.INSTANCE)
 		;
 		return findById; 
 	}

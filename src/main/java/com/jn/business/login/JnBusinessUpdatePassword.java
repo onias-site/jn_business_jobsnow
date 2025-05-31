@@ -4,7 +4,7 @@ import com.ccp.constantes.CcpOtherConstants;
 import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.especifications.db.bulk.handlers.CcpBulkHandlerDelete;
 import com.ccp.especifications.db.bulk.handlers.CcpBulkHandlerSave;
-import com.ccp.especifications.db.bulk.handlers.CcpBulkHandlerTransferRecordToReverseEntity;
+import com.ccp.especifications.db.bulk.handlers.CcpEntityBulkHandlerTransferRecordToReverseEntity;
 import com.ccp.especifications.db.utils.CcpEntity;
 import com.ccp.especifications.mensageria.receiver.CcpTopic;
 import com.jn.db.bulk.JnExecuteBulkOperation;
@@ -24,11 +24,11 @@ public class JnBusinessUpdatePassword implements CcpTopic {
 	@SuppressWarnings("unchecked")
 	public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
 
-		CcpBulkHandlerTransferRecordToReverseEntity executeLogout = JnEntityLoginSessionValidation.ENTITY.getTransferRecordToReverseEntity();
+		CcpEntityBulkHandlerTransferRecordToReverseEntity executeLogout = JnEntityLoginSessionValidation.ENTITY.getTransferRecordToReverseEntity();
 		
 		CcpEntity twinEntity = JnEntityLoginPassword.ENTITY.getTwinEntity();
-		CcpBulkHandlerTransferRecordToReverseEntity registerUnlock = twinEntity.getTransferRecordToReverseEntity();
-		CcpBulkHandlerDelete removeAttempts = new CcpBulkHandlerDelete(JnEntityLoginPasswordAttempts.ENTITY);
+		CcpEntityBulkHandlerTransferRecordToReverseEntity registerPasswordUnlock = twinEntity.getTransferRecordToReverseEntity();
+		CcpBulkHandlerDelete removePasswordAttempts = new CcpBulkHandlerDelete(JnEntityLoginPasswordAttempts.ENTITY);
 
 		CcpJsonRepresentation renameField = json.renameField("sessionToken", JnEntityLoginSessionValidation.Fields.token.name());
 		CcpBulkHandlerSave updatePassword = new CcpBulkHandlerSave(JnEntityLoginPassword.ENTITY);
@@ -37,8 +37,8 @@ public class JnBusinessUpdatePassword implements CcpTopic {
 				renameField 
 				, JnDeleteKeysFromCache.INSTANCE
 				, updatePassword
-				, registerUnlock
-				, removeAttempts
+				, registerPasswordUnlock
+				, removePasswordAttempts
 				, executeLogout
 				, JnBulkHandlerRegisterLogin.INSTANCE
 				, JnBulkHandlerSolveLoginConflict.INSTANCE

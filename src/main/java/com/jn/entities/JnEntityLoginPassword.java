@@ -9,10 +9,12 @@ import com.ccp.especifications.db.utils.CcpEntityField;
 import com.ccp.especifications.db.utils.decorators.configurations.CcpEntityOperationSpecification;
 import com.ccp.especifications.db.utils.decorators.configurations.CcpEntitySpecifications;
 import com.ccp.especifications.db.utils.decorators.configurations.CcpEntityTransferOperationEspecification;
+import com.ccp.especifications.db.utils.decorators.configurations.CcpEntityTwin;
 import com.ccp.especifications.db.utils.decorators.configurations.CcpIgnoreFieldsValidation;
 import com.ccp.especifications.db.utils.decorators.engine.CcpEntityConfigurator;
 import com.ccp.especifications.db.utils.decorators.engine.CcpEntityFactory;
 import com.jn.json.transformers.JnJsonTransformersDefaultEntityFields;
+@CcpEntityTwin(twinEntityName = "login_password_locked")
 
 @CcpEntitySpecifications(
 		classWithFieldsValidationsRules = CcpIgnoreFieldsValidation.class,

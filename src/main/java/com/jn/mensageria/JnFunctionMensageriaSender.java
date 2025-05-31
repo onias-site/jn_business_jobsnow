@@ -39,13 +39,14 @@ public class JnFunctionMensageriaSender implements Function<CcpJsonRepresentatio
 
 	public JnFunctionMensageriaSender(CcpEntity entity, CcpEntityCrudOperationType operation) {
 		this.operationType = CcpMensageriaOperationType.entityCrud.name();
-		this.topic = entity.getClass().getSimpleName();
+		this.topic = entity.getClass().getName();
 		this.operation = operation.name();
 	}
 
 	public JnFunctionMensageriaSender(CcpEntity entity, CcpBulkHandlers operation) {
 		this.operationType = CcpMensageriaOperationType.entityBulkHandler.name();
-		this.topic = entity.getClass().getSimpleName();
+		Class<?> configurationClass = entity.getConfigurationClass();
+		this.topic = configurationClass.getName();
 		this.operation = operation.name();
 	}
 
@@ -62,8 +63,8 @@ public class JnFunctionMensageriaSender implements Function<CcpJsonRepresentatio
 		CcpJsonRepresentation messageDetails = this.getMessageDetails(put);
 		
 		JnEntityAsyncTask.ENTITY.createOrUpdate(messageDetails);
-		
-		this.mensageriaSender.send(this.topic, messageDetails);
+		CcpJsonRepresentation put2 = messageDetails.put("mensageriaReceiver", JnMensageriaReceiver.class.getName());
+		this.mensageriaSender.send(this.topic, put2);
 
 		return messageDetails;
 	}
