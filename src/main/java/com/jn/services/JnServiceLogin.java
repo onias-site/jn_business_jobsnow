@@ -86,6 +86,7 @@ public class JnServiceLogin{
 		
 		Function<CcpJsonRepresentation, CcpJsonRepresentation> action = JnEntityLoginEmail.ENTITY.getOperationCallback(CcpEntityCrudOperationType.save);
 
+		String context = new Object(){}.getClass().getEnclosingMethod().getName();
 		CcpJsonRepresentation result = new CcpGetEntityId(json)
 		.toBeginProcedureAnd()
 			.ifThisIdIsPresentInEntity(JnEntityLoginToken.ENTITY.getTwinEntity()).returnStatus(JnProcessStatusCreateLoginEmail.lockedToken).and()
@@ -94,14 +95,15 @@ public class JnServiceLogin{
 			.ifThisIdIsNotPresentInEntity(JnEntityLoginEmail.ENTITY).executeAction(action).and()
 			.ifThisIdIsNotPresentInEntity(JnEntityLoginPassword.ENTITY).returnStatus(JnProcessStatusCreateLoginEmail.missingSavePassword).and()
 			.ifThisIdIsNotPresentInEntity(JnEntityLoginAnswers.ENTITY).returnStatus(JnProcessStatusCreateLoginEmail.missingSaveAnswers).andFinallyReturningTheseFields("x")
-		.endThisProcedureRetrievingTheResultingData(new Object(){}.getClass().getEnclosingMethod().getName(), CcpOtherConstants.DO_NOTHING, JnDeleteKeysFromCache.INSTANCE);
+		.endThisProcedureRetrievingTheResultingData(context, CcpOtherConstants.DO_NOTHING, JnDeleteKeysFromCache.INSTANCE);
 
 		return result;
 	}
 	
 	public CcpJsonRepresentation existsLoginEmail(CcpJsonRepresentation json){
 		
-		 new CcpGetEntityId(json) 
+		 String context = new Object(){}.getClass().getEnclosingMethod().getName();
+		new CcpGetEntityId(json) 
 		.toBeginProcedureAnd()
 			.ifThisIdIsPresentInEntity(JnEntityLoginToken.ENTITY.getTwinEntity()).returnStatus(JnProcessStatusExistsLoginEmail.lockedToken).and()
 			.ifThisIdIsNotPresentInEntity(JnEntityLoginEmail.ENTITY).returnStatus(JnProcessStatusExistsLoginEmail.missingEmail).and()
@@ -109,18 +111,19 @@ public class JnServiceLogin{
 			.ifThisIdIsPresentInEntity(JnEntityLoginSessionConflict.ENTITY).returnStatus(JnProcessStatusExistsLoginEmail.loginConflict).and()
 			.ifThisIdIsNotPresentInEntity(JnEntityLoginAnswers.ENTITY).returnStatus(JnProcessStatusExistsLoginEmail.missingAnswers).and()
 			.ifThisIdIsNotPresentInEntity(JnEntityLoginPassword.ENTITY).returnStatus(JnProcessStatusExistsLoginEmail.missingPassword).andFinallyReturningTheseFields("x")
-		.endThisProcedure(new Object(){}.getClass().getEnclosingMethod().getName(), CcpOtherConstants.DO_NOTHING, JnDeleteKeysFromCache.INSTANCE)
+		.endThisProcedure(context, CcpOtherConstants.DO_NOTHING, JnDeleteKeysFromCache.INSTANCE)
 		;
 	 return json;
 	}
 	public CcpJsonRepresentation executeLogout(CcpJsonRepresentation json){
 		Function<CcpJsonRepresentation, CcpJsonRepresentation> action = new JnFunctionMensageriaSender(JnBusinessExecuteLogout.INSTANCE);
 		
-		 new CcpGetEntityId(json) 
+		 String context = new Object(){}.getClass().getEnclosingMethod().getName();
+		new CcpGetEntityId(json) 
 		.toBeginProcedureAnd()
 			.ifThisIdIsNotPresentInEntity(JnEntityLoginSessionConflict.ENTITY).returnStatus(JnProcessStatusExecuteLogout.missingLogin).and()
 			.ifThisIdIsPresentInEntity(JnEntityLoginSessionValidation.ENTITY).executeAction(action).andFinallyReturningTheseFields("x")
-		.endThisProcedure(new Object(){}.getClass().getEnclosingMethod().getName(), CcpOtherConstants.DO_NOTHING, JnDeleteKeysFromCache.INSTANCE)
+		.endThisProcedure(context, CcpOtherConstants.DO_NOTHING, JnDeleteKeysFromCache.INSTANCE)
 		;
 		 
 		return json;
@@ -129,7 +132,8 @@ public class JnServiceLogin{
 	public CcpJsonRepresentation saveAnswers (CcpJsonRepresentation json){
 		
 		Function<CcpJsonRepresentation, CcpJsonRepresentation> action = JnEntityLoginAnswers.ENTITY.getOperationCallback(CcpEntityCrudOperationType.save);
-		 new CcpGetEntityId(json)
+		 String context = new Object(){}.getClass().getEnclosingMethod().getName();
+		new CcpGetEntityId(json)
 		.toBeginProcedureAnd()
 			.ifThisIdIsPresentInEntity(JnEntityLoginToken.ENTITY.getTwinEntity()).returnStatus(JnProcessStatusSaveAnswers.lockedToken).and()
 			.ifThisIdIsNotPresentInEntity(JnEntityLoginEmail.ENTITY).returnStatus(JnProcessStatusSaveAnswers.tokenFaltando).and()
@@ -139,13 +143,14 @@ public class JnServiceLogin{
  			.and().ifThisIdIsNotPresentInEntity(JnEntityLoginPassword.ENTITY).returnStatus(JnProcessStatusSaveAnswers.missingPassword)
 			
 			.andFinallyReturningTheseFields("x")
-		.endThisProcedure(new Object(){}.getClass().getEnclosingMethod().getName(), CcpOtherConstants.DO_NOTHING, JnDeleteKeysFromCache.INSTANCE)
+		.endThisProcedure(context, CcpOtherConstants.DO_NOTHING, JnDeleteKeysFromCache.INSTANCE)
 		;
 		return json; 
 	}
 
 	public CcpJsonRepresentation createLoginToken(CcpJsonRepresentation json){
 		
+		String context = new Object(){}.getClass().getEnclosingMethod().getName();
 		CcpJsonRepresentation result = new CcpGetEntityId(json)
 		.toBeginProcedureAnd()
 			.ifThisIdIsPresentInEntity(JnEntityLoginToken.ENTITY.getTwinEntity()).returnStatus(JnProcessStatusCreateLoginToken.statusLockedToken).and()
@@ -154,7 +159,7 @@ public class JnServiceLogin{
 			.ifThisIdIsPresentInEntity(JnEntityLoginToken.ENTITY).returnStatus(JnProcessStatusCreateLoginToken.statusAlreadySentToken).and()
 			.ifThisIdIsNotPresentInEntity(JnEntityLoginToken.ENTITY).executeAction(new JnFunctionMensageriaSender(JnBusinessSendUserToken.INSTANCE))
 			.andFinallyReturningTheseFields(json.fieldSet())
-		.endThisProcedureRetrievingTheResultingData(new Object(){}.getClass().getEnclosingMethod().getName(), CcpOtherConstants.DO_NOTHING, JnDeleteKeysFromCache.INSTANCE);
+		.endThisProcedureRetrievingTheResultingData(context, CcpOtherConstants.DO_NOTHING, JnDeleteKeysFromCache.INSTANCE);
 
 		return result;
 	}
@@ -180,6 +185,7 @@ public class JnServiceLogin{
 				.removeField(JnEntityLoginSessionValidation.Fields.token.name())
 				;
 		CcpJsonRepresentation putAll = json.putAll(renameField);
+		String context = new Object(){}.getClass().getEnclosingMethod().getName();
 		CcpJsonRepresentation result =  new CcpGetEntityId(putAll)
 		.toBeginProcedureAnd()
 			.loadThisIdFromEntity(JnEntityLoginStats.INSTANCE).and()
@@ -193,7 +199,7 @@ public class JnServiceLogin{
 					JnEntityLoginToken.Fields.ip.name(),
 					"sessionToken" 
 					)	
-		.endThisProcedureRetrievingTheResultingData(new Object(){}.getClass().getEnclosingMethod().getName(), CcpOtherConstants.DO_NOTHING, JnDeleteKeysFromCache.INSTANCE);
+		.endThisProcedureRetrievingTheResultingData(context, CcpOtherConstants.DO_NOTHING, JnDeleteKeysFromCache.INSTANCE);
 		
 		return result;
 	}

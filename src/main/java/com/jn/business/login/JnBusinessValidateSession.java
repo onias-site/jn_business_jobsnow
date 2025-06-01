@@ -27,6 +27,7 @@ public class JnBusinessValidateSession implements Function<CcpJsonRepresentation
 			throw new CcpErrorFlowDisturb(JnProcessStatusExecuteLogin.missingSessionToken);
 		}
 		
+		String context = new Object(){}.getClass().getEnclosingMethod().getName();
 		new CcpGetEntityId(json.duplicateValueFromField("sessionToken", JnEntityLoginSessionValidation.Fields.token.name())) 
 		.toBeginProcedureAnd()
 		.ifThisIdIsNotPresentInEntity(JnEntityLoginSessionValidation.ENTITY).returnStatus(JnProcessStatusExecuteLogin.invalidSession).and()
@@ -35,7 +36,7 @@ public class JnBusinessValidateSession implements Function<CcpJsonRepresentation
 		.ifThisIdIsNotPresentInEntity(JnEntityLoginPassword.ENTITY).returnStatus(JnProcessStatusExecuteLogin.missingSavePassword).and()
 		.ifThisIdIsNotPresentInEntity(JnEntityLoginEmail.ENTITY).returnStatus(JnProcessStatusExecuteLogin.missingSavingEmail)
 		.andFinallyReturningTheseFields("sessionToken")
-		.endThisProcedureRetrievingTheResultingData(new Object(){}.getClass().getEnclosingMethod().getName(), CcpOtherConstants.DO_NOTHING, JnDeleteKeysFromCache.INSTANCE);
+		.endThisProcedureRetrievingTheResultingData(context, CcpOtherConstants.DO_NOTHING, JnDeleteKeysFromCache.INSTANCE);
 		return json; 
 	}
 
