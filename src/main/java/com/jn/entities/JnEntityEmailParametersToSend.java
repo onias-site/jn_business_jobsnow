@@ -32,7 +32,7 @@ import com.jn.json.transformers.JnJsonTransformersDefaultEntityFields;
 public class JnEntityEmailParametersToSend  implements CcpEntityConfigurator{
 
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityEmailParametersToSend.class).entityInstance;
-
+ 
 	public static enum Fields implements CcpEntityField {
 		email(false), sender(false), templateId(true), subjectType(false), moreParameters(false);
 

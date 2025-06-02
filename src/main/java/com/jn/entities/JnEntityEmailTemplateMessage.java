@@ -34,7 +34,7 @@ public class JnEntityEmailTemplateMessage  implements CcpEntityConfigurator{
 
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityEmailTemplateMessage.class).entityInstance;
 
-	public static enum Fields implements CcpEntityField{
+	public static enum Fields implements CcpEntityField{ 
 		templateId(true),language(true), subject(false), message(false)
 		;
 		
@@ -54,7 +54,7 @@ public class JnEntityEmailTemplateMessage  implements CcpEntityConfigurator{
 		public Function<CcpJsonRepresentation, CcpJsonRepresentation> getTransformer() {
 			return this.transformer == CcpOtherConstants.DO_NOTHING ? JnJsonTransformersDefaultEntityFields.getTransformer(this) : this.transformer;
 		}
-		public boolean isPrimaryKey() {
+		public boolean isPrimaryKey() { 
 			return this.primaryKey;
 		}
 
