@@ -30,9 +30,13 @@ public class JnEntityDisposableRecord implements CcpEntityConfigurator {
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityDisposableRecord.class).entityInstance;
 
 	public static enum Fields implements CcpEntityField{
+		timestamp(false),
+		format(false),
 		entity(true), 
 		date(false),
-		id(true), timestamp(false),json(false);
+		json(false),
+		id(true), 
+		;
 		
 		private final boolean primaryKey;
 

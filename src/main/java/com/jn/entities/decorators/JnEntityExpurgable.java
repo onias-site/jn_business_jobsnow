@@ -99,6 +99,7 @@ public final class JnEntityExpurgable extends CcpEntityDelegator implements CcpE
 		Long nextTimeStamp = this.timeOption.getNextTimeStamp(timestamp);
 		String nextDate = this.timeOption.getNextDate(timestamp);
 		CcpJsonRepresentation expurgable = expurgableId
+				.put(JnEntityDisposableRecord.Fields.format.name(), this.timeOption.format)
 				.put(JnEntityDisposableRecord.Fields.timestamp.name(), nextTimeStamp)
 				.put(JnEntityDisposableRecord.Fields.json.name(), onlyExistingFields)
 				.put(JnEntityDisposableRecord.Fields.date.name(), nextDate)
