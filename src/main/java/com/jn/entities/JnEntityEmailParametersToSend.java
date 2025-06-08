@@ -60,10 +60,14 @@ public class JnEntityEmailParametersToSend  implements CcpEntityConfigurator{
 	public List<CcpBulkItem> getFirstRecordsToInsert() {
 		List<CcpBulkItem> createBulkItems = CcpEntityConfigurator.super.toCreateBulkItems(ENTITY, 
 				"{" + "	\"email\": \"devs.jobsnow@gmail.com\"," + "	\"sender\": \"devs.jobsnow@gmail.com\","
-						+ "	\"subjectType\": \"notifyError\"," + "	\"templateId\": \""
+						+ "	\"subjectType\": \""
+						+ JnBusinessNotifyError.class.getName()		
+						+ "\"," + "	\"templateId\": \""
 						+ JnBusinessNotifyError.class.getName()		
 						+ "\"" + "}",
-				"{" + "	\"sender\": \"devs.jobsnow@gmail.com\"," + "	\"subjectType\": \"sendUserToken\","
+				"{" + "	\"sender\": \"devs.jobsnow@gmail.com\"," + "	\"subjectType\": \""
+						+ JnBusinessSendUserToken.class.getName()
+						+ "\","
 						+ "	\"templateId\": \""
 						+ JnBusinessSendUserToken.class.getName()
 						+ "\"," + "	\"moreParameters\": {"
