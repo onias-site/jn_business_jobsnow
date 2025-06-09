@@ -33,7 +33,7 @@ public class JnEntityLoginSessionValidation implements CcpEntityConfigurator {
 
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityLoginSessionValidation.class).entityInstance;
 	public static enum Fields implements CcpEntityField{
-		email(true), token(true), ip(true), coordinates(false), macAddress(false), userAgent(true)
+		email(true), token(true, JnJsonTransformersDefaultEntityFields.tokenHash), ip(true), coordinates(false), macAddress(false), userAgent(true)
 		;
 		
 		private final boolean primaryKey;

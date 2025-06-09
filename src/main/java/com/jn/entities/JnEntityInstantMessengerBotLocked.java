@@ -28,7 +28,7 @@ public class JnEntityInstantMessengerBotLocked implements CcpEntityConfigurator 
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityInstantMessengerBotLocked.class).entityInstance;
 
 	public static enum Fields implements CcpEntityField{
-		token(true), recipient(true), subjectType(false), message(false)
+		token(true, JnJsonTransformersDefaultEntityFields.tokenHash), recipient(true), subjectType(false), message(false)
 		;
 		
 		private final boolean primaryKey;

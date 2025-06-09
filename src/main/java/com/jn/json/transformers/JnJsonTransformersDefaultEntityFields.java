@@ -23,7 +23,7 @@ import com.jn.entities.JnEntityLoginToken;
 import com.jn.exceptions.JnErrorIsNotAnEmail;
 
 public enum JnJsonTransformersDefaultEntityFields implements Function<CcpJsonRepresentation, CcpJsonRepresentation> {
-	email {
+	email(true) {
 
 		public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
 			String oldField = CcpStringConstants.EMAIL.value;
@@ -44,7 +44,7 @@ public enum JnJsonTransformersDefaultEntityFields implements Function<CcpJsonRep
 			return put;
 		}
 	},
-	password {
+	password(false) {
 		public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
 			String token = json.getAsString(JnEntityLoginPassword.Fields.password.name());
 			
@@ -58,7 +58,7 @@ public enum JnJsonTransformersDefaultEntityFields implements Function<CcpJsonRep
 		}
 
 	},
-	token {
+	token(false) {
 		public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
 			String createOriginalToken = super.getOriginalToken();
 			String originalToken = json.getOrDefault("originalToken", createOriginalToken);
@@ -76,7 +76,7 @@ public enum JnJsonTransformersDefaultEntityFields implements Function<CcpJsonRep
 		}
 
 	},
-	timestamp {
+	timestamp(true) {
 		public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
 			CcpTimeDecorator ctd = new CcpTimeDecorator();
 			String formattedDateTime = ctd.getFormattedDateTime(CcpEntityExpurgableOptions.millisecond.format);
@@ -93,7 +93,7 @@ public enum JnJsonTransformersDefaultEntityFields implements Function<CcpJsonRep
 
 	},
 	
-	tokenHash{
+	tokenHash(true){
 
 		public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
 			
@@ -112,6 +112,13 @@ public enum JnJsonTransformersDefaultEntityFields implements Function<CcpJsonRep
 	;
 
 	
+	
+	private JnJsonTransformersDefaultEntityFields(boolean canBePrimaryKey) {
+			this.canBePrimaryKey = canBePrimaryKey;
+		}
+
+	private final boolean canBePrimaryKey;
+	
 	public static Function<CcpJsonRepresentation, CcpJsonRepresentation> getTransformer(CcpEntityField field){
 		 
 		Optional<JnJsonTransformersDefaultEntityFields> findFirst = Arrays.asList(JnJsonTransformersDefaultEntityFields.values()).stream().filter(x -> x.name().equals(field.name())).findFirst();
@@ -123,8 +130,18 @@ public enum JnJsonTransformersDefaultEntityFields implements Function<CcpJsonRep
 		 }
 		 
 		 JnJsonTransformersDefaultEntityFields jnDefaultEntityFields = findFirst.get();
-		
-		 return jnDefaultEntityFields;
+
+		 boolean isNotPrimaryKeyField = field.isPrimaryKey() == false;
+
+		 if(isNotPrimaryKeyField) {
+			 return jnDefaultEntityFields;
+		 }
+		 
+		 if(jnDefaultEntityFields.canBePrimaryKey) {
+			 return jnDefaultEntityFields;
+		 }
+
+		 throw new RuntimeException("The field '" + jnDefaultEntityFields.name() +"' can not be a primary key");
 	}
 	
 	private String getOriginalToken() {

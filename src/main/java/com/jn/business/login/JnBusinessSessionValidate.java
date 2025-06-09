@@ -13,11 +13,11 @@ import com.jn.entities.JnEntityLoginToken;
 import com.jn.status.login.JnProcessStatusExecuteLogin;
 import com.jn.utils.JnDeleteKeysFromCache;
 
-public class JnBusinessValidateSession implements Function<CcpJsonRepresentation, CcpJsonRepresentation>{
+public class JnBusinessSessionValidate implements Function<CcpJsonRepresentation, CcpJsonRepresentation>{
 
-	private JnBusinessValidateSession() {}
+	private JnBusinessSessionValidate() {}
 	
-	public static final JnBusinessValidateSession INSTANCE = new JnBusinessValidateSession();
+	public static final JnBusinessSessionValidate INSTANCE = new JnBusinessSessionValidate();
 	
 	public CcpJsonRepresentation apply(CcpJsonRepresentation json) { 
 		

@@ -32,7 +32,7 @@ public class JnEntityInstantMessengerMessageSent implements CcpEntityConfigurato
 
 	
 	public static enum Fields implements CcpEntityField{
-		token(true), recipient(true), subjectType(true), message(false), interval(true)
+		token(true, JnJsonTransformersDefaultEntityFields.tokenHash), recipient(true), subjectType(true), message(false), interval(true)
 		;
 		
 		private final boolean primaryKey;
