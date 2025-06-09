@@ -39,7 +39,8 @@ public class JnFunctionMensageriaSender implements Function<CcpJsonRepresentatio
 
 	public JnFunctionMensageriaSender(CcpEntity entity, CcpEntityCrudOperationType operation) {
 		this.operationType = CcpMensageriaOperationType.entityCrud.name();
-		this.topic = entity.getClass().getName();
+		Class<?> configurationClass = entity.getConfigurationClass();
+		this.topic = configurationClass.getName();
 		this.operation = operation.name();
 	}
 
