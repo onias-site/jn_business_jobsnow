@@ -17,7 +17,7 @@ import com.ccp.especifications.db.utils.decorators.engine.CcpEntityFactory;
 import com.jn.entities.decorators.JnEntityExpurgable;
 import com.jn.json.transformers.JnJsonTransformersDefaultEntityFields;
 
-@CcpEntityExpurgable(expurgTime = CcpEntityExpurgableOptions.yearly, expurgableEntityFactory = JnEntityExpurgable.class)
+@CcpEntityExpurgable(expurgTime = CcpEntityExpurgableOptions.hourly, expurgableEntityFactory = JnEntityExpurgable.class)
 @CcpEntitySpecifications(
 		classWithFieldsValidationsRules = CcpIgnoreFieldsValidation.class,
 		inactivate = @CcpEntityTransferOperationEspecification(whenRecordToTransferIsFound = @CcpEntityOperationSpecification(afterOperation = {}), whenRecordToTransferIsNotFound = @CcpEntityOperationSpecification(afterOperation = {})),

@@ -116,12 +116,12 @@ public class JnExecuteBulkOperation implements CcpExecuteBulkOperation{
 		CcpEntity[] array = collect.toArray(new CcpEntity[collect.size()]);
 		CcpCrud crud = CcpDependencyInjection.getDependency(CcpCrud.class);
 		CcpSelectUnionAll unionAll = crud.unionAll(json, functionToDeleteKeysInTheCache, array);
-		
+		 
 		Set<CcpBulkItem> all = new HashSet<>();
 		
 		for (CcpHandleWithSearchResultsInTheEntity<List<CcpBulkItem>> handler : handlers) {
 			List<CcpBulkItem> list =  unionAll.handleRecordInUnionAll(json, handler);
-			all.addAll(list);
+			all.addAll(list); 
 		}
 		this.executeBulk(all);
 

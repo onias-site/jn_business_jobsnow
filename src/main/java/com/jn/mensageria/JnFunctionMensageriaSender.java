@@ -60,7 +60,7 @@ public class JnFunctionMensageriaSender implements Function<CcpJsonRepresentatio
 
 		CcpJsonRepresentation put = json.put(JnEntityAsyncTask.Fields.topic.name(), this.topic); 
 		
-		CcpJsonRepresentation messageDetails = this.getMessageDetails(put);
+		CcpJsonRepresentation messageDetails = this.getMessageDetails(put); 
 		
 		JnEntityAsyncTask.ENTITY.createOrUpdate(messageDetails);
 		CcpJsonRepresentation put2 = messageDetails.put("mensageriaReceiver", JnMensageriaReceiver.class.getName());

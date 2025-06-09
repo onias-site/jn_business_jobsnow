@@ -122,12 +122,12 @@ public class JnServiceLogin{
 		new CcpGetEntityId(json) 
 		.toBeginProcedureAnd()
 			.ifThisIdIsNotPresentInEntity(JnEntityLoginSessionConflict.ENTITY).returnStatus(JnProcessStatusExecuteLogout.missingLogin).and()
-			.ifThisIdIsPresentInEntity(JnEntityLoginSessionValidation.ENTITY).executeAction(action).andFinallyReturningTheseFields("x")
+			.executeAction(action).andFinallyReturningTheseFields("x")
 		.endThisProcedure(context, CcpOtherConstants.DO_NOTHING, JnDeleteKeysFromCache.INSTANCE)
 		;
 		 
 		return json;
-	}
+	} 
 	
 	public CcpJsonRepresentation saveAnswers (CcpJsonRepresentation json){
 		
@@ -172,11 +172,11 @@ public class JnServiceLogin{
 						JnEntityLoginTokenAttempts.ENTITY, 
 						JnEntityLoginToken.ENTITY, 
 						JnEntityLoginToken.Fields.token.name(),
-						JnEntityLoginToken.Fields.token.name(),
+						JnEntityLoginToken.Fields.token.name(), 
 						JnProcessStatusUpdatePassword.tokenLockedRecently,
 						JnProcessStatusUpdatePassword.wrongToken, 
 						lockToken,
-						updatePassword, 
+						updatePassword,  
 						JnEntityLoginTokenAttempts.Fields.attempts.name(),
 						JnEntityLoginToken.Fields.email.name()
 						);

@@ -14,11 +14,11 @@ import com.jn.utils.JnDeleteKeysFromCache;
 
 public class JnBusinessSendEmailMessage implements CcpTopic{
 
-	public static final JnBusinessSendEmailMessage INSTANCE = new JnBusinessSendEmailMessage();
+	public static final JnBusinessSendEmailMessage INSTANCE = new JnBusinessSendEmailMessage(); 
 	
 	private JnBusinessSendEmailMessage() {	}
 
-	public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
+	public CcpJsonRepresentation apply(CcpJsonRepresentation json) { 
 		
 		CcpEmailSender emailSender = CcpDependencyInjection.getDependency(CcpEmailSender.class);
 		

@@ -16,7 +16,7 @@ import com.jn.entities.JnEntityLoginSessionValidation;
 import com.jn.utils.JnDeleteKeysFromCache;
 
 public class JnBusinessUpdatePassword implements CcpTopic {
-
+ 
 	public static final JnBusinessUpdatePassword INSTANCE = new JnBusinessUpdatePassword();
 	
 	private JnBusinessUpdatePassword() {}
