@@ -41,7 +41,7 @@ public final class JnEntityExpurgable extends CcpEntityDelegator implements CcpE
 	}
 
 	private final String getId(CcpJsonRepresentation json) {
-		Long timestamp = json.getOrDefault(JnEntityDisposableRecord.Fields.timestamp.name(), System.currentTimeMillis());
+		Long timestamp = json.getOrDefault(JnEntityDisposableRecord.Fields.timestamp, System.currentTimeMillis());
 		String formattedTimestamp = this.timeOption.getFormattedDate(timestamp);
 
 		ArrayList<Object> onlyPrimaryKeysValues = new ArrayList<>();
@@ -62,8 +62,8 @@ public final class JnEntityExpurgable extends CcpEntityDelegator implements CcpE
 		String entityName = this.getEntityName();
 		
 		CcpJsonRepresentation expurgableId = CcpOtherConstants.EMPTY_JSON
-				.put(JnEntityDisposableRecord.Fields.entity.name(), entityName)
-				.put(JnEntityDisposableRecord.Fields.id.name(), id)
+				.put(JnEntityDisposableRecord.Fields.entity, entityName)
+				.put(JnEntityDisposableRecord.Fields.id, id)
 				;
 		return expurgableId;
 	}
@@ -95,15 +95,15 @@ public final class JnEntityExpurgable extends CcpEntityDelegator implements CcpE
 		CcpJsonRepresentation onlyExistingFields = this.entity.getOnlyExistingFields(handledJson);
 		CcpJsonRepresentation expurgableId = this.getExpurgableId(json);
 		String id = this.getPrimaryKeyValues(json).asUgglyJson();
-		Long timestamp = json.getOrDefault(JnEntityDisposableRecord.Fields.timestamp.name(), System.currentTimeMillis());
+		Long timestamp = json.getOrDefault(JnEntityDisposableRecord.Fields.timestamp, System.currentTimeMillis());
 		Long nextTimeStamp = this.timeOption.getNextTimeStamp(timestamp);
 		String nextDate = this.timeOption.getNextDate(timestamp);
 		CcpJsonRepresentation expurgable = expurgableId
-				.put(JnEntityDisposableRecord.Fields.format.name(), this.timeOption.format)
-				.put(JnEntityDisposableRecord.Fields.timestamp.name(), nextTimeStamp)
-				.put(JnEntityDisposableRecord.Fields.json.name(), onlyExistingFields)
-				.put(JnEntityDisposableRecord.Fields.date.name(), nextDate)
-				.put(JnEntityDisposableRecord.Fields.id.name(), id)
+				.put(JnEntityDisposableRecord.Fields.format, this.timeOption.format)
+				.put(JnEntityDisposableRecord.Fields.timestamp, nextTimeStamp)
+				.put(JnEntityDisposableRecord.Fields.json, onlyExistingFields)
+				.put(JnEntityDisposableRecord.Fields.date, nextDate)
+				.put(JnEntityDisposableRecord.Fields.id, id)
 				;
 		return expurgable;
 	}
@@ -176,7 +176,7 @@ public final class JnEntityExpurgable extends CcpEntityDelegator implements CcpE
 		}
 		
 		CcpJsonRepresentation requiredEntityRow = JnEntityDisposableRecord.ENTITY.getRequiredEntityRow(unionAll, expurgableId);
-		Long timeStamp = requiredEntityRow.getAsLongNumber(JnEntityDisposableRecord.Fields.timestamp.name());
+		Long timeStamp = requiredEntityRow.getAsLongNumber(JnEntityDisposableRecord.Fields.timestamp);
 		
 		boolean obsoleteTimeStamp = timeStamp <= System.currentTimeMillis();
 		
@@ -212,12 +212,12 @@ public final class JnEntityExpurgable extends CcpEntityDelegator implements CcpE
 		}
 
 		CcpJsonRepresentation requiredEntityRow = JnEntityDisposableRecord.ENTITY.getRequiredEntityRow(unionAll, allValuesTogether);
-		Long timeStamp = requiredEntityRow.getAsLongNumber(JnEntityDisposableRecord.Fields.timestamp.name());
+		Long timeStamp = requiredEntityRow.getAsLongNumber(JnEntityDisposableRecord.Fields.timestamp);
 		
 		boolean validTimeStamp = timeStamp > System.currentTimeMillis();
 		
 		if(validTimeStamp) {
-			CcpJsonRepresentation innerJson = requiredEntityRow.getInnerJson(JnEntityDisposableRecord.Fields.json.name());
+			CcpJsonRepresentation innerJson = requiredEntityRow.getInnerJson(JnEntityDisposableRecord.Fields.json);
 			return innerJson;
 		}
 
@@ -249,12 +249,12 @@ public final class JnEntityExpurgable extends CcpEntityDelegator implements CcpE
 		}
 
 		CcpJsonRepresentation requiredEntityRow = JnEntityDisposableRecord.ENTITY.getRequiredEntityRow(unionAll, allValuesTogether);
-		Long timeStamp = requiredEntityRow.getAsLongNumber(JnEntityDisposableRecord.Fields.timestamp.name());
+		Long timeStamp = requiredEntityRow.getAsLongNumber(JnEntityDisposableRecord.Fields.timestamp);
 		
 		boolean validTimeStamp = timeStamp > System.currentTimeMillis();
 		
 		if(validTimeStamp) {
-			CcpJsonRepresentation innerJson = requiredEntityRow.getInnerJson(JnEntityDisposableRecord.Fields.json.name());
+			CcpJsonRepresentation innerJson = requiredEntityRow.getInnerJson(JnEntityDisposableRecord.Fields.json);
 			return innerJson;
 		}
 		CcpJsonRepresentation whenNotFound =  ifNotFound.apply(allValuesTogether);
@@ -277,8 +277,8 @@ public final class JnEntityExpurgable extends CcpEntityDelegator implements CcpE
 		String entityName = this.getEntityName();
 		
 		CcpJsonRepresentation mainRecord = CcpOtherConstants.EMPTY_JSON
-		.put(fieldNameToEntity, entityName)
-		.put(fieldNameToId, id)
+				.getDynamicVersion().put(fieldNameToEntity, entityName)
+				.getDynamicVersion().put(fieldNameToId, id)
 		;
 		List<CcpJsonRepresentation> asList = Arrays.asList(mainRecord);
 		return asList;
@@ -330,13 +330,13 @@ public final class JnEntityExpurgable extends CcpEntityDelegator implements CcpE
 		
 		String timeStampFieldName = JnEntityDisposableRecord.Fields.timestamp.name();
 		
-		boolean recordNotFound = requiredEntityRow.containsAllFields(timeStampFieldName) == false;
+		boolean recordNotFound = requiredEntityRow.getDynamicVersion().containsAllFields(timeStampFieldName) == false;
 	
 		if(recordNotFound) {
 			return false;
 		}
 		
-		Long timeStamp = requiredEntityRow.getAsLongNumber(timeStampFieldName);
+		Long timeStamp = requiredEntityRow.getDynamicVersion().getAsLongNumber(timeStampFieldName);
 		
 		if(timeStamp > System.currentTimeMillis()) {
 			return true;
@@ -366,7 +366,7 @@ public final class JnEntityExpurgable extends CcpEntityDelegator implements CcpE
 			throw new CcpErrorBulkEntityRecordNotFound(this, expurgableId);
 		}
 		
-		CcpJsonRepresentation innerJson = recordFromDisposable.getInnerJson(JnEntityDisposableRecord.Fields.json.name());
+		CcpJsonRepresentation innerJson = recordFromDisposable.getInnerJson(JnEntityDisposableRecord.Fields.json);
 		return innerJson;
 	}
 	

@@ -21,13 +21,16 @@ import com.jn.entities.JnEntityLoginPassword;
 import com.jn.entities.JnEntityLoginSessionValidation;
 import com.jn.entities.JnEntityLoginToken;
 import com.jn.exceptions.JnErrorIsNotAnEmail;
-
+enum JnJsonTransformersDefaultEntityFieldsConstants{
+	originalEmail, originalToken
+	
+}
 public enum JnJsonTransformersDefaultEntityFields implements Function<CcpJsonRepresentation, CcpJsonRepresentation> {
 	email(true) {
 
 		public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
-			String oldField = CcpStringConstants.EMAIL.value;
-			String newField = "originalEmail";
+			CcpStringConstants oldField = CcpStringConstants.EMAIL;
+			JnJsonTransformersDefaultEntityFieldsConstants newField = JnJsonTransformersDefaultEntityFieldsConstants.originalEmail;
 			String value = json.getAsString(oldField);
 			CcpEmailDecorator email = new CcpStringDecorator(value).email();
 			
@@ -46,13 +49,13 @@ public enum JnJsonTransformersDefaultEntityFields implements Function<CcpJsonRep
 	},
 	password(false) {
 		public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
-			String token = json.getAsString(JnEntityLoginPassword.Fields.password.name());
+			String token = json.getAsString(JnEntityLoginPassword.Fields.password);
 			
 			CcpPasswordHandler dependency = CcpDependencyInjection.getDependency(CcpPasswordHandler.class);
 			
 			String passwordHash = dependency.getHash(token); 
 			
-			CcpJsonRepresentation put = json.put(JnEntityLoginPassword.Fields.password.name(), passwordHash);
+			CcpJsonRepresentation put = json.put(JnEntityLoginPassword.Fields.password, passwordHash);
 			
 			return put;
 		}
@@ -61,15 +64,15 @@ public enum JnJsonTransformersDefaultEntityFields implements Function<CcpJsonRep
 	token(false) {
 		public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
 			String createOriginalToken = super.getOriginalToken();
-			String originalToken = json.getOrDefault("originalToken", createOriginalToken);
+			String originalToken = json.getOrDefault(JnJsonTransformersDefaultEntityFieldsConstants.originalToken, createOriginalToken);
 			 
 			CcpPasswordHandler dependency = CcpDependencyInjection.getDependency(CcpPasswordHandler.class);
 			
 			String token = dependency.getHash(originalToken);
 		
 			CcpJsonRepresentation put = json
-					.put(JnEntityLoginToken.Fields.token.name(), token)
-					.put("originalToken", originalToken)
+					.put(JnEntityLoginToken.Fields.token, token)
+					.put(JnJsonTransformersDefaultEntityFieldsConstants.originalToken, originalToken)
 					;
 			
 			return put;
@@ -80,13 +83,14 @@ public enum JnJsonTransformersDefaultEntityFields implements Function<CcpJsonRep
 		public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
 			CcpTimeDecorator ctd = new CcpTimeDecorator();
 			String formattedDateTime = ctd.getFormattedDateTime(CcpEntityExpurgableOptions.millisecond.format);
-			boolean containsAllFields = json.containsAllFields(CcpEntityField.TIMESTAMP.name());
+			boolean containsAllFields = json.getDynamicVersion().containsAllFields(CcpEntityField.TIMESTAMP.name());
 			
 			if(containsAllFields) {
 				return json;
 			}
 			
-			CcpJsonRepresentation put = json.put(CcpEntityField.TIMESTAMP.name(), ctd.content).put(CcpEntityField.DATE.name(), formattedDateTime);
+			CcpJsonRepresentation put = json.getDynamicVersion().put(CcpEntityField.TIMESTAMP.name(), ctd.content)
+					.getDynamicVersion().put(CcpEntityField.DATE.name(), formattedDateTime);
 			
 			return put;
 		}
@@ -97,14 +101,14 @@ public enum JnJsonTransformersDefaultEntityFields implements Function<CcpJsonRep
 
 		public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
 			
-			String originalToken = json.getOrDefault(JnEntityLoginSessionValidation.Fields.token.name(), super.getOriginalToken());
+			String originalToken = json.getOrDefault(JnEntityLoginSessionValidation.Fields.token, super.getOriginalToken());
 			CcpHashDecorator hash = new CcpStringDecorator(originalToken).hash();
 			
 			String token = hash.asString(CcpHashAlgorithm.SHA1);
 		
 			CcpJsonRepresentation put = json
-					.put(JnEntityLoginToken.Fields.token.name(), token)
-					.put("originalToken", originalToken)
+					.put(JnEntityLoginToken.Fields.token, token)
+					.put(JnJsonTransformersDefaultEntityFieldsConstants.originalToken, originalToken)
 					;
 			
 			return put;

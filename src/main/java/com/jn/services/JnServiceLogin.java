@@ -31,7 +31,10 @@ import com.jn.status.login.JnProcessStatusExistsLoginEmail;
 import com.jn.status.login.JnProcessStatusSaveAnswers;
 import com.jn.status.login.JnProcessStatusUpdatePassword;
 import com.jn.utils.JnDeleteKeysFromCache;
-
+enum JnServiceLoginConstants{
+	originalToken, sessionToken
+	
+}
 public class JnServiceLogin{
 	
 	private JnServiceLogin() {}
@@ -58,7 +61,7 @@ public class JnServiceLogin{
 
 		CcpJsonRepresentation transformedJson = json
 				.getTransformedJson(JnJsonTransformersDefaultEntityFields.tokenHash)
-				.duplicateValueFromField("originalToken", "sessionToken")
+				.duplicateValueFromField(JnServiceLoginConstants.originalToken, JnServiceLoginConstants.sessionToken)
 				;
 		String methodName = new Object(){}.getClass().getEnclosingMethod().getName();
 		CcpJsonRepresentation findById =  new CcpGetEntityId(transformedJson)
@@ -181,8 +184,9 @@ public class JnServiceLogin{
 						JnEntityLoginToken.Fields.email.name()
 						);
 		CcpJsonRepresentation renameField = CcpOtherConstants.EMPTY_JSON
-				.getTransformedJson(JnJsonTransformersDefaultEntityFields.tokenHash).renameField("originalToken", "sessionToken")
-				.removeField(JnEntityLoginSessionValidation.Fields.token.name())
+				.getTransformedJson(JnJsonTransformersDefaultEntityFields.tokenHash)
+				.renameField(JnServiceLoginConstants.originalToken, JnServiceLoginConstants.sessionToken)
+				.removeField(JnEntityLoginSessionValidation.Fields.token)
 				;
 		CcpJsonRepresentation putAll = json.putAll(renameField);
 		String context = new Object(){}.getClass().getEnclosingMethod().getName();
