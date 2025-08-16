@@ -4,6 +4,7 @@ import java.util.function.Function;
 
 import com.ccp.constantes.CcpOtherConstants;
 import com.ccp.decorators.CcpJsonRepresentation;
+import com.ccp.decorators.CcpJsonRepresentation.CcpJsonFieldName;
 import com.ccp.dependency.injection.CcpDependencyInjection;
 import com.ccp.especifications.db.utils.CcpEntity;
 import com.ccp.especifications.password.CcpPasswordHandler;
@@ -11,9 +12,15 @@ import com.ccp.exceptions.process.CcpErrorFlowDisturb;
 import com.ccp.process.CcpProcessStatus;
 import com.jn.mensageria.JnFunctionMensageriaSender;
 
-public class JnBusinessEvaluateAttempts implements Function<CcpJsonRepresentation, CcpJsonRepresentation>{
+enum JnBusinessEvaluateAttemptsConstants  implements CcpJsonFieldName{
+	entities
+}
+
 
 	
+
+public class JnBusinessEvaluateAttempts implements Function<CcpJsonRepresentation, CcpJsonRepresentation>{
+
 	private final CcpEntity entityToGetTheSecret;
 	
 	private final CcpEntity entityToGetTheAttempts;
@@ -62,15 +69,15 @@ public class JnBusinessEvaluateAttempts implements Function<CcpJsonRepresentatio
 
 	public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
 		
-		String secretFromDatabase = json.getValueFromPath("","_entities", this.entityToGetTheSecret.getEntityName(), this.databaseFieldName);
+		String secretFromDatabase = json.getDynamicVersion().getValueFromPath("","_entities", this.entityToGetTheSecret.getEntityName(), this.databaseFieldName);
 		
-		String secretFomUser = json.getAsString(this.userFieldName);
+		String secretFomUser = json.getDynamicVersion().getAsString(this.userFieldName);
 		
 		CcpPasswordHandler dependency = CcpDependencyInjection.getDependency(CcpPasswordHandler.class);
 		
 		boolean correctSecret = dependency.matches(secretFomUser, secretFromDatabase);
 		
-		CcpJsonRepresentation toReturn = json.removeField("_entities");
+		CcpJsonRepresentation toReturn = json.removeField(JnBusinessEvaluateAttemptsConstants.entities);
 		
 		if(correctSecret) {
 
@@ -79,7 +86,7 @@ public class JnBusinessEvaluateAttempts implements Function<CcpJsonRepresentatio
 		}
 
 		String attemptsEntityName = this.entityToGetTheAttempts.getEntityName();
-		Double attemptsFromDatabase = json.getValueFromPath(0d,"_entities", attemptsEntityName, this.fieldAttempsName);
+		Double attemptsFromDatabase = json.getDynamicVersion().getValueFromPath(0d,"_entities", attemptsEntityName, this.fieldAttempsName);
 		//LATER PARAMETRIZAR O 3
 		boolean exceededAttempts = attemptsFromDatabase >= 3;
 		if(exceededAttempts) {
@@ -87,10 +94,10 @@ public class JnBusinessEvaluateAttempts implements Function<CcpJsonRepresentatio
 			throw new CcpErrorFlowDisturb(toReturn, this.statusToReturnWhenExceedAttempts);
 		}
 		
-		String email = json.getAsString(this.fieldEmailName);
+		String email = json.getDynamicVersion().getAsString(this.fieldEmailName);
 		CcpJsonRepresentation put = CcpOtherConstants.EMPTY_JSON
-				.put(this.fieldAttempsName, attemptsFromDatabase + 1)
-				.put(this.fieldEmailName, email)
+				.getDynamicVersion().put(this.fieldAttempsName, attemptsFromDatabase + 1)
+				.getDynamicVersion().put(this.fieldEmailName, email)
 				;
 		this.entityToGetTheAttempts.createOrUpdate(put);
 		throw new CcpErrorFlowDisturb(toReturn, this.statusToReturnWhenWrongType);

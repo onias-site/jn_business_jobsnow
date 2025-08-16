@@ -18,7 +18,7 @@ public class JnBusinessSendHttpRequest {
 	private JnBusinessSendHttpRequest() {}
 	public CcpJsonRepresentation execute(CcpJsonRepresentation json, Function<CcpJsonRepresentation, CcpJsonRepresentation> processThatSendsHttpRequest, JnBusinessHttpRequestType httpRequestType, String...keys) {
 
-		CcpJsonRepresentation jsonWithApiName = json.put(JnEntityHttpApiParameters.Fields.apiName.name(), httpRequestType.name());
+		CcpJsonRepresentation jsonWithApiName = json.put(JnEntityHttpApiParameters.Fields.apiName, httpRequestType);
 		CcpJsonRepresentation httpApiParameters = JnEntityHttpApiParameters.ENTITY.getOneById(jsonWithApiName);
 		CcpJsonRepresentation jsonWithHttpApiParameters = json.putAll(httpApiParameters);
 		
@@ -26,15 +26,15 @@ public class JnBusinessSendHttpRequest {
 			CcpJsonRepresentation apply = processThatSendsHttpRequest.apply(jsonWithHttpApiParameters);
 			return apply;
 		}catch (CcpErrorHttpServer e) {
-			String details = jsonWithHttpApiParameters.getJsonPiece(keys).asUgglyJson();
-			CcpJsonRepresentation httpErrorDetails = e.entity.putAll(jsonWithHttpApiParameters).put(JnEntityHttpApiErrorClient.Fields.details.name(), details);
+			String details = jsonWithHttpApiParameters.getDynamicVersion().getJsonPiece(keys).asUgglyJson();
+			CcpJsonRepresentation httpErrorDetails = e.entity.putAll(jsonWithHttpApiParameters).put(JnEntityHttpApiErrorClient.Fields.details, details);
 			CcpJsonRepresentation retryToSendIntantMessage = this.retryToSendIntantMessage(e, json, httpErrorDetails, processThatSendsHttpRequest, httpRequestType, keys);
 			return retryToSendIntantMessage;
 		}catch (CcpErrorHttpClient e) {
-			String details = jsonWithHttpApiParameters.getJsonPiece(keys).asUgglyJson();
-			CcpJsonRepresentation httpErrorDetails = e.entity.putAll(jsonWithHttpApiParameters).put(JnEntityHttpApiErrorClient.Fields.details.name(), details);
-			String request = httpErrorDetails.getAsString(JnEntityHttpApiErrorClient.Fields.request.name());
-			httpErrorDetails = httpErrorDetails.put(JnEntityHttpApiErrorClient.Fields.request.name(), request);
+			String details = jsonWithHttpApiParameters.getDynamicVersion().getJsonPiece(keys).asUgglyJson();
+			CcpJsonRepresentation httpErrorDetails = e.entity.putAll(jsonWithHttpApiParameters).put(JnEntityHttpApiErrorClient.Fields.details, details);
+			String request = httpErrorDetails.getAsString(JnEntityHttpApiErrorClient.Fields.request);
+			httpErrorDetails = httpErrorDetails.put(JnEntityHttpApiErrorClient.Fields.request, request);
 			JnEntityHttpApiErrorClient.ENTITY.createOrUpdate(httpErrorDetails);
 			throw e;
 		}
@@ -42,7 +42,7 @@ public class JnBusinessSendHttpRequest {
 	
 	private CcpJsonRepresentation retryToSendIntantMessage(CcpErrorHttp e, CcpJsonRepresentation json, CcpJsonRepresentation httpErrorDetails, Function<CcpJsonRepresentation, CcpJsonRepresentation> processThatSendsHttpRequest, JnBusinessHttpRequestType httpRequestType, String... keys) {
 		//LATER RENOMEAR ENTIDADES E CAMPOS
-		Integer maxTries = httpErrorDetails.getAsIntegerNumber(JnEntityHttpApiParameters.Fields.maxTries.name());
+		Integer maxTries = httpErrorDetails.getAsIntegerNumber(JnEntityHttpApiParameters.Fields.maxTries);
 		boolean exceededTries = JnEntityHttpApiRetrySendRequest.exceededTries(httpErrorDetails, JnEntityHttpApiRetrySendRequest.Fields.tries.name(), maxTries);
 		
 		if(exceededTries) {
@@ -50,7 +50,7 @@ public class JnBusinessSendHttpRequest {
 			throw e;
 		}
 		
-		Integer sleep = httpErrorDetails.getAsIntegerNumber(JnEntityHttpApiParameters.Fields.sleep.name());
+		Integer sleep = httpErrorDetails.getAsIntegerNumber(JnEntityHttpApiParameters.Fields.sleep);
 		new CcpTimeDecorator().sleep(sleep);
 		CcpJsonRepresentation execute = this.execute(json, processThatSendsHttpRequest, httpRequestType, keys);
 		//DOUBT REMOVER TENTATIVAS

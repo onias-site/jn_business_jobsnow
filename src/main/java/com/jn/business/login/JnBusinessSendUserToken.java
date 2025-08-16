@@ -2,13 +2,14 @@
 package com.jn.business.login;
 
 import com.ccp.decorators.CcpJsonRepresentation;
+import com.ccp.decorators.CcpJsonRepresentation.CcpJsonFieldName;
 import com.ccp.especifications.mensageria.receiver.CcpTopic;
 import com.jn.entities.JnEntityEmailTemplateMessage;
 import com.jn.entities.JnEntityInstantMessengerMessageSent;
 import com.jn.entities.JnEntityInstantMessengerParametersToSend;
 import com.jn.entities.JnEntityLoginToken;
 import com.jn.messages.JnSendMessage;
-enum JnBusinessSendUserTokenConstants{
+enum JnBusinessSendUserTokenConstants implements CcpJsonFieldName{
 	request, originalEmail, originalToken
 	
 }

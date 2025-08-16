@@ -1,6 +1,5 @@
 package com.jn.json.validations;
 
-import com.ccp.constantes.CcpStringConstants;
 import com.ccp.validation.annotations.CcpJsonFieldsValidation;
 import com.ccp.validation.annotations.CcpObjectTextSize;
 import com.ccp.validation.annotations.CcpRegex;
@@ -10,7 +9,7 @@ import com.ccp.validation.enums.CcpSimpleObjectValidations;
 
 @CcpJsonFieldsValidation(
 		regex = {
-				@CcpRegex(value = CcpStringConstants.STRONG_PASSWORD_REGEX, fields = "password")
+				@CcpRegex(value = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#&()–[{}]:;',?/*~$^+=<>]).{8,20}$", fields = "password")
 		},
 		simpleObject = { 
 		@CcpSimpleObject(rule = CcpSimpleObjectValidations.requiredFields, fields = { "password" }) },

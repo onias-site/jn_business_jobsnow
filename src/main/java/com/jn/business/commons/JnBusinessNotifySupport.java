@@ -2,11 +2,17 @@ package com.jn.business.commons;
 
 import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.decorators.CcpStringDecorator;
+import com.ccp.decorators.CcpJsonRepresentation.CcpJsonFieldName;
 import com.ccp.especifications.db.utils.CcpEntity;
 import com.jn.entities.JnEntityJobsnowError;
 import com.jn.entities.JnEntityJobsnowPenddingError;
 import com.jn.exceptions.JnErrorSupportLanguageIsMissing;
 import com.jn.messages.JnSendMessage;
+
+enum JnBusinessNotifySupportConstants  implements CcpJsonFieldName{
+	supportLanguage, msg
+	
+}
 
 public class JnBusinessNotifySupport {
 	
@@ -18,7 +24,8 @@ public class JnBusinessNotifySupport {
 	}
 	
 	public CcpJsonRepresentation apply(CcpJsonRepresentation json, String topic, CcpEntity entityToSaveError, JnSendMessage sender) {
-		String supportLanguage = new CcpStringDecorator("application_properties").propertiesFrom().environmentVariablesOrClassLoaderOrFile().getAsString("supportLanguage");
+		String supportLanguage = new CcpStringDecorator("application_properties").propertiesFrom().environmentVariablesOrClassLoaderOrFile()
+				.getAsString(JnBusinessNotifySupportConstants.supportLanguage);
 		
 		boolean hasNotLanguage = supportLanguage.trim().isEmpty();
 		
@@ -26,7 +33,7 @@ public class JnBusinessNotifySupport {
 			throw new JnErrorSupportLanguageIsMissing();
 		}
 
-		CcpJsonRepresentation duplicateValueFromField = json.renameField(JnEntityJobsnowError.Fields.message.name(), "msg");
+		CcpJsonRepresentation duplicateValueFromField = json.renameField(JnEntityJobsnowError.Fields.message, JnBusinessNotifySupportConstants.msg);
 		CcpJsonRepresentation result = sender
 		.addDefaultProcessForEmailSending()
 		.and()

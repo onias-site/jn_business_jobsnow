@@ -4,10 +4,14 @@ import java.util.function.Function;
 
 import com.ccp.constantes.CcpOtherConstants;
 import com.ccp.decorators.CcpJsonRepresentation;
+import com.ccp.decorators.CcpJsonRepresentation.CcpJsonFieldName;
 import com.ccp.especifications.db.bulk.CcpBulkItem;
 import com.ccp.especifications.db.bulk.CcpBulkOperationResult;
 import com.jn.entities.JnEntityRecordToReprocess;
-
+enum FunctionReprocessMapperConstants  implements CcpJsonFieldName{
+	type
+	
+}
 class FunctionReprocessMapper implements Function<CcpBulkOperationResult, CcpJsonRepresentation>{
 
 	public static final FunctionReprocessMapper INSTANCE = new FunctionReprocessMapper();
@@ -17,13 +21,13 @@ class FunctionReprocessMapper implements Function<CcpBulkOperationResult, CcpJso
 	public CcpJsonRepresentation apply(CcpBulkOperationResult result) {
 		long currentTimeMillis = System.currentTimeMillis();
 		CcpJsonRepresentation put = CcpOtherConstants.EMPTY_JSON
-				.put(JnEntityRecordToReprocess.Fields.timestamp.name(), currentTimeMillis);
+				.put(JnEntityRecordToReprocess.Fields.timestamp, currentTimeMillis);
 		CcpBulkItem bulkItem = result.getBulkItem();
 		CcpJsonRepresentation putAll = put.putAll(bulkItem.json);
 		CcpJsonRepresentation errorDetails = result.getErrorDetails();
 		CcpJsonRepresentation putAll2 = putAll.putAll(errorDetails);
-		CcpJsonRepresentation renameKey = putAll2.renameField("type", JnEntityRecordToReprocess.Fields.errorType.name());
-		CcpJsonRepresentation jsonPiece = renameKey.getJsonPiece( JnEntityRecordToReprocess.Fields.errorType.name(),  JnEntityRecordToReprocess.Fields.reason.name());
+		CcpJsonRepresentation renameKey = putAll2.renameField(FunctionReprocessMapperConstants.type, JnEntityRecordToReprocess.Fields.errorType);
+		CcpJsonRepresentation jsonPiece = renameKey.getJsonPiece( JnEntityRecordToReprocess.Fields.errorType,  JnEntityRecordToReprocess.Fields.reason);
 		return jsonPiece;
 	} 
 	

@@ -3,6 +3,7 @@ package com.jn.business.commons;
 
 import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.decorators.CcpTimeDecorator;
+import com.ccp.decorators.CcpJsonRepresentation.CcpJsonFieldName;
 import com.ccp.dependency.injection.CcpDependencyInjection;
 import com.ccp.especifications.db.crud.CcpCrud;
 import com.ccp.especifications.db.crud.CcpSelectUnionAll;
@@ -14,11 +15,13 @@ import com.jn.entities.JnEntityInstantMessengerBotLocked;
 import com.jn.entities.JnEntityInstantMessengerMessageSent;
 import com.jn.exceptions.JnErrorUnableToSendInstantMessage;
 import com.jn.utils.JnDeleteKeysFromCache;
-
+enum JnBusinessSendInstantMessageConstants  implements CcpJsonFieldName{
+	maxTriesToSendMessage, triesToSendMessage, sleepToSendMessage
+	
+}
 
 public class JnBusinessSendInstantMessage {
 
-	
 	public static final JnBusinessSendInstantMessage INSTANCE = new JnBusinessSendInstantMessage();
 	
 	private JnBusinessSendInstantMessage() {
@@ -32,13 +35,13 @@ public class JnBusinessSendInstantMessage {
 		String token = instantMessenger.getToken(json);
 		
 		long totalDeSegundosDecorridosDesdeMeiaNoiteDesteDia = new CcpTimeDecorator().getSecondsEnlapsedSinceMidnight();
-		json = json.put(JnEntityInstantMessengerMessageSent.Fields.interval.name(), totalDeSegundosDecorridosDesdeMeiaNoiteDesteDia / 3).put(JnEntityInstantMessengerMessageSent.Fields.token.name(), token);
+		json = json.put(JnEntityInstantMessengerMessageSent.Fields.interval, totalDeSegundosDecorridosDesdeMeiaNoiteDesteDia / 3).put(JnEntityInstantMessengerMessageSent.Fields.token, token);
 		CcpSelectUnionAll dataFromThisRecipient = crud.unionAll(json, JnDeleteKeysFromCache.INSTANCE, JnEntityInstantMessengerBotLocked.ENTITY, JnEntityInstantMessengerMessageSent.ENTITY);
 
 		boolean thisRecipientRecentlyReceivedThisMessageFromThisBot =  JnEntityInstantMessengerMessageSent.ENTITY.isPresentInThisUnionAll(dataFromThisRecipient , json);
 
 		if(thisRecipientRecentlyReceivedThisMessageFromThisBot) {
-			Integer sleep = json.getAsIntegerNumber(JnEntityHttpApiParameters.Fields.sleep.name());
+			Integer sleep = json.getAsIntegerNumber(JnEntityHttpApiParameters.Fields.sleep);
 			new CcpTimeDecorator().sleep(sleep);
 			CcpJsonRepresentation execute = this.apply(json);
 			return execute;
@@ -66,23 +69,23 @@ public class JnBusinessSendInstantMessage {
 
 	private CcpJsonRepresentation retryToSendMessage(CcpJsonRepresentation json) {
 		
-		Integer maxTriesToSendMessage = json.getAsIntegerNumber("maxTriesToSendMessage");
-		Integer triesToSendMessage = json.getOrDefault("triesToSendMessage", 1);
+		Integer maxTriesToSendMessage = json.getAsIntegerNumber(JnBusinessSendInstantMessageConstants.maxTriesToSendMessage);
+		Integer triesToSendMessage = json.getOrDefault(JnBusinessSendInstantMessageConstants.triesToSendMessage, 1);
 		
 		if(triesToSendMessage >= maxTriesToSendMessage) {
 			throw new JnErrorUnableToSendInstantMessage(json);
 		}
 		
-		Integer sleepToSendMessage = json.getAsIntegerNumber("sleepToSendMessage");
+		Integer sleepToSendMessage = json.getAsIntegerNumber(JnBusinessSendInstantMessageConstants.sleepToSendMessage);
 		
 		new CcpTimeDecorator().sleep(sleepToSendMessage);
-		CcpJsonRepresentation put = json.put("triesToSendMessage", triesToSendMessage + 1);
+		CcpJsonRepresentation put = json.put(JnBusinessSendInstantMessageConstants.triesToSendMessage, triesToSendMessage + 1);
 		CcpJsonRepresentation apply = this.apply(put);
 		return apply;
 	}
 
 	private CcpJsonRepresentation saveBlockedBot(CcpJsonRepresentation putAll, String token) {
-		JnEntityInstantMessengerBotLocked.ENTITY.createOrUpdate(putAll.put(JnEntityInstantMessengerBotLocked.Fields.token.name(), token));
+		JnEntityInstantMessengerBotLocked.ENTITY.createOrUpdate(putAll.put(JnEntityInstantMessengerBotLocked.Fields.token, token));
 		return putAll;
 	}
 

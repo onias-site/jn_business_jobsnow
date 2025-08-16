@@ -49,12 +49,12 @@ public final class JnEntityVersionable extends CcpEntityDelegator implements Ccp
 		String entityName = this.entity.getEntityName();
 		CcpJsonRepresentation audit = 
 				CcpOtherConstants.EMPTY_JSON
-				.put(JnEntityAudit.Fields.timestamp.name(), System.currentTimeMillis())
-				.put(JnEntityAudit.Fields.date.name(), new CcpTimeDecorator().getFormattedDateTime("dd/MM/yyyy HH:mm:ss.SSS"))
-				.put(JnEntityAudit.Fields.operation.name(), operation)
-				.put(JnEntityAudit.Fields.entity.name(), entityName)
-				.put(JnEntityAudit.Fields.json.name(), "" + oneById)
-				.put(JnEntityAudit.Fields.id.name(), id)
+				.put(JnEntityAudit.Fields.timestamp, System.currentTimeMillis())
+				.put(JnEntityAudit.Fields.date, new CcpTimeDecorator().getFormattedDateTime("dd/MM/yyyy HH:mm:ss.SSS"))
+				.put(JnEntityAudit.Fields.operation, operation)
+				.put(JnEntityAudit.Fields.entity, entityName)
+				.put(JnEntityAudit.Fields.json, "" + oneById)
+				.put(JnEntityAudit.Fields.id, id)
 		;
 		return audit;
 	}

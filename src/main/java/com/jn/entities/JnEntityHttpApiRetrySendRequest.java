@@ -35,7 +35,7 @@ public class JnEntityHttpApiRetrySendRequest implements CcpEntityConfigurator {
 		
 		for(int k = 1; k <= limit; k++) {
 			
-			CcpJsonRepresentation put = json.put(fieldName, k);
+			CcpJsonRepresentation put = json.getDynamicVersion().put(fieldName, k);
 			
 			boolean exists = ENTITY.exists(put);
 			

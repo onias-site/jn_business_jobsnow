@@ -5,10 +5,10 @@ import java.util.Optional;
 import java.util.function.Function;
 
 import com.ccp.constantes.CcpOtherConstants;
-import com.ccp.constantes.CcpStringConstants;
 import com.ccp.decorators.CcpEmailDecorator;
 import com.ccp.decorators.CcpHashDecorator;
 import com.ccp.decorators.CcpJsonRepresentation;
+import com.ccp.decorators.CcpJsonRepresentation.CcpJsonFieldName;
 import com.ccp.decorators.CcpStringDecorator;
 import com.ccp.decorators.CcpTextDecorator;
 import com.ccp.decorators.CcpTimeDecorator;
@@ -21,15 +21,15 @@ import com.jn.entities.JnEntityLoginPassword;
 import com.jn.entities.JnEntityLoginSessionValidation;
 import com.jn.entities.JnEntityLoginToken;
 import com.jn.exceptions.JnErrorIsNotAnEmail;
-enum JnJsonTransformersDefaultEntityFieldsConstants{
-	originalEmail, originalToken
+enum JnJsonTransformersDefaultEntityFieldsConstants  implements CcpJsonFieldName{
+	originalEmail, originalToken, email
 	
 }
 public enum JnJsonTransformersDefaultEntityFields implements Function<CcpJsonRepresentation, CcpJsonRepresentation> {
 	email(true) {
 
 		public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
-			CcpStringConstants oldField = CcpStringConstants.EMAIL;
+			JnJsonTransformersDefaultEntityFieldsConstants oldField = JnJsonTransformersDefaultEntityFieldsConstants.email;
 			JnJsonTransformersDefaultEntityFieldsConstants newField = JnJsonTransformersDefaultEntityFieldsConstants.originalEmail;
 			String value = json.getAsString(oldField);
 			CcpEmailDecorator email = new CcpStringDecorator(value).email();
@@ -89,8 +89,8 @@ public enum JnJsonTransformersDefaultEntityFields implements Function<CcpJsonRep
 				return json;
 			}
 			
-			CcpJsonRepresentation put = json.getDynamicVersion().put(CcpEntityField.TIMESTAMP.name(), ctd.content)
-					.getDynamicVersion().put(CcpEntityField.DATE.name(), formattedDateTime);
+			CcpJsonRepresentation put = json.put(CcpEntityField.TIMESTAMP, ctd.content)
+					.put(CcpEntityField.DATE, formattedDateTime);
 			
 			return put;
 		}
@@ -149,7 +149,7 @@ public enum JnJsonTransformersDefaultEntityFields implements Function<CcpJsonRep
 	}
 	
 	private String getOriginalToken() {
-		CcpStringDecorator csd = new CcpStringDecorator(CcpStringConstants.CHARACTERS_TO_GENERATE_TOKEN.value);
+		CcpStringDecorator csd = new CcpStringDecorator("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789");
 		CcpTextDecorator text = csd.text();
 		CcpTextDecorator generateToken = text.generateToken(8);
 		String originalToken = generateToken.content;

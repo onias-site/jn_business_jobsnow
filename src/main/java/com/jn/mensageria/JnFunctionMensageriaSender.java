@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import com.ccp.constantes.CcpOtherConstants;
 import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.decorators.CcpTimeDecorator;
+import com.ccp.decorators.CcpJsonRepresentation.CcpJsonFieldName;
 import com.ccp.dependency.injection.CcpDependencyInjection;
 import com.ccp.especifications.db.bulk.CcpBulkItem;
 import com.ccp.especifications.db.bulk.CcpEntityBulkOperationType;
@@ -22,7 +23,9 @@ import com.ccp.especifications.mensageria.receiver.CcpTopic;
 import com.ccp.especifications.mensageria.sender.CcpMensageriaSender;
 import com.jn.db.bulk.JnExecuteBulkOperation;
 import com.jn.entities.JnEntityAsyncTask;
-
+enum JnFunctionMensageriaSenderConstants  implements CcpJsonFieldName{
+	mensageriaReceiver
+}
 public class JnFunctionMensageriaSender implements Function<CcpJsonRepresentation, CcpJsonRepresentation> {
 	
 	private final CcpMensageriaSender mensageriaSender = CcpDependencyInjection.getDependency(CcpMensageriaSender.class);
@@ -59,12 +62,12 @@ public class JnFunctionMensageriaSender implements Function<CcpJsonRepresentatio
 	
 	public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
 
-		CcpJsonRepresentation put = json.put(JnEntityAsyncTask.Fields.topic.name(), this.topic); 
+		CcpJsonRepresentation put = json.put(JnEntityAsyncTask.Fields.topic, this.topic); 
 		
 		CcpJsonRepresentation messageDetails = this.getMessageDetails(put); 
 		
 		JnEntityAsyncTask.ENTITY.createOrUpdate(messageDetails);
-		CcpJsonRepresentation put2 = messageDetails.put("mensageriaReceiver", JnMensageriaReceiver.class.getName());
+		CcpJsonRepresentation put2 = messageDetails.put(JnFunctionMensageriaSenderConstants.mensageriaReceiver, JnMensageriaReceiver.class.getName());
 		this.mensageriaSender.send(this.topic, put2);
 
 		return messageDetails;
@@ -79,13 +82,13 @@ public class JnFunctionMensageriaSender implements Function<CcpJsonRepresentatio
 		String formattedCurrentDateTime = ccpTimeDecorator.getFormattedDateTime(CcpEntityExpurgableOptions.second.format);
 		
 		CcpJsonRepresentation messageDetails = CcpOtherConstants.EMPTY_JSON
-				.put(JnEntityAsyncTask.Fields.started.name(), System.currentTimeMillis())
-				.put(JnEntityAsyncTask.Fields.operationType.name(), this.operationType)
-				.put(JnEntityAsyncTask.Fields.data.name(), formattedCurrentDateTime)
-				.put(JnEntityAsyncTask.Fields.messageId.name(), UUID.randomUUID())
-				.put(JnEntityAsyncTask.Fields.operation.name(), this.operation)
-				.put(JnEntityAsyncTask.Fields.topic.name(), this.topic)
-				.put(JnEntityAsyncTask.Fields.request.name(), json)
+				.put(JnEntityAsyncTask.Fields.started, System.currentTimeMillis())
+				.put(JnEntityAsyncTask.Fields.operationType, this.operationType)
+				.put(JnEntityAsyncTask.Fields.data, formattedCurrentDateTime)
+				.put(JnEntityAsyncTask.Fields.messageId, UUID.randomUUID())
+				.put(JnEntityAsyncTask.Fields.operation, this.operation)
+				.put(JnEntityAsyncTask.Fields.topic, this.topic)
+				.put(JnEntityAsyncTask.Fields.request, json)
 				.putAll(json)
 				;
 		return messageDetails;

@@ -4,6 +4,7 @@ import java.util.function.Function;
 
 import com.ccp.constantes.CcpOtherConstants;
 import com.ccp.decorators.CcpJsonRepresentation;
+import com.ccp.decorators.CcpJsonRepresentation.CcpJsonFieldName;
 import com.ccp.especifications.db.crud.CcpGetEntityId;
 import com.ccp.especifications.db.utils.CcpEntityCrudOperationType;
 import com.ccp.especifications.mensageria.receiver.CcpBulkHandlers;
@@ -31,7 +32,7 @@ import com.jn.status.login.JnProcessStatusExistsLoginEmail;
 import com.jn.status.login.JnProcessStatusSaveAnswers;
 import com.jn.status.login.JnProcessStatusUpdatePassword;
 import com.jn.utils.JnDeleteKeysFromCache;
-enum JnServiceLoginConstants{
+enum JnServiceLoginConstants  implements CcpJsonFieldName{
 	originalToken, sessionToken
 	
 }
