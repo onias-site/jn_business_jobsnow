@@ -11,7 +11,7 @@ import com.ccp.dependency.injection.CcpDependencyInjection;
 import com.ccp.especifications.db.crud.CcpCrud;
 import com.ccp.especifications.db.crud.CcpSelectUnionAll;
 import com.ccp.especifications.db.utils.CcpEntity;
-import com.ccp.exceptions.http.CcpErrorHttp;
+import com.ccp.especifications.http.CcpErrorHttp;
 import com.jn.business.commons.JnBusinessSendEmailMessage;
 import com.jn.business.commons.JnBusinessTryToSendInstantMessage;
 import com.jn.entities.JnEntityEmailParametersToSend;
@@ -20,11 +20,10 @@ import com.jn.entities.JnEntityInstantMessengerParametersToSend;
 import com.jn.entities.JnEntityInstantMessengerTemplateMessage;
 import com.jn.utils.JnDeleteKeysFromCache;
 
-enum JnSendMessageConstants  implements CcpJsonFieldName{
-	message, msg
-	
-}
 public class JnSendMessage {
+	enum JsonFieldNames implements CcpJsonFieldName{
+		message, msg
+	}
 
 	private final List<Function<CcpJsonRepresentation, CcpJsonRepresentation>> process = new ArrayList<>();
 
@@ -111,7 +110,7 @@ public class JnSendMessage {
 			}
 			k++;
 		}
-		CcpJsonRepresentation renameField = entityValues.renameField(JnSendMessageConstants.msg, JnSendMessageConstants.message);
+		CcpJsonRepresentation renameField = entityValues.renameField(JsonFieldNames.msg, JsonFieldNames.message);
 		entityToSave.createOrUpdate(renameField);
 		return entityValues;
 	}

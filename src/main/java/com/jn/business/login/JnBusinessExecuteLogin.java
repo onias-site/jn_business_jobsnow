@@ -14,12 +14,10 @@ import com.jn.entities.JnEntityLoginPasswordAttempts;
 import com.jn.entities.JnEntityLoginSessionValidation;
 import com.jn.utils.JnDeleteKeysFromCache;
 
-enum JnBusinessExecuteLoginConstants  implements CcpJsonFieldName{
-	sessionToken
-	
-}
-
 public class JnBusinessExecuteLogin implements CcpTopic {
+	enum JsonFieldNames implements CcpJsonFieldName{
+		sessionToken
+	}
 
 	public static final JnBusinessExecuteLogin INSTANCE = new JnBusinessExecuteLogin();
 	
@@ -27,7 +25,7 @@ public class JnBusinessExecuteLogin implements CcpTopic {
 	
 	@SuppressWarnings("unchecked")
 	public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
-		CcpJsonRepresentation renameField = json.renameField(JnBusinessExecuteLoginConstants.sessionToken, JnEntityLoginSessionValidation.Fields.token);
+		CcpJsonRepresentation renameField = json.renameField(JsonFieldNames.sessionToken, JnEntityLoginSessionValidation.Fields.token);
 		
 		CcpEntity twinEntity = JnEntityLoginPassword.ENTITY.getTwinEntity();
 		CcpEntityBulkHandlerTransferRecordToReverseEntity executeUnlock = twinEntity.getTransferRecordToReverseEntity();

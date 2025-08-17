@@ -15,11 +15,11 @@ import com.jn.entities.JnEntityLoginConflict;
 import com.jn.entities.JnEntityLoginSessionConflict;
 import com.jn.entities.JnEntityLoginSessionValidation;
 
-enum JnBulkHandlerSolveLoginConflictConstants  implements CcpJsonFieldName{
-	email
-}
 
 public class JnBulkHandlerSolveLoginConflict implements CcpHandleWithSearchResultsInTheEntity<List<CcpBulkItem>>{
+	enum JsonFieldNames implements CcpJsonFieldName{
+		email
+	}
 
 	private JnBulkHandlerSolveLoginConflict() {}
 	
@@ -27,12 +27,12 @@ public class JnBulkHandlerSolveLoginConflict implements CcpHandleWithSearchResul
 	
 	public List<CcpBulkItem> whenRecordWasFoundInTheEntitySearch(CcpJsonRepresentation json, CcpJsonRepresentation recordFound) {
 	
-		String email = recordFound.getAsString(JnBulkHandlerSolveLoginConflictConstants.email);
+		String email = recordFound.getAsString(JsonFieldNames.email);
 		
 		CcpJsonRepresentation newLogin = JnEntityLoginSessionValidation.ENTITY.getOnlyExistingFields(json);
 		
 		CcpJsonRepresentation loginConflict = CcpOtherConstants.EMPTY_JSON
-				.put(JnBulkHandlerSolveLoginConflictConstants.email, email)
+				.put(JsonFieldNames.email, email)
 				.put(JnEntityLoginConflict.Fields.oldLogin, recordFound)
 				.put(JnEntityLoginConflict.Fields.newLogin, newLogin)
 				;

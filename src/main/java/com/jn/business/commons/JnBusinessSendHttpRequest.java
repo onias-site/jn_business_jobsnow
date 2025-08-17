@@ -4,9 +4,9 @@ import java.util.function.Function;
 
 import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.decorators.CcpTimeDecorator;
-import com.ccp.exceptions.http.CcpErrorHttpClient;
-import com.ccp.exceptions.http.CcpErrorHttp;
-import com.ccp.exceptions.http.CcpErrorHttpServer;
+import com.ccp.especifications.http.CcpErrorHttp;
+import com.ccp.especifications.http.CcpErrorHttpClient;
+import com.ccp.especifications.http.CcpErrorHttpServer;
 import com.jn.entities.JnEntityHttpApiErrorClient;
 import com.jn.entities.JnEntityHttpApiErrorServer;
 import com.jn.entities.JnEntityHttpApiParameters;

@@ -21,16 +21,12 @@ import com.jn.entities.JnEntityLoginPassword;
 import com.jn.entities.JnEntityLoginSessionValidation;
 import com.jn.entities.JnEntityLoginToken;
 import com.jn.exceptions.JnErrorIsNotAnEmail;
-enum JnJsonTransformersDefaultEntityFieldsConstants  implements CcpJsonFieldName{
-	originalEmail, originalToken, email
-	
-}
 public enum JnJsonTransformersDefaultEntityFields implements Function<CcpJsonRepresentation, CcpJsonRepresentation> {
 	email(true) {
 
 		public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
-			JnJsonTransformersDefaultEntityFieldsConstants oldField = JnJsonTransformersDefaultEntityFieldsConstants.email;
-			JnJsonTransformersDefaultEntityFieldsConstants newField = JnJsonTransformersDefaultEntityFieldsConstants.originalEmail;
+			JsonFieldNames oldField = JsonFieldNames.email;
+			JsonFieldNames newField = JsonFieldNames.originalEmail;
 			String value = json.getAsString(oldField);
 			CcpEmailDecorator email = new CcpStringDecorator(value).email();
 			
@@ -64,7 +60,7 @@ public enum JnJsonTransformersDefaultEntityFields implements Function<CcpJsonRep
 	token(false) {
 		public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
 			String createOriginalToken = super.getOriginalToken();
-			String originalToken = json.getOrDefault(JnJsonTransformersDefaultEntityFieldsConstants.originalToken, createOriginalToken);
+			String originalToken = json.getOrDefault(JsonFieldNames.originalToken, createOriginalToken);
 			 
 			CcpPasswordHandler dependency = CcpDependencyInjection.getDependency(CcpPasswordHandler.class);
 			
@@ -72,7 +68,7 @@ public enum JnJsonTransformersDefaultEntityFields implements Function<CcpJsonRep
 		
 			CcpJsonRepresentation put = json
 					.put(JnEntityLoginToken.Fields.token, token)
-					.put(JnJsonTransformersDefaultEntityFieldsConstants.originalToken, originalToken)
+					.put(JsonFieldNames.originalToken, originalToken)
 					;
 			
 			return put;
@@ -108,7 +104,7 @@ public enum JnJsonTransformersDefaultEntityFields implements Function<CcpJsonRep
 		
 			CcpJsonRepresentation put = json
 					.put(JnEntityLoginToken.Fields.token, token)
-					.put(JnJsonTransformersDefaultEntityFieldsConstants.originalToken, originalToken)
+					.put(JsonFieldNames.originalToken, originalToken)
 					;
 			
 			return put;
@@ -154,6 +150,9 @@ public enum JnJsonTransformersDefaultEntityFields implements Function<CcpJsonRep
 		CcpTextDecorator generateToken = text.generateToken(8);
 		String originalToken = generateToken.content;
 		return originalToken;
+	}
+	enum JsonFieldNames implements CcpJsonFieldName{
+		originalEmail, originalToken, email
 	}
 
 }

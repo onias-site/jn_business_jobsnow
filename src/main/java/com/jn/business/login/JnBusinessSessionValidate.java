@@ -6,18 +6,17 @@ import com.ccp.constantes.CcpOtherConstants;
 import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.decorators.CcpJsonRepresentation.CcpJsonFieldName;
 import com.ccp.especifications.db.crud.CcpGetEntityId;
-import com.ccp.exceptions.process.CcpErrorFlowDisturb;
+import com.ccp.flow.CcpErrorFlowDisturb;
 import com.jn.entities.JnEntityLoginEmail;
 import com.jn.entities.JnEntityLoginPassword;
 import com.jn.entities.JnEntityLoginSessionValidation;
 import com.jn.entities.JnEntityLoginToken;
 import com.jn.status.login.JnProcessStatusExecuteLogin;
 import com.jn.utils.JnDeleteKeysFromCache;
-enum JnBusinessSessionValidateConstants  implements CcpJsonFieldName{
-	sessionToken
-	
-}
 public class JnBusinessSessionValidate implements Function<CcpJsonRepresentation, CcpJsonRepresentation>{
+	enum JsonFieldNames implements CcpJsonFieldName{
+		sessionToken
+	}
 
 	private JnBusinessSessionValidate() {}
 	
@@ -25,14 +24,14 @@ public class JnBusinessSessionValidate implements Function<CcpJsonRepresentation
 	
 	public CcpJsonRepresentation apply(CcpJsonRepresentation json) { 
 		
-		boolean isSessionLess = json.getAsString(JnBusinessSessionValidateConstants.sessionToken).trim().isEmpty(); 
+		boolean isSessionLess = json.getAsString(JsonFieldNames.sessionToken).trim().isEmpty(); 
 		
 		if(isSessionLess) {
 			throw new CcpErrorFlowDisturb(JnProcessStatusExecuteLogin.missingSessionToken);
 		}
 		
 		String context = new Object(){}.getClass().getEnclosingMethod().getName();
-		new CcpGetEntityId(json.duplicateValueFromField(JnBusinessSessionValidateConstants.sessionToken, JnEntityLoginSessionValidation.Fields.token)) 
+		new CcpGetEntityId(json.duplicateValueFromField(JsonFieldNames.sessionToken, JnEntityLoginSessionValidation.Fields.token)) 
 		.toBeginProcedureAnd()
 		.ifThisIdIsNotPresentInEntity(JnEntityLoginSessionValidation.ENTITY).returnStatus(JnProcessStatusExecuteLogin.invalidSession).and()
 		.ifThisIdIsPresentInEntity(JnEntityLoginToken.ENTITY.getTwinEntity()).returnStatus(JnProcessStatusExecuteLogin.lockedToken).and()

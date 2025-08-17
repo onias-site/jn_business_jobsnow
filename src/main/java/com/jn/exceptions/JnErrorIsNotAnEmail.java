@@ -1,7 +1,7 @@
 package com.jn.exceptions;
 
 import com.ccp.decorators.CcpJsonRepresentation;
-import com.ccp.exceptions.db.utils.CcpEntityJsonTransformerError;
+import com.ccp.especifications.db.utils.CcpEntityJsonTransformerError;
 
 @SuppressWarnings("serial")
 public class JnErrorIsNotAnEmail extends CcpEntityJsonTransformerError {

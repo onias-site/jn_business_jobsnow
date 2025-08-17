@@ -9,11 +9,10 @@ import com.jn.entities.JnEntityInstantMessengerMessageSent;
 import com.jn.entities.JnEntityInstantMessengerParametersToSend;
 import com.jn.entities.JnEntityLoginToken;
 import com.jn.messages.JnSendMessage;
-enum JnBusinessSendUserTokenConstants implements CcpJsonFieldName{
-	request, originalEmail, originalToken
-	
-}
 public class JnBusinessSendUserToken implements CcpTopic{
+	enum JsonFieldNames implements CcpJsonFieldName{
+		request, originalEmail, originalToken
+	}
 	
 	public static final JnBusinessSendUserToken INSTANCE = new JnBusinessSendUserToken();
 	
@@ -26,11 +25,11 @@ public class JnBusinessSendUserToken implements CcpTopic{
 		String topic = this.getClass().getName();
 		JnSendMessage getMessage = new JnSendMessage();
 		
-		CcpJsonRepresentation request = json.getInnerJson(JnBusinessSendUserTokenConstants.request);
+		CcpJsonRepresentation request = json.getInnerJson(JsonFieldNames.request);
 		CcpJsonRepresentation duplicateValueFromField = request.putAll(jsonPiece)
-				.duplicateValueFromField(JnBusinessSendUserTokenConstants.originalEmail, JnEntityLoginToken.Fields.email, 
+				.duplicateValueFromField(JsonFieldNames.originalEmail, JnEntityLoginToken.Fields.email, 
 						JnEntityInstantMessengerParametersToSend.Fields.recipient)
-				.duplicateValueFromField(JnBusinessSendUserTokenConstants.originalToken, JnEntityInstantMessengerMessageSent.Fields.token)
+				.duplicateValueFromField(JsonFieldNames.originalToken, JnEntityInstantMessengerMessageSent.Fields.token)
 				;
 		getMessage
 		.addDefaultProcessForEmailSending()

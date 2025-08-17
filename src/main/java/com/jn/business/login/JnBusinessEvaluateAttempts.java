@@ -8,18 +8,14 @@ import com.ccp.decorators.CcpJsonRepresentation.CcpJsonFieldName;
 import com.ccp.dependency.injection.CcpDependencyInjection;
 import com.ccp.especifications.db.utils.CcpEntity;
 import com.ccp.especifications.password.CcpPasswordHandler;
-import com.ccp.exceptions.process.CcpErrorFlowDisturb;
+import com.ccp.flow.CcpErrorFlowDisturb;
 import com.ccp.process.CcpProcessStatus;
 import com.jn.mensageria.JnFunctionMensageriaSender;
 
-enum JnBusinessEvaluateAttemptsConstants  implements CcpJsonFieldName{
-	entities
-}
-
-
-	
-
 public class JnBusinessEvaluateAttempts implements Function<CcpJsonRepresentation, CcpJsonRepresentation>{
+	enum JsonFieldNames implements CcpJsonFieldName{
+		entities
+	}
 
 	private final CcpEntity entityToGetTheSecret;
 	
@@ -77,7 +73,7 @@ public class JnBusinessEvaluateAttempts implements Function<CcpJsonRepresentatio
 		
 		boolean correctSecret = dependency.matches(secretFomUser, secretFromDatabase);
 		
-		CcpJsonRepresentation toReturn = json.removeField(JnBusinessEvaluateAttemptsConstants.entities);
+		CcpJsonRepresentation toReturn = json.removeField(JsonFieldNames.entities);
 		
 		if(correctSecret) {
 

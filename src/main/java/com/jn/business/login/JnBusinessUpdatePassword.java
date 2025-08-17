@@ -15,11 +15,10 @@ import com.jn.entities.JnEntityLoginPassword;
 import com.jn.entities.JnEntityLoginPasswordAttempts;
 import com.jn.entities.JnEntityLoginSessionValidation;
 import com.jn.utils.JnDeleteKeysFromCache;
-enum JnBusinessUpdatePasswordConstants  implements CcpJsonFieldName{
-	sessionToken
-	
-}
 public class JnBusinessUpdatePassword implements CcpTopic {
+	enum JsonFieldNames implements CcpJsonFieldName{
+		sessionToken
+	}
  
 	public static final JnBusinessUpdatePassword INSTANCE = new JnBusinessUpdatePassword();
 	
@@ -34,7 +33,7 @@ public class JnBusinessUpdatePassword implements CcpTopic {
 		CcpEntityBulkHandlerTransferRecordToReverseEntity registerPasswordUnlock = twinEntity.getTransferRecordToReverseEntity();
 		CcpBulkHandlerDelete removePasswordAttempts = new CcpBulkHandlerDelete(JnEntityLoginPasswordAttempts.ENTITY);
 
-		CcpJsonRepresentation renameField = json.renameField(JnBusinessUpdatePasswordConstants.sessionToken, JnEntityLoginSessionValidation.Fields.token);
+		CcpJsonRepresentation renameField = json.renameField(JsonFieldNames.sessionToken, JnEntityLoginSessionValidation.Fields.token);
 		CcpBulkHandlerSave updatePassword = new CcpBulkHandlerSave(JnEntityLoginPassword.ENTITY);
 		JnExecuteBulkOperation.INSTANCE.
 		executeSelectUnionAllThenExecuteBulkOperation(

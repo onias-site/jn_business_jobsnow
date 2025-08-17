@@ -8,11 +8,10 @@ import com.ccp.decorators.CcpJsonRepresentation.CcpJsonFieldName;
 import com.ccp.especifications.db.bulk.CcpBulkItem;
 import com.ccp.especifications.db.bulk.CcpBulkOperationResult;
 import com.jn.entities.JnEntityRecordToReprocess;
-enum FunctionReprocessMapperConstants  implements CcpJsonFieldName{
-	type
-	
-}
 class FunctionReprocessMapper implements Function<CcpBulkOperationResult, CcpJsonRepresentation>{
+	enum JsonFieldNames implements CcpJsonFieldName{
+		type
+	}
 
 	public static final FunctionReprocessMapper INSTANCE = new FunctionReprocessMapper();
 	
@@ -26,7 +25,7 @@ class FunctionReprocessMapper implements Function<CcpBulkOperationResult, CcpJso
 		CcpJsonRepresentation putAll = put.putAll(bulkItem.json);
 		CcpJsonRepresentation errorDetails = result.getErrorDetails();
 		CcpJsonRepresentation putAll2 = putAll.putAll(errorDetails);
-		CcpJsonRepresentation renameKey = putAll2.renameField(FunctionReprocessMapperConstants.type, JnEntityRecordToReprocess.Fields.errorType);
+		CcpJsonRepresentation renameKey = putAll2.renameField(JsonFieldNames.type, JnEntityRecordToReprocess.Fields.errorType);
 		CcpJsonRepresentation jsonPiece = renameKey.getJsonPiece( JnEntityRecordToReprocess.Fields.errorType,  JnEntityRecordToReprocess.Fields.reason);
 		return jsonPiece;
 	} 

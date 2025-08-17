@@ -23,11 +23,11 @@ import com.ccp.especifications.mensageria.receiver.CcpTopic;
 import com.ccp.especifications.mensageria.sender.CcpMensageriaSender;
 import com.jn.db.bulk.JnExecuteBulkOperation;
 import com.jn.entities.JnEntityAsyncTask;
-enum JnFunctionMensageriaSenderConstants  implements CcpJsonFieldName{
-	mensageriaReceiver
-}
 public class JnFunctionMensageriaSender implements Function<CcpJsonRepresentation, CcpJsonRepresentation> {
 	
+	enum JsonFieldNames implements CcpJsonFieldName{
+		mensageriaReceiver
+	}
 	private final CcpMensageriaSender mensageriaSender = CcpDependencyInjection.getDependency(CcpMensageriaSender.class);
 	
 	private final String operationType;
@@ -67,7 +67,7 @@ public class JnFunctionMensageriaSender implements Function<CcpJsonRepresentatio
 		CcpJsonRepresentation messageDetails = this.getMessageDetails(put); 
 		
 		JnEntityAsyncTask.ENTITY.createOrUpdate(messageDetails);
-		CcpJsonRepresentation put2 = messageDetails.put(JnFunctionMensageriaSenderConstants.mensageriaReceiver, JnMensageriaReceiver.class.getName());
+		CcpJsonRepresentation put2 = messageDetails.put(JsonFieldNames.mensageriaReceiver, JnMensageriaReceiver.class.getName());
 		this.mensageriaSender.send(this.topic, put2);
 
 		return messageDetails;
