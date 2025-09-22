@@ -10,7 +10,6 @@ import com.ccp.especifications.db.utils.decorators.configurations.CcpEntityExpur
 import com.ccp.especifications.db.utils.decorators.configurations.CcpEntityOperationSpecification;
 import com.ccp.especifications.db.utils.decorators.configurations.CcpEntitySpecifications;
 import com.ccp.especifications.db.utils.decorators.configurations.CcpEntityTransferOperationEspecification;
-import com.ccp.especifications.db.utils.decorators.configurations.CcpIgnoreFieldsValidation;
 import com.ccp.especifications.db.utils.decorators.engine.CcpEntityConfigurator;
 import com.ccp.especifications.db.utils.decorators.engine.CcpEntityExpurgableOptions;
 import com.ccp.especifications.db.utils.decorators.engine.CcpEntityFactory;
@@ -23,9 +22,10 @@ import com.jn.json.transformers.JnJsonTransformersDefaultEntityFields;
 		reactivate = @CcpEntityTransferOperationEspecification(whenRecordToTransferIsFound = @CcpEntityOperationSpecification(afterOperation = {}), whenRecordToTransferIsNotFound = @CcpEntityOperationSpecification(afterOperation = {})),
 		delete = @CcpEntityOperationSpecification(afterOperation = {}),
 	    save = @CcpEntityOperationSpecification(afterOperation = {}),
-	    classWithFieldsValidationsRules = CcpIgnoreFieldsValidation.class,
+	    classWithFieldsValidationsRules = JnEntityJobsnowError.Fields.class,
 		cacheableEntity = true
 )
+//TODO FIELDS VALIDATIONS
 public class JnEntityJobsnowError implements CcpEntityConfigurator {
 
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityJobsnowError.class).entityInstance;

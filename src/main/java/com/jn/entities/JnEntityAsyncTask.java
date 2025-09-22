@@ -9,13 +9,17 @@ import com.ccp.especifications.db.utils.CcpEntityField;
 import com.ccp.especifications.db.utils.decorators.configurations.CcpEntityOperationSpecification;
 import com.ccp.especifications.db.utils.decorators.configurations.CcpEntitySpecifications;
 import com.ccp.especifications.db.utils.decorators.configurations.CcpEntityTransferOperationEspecification;
-import com.ccp.especifications.db.utils.decorators.configurations.CcpIgnoreFieldsValidation;
 import com.ccp.especifications.db.utils.decorators.engine.CcpEntityConfigurator;
 import com.ccp.especifications.db.utils.decorators.engine.CcpEntityFactory;
+import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidator;
+import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeNestedJson;
+import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeNumber;
+import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeString;
+import com.ccp.json.validations.fields.enums.CcpJsonFieldType;
 import com.jn.json.transformers.JnJsonTransformersDefaultEntityFields;
 
 @CcpEntitySpecifications(
-		classWithFieldsValidationsRules = CcpIgnoreFieldsValidation.class,
+		classWithFieldsValidationsRules = JnEntityAsyncTask.Fields.class,
 		inactivate = @CcpEntityTransferOperationEspecification(whenRecordToTransferIsFound = @CcpEntityOperationSpecification(afterOperation = {}), whenRecordToTransferIsNotFound = @CcpEntityOperationSpecification(afterOperation = {})),
 		reactivate = @CcpEntityTransferOperationEspecification(whenRecordToTransferIsFound = @CcpEntityOperationSpecification(afterOperation = {}), whenRecordToTransferIsNotFound = @CcpEntityOperationSpecification(afterOperation = {})),
 		delete = @CcpEntityOperationSpecification(afterOperation = {}),
@@ -27,10 +31,37 @@ public class JnEntityAsyncTask implements CcpEntityConfigurator {
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityAsyncTask.class).entityInstance;
 
 	public static enum Fields implements CcpEntityField{
-		started(false), finished(false), enlapsedTime(false), data(false),
-		topic(false), request(false), messageId(true), success(false),
+		@CcpJsonFieldValidator(type = CcpJsonFieldType.Number)
+		@CcpJsonFieldTypeNumber
+		started(false), 
+		@CcpJsonFieldValidator(type = CcpJsonFieldType.Number)
+		@CcpJsonFieldTypeNumber
+		finished(false), 
+		@CcpJsonFieldValidator(type = CcpJsonFieldType.Number)
+		@CcpJsonFieldTypeNumber
+		enlapsedTime(false), 
+		@CcpJsonFieldValidator(type = CcpJsonFieldType.String)
+		@CcpJsonFieldTypeString(minLength = 1)
+		data(false),
+		@CcpJsonFieldValidator(type = CcpJsonFieldType.String)
+		@CcpJsonFieldTypeString(minLength = 1)
+		topic(false), 
+		@CcpJsonFieldValidator(type = CcpJsonFieldType.NestedJson)
+		@CcpJsonFieldTypeNestedJson
+		request(false), 
+		@CcpJsonFieldValidator(type = CcpJsonFieldType.String)
+		@CcpJsonFieldTypeString(minLength = 1)
+		messageId(true), 
+		@CcpJsonFieldValidator(type = CcpJsonFieldType.Boolean)
+		success(false),
+		@CcpJsonFieldValidator(type = CcpJsonFieldType.String)
+		@CcpJsonFieldTypeString(minLength = 1)
 		operationType(false),
+		@CcpJsonFieldValidator(type = CcpJsonFieldType.String)
+		@CcpJsonFieldTypeString(minLength = 1)
 		operation(false),
+		@CcpJsonFieldValidator(type = CcpJsonFieldType.NestedJson)
+		@CcpJsonFieldTypeNestedJson
 		response(false)
 		;
 		private final boolean primaryKey;
