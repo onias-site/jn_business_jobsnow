@@ -46,7 +46,7 @@ public class JnEntityAudit implements CcpEntityConfigurator {
 		id(true),
 		@CcpJsonFieldValidator(type = CcpJsonFieldType.String)
 		@CcpJsonFieldTypeString(minLength = 1)
-		json(false)
+		json(false)//FIXME NESTEDJSON
 		;
 		
 		private final boolean primaryKey;

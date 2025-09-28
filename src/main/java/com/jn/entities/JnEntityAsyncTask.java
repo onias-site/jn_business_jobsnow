@@ -32,13 +32,13 @@ public class JnEntityAsyncTask implements CcpEntityConfigurator {
 
 	public static enum Fields implements CcpEntityField{
 		@CcpJsonFieldValidator(type = CcpJsonFieldType.Number)
-		@CcpJsonFieldTypeNumber
+		@CcpJsonFieldTypeNumber(minValue = 0)
 		started(false), 
 		@CcpJsonFieldValidator(type = CcpJsonFieldType.Number)
-		@CcpJsonFieldTypeNumber
+		@CcpJsonFieldTypeNumber(minValue = 0)
 		finished(false), 
 		@CcpJsonFieldValidator(type = CcpJsonFieldType.Number)
-		@CcpJsonFieldTypeNumber
+		@CcpJsonFieldTypeNumber(minValue = 0)
 		enlapsedTime(false), 
 		@CcpJsonFieldValidator(type = CcpJsonFieldType.String)
 		@CcpJsonFieldTypeString(minLength = 1)
@@ -48,7 +48,7 @@ public class JnEntityAsyncTask implements CcpEntityConfigurator {
 		topic(false), 
 		@CcpJsonFieldValidator(type = CcpJsonFieldType.NestedJson)
 		@CcpJsonFieldTypeNestedJson
-		request(false), 
+		request(false), //TODO 
 		@CcpJsonFieldValidator(type = CcpJsonFieldType.String)
 		@CcpJsonFieldTypeString(minLength = 1)
 		messageId(true), 

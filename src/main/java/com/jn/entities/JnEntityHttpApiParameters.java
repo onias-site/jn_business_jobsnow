@@ -32,7 +32,12 @@ public class JnEntityHttpApiParameters implements CcpEntityConfigurator{
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityHttpApiParameters.class).entityInstance;
 	
 	public static enum Fields implements CcpEntityField{
-		apiName(true), url(false), token (false), maxTries(false), sleep(false), method(false)
+		apiName(true), 
+		url(false), 
+		token(false), 
+		maxTries(false), 
+		sleep(false), 
+		method(false)
 		;
 		
 		private final boolean primaryKey;

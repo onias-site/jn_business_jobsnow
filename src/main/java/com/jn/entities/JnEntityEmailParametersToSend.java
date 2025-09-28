@@ -52,7 +52,8 @@ public class JnEntityEmailParametersToSend  implements CcpEntityConfigurator{
 		subjectType(false), 
 		@CcpJsonFieldValidator(required = true, type = CcpJsonFieldType.NestedJson)
 		@CcpJsonFieldTypeNestedJson
-		moreParameters(false);
+		moreParameters(false)
+		;
 
 		private final boolean primaryKey;
 

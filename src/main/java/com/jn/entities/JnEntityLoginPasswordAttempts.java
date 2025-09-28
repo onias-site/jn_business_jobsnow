@@ -26,7 +26,7 @@ import com.jn.json.transformers.JnJsonTransformersDefaultEntityFields;
 		cacheableEntity = true
 )
 //TODO FIELDS VALIDATIONS
-
+//FIXME tries ou attempts
 public class JnEntityLoginPasswordAttempts implements CcpEntityConfigurator {
 
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityLoginPasswordAttempts.class).entityInstance;
