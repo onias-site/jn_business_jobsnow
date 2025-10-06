@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.function.Function;
 
 import com.ccp.constantes.CcpOtherConstants;
-import com.ccp.decorators.CcpEmailDecorator;
 import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.especifications.db.bulk.CcpBulkItem;
 import com.ccp.especifications.db.utils.CcpEntity;
@@ -16,12 +15,10 @@ import com.ccp.especifications.db.utils.decorators.configurations.CcpEntityTrans
 import com.ccp.especifications.db.utils.decorators.engine.CcpEntityConfigurator;
 import com.ccp.especifications.db.utils.decorators.engine.CcpEntityFactory;
 import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidator;
-import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeNestedJson;
-import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeString;
-import com.ccp.json.validations.fields.enums.CcpJsonFieldType;
 import com.jn.business.commons.JnBusinessNotifyError;
 import com.jn.business.login.JnBusinessSendUserToken;
 import com.jn.entities.decorators.JnEntityVersionable;
+import com.jn.json.fields.validation.JnJsonValidationsByFieldName;
 import com.jn.json.transformers.JnJsonTransformersDefaultEntityFields;
 
 @CcpEntityDecorators(decorators = JnEntityVersionable.class)
@@ -38,20 +35,15 @@ public class JnEntityEmailParametersToSend  implements CcpEntityConfigurator{
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityEmailParametersToSend.class).entityInstance;
  
 	public static enum Fields implements CcpEntityField {
-		@CcpJsonFieldValidator(required = true, type = CcpJsonFieldType.String)
-		@CcpJsonFieldTypeString(regexValidation = CcpEmailDecorator.EMAIL_REGEX, minLength = 7, maxLength = 100)
+		@CcpJsonFieldValidator(required = true, validationsCatalog = {JnJsonValidationsByFieldName.class})
 		email(false), 
-		@CcpJsonFieldValidator(required = true, type = CcpJsonFieldType.String)
-		@CcpJsonFieldTypeString(minLength = 1, maxLength = 30)
+		@CcpJsonFieldValidator(required = true, validationsCatalog = {JnJsonValidationsByFieldName.class})
 		sender(false), 
-		@CcpJsonFieldValidator(required = true, type = CcpJsonFieldType.String)
-		@CcpJsonFieldTypeString(minLength = 1, maxLength = 30)
+		@CcpJsonFieldValidator(required = true, validationsCatalog = {JnJsonValidationsByFieldName.class})
 		templateId(true), 
-		@CcpJsonFieldValidator(required = true, type = CcpJsonFieldType.String)
-		@CcpJsonFieldTypeString(minLength = 1, maxLength = 30)
+		@CcpJsonFieldValidator(required = true, validationsCatalog = {JnJsonValidationsByFieldName.class})
 		subjectType(false), 
-		@CcpJsonFieldValidator(required = true, type = CcpJsonFieldType.NestedJson)
-		@CcpJsonFieldTypeNestedJson
+		@CcpJsonFieldValidator(validationsCatalog = {JnJsonValidationsByFieldName.class})
 		moreParameters(false)
 		;
 

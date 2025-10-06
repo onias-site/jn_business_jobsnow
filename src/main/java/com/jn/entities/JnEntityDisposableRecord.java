@@ -14,9 +14,9 @@ import com.ccp.especifications.db.utils.decorators.engine.CcpEntityConfigurator;
 import com.ccp.especifications.db.utils.decorators.engine.CcpEntityFactory;
 import com.ccp.especifications.db.utils.decorators.engine.CcpEntityReadOnly;
 import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidator;
-import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeNestedJson;
 import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeString;
 import com.ccp.json.validations.fields.enums.CcpJsonFieldType;
+import com.jn.json.fields.validation.JnJsonValidationsByFieldName;
 import com.jn.json.transformers.JnJsonTransformersDefaultEntityFields;
 
 @CcpEntityDecorators(decorators = CcpEntityReadOnly.class)
@@ -33,19 +33,18 @@ public class JnEntityDisposableRecord implements CcpEntityConfigurator {
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityDisposableRecord.class).entityInstance;
 
 	public static enum Fields implements CcpEntityField{
+		@CcpJsonFieldValidator(required = true, validationsCatalog = {JnJsonValidationsByFieldName.class})
 		timestamp(false),
 		@CcpJsonFieldValidator(required = true, type = CcpJsonFieldType.String)
 		@CcpJsonFieldTypeString(minLength = 7, maxLength = 100)
 		format(false),
-		@CcpJsonFieldValidator(required = true, type = CcpJsonFieldType.String)
-		@CcpJsonFieldTypeString(minLength = 7, maxLength = 100)
+		@CcpJsonFieldValidator(required = true, validationsCatalog = {JnJsonValidationsByFieldName.class})
 		entity(true), 
+		@CcpJsonFieldValidator(required = true, validationsCatalog = {JnJsonValidationsByFieldName.class})
 		date(false),
-		@CcpJsonFieldValidator(required = true, type = CcpJsonFieldType.NestedJson)
-		@CcpJsonFieldTypeNestedJson
+		@CcpJsonFieldValidator(required = true, validationsCatalog = {JnJsonValidationsByFieldName.class})
 		json(false),
-		@CcpJsonFieldValidator(required = true, type = CcpJsonFieldType.String)
-		@CcpJsonFieldTypeString(minLength = 7, maxLength = 100)
+		@CcpJsonFieldValidator(required = true, validationsCatalog = {JnJsonValidationsByFieldName.class})
 		id(true), 
 		;
 		

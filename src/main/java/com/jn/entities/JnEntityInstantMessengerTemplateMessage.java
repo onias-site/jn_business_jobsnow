@@ -14,8 +14,10 @@ import com.ccp.especifications.db.utils.decorators.configurations.CcpEntitySpeci
 import com.ccp.especifications.db.utils.decorators.configurations.CcpEntityTransferOperationEspecification;
 import com.ccp.especifications.db.utils.decorators.engine.CcpEntityConfigurator;
 import com.ccp.especifications.db.utils.decorators.engine.CcpEntityFactory;
+import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidator;
 import com.jn.business.commons.JnBusinessNotifyError;
 import com.jn.entities.decorators.JnEntityVersionable;
+import com.jn.json.fields.validation.JnJsonValidationsByFieldName;
 import com.jn.json.transformers.JnJsonTransformersDefaultEntityFields;
 import com.jn.utils.JnLanguage;
 
@@ -28,13 +30,19 @@ import com.jn.utils.JnLanguage;
 	    save = @CcpEntityOperationSpecification(afterOperation = {}),
 		cacheableEntity = true
 )
-//TODO FIELDS VALIDATIONS
 public class JnEntityInstantMessengerTemplateMessage  implements CcpEntityConfigurator {
 
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityInstantMessengerTemplateMessage.class).entityInstance;
 
 	public static enum Fields implements CcpEntityField{
-		templateId(true),language(true), subject(false), message(false)
+		@CcpJsonFieldValidator(required = true, validationsCatalog = {JnJsonValidationsByFieldName.class})
+		templateId(true),
+		@CcpJsonFieldValidator(required = true, validationsCatalog = {JnJsonValidationsByFieldName.class})
+		language(true), 
+		@CcpJsonFieldValidator(required = true, validationsCatalog = {JnJsonValidationsByFieldName.class})
+		subject(false), 
+		@CcpJsonFieldValidator(required = true, validationsCatalog = {JnJsonValidationsByFieldName.class})
+		message(false)
 		;
 		
 		private final boolean primaryKey;

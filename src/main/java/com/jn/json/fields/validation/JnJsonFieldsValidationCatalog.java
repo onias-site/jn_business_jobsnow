@@ -14,8 +14,8 @@ public enum JnJsonFieldsValidationCatalog{
 	@CcpJsonFieldValidator(type = CcpJsonFieldType.String)
 	@CcpJsonFieldTypeString(minLength = 1)
 	operation,
-	@CcpJsonFieldValidator(type = CcpJsonFieldType.NestedJson)
-	@CcpJsonFieldTypeNestedJson
+	@CcpJsonFieldValidator(type = CcpJsonFieldType.String)
+	@CcpJsonFieldTypeString(minLength = 1, maxLength = 500)
 	response,
 	@CcpJsonFieldValidator(type = CcpJsonFieldType.Number)
 	@CcpJsonFieldTypeNumber(minValue = 0)
@@ -23,80 +23,93 @@ public enum JnJsonFieldsValidationCatalog{
 	@CcpJsonFieldValidator(type = CcpJsonFieldType.String)
 	@CcpJsonFieldTypeString(maxLength = 23)
 	date,
-	@CcpJsonFieldValidator(required = true,type = CcpJsonFieldType.String)
+	@CcpJsonFieldValidator(type = CcpJsonFieldType.String)
 	@CcpJsonFieldTypeString(minLength = 1, maxLength = 30)
 	entity, 
 	@CcpJsonFieldValidator(required = true, type = CcpJsonFieldType.String)
 	@CcpJsonFieldTypeString(minLength = 1)
 	id,
-	@CcpJsonFieldValidator(required = true, type = CcpJsonFieldType.NestedJson)
+	@CcpJsonFieldValidator(type = CcpJsonFieldType.NestedJson)
 	@CcpJsonFieldTypeNestedJson
 	json,
-	@CcpJsonFieldValidator(required = true, type = CcpJsonFieldType.String)
+	@CcpJsonFieldValidator(type = CcpJsonFieldType.String)
 	@CcpJsonFieldTypeString(minLength = 1, maxLength = 20)
 	subjectType, 
-	@CcpJsonFieldValidator(required = true, type = CcpJsonFieldType.String)
+	@CcpJsonFieldValidator(type = CcpJsonFieldType.String)
 	@CcpJsonFieldTypeString(regexValidation = CcpEmailDecorator.EMAIL_REGEX, minLength = 7, maxLength = 100)
 	email, 
-	@CcpJsonFieldValidator(required = true, type = CcpJsonFieldType.String)
+	@CcpJsonFieldValidator(type = CcpJsonFieldType.String)
 	@CcpJsonFieldTypeString(minLength = 1, maxLength = 30)
 	subject, 
-	@CcpJsonFieldValidator(required = true, type = CcpJsonFieldType.String)
+	@CcpJsonFieldValidator(type = CcpJsonFieldType.String)
 	@CcpJsonFieldTypeString( minLength = 5, maxLength = 500)
 	message, 
 	@CcpJsonFieldValidator(type = CcpJsonFieldType.Number)
 	@CcpJsonFieldTypeNumber(minValue = 0)
 	chatId, 
-	@CcpJsonFieldValidator(required = true, type = CcpJsonFieldType.String)
+	@CcpJsonFieldValidator(type = CcpJsonFieldType.String)
 	@CcpJsonFieldTypeString(minLength = 1, maxLength = 30)
 	sender,
-	@CcpJsonFieldValidator(required = true, type = CcpJsonFieldType.NestedJson)
+	@CcpJsonFieldValidator(type = CcpJsonFieldType.NestedJson)
 	@CcpJsonFieldTypeNestedJson
 	moreParameters,
-	@CcpJsonFieldValidator(required = true, type = CcpJsonFieldType.String)
+	@CcpJsonFieldValidator(type = CcpJsonFieldType.String)
 	@CcpJsonFieldTypeString(minLength = 1, maxLength = 30)
 	templateId,
-	@CcpJsonFieldValidator(required = true, type = CcpJsonFieldType.String)
+	@CcpJsonFieldValidator(type = CcpJsonFieldType.String)
 	@CcpJsonFieldTypeString(minLength = 1, maxLength = 30)
 	language, 
-	@CcpJsonFieldValidator(required = true, type = CcpJsonFieldType.String)
+	@CcpJsonFieldValidator(type = CcpJsonFieldType.String)
 	@CcpJsonFieldTypeString(minLength = 1, maxLength = 500)
 	url, 
-	@CcpJsonFieldValidator(required = true, type = CcpJsonFieldType.String)
+	@CcpJsonFieldValidator(type = CcpJsonFieldType.String)
 	@CcpJsonFieldTypeString(minLength = 1, maxLength = 10)
 	method, 
-	@CcpJsonFieldValidator(required = true, type = CcpJsonFieldType.NestedJson)
+	@CcpJsonFieldValidator(type = CcpJsonFieldType.NestedJson)
 	@CcpJsonFieldTypeNestedJson
 	headers, 
-	@CcpJsonFieldValidator(required = true, type = CcpJsonFieldType.String)
+	@CcpJsonFieldValidator(type = CcpJsonFieldType.String)
 	@CcpJsonFieldTypeString(minLength = 1, maxLength = 10)
 	apiName,
-	@CcpJsonFieldValidator(required = true, type = CcpJsonFieldType.String)
+	@CcpJsonFieldValidator(type = CcpJsonFieldType.String)
 	@CcpJsonFieldTypeString(minLength = 1)
 	details, 
-	@CcpJsonFieldValidator(required = true, type = CcpJsonFieldType.String)
+	@CcpJsonFieldValidator(type = CcpJsonFieldType.String)
 	@CcpJsonFieldTypeString(minLength = 1)
 	status,
 	@CcpJsonFieldValidator(type = CcpJsonFieldType.String)
+	@CcpJsonFieldTypeString(minLength = 7)
 	token,
 	@CcpJsonFieldValidator(type = CcpJsonFieldType.String)
+	@CcpJsonFieldTypeString(minLength = 1)
 	recipient,
 	@CcpJsonFieldValidator(type = CcpJsonFieldType.String)
+	@CcpJsonFieldTypeString(minLength = 1)
 	cause, 
 	@CcpJsonFieldValidator(type = CcpJsonFieldType.String)
+	@CcpJsonFieldTypeString(minLength = 1)
 	stackTrace, 
 	@CcpJsonFieldValidator(type = CcpJsonFieldType.String)
+	@CcpJsonFieldTypeString(minLength = 1)
 	type,
-	@CcpJsonFieldValidator(type = CcpJsonFieldType.String)
+	@CcpJsonFieldValidator(type = CcpJsonFieldType.Number)
+	@CcpJsonFieldTypeNumber(minValue = 0)
 	attempts,
 	@CcpJsonFieldValidator(type = CcpJsonFieldType.String)
+	@CcpJsonFieldTypeString(regexValidation = "(\\\\d{1,2}|(0|1)\\\\d{2}|2[0-4]\\\\d|25[0-5])\\\\.(\\\\d{1,2}|(0|1)\\\\d{2}|2[0-4]\\\\d|25[0-5])\\\\.(\\\\d{1,2}|(0|1)\\\\d{2}|2[0-4]\\\\d|25[0-5])\\\\.(\\\\d{1,2}|(0|1)\\\\d{2}|2[0-4]\\\\d|25[0-5])")
 	ip,
 	@CcpJsonFieldValidator(type = CcpJsonFieldType.String)
 	coordinates,
 	@CcpJsonFieldValidator(type = CcpJsonFieldType.String)
+	@CcpJsonFieldTypeString(regexValidation = "^([a-fA-F0-9][:-]){5}[a-fA-F0-9][:-]$")
 	macAddress,
 	@CcpJsonFieldValidator(type = CcpJsonFieldType.String)
+	@CcpJsonFieldTypeString(minLength = 1)
 	userAgent,
+	
+	@CcpJsonFieldValidator(type = CcpJsonFieldType.Number)
+	@CcpJsonFieldTypeNumber(minValue = 200, maxValue = 599)
+	httpStatus,
 	
 	
 

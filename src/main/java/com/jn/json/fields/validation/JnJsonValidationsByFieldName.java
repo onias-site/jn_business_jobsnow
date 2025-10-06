@@ -8,7 +8,7 @@ import com.ccp.json.validations.fields.enums.CcpJsonFieldTypeError;
 import com.ccp.json.validations.fields.interfaces.CcpJsonFieldValidatorCatalog;
 import com.ccp.json.validations.fields.interfaces.CcpJsonFieldValidatorInterface;
 
-public class JnJsonFieldsValidation implements CcpJsonFieldValidatorCatalog {
+public class JnJsonValidationsByFieldName implements CcpJsonFieldValidatorCatalog {
 
 	public CcpJsonFieldValidatorInterface[] getValidations(Field field) {
 		try {

@@ -15,11 +15,10 @@ import com.ccp.especifications.db.utils.decorators.configurations.CcpEntityTrans
 import com.ccp.especifications.db.utils.decorators.engine.CcpEntityConfigurator;
 import com.ccp.especifications.db.utils.decorators.engine.CcpEntityFactory;
 import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidator;
-import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeString;
-import com.ccp.json.validations.fields.enums.CcpJsonFieldType;
 import com.jn.business.commons.JnBusinessNotifyError;
 import com.jn.business.login.JnBusinessSendUserToken;
 import com.jn.entities.decorators.JnEntityVersionable;
+import com.jn.json.fields.validation.JnJsonValidationsByFieldName;
 import com.jn.json.transformers.JnJsonTransformersDefaultEntityFields;
 import com.jn.utils.JnLanguage;
 
@@ -37,17 +36,13 @@ public class JnEntityEmailTemplateMessage  implements CcpEntityConfigurator{
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityEmailTemplateMessage.class).entityInstance;
 
 	public static enum Fields implements CcpEntityField{ 
-		@CcpJsonFieldValidator(required = true, type = CcpJsonFieldType.String)
-		@CcpJsonFieldTypeString(minLength = 1, maxLength = 30)
+		@CcpJsonFieldValidator(required = true, validationsCatalog = {JnJsonValidationsByFieldName.class})
 		templateId(true),
-		@CcpJsonFieldValidator(required = true, type = CcpJsonFieldType.String)
-		@CcpJsonFieldTypeString(minLength = 1, maxLength = 30)
+		@CcpJsonFieldValidator(required = true, validationsCatalog = {JnJsonValidationsByFieldName.class})
 		language(true), 
-		@CcpJsonFieldValidator(required = true, type = CcpJsonFieldType.String)
-		@CcpJsonFieldTypeString(minLength = 1, maxLength = 30)
+		@CcpJsonFieldValidator(required = true, validationsCatalog = {JnJsonValidationsByFieldName.class})
 		subject(false), 
-		@CcpJsonFieldValidator(required = true, type = CcpJsonFieldType.String)
-		@CcpJsonFieldTypeString(minLength = 10)
+		@CcpJsonFieldValidator(required = true, validationsCatalog = {JnJsonValidationsByFieldName.class})
 		message(false)
 		;
 		

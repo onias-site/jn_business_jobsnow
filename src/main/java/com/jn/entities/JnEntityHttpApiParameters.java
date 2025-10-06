@@ -14,7 +14,11 @@ import com.ccp.especifications.db.utils.decorators.configurations.CcpEntitySpeci
 import com.ccp.especifications.db.utils.decorators.configurations.CcpEntityTransferOperationEspecification;
 import com.ccp.especifications.db.utils.decorators.engine.CcpEntityConfigurator;
 import com.ccp.especifications.db.utils.decorators.engine.CcpEntityFactory;
+import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidator;
+import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeNumber;
+import com.ccp.json.validations.fields.enums.CcpJsonFieldType;
 import com.jn.entities.decorators.JnEntityVersionable;
+import com.jn.json.fields.validation.JnJsonValidationsByFieldName;
 import com.jn.json.transformers.JnJsonTransformersDefaultEntityFields;
 
 @CcpEntityDecorators(decorators = JnEntityVersionable.class)
@@ -26,17 +30,24 @@ import com.jn.json.transformers.JnJsonTransformersDefaultEntityFields;
 	    save = @CcpEntityOperationSpecification(afterOperation = {}),
 		cacheableEntity = true
 )
-//TODO FIELDS VALIDATIONS
 public class JnEntityHttpApiParameters implements CcpEntityConfigurator{
 
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityHttpApiParameters.class).entityInstance;
 	
 	public static enum Fields implements CcpEntityField{
+		@CcpJsonFieldValidator(required = true, validationsCatalog = {JnJsonValidationsByFieldName.class})
 		apiName(true), 
+		@CcpJsonFieldValidator(required = true, validationsCatalog = {JnJsonValidationsByFieldName.class})
 		url(false), 
+		@CcpJsonFieldValidator(validationsCatalog = {JnJsonValidationsByFieldName.class})
 		token(false), 
+		@CcpJsonFieldValidator(required = true, type = CcpJsonFieldType.Number)
+		@CcpJsonFieldTypeNumber(minValue = 0, maxValue = 5)
 		maxTries(false), 
+		@CcpJsonFieldValidator(required = true, type = CcpJsonFieldType.Number)
+		@CcpJsonFieldTypeNumber(minValue = 0)
 		sleep(false), 
+		@CcpJsonFieldValidator(required = true, validationsCatalog = {JnJsonValidationsByFieldName.class})
 		method(false)
 		;
 		

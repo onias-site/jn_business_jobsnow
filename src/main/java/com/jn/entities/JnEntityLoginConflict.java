@@ -11,6 +11,10 @@ import com.ccp.especifications.db.utils.decorators.configurations.CcpEntitySpeci
 import com.ccp.especifications.db.utils.decorators.configurations.CcpEntityTransferOperationEspecification;
 import com.ccp.especifications.db.utils.decorators.engine.CcpEntityConfigurator;
 import com.ccp.especifications.db.utils.decorators.engine.CcpEntityFactory;
+import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidator;
+import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeNestedJson;
+import com.ccp.json.validations.fields.enums.CcpJsonFieldType;
+import com.jn.json.fields.validation.JnJsonValidationsByFieldName;
 import com.jn.json.transformers.JnJsonTransformersDefaultEntityFields;
 
 @CcpEntitySpecifications(
@@ -21,13 +25,19 @@ import com.jn.json.transformers.JnJsonTransformersDefaultEntityFields;
 	    save = @CcpEntityOperationSpecification(afterOperation = {}),
 		cacheableEntity = true
 )
-//TODO FIELDS VALIDATIONS
 public class JnEntityLoginConflict implements CcpEntityConfigurator {
 
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityLoginConflict.class).entityInstance;
 	
 	public static enum Fields implements CcpEntityField{
-		email(true), oldLogin(false), newLogin(false)
+		@CcpJsonFieldValidator(required = true, validationsCatalog = {JnJsonValidationsByFieldName.class})
+		email(true), 
+		@CcpJsonFieldValidator(required = true, type = CcpJsonFieldType.NestedJson)
+		@CcpJsonFieldTypeNestedJson(validationClass = JnEntityLoginSessionValidation.Fields.class)
+		oldLogin(false), 
+		@CcpJsonFieldValidator(required = true, type = CcpJsonFieldType.NestedJson)
+		@CcpJsonFieldTypeNestedJson(validationClass = JnEntityLoginSessionValidation.Fields.class)
+		newLogin(false)
 		;
 		
 		private final boolean primaryKey;

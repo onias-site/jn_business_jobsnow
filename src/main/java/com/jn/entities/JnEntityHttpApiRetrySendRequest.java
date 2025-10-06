@@ -13,7 +13,9 @@ import com.ccp.especifications.db.utils.decorators.configurations.CcpEntityTrans
 import com.ccp.especifications.db.utils.decorators.engine.CcpEntityConfigurator;
 import com.ccp.especifications.db.utils.decorators.engine.CcpEntityExpurgableOptions;
 import com.ccp.especifications.db.utils.decorators.engine.CcpEntityFactory;
+import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidator;
 import com.jn.entities.decorators.JnEntityExpurgable;
+import com.jn.json.fields.validation.JnJsonValidationsByFieldName;
 import com.jn.json.transformers.JnJsonTransformersDefaultEntityFields;
 
 @CcpEntityExpurgable(expurgTime = CcpEntityExpurgableOptions.hourly, expurgableEntityFactory = JnEntityExpurgable.class)
@@ -25,7 +27,6 @@ import com.jn.json.transformers.JnJsonTransformersDefaultEntityFields;
 	    save = @CcpEntityOperationSpecification(afterOperation = {}),
 		cacheableEntity = true
 )
-//TODO FIELDS VALIDATIONS
 
 public class JnEntityHttpApiRetrySendRequest implements CcpEntityConfigurator {
 
@@ -48,8 +49,28 @@ public class JnEntityHttpApiRetrySendRequest implements CcpEntityConfigurator {
 	}
 
 	public static enum Fields implements CcpEntityField{
-		url(true), method(true), headers(true), request(false), apiName(true), tries(true), response(false), status(false)
-		,timestamp(false), details(false)
+		@CcpJsonFieldValidator(required = true, validationsCatalog = {JnJsonValidationsByFieldName.class})
+		url(true), 
+		@CcpJsonFieldValidator(required = true, validationsCatalog = {JnJsonValidationsByFieldName.class})
+		method(true), 
+		@CcpJsonFieldValidator(required = true, validationsCatalog = {JnJsonValidationsByFieldName.class})
+		headers(true), 
+		@CcpJsonFieldValidator(validationsCatalog = {JnJsonValidationsByFieldName.class})
+		request(false), 
+		@CcpJsonFieldValidator(required = true, validationsCatalog = {JnJsonValidationsByFieldName.class})
+		apiName(true), 
+		@CcpJsonFieldValidator(required = true, validationsCatalog = {JnJsonValidationsByFieldName.class})
+		attempts(true), 
+		@CcpJsonFieldValidator(validationsCatalog = {JnJsonValidationsByFieldName.class})
+		response(false), 
+		@CcpJsonFieldValidator(validationsCatalog = {JnJsonValidationsByFieldName.class})
+		httpStatus(false),
+		@CcpJsonFieldValidator(required = true, validationsCatalog = {JnJsonValidationsByFieldName.class})
+		timestamp(false),
+		@CcpJsonFieldValidator(required = true, validationsCatalog = {JnJsonValidationsByFieldName.class})
+		date(false),
+		@CcpJsonFieldValidator(required = true, validationsCatalog = {JnJsonValidationsByFieldName.class})
+		details(false)
 		;
 		
 		private final boolean primaryKey;

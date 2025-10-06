@@ -13,7 +13,9 @@ import com.ccp.especifications.db.utils.decorators.configurations.CcpEntityTrans
 import com.ccp.especifications.db.utils.decorators.engine.CcpEntityConfigurator;
 import com.ccp.especifications.db.utils.decorators.engine.CcpEntityExpurgableOptions;
 import com.ccp.especifications.db.utils.decorators.engine.CcpEntityFactory;
+import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidator;
 import com.jn.entities.decorators.JnEntityExpurgable;
+import com.jn.json.fields.validation.JnJsonValidationsByFieldName;
 import com.jn.json.transformers.JnJsonTransformersDefaultEntityFields;
 
 @CcpEntityExpurgable(expurgTime = CcpEntityExpurgableOptions.hourly, expurgableEntityFactory = JnEntityExpurgable.class)
@@ -25,11 +27,11 @@ import com.jn.json.transformers.JnJsonTransformersDefaultEntityFields;
 	    save = @CcpEntityOperationSpecification(afterOperation = {}),
 		cacheableEntity = true
 )
-//TODO FIELDS VALIDATIONS
 public class JnEntityLoginSessionConflict implements CcpEntityConfigurator {
 
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityLoginSessionConflict.class).entityInstance;
 	public static enum Fields implements CcpEntityField{
+		@CcpJsonFieldValidator(required = true, validationsCatalog = {JnJsonValidationsByFieldName.class})
 		email(true);
 		
 		private final boolean primaryKey;

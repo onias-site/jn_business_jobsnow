@@ -13,7 +13,11 @@ import com.ccp.especifications.db.utils.decorators.configurations.CcpEntityTrans
 import com.ccp.especifications.db.utils.decorators.engine.CcpEntityConfigurator;
 import com.ccp.especifications.db.utils.decorators.engine.CcpEntityExpurgableOptions;
 import com.ccp.especifications.db.utils.decorators.engine.CcpEntityFactory;
+import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidator;
+import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeNumber;
+import com.ccp.json.validations.fields.enums.CcpJsonFieldType;
 import com.jn.entities.decorators.JnEntityExpurgable;
+import com.jn.json.fields.validation.JnJsonValidationsByFieldName;
 import com.jn.json.transformers.JnJsonTransformersDefaultEntityFields;
 
 @CcpEntityExpurgable(expurgTime = CcpEntityExpurgableOptions.hourly, expurgableEntityFactory = JnEntityExpurgable.class)
@@ -25,14 +29,21 @@ import com.jn.json.transformers.JnJsonTransformersDefaultEntityFields;
 	    save = @CcpEntityOperationSpecification(afterOperation = {}),
 		cacheableEntity = true
 )
-//TODO FIELDS VALIDATIONS
 public class JnEntityInstantMessengerMessageSent implements CcpEntityConfigurator {
 	
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityInstantMessengerMessageSent.class).entityInstance;
 
 	
 	public static enum Fields implements CcpEntityField{
-		token(true, JnJsonTransformersDefaultEntityFields.tokenHash), recipient(true), subjectType(true), message(false), interval(true)
+		@CcpJsonFieldValidator(required = true, validationsCatalog = {JnJsonValidationsByFieldName.class})
+		token(true, JnJsonTransformersDefaultEntityFields.tokenHash), 
+		@CcpJsonFieldValidator(required = true, validationsCatalog = {JnJsonValidationsByFieldName.class})
+		recipient(true), 
+		@CcpJsonFieldValidator(required = true, validationsCatalog = {JnJsonValidationsByFieldName.class})
+		subjectType(true), 
+		@CcpJsonFieldValidator(required = true, type = CcpJsonFieldType.Number)
+		@CcpJsonFieldTypeNumber(minValue = 0, maxValue = 10000)
+		interval(true)
 		;
 		
 		private final boolean primaryKey;

@@ -13,7 +13,9 @@ import com.ccp.especifications.db.utils.decorators.configurations.CcpEntityTrans
 import com.ccp.especifications.db.utils.decorators.engine.CcpEntityConfigurator;
 import com.ccp.especifications.db.utils.decorators.engine.CcpEntityExpurgableOptions;
 import com.ccp.especifications.db.utils.decorators.engine.CcpEntityFactory;
+import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidator;
 import com.jn.entities.decorators.JnEntityExpurgable;
+import com.jn.json.fields.validation.JnJsonValidationsByFieldName;
 import com.jn.json.transformers.JnJsonTransformersDefaultEntityFields;
 
 @CcpEntityExpurgable(expurgTime = CcpEntityExpurgableOptions.hourly, expurgableEntityFactory = JnEntityExpurgable.class)
@@ -25,13 +27,19 @@ import com.jn.json.transformers.JnJsonTransformersDefaultEntityFields;
 	    classWithFieldsValidationsRules = JnEntityJobsnowError.Fields.class,
 		cacheableEntity = true
 )
-//TODO FIELDS VALIDATIONS
 public class JnEntityJobsnowError implements CcpEntityConfigurator {
 
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityJobsnowError.class).entityInstance;
 	
 	public static enum Fields implements CcpEntityField{
-		cause(true), stackTrace(true), type(true), message(false)
+		@CcpJsonFieldValidator(required = true, validationsCatalog = {JnJsonValidationsByFieldName.class})
+		cause(true), 
+		@CcpJsonFieldValidator(required = true, validationsCatalog = {JnJsonValidationsByFieldName.class})
+		stackTrace(true), 
+		@CcpJsonFieldValidator(required = true, validationsCatalog = {JnJsonValidationsByFieldName.class})
+		type(true), 
+		@CcpJsonFieldValidator(required = true, validationsCatalog = {JnJsonValidationsByFieldName.class})
+		message(false)
 		;
 		
 		private final boolean primaryKey;

@@ -12,6 +12,8 @@ import com.ccp.especifications.db.utils.decorators.configurations.CcpEntityTrans
 import com.ccp.especifications.db.utils.decorators.configurations.CcpEntityTwin;
 import com.ccp.especifications.db.utils.decorators.engine.CcpEntityConfigurator;
 import com.ccp.especifications.db.utils.decorators.engine.CcpEntityFactory;
+import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidator;
+import com.jn.json.fields.validation.JnJsonValidationsByFieldName;
 import com.jn.json.transformers.JnJsonTransformersDefaultEntityFields;
 
 @CcpEntityTwin(twinEntityName = "login_token_locked")
@@ -23,13 +25,23 @@ import com.jn.json.transformers.JnJsonTransformersDefaultEntityFields;
 	    save = @CcpEntityOperationSpecification(afterOperation = {}) ,
 		cacheableEntity = true
 )
-//TODO FIELDS VALIDATIONS
 public class JnEntityLoginToken implements CcpEntityConfigurator {
 	
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityLoginToken.class).entityInstance;
 
 	public static enum Fields implements CcpEntityField{
-		email(true),  token(false),ip(true), coordinates(false), macAddress(false), userAgent(true)
+		@CcpJsonFieldValidator(required = true, validationsCatalog = {JnJsonValidationsByFieldName.class})
+		email(true),  
+		@CcpJsonFieldValidator(required = true, validationsCatalog = {JnJsonValidationsByFieldName.class})
+		token(false),
+		@CcpJsonFieldValidator(required = true, validationsCatalog = {JnJsonValidationsByFieldName.class})
+		ip(true), 
+		@CcpJsonFieldValidator(validationsCatalog = {JnJsonValidationsByFieldName.class})
+		coordinates(false), 
+		@CcpJsonFieldValidator(validationsCatalog = {JnJsonValidationsByFieldName.class})
+		macAddress(false), 
+		@CcpJsonFieldValidator(required = true, validationsCatalog = {JnJsonValidationsByFieldName.class})
+		userAgent(true)
 		;
 		
 		private final boolean primaryKey;

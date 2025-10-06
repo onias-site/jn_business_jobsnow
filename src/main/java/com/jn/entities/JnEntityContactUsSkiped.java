@@ -3,7 +3,6 @@ package com.jn.entities;
 import java.util.function.Function;
 
 import com.ccp.constantes.CcpOtherConstants;
-import com.ccp.decorators.CcpEmailDecorator;
 import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.especifications.db.utils.CcpEntity;
 import com.ccp.especifications.db.utils.CcpEntityField;
@@ -15,9 +14,8 @@ import com.ccp.especifications.db.utils.decorators.engine.CcpEntityConfigurator;
 import com.ccp.especifications.db.utils.decorators.engine.CcpEntityExpurgableOptions;
 import com.ccp.especifications.db.utils.decorators.engine.CcpEntityFactory;
 import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidator;
-import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeString;
-import com.ccp.json.validations.fields.enums.CcpJsonFieldType;
 import com.jn.entities.decorators.JnEntityExpurgable;
+import com.jn.json.fields.validation.JnJsonValidationsByFieldName;
 import com.jn.json.transformers.JnJsonTransformersDefaultEntityFields;
 
 @CcpEntityExpurgable( expurgTime = CcpEntityExpurgableOptions.daily, expurgableEntityFactory = JnEntityExpurgable.class)
@@ -35,8 +33,7 @@ public class JnEntityContactUsSkiped implements CcpEntityConfigurator {
 	
 	
 	public static enum Fields implements CcpEntityField{
-		@CcpJsonFieldValidator(required = true, type = CcpJsonFieldType.String)
-		@CcpJsonFieldTypeString(regexValidation = CcpEmailDecorator.EMAIL_REGEX, minLength = 7, maxLength = 100)
+		@CcpJsonFieldValidator(required = true, validationsCatalog = {JnJsonValidationsByFieldName.class})
 		email(true)
 		;
 		

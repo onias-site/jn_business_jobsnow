@@ -3,7 +3,6 @@ package com.jn.entities;
 import java.util.function.Function;
 
 import com.ccp.constantes.CcpOtherConstants;
-import com.ccp.decorators.CcpEmailDecorator;
 import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.especifications.db.utils.CcpEntity;
 import com.ccp.especifications.db.utils.CcpEntityField;
@@ -13,8 +12,7 @@ import com.ccp.especifications.db.utils.decorators.configurations.CcpEntityTrans
 import com.ccp.especifications.db.utils.decorators.engine.CcpEntityConfigurator;
 import com.ccp.especifications.db.utils.decorators.engine.CcpEntityFactory;
 import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidator;
-import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeString;
-import com.ccp.json.validations.fields.enums.CcpJsonFieldType;
+import com.jn.json.fields.validation.JnJsonValidationsByFieldName;
 import com.jn.json.transformers.JnJsonTransformersDefaultEntityFields;
 
 @CcpEntitySpecifications(
@@ -26,21 +24,16 @@ import com.jn.json.transformers.JnJsonTransformersDefaultEntityFields;
 		cacheableEntity = true
 )
 public class JnEntityEmailReportedAsSpam implements CcpEntityConfigurator {
-	//FIXME CONSERTAR TABELA
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityEmailReportedAsSpam.class).entityInstance;
 	
 	public static enum Fields implements CcpEntityField{
-		@CcpJsonFieldValidator(required = true, type = CcpJsonFieldType.String)
-		@CcpJsonFieldTypeString(minLength = 1)
+		@CcpJsonFieldValidator(required = true, validationsCatalog = {JnJsonValidationsByFieldName.class})
 		subjectType(true), 
-		@CcpJsonFieldValidator(required = true, type = CcpJsonFieldType.String)
-		@CcpJsonFieldTypeString(regexValidation = CcpEmailDecorator.EMAIL_REGEX, minLength = 7, maxLength = 100)
+		@CcpJsonFieldValidator(required = true, validationsCatalog = {JnJsonValidationsByFieldName.class})
 		email(true), 
-		@CcpJsonFieldValidator(required = true, type = CcpJsonFieldType.String)
-		@CcpJsonFieldTypeString(minLength = 1, maxLength = 30)
+		@CcpJsonFieldValidator(required = true, validationsCatalog = {JnJsonValidationsByFieldName.class})
 		subject(false), 
-		@CcpJsonFieldValidator(required = true, type = CcpJsonFieldType.String)
-		@CcpJsonFieldTypeString(minLength = 1, maxLength = 30)
+		@CcpJsonFieldValidator(required = true, validationsCatalog = {JnJsonValidationsByFieldName.class})
 		sender(false)
 		;
 		

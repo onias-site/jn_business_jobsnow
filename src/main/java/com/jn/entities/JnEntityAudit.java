@@ -14,8 +14,7 @@ import com.ccp.especifications.db.utils.decorators.engine.CcpEntityConfigurator;
 import com.ccp.especifications.db.utils.decorators.engine.CcpEntityFactory;
 import com.ccp.especifications.db.utils.decorators.engine.CcpEntityReadOnly;
 import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidator;
-import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeString;
-import com.ccp.json.validations.fields.enums.CcpJsonFieldType;
+import com.jn.json.fields.validation.JnJsonValidationsByFieldName;
 import com.jn.json.transformers.JnJsonTransformersDefaultEntityFields;
 
 @CcpEntityDecorators(decorators = CcpEntityReadOnly.class)
@@ -33,20 +32,18 @@ public class JnEntityAudit implements CcpEntityConfigurator {
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityAudit.class).entityInstance;
 
 	public static enum Fields implements CcpEntityField{
+		@CcpJsonFieldValidator(required = true, validationsCatalog = {JnJsonValidationsByFieldName.class})
 		timestamp(true), 
-		@CcpJsonFieldValidator(type = CcpJsonFieldType.String)
-		@CcpJsonFieldTypeString(minLength = 1)
+		@CcpJsonFieldValidator(required = true, validationsCatalog = {JnJsonValidationsByFieldName.class})
 		operation(false),
+		@CcpJsonFieldValidator(required = true, validationsCatalog = {JnJsonValidationsByFieldName.class})
 		date(false),
-		@CcpJsonFieldValidator(required = true,type = CcpJsonFieldType.String)
-		@CcpJsonFieldTypeString(minLength = 1)
+		@CcpJsonFieldValidator(required = true, validationsCatalog = {JnJsonValidationsByFieldName.class})
 		entity(true), 
-		@CcpJsonFieldValidator(required = true, type = CcpJsonFieldType.String)
-		@CcpJsonFieldTypeString(minLength = 1)
+		@CcpJsonFieldValidator(required = true, validationsCatalog = {JnJsonValidationsByFieldName.class})
 		id(true),
-		@CcpJsonFieldValidator(type = CcpJsonFieldType.String)
-		@CcpJsonFieldTypeString(minLength = 1)
-		json(false)//FIXME NESTEDJSON
+		@CcpJsonFieldValidator(required = true, validationsCatalog = {JnJsonValidationsByFieldName.class})
+		json(false)
 		;
 		
 		private final boolean primaryKey;

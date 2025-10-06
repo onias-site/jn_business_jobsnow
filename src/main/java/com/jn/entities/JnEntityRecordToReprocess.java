@@ -11,6 +11,10 @@ import com.ccp.especifications.db.utils.decorators.configurations.CcpEntitySpeci
 import com.ccp.especifications.db.utils.decorators.configurations.CcpEntityTransferOperationEspecification;
 import com.ccp.especifications.db.utils.decorators.engine.CcpEntityConfigurator;
 import com.ccp.especifications.db.utils.decorators.engine.CcpEntityFactory;
+import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidator;
+import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeString;
+import com.ccp.json.validations.fields.enums.CcpJsonFieldType;
+import com.jn.json.fields.validation.JnJsonValidationsByFieldName;
 import com.jn.json.transformers.JnJsonTransformersDefaultEntityFields;
 
 @CcpEntitySpecifications(
@@ -21,16 +25,29 @@ import com.jn.json.transformers.JnJsonTransformersDefaultEntityFields;
 	    save = @CcpEntityOperationSpecification(afterOperation = {}),
 		cacheableEntity = false
 )
-//TODO FIELDS VALIDATIONS
 public class JnEntityRecordToReprocess implements CcpEntityConfigurator {
 	
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityRecordToReprocess.class).entityInstance;
 
 	public static enum Fields implements CcpEntityField{
-		timestamp(true), operation(false),
-		entity(true), id(true),
-		json(false), status(false),
-		reason(false), errorType(false)
+		@CcpJsonFieldValidator(required = true, validationsCatalog = {JnJsonValidationsByFieldName.class})
+		timestamp(true), 
+		@CcpJsonFieldValidator(required = true, validationsCatalog = {JnJsonValidationsByFieldName.class})
+		operation(false),
+		@CcpJsonFieldValidator(required = true, validationsCatalog = {JnJsonValidationsByFieldName.class})
+		entity(true), 
+		@CcpJsonFieldValidator(required = true, validationsCatalog = {JnJsonValidationsByFieldName.class})
+		id(true),
+		@CcpJsonFieldValidator(validationsCatalog = {JnJsonValidationsByFieldName.class})
+		json(false), 
+		@CcpJsonFieldValidator(required = true, validationsCatalog = {JnJsonValidationsByFieldName.class})
+		status(false),
+		@CcpJsonFieldValidator(required = true, type = CcpJsonFieldType.String)
+		@CcpJsonFieldTypeString(minLength = 1)
+		reason(false), 
+		@CcpJsonFieldValidator(required = true, type = CcpJsonFieldType.String)
+		@CcpJsonFieldTypeString(minLength = 1)
+		errorType(false)
 		;
 		
 		private final boolean primaryKey;

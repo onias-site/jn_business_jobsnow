@@ -14,8 +14,10 @@ import com.ccp.especifications.db.utils.decorators.configurations.CcpEntitySpeci
 import com.ccp.especifications.db.utils.decorators.configurations.CcpEntityTransferOperationEspecification;
 import com.ccp.especifications.db.utils.decorators.engine.CcpEntityConfigurator;
 import com.ccp.especifications.db.utils.decorators.engine.CcpEntityFactory;
+import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidator;
 import com.jn.business.commons.JnBusinessNotifyError;
 import com.jn.entities.decorators.JnEntityVersionable;
+import com.jn.json.fields.validation.JnJsonValidationsByFieldName;
 import com.jn.json.transformers.JnJsonTransformersDefaultEntityFields;
 
 @CcpEntityDecorators(decorators = JnEntityVersionable.class)
@@ -27,13 +29,19 @@ import com.jn.json.transformers.JnJsonTransformersDefaultEntityFields;
 	    save = @CcpEntityOperationSpecification(afterOperation = {}),
 		cacheableEntity = true
 )
-//TODO FIELDS VALIDATIONS
 public class JnEntityInstantMessengerParametersToSend implements CcpEntityConfigurator {
 	
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityInstantMessengerParametersToSend.class).entityInstance;
 
 	public static enum Fields implements CcpEntityField{
-		recipient(false), templateId(true), subjectType(false), moreParameters(false)
+		@CcpJsonFieldValidator(required = true, validationsCatalog = {JnJsonValidationsByFieldName.class})
+		recipient(false), 
+		@CcpJsonFieldValidator(required = true, validationsCatalog = {JnJsonValidationsByFieldName.class})
+		templateId(true), 
+		@CcpJsonFieldValidator(required = true, validationsCatalog = {JnJsonValidationsByFieldName.class})
+		subjectType(false), 
+		@CcpJsonFieldValidator(validationsCatalog = {JnJsonValidationsByFieldName.class})
+		moreParameters(false)
 		;
 		
 		private final boolean primaryKey;

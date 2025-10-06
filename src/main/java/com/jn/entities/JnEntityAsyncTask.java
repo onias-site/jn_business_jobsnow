@@ -12,10 +12,10 @@ import com.ccp.especifications.db.utils.decorators.configurations.CcpEntityTrans
 import com.ccp.especifications.db.utils.decorators.engine.CcpEntityConfigurator;
 import com.ccp.especifications.db.utils.decorators.engine.CcpEntityFactory;
 import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidator;
-import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeNestedJson;
 import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeNumber;
 import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeString;
 import com.ccp.json.validations.fields.enums.CcpJsonFieldType;
+import com.jn.json.fields.validation.JnJsonValidationsByFieldName;
 import com.jn.json.transformers.JnJsonTransformersDefaultEntityFields;
 
 @CcpEntitySpecifications(
@@ -31,7 +31,7 @@ public class JnEntityAsyncTask implements CcpEntityConfigurator {
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityAsyncTask.class).entityInstance;
 
 	public static enum Fields implements CcpEntityField{
-		@CcpJsonFieldValidator(type = CcpJsonFieldType.Number)
+		@CcpJsonFieldValidator(required = true, type = CcpJsonFieldType.Number)
 		@CcpJsonFieldTypeNumber(minValue = 0)
 		started(false), 
 		@CcpJsonFieldValidator(type = CcpJsonFieldType.Number)
@@ -40,16 +40,15 @@ public class JnEntityAsyncTask implements CcpEntityConfigurator {
 		@CcpJsonFieldValidator(type = CcpJsonFieldType.Number)
 		@CcpJsonFieldTypeNumber(minValue = 0)
 		enlapsedTime(false), 
-		@CcpJsonFieldValidator(type = CcpJsonFieldType.String)
+		@CcpJsonFieldValidator(required = true, type = CcpJsonFieldType.String)
 		@CcpJsonFieldTypeString(minLength = 1)
 		data(false),
-		@CcpJsonFieldValidator(type = CcpJsonFieldType.String)
+		@CcpJsonFieldValidator(required = true, type = CcpJsonFieldType.String)
 		@CcpJsonFieldTypeString(minLength = 1)
 		topic(false), 
-		@CcpJsonFieldValidator(type = CcpJsonFieldType.NestedJson)
-		@CcpJsonFieldTypeNestedJson
-		request(false), //TODO 
-		@CcpJsonFieldValidator(type = CcpJsonFieldType.String)
+		@CcpJsonFieldValidator(required = true, validationsCatalog = {JnJsonValidationsByFieldName.class})
+		request(false), 
+		@CcpJsonFieldValidator(required = true, type = CcpJsonFieldType.String)
 		@CcpJsonFieldTypeString(minLength = 1)
 		messageId(true), 
 		@CcpJsonFieldValidator(type = CcpJsonFieldType.Boolean)
@@ -57,11 +56,9 @@ public class JnEntityAsyncTask implements CcpEntityConfigurator {
 		@CcpJsonFieldValidator(type = CcpJsonFieldType.String)
 		@CcpJsonFieldTypeString(minLength = 1)
 		operationType(false),
-		@CcpJsonFieldValidator(type = CcpJsonFieldType.String)
-		@CcpJsonFieldTypeString(minLength = 1)
+		@CcpJsonFieldValidator(validationsCatalog = {JnJsonValidationsByFieldName.class})
 		operation(false),
-		@CcpJsonFieldValidator(type = CcpJsonFieldType.NestedJson)
-		@CcpJsonFieldTypeNestedJson
+		@CcpJsonFieldValidator(validationsCatalog = {JnJsonValidationsByFieldName.class})
 		response(false)
 		;
 		private final boolean primaryKey;
