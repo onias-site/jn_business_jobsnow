@@ -16,6 +16,7 @@ import com.jn.entities.JnEntityLoginPasswordAttempts;
 import com.jn.entities.JnEntityLoginSessionValidation;
 import com.jn.utils.JnDeleteKeysFromCache;
 public class JnBusinessUpdatePassword implements CcpTopic {
+	//TODO JSON VALIDATIONS	
 	enum JsonFieldNames implements CcpJsonFieldName{
 		sessionToken
 	}

@@ -6,6 +6,7 @@ import com.jn.entities.JnEntityContactUs;
 import com.jn.messages.JnSendMessage;
 
 public class JnBusinessNotifyContactUs implements CcpTopic{
+	//TODO JSON VALIDATIONS	
 
 	public static final JnBusinessNotifyContactUs INSTANCE = new JnBusinessNotifyContactUs();
 	

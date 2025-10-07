@@ -32,17 +32,20 @@ public class JnFunctionMensageriaSender implements Function<CcpJsonRepresentatio
 	
 	private final String operationType;
 	private final String operation;
+	private final Class<?> jsonValidationClass;
 	private final String topic;
 	
 	public JnFunctionMensageriaSender(CcpTopic topic) {
 		this.topic = topic.getClass().getName();
 		this.operation = CcpEntityCrudOperationType.none.name();
+		this.jsonValidationClass = topic.getJsonValidationClass();
 		this.operationType = CcpMensageriaOperationType.none.name();
 	}
 
 	public JnFunctionMensageriaSender(CcpEntity entity, CcpEntityCrudOperationType operation) {
 		this.operationType = CcpMensageriaOperationType.entityCrud.name();
 		Class<?> configurationClass = entity.getConfigurationClass();
+		this.jsonValidationClass = operation.getJsonValidationClass(entity);
 		this.topic = configurationClass.getName();
 		this.operation = operation.name();
 	}
@@ -50,6 +53,7 @@ public class JnFunctionMensageriaSender implements Function<CcpJsonRepresentatio
 	public JnFunctionMensageriaSender(CcpEntity entity, CcpBulkHandlers operation) {
 		this.operationType = CcpMensageriaOperationType.entityBulkHandler.name();
 		Class<?> configurationClass = entity.getConfigurationClass();
+		this.jsonValidationClass = operation.getJsonValidationClass(entity);
 		this.topic = configurationClass.getName();
 		this.operation = operation.name();
 	}
@@ -68,7 +72,7 @@ public class JnFunctionMensageriaSender implements Function<CcpJsonRepresentatio
 		
 		JnEntityAsyncTask.ENTITY.createOrUpdate(messageDetails);
 		CcpJsonRepresentation put2 = messageDetails.put(JsonFieldNames.mensageriaReceiver, JnMensageriaReceiver.class.getName());
-		this.mensageriaSender.send(this.topic, put2);
+		this.mensageriaSender.sendToMensageria(this.topic, this.jsonValidationClass, put2);
 
 		return messageDetails;
 	}
@@ -101,31 +105,33 @@ public class JnFunctionMensageriaSender implements Function<CcpJsonRepresentatio
 	}
 	
 	private boolean canSave(CcpJsonRepresentation x) {
-		CcpTopic process = JnMensageriaReceiver.INSTANCE.getProcess(this.topic, x);
-		boolean canSave = process.canSave();
-		return canSave;
+		Function<CcpJsonRepresentation, CcpJsonRepresentation> process = JnMensageriaReceiver.INSTANCE.getProcess(this.topic, x);
+		if(process instanceof CcpTopic topic) {
+			boolean canSave = topic.canSave();
+			return canSave;
+		}
+		return true;
 	}
 	
-	public JnFunctionMensageriaSender send(CcpEntity entity, CcpJsonRepresentation... messages) {
+	private JnFunctionMensageriaSender sendToMensageria(CcpEntity entity, CcpJsonRepresentation... messages) {
 		List<CcpJsonRepresentation> msgs = Arrays.asList(messages).stream().map(json -> this.getMessageDetails(json)).collect(Collectors.toList());
 		List<CcpBulkItem> bulkItems = msgs.stream().filter(x -> this.canSave(x)).map(msg -> this.toBulkItem(entity, msg)).collect(Collectors.toList());
 		JnExecuteBulkOperation.INSTANCE.executeBulk(bulkItems);
-		this.mensageriaSender.send(this.topic, msgs);
+		this.mensageriaSender.sendToMensageria(this.topic, this.jsonValidationClass, msgs);
 		return this;
 	}
 	
-	public JnFunctionMensageriaSender send(List<CcpJsonRepresentation> messages) {
+	public JnFunctionMensageriaSender sendToMensageria(List<CcpJsonRepresentation> messages) {
 		
 		int size = messages.size();
 		CcpJsonRepresentation[] a = new CcpJsonRepresentation[size];
 		CcpJsonRepresentation[] array = messages.toArray(a);
-		JnFunctionMensageriaSender send = this.send(JnEntityAsyncTask.ENTITY, array);
+		JnFunctionMensageriaSender send = this.sendToMensageria(JnEntityAsyncTask.ENTITY, array);
 		return send;
 	}
 
-	public CcpJsonRepresentation send(CcpJsonRepresentation... messages) {
-		this.send(JnEntityAsyncTask.ENTITY, messages);
+	public CcpJsonRepresentation sendToMensageria(CcpJsonRepresentation... messages) {
+		this.sendToMensageria(JnEntityAsyncTask.ENTITY, messages);
 		return CcpOtherConstants.EMPTY_JSON;
 	}
-
 }

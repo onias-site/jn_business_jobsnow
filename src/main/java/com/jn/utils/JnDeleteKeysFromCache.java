@@ -11,6 +11,7 @@ import com.ccp.decorators.CcpJsonRepresentation.CcpJsonFieldName;
 import com.ccp.especifications.cache.CcpCacheDecorator;
 import com.ccp.especifications.mensageria.receiver.CcpTopic;
 public class JnDeleteKeysFromCache implements  CcpTopic, Consumer<String[]> {
+	//TODO JSON VALIDATIONS	
 	enum JsonFieldNames implements CcpJsonFieldName{
 		keysToDeleteInCache
 	}

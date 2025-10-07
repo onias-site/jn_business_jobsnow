@@ -11,11 +11,12 @@ import com.ccp.especifications.db.utils.decorators.configurations.CcpEntitySpeci
 import com.ccp.especifications.db.utils.decorators.configurations.CcpEntityTransferOperationEspecification;
 import com.ccp.especifications.db.utils.decorators.engine.CcpEntityConfigurator;
 import com.ccp.especifications.db.utils.decorators.engine.CcpEntityFactory;
-import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidator;
-import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeNumber;
+import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidatorRequired;
+import com.ccp.json.validations.fields.annotations.CcpJsonCommonsFields;
+import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeBoolean;
+import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeNumberNatural;
 import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeString;
-import com.ccp.json.validations.fields.enums.CcpJsonFieldType;
-import com.jn.json.fields.validation.JnJsonValidationsByFieldName;
+import com.jn.json.fields.validation.JnJsonCommonsFields;
 import com.jn.json.transformers.JnJsonTransformersDefaultEntityFields;
 
 @CcpEntitySpecifications(
@@ -31,34 +32,34 @@ public class JnEntityAsyncTask implements CcpEntityConfigurator {
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityAsyncTask.class).entityInstance;
 
 	public static enum Fields implements CcpEntityField{
-		@CcpJsonFieldValidator(required = true, type = CcpJsonFieldType.Number)
-		@CcpJsonFieldTypeNumber(minValue = 0)
+		@CcpJsonFieldValidatorRequired
+		@CcpJsonFieldTypeNumberNatural
 		started(false), 
-		@CcpJsonFieldValidator(type = CcpJsonFieldType.Number)
-		@CcpJsonFieldTypeNumber(minValue = 0)
+		@CcpJsonFieldValidatorRequired
+		@CcpJsonFieldTypeNumberNatural
 		finished(false), 
-		@CcpJsonFieldValidator(type = CcpJsonFieldType.Number)
-		@CcpJsonFieldTypeNumber(minValue = 0)
+		@CcpJsonFieldTypeNumberNatural
 		enlapsedTime(false), 
-		@CcpJsonFieldValidator(required = true, type = CcpJsonFieldType.String)
-		@CcpJsonFieldTypeString(minLength = 1)
+		@CcpJsonFieldValidatorRequired
+		@CcpJsonFieldTypeString
 		data(false),
-		@CcpJsonFieldValidator(required = true, type = CcpJsonFieldType.String)
-		@CcpJsonFieldTypeString(minLength = 1)
+		@CcpJsonFieldValidatorRequired
+		@CcpJsonFieldTypeString
 		topic(false), 
-		@CcpJsonFieldValidator(required = true, validationsCatalog = {JnJsonValidationsByFieldName.class})
+		@CcpJsonFieldValidatorRequired
 		request(false), 
-		@CcpJsonFieldValidator(required = true, type = CcpJsonFieldType.String)
-		@CcpJsonFieldTypeString(minLength = 1)
+		@CcpJsonFieldValidatorRequired
+		@CcpJsonFieldTypeString
 		messageId(true), 
-		@CcpJsonFieldValidator(type = CcpJsonFieldType.Boolean)
+		@CcpJsonFieldValidatorRequired
+		@CcpJsonFieldTypeBoolean
 		success(false),
-		@CcpJsonFieldValidator(type = CcpJsonFieldType.String)
-		@CcpJsonFieldTypeString(minLength = 1)
+		@CcpJsonFieldValidatorRequired
+		@CcpJsonFieldTypeString
 		operationType(false),
-		@CcpJsonFieldValidator(validationsCatalog = {JnJsonValidationsByFieldName.class})
+		@CcpJsonCommonsFields(JnJsonCommonsFields.class)
 		operation(false),
-		@CcpJsonFieldValidator(validationsCatalog = {JnJsonValidationsByFieldName.class})
+		@CcpJsonCommonsFields(JnJsonCommonsFields.class)
 		response(false)
 		;
 		private final boolean primaryKey;

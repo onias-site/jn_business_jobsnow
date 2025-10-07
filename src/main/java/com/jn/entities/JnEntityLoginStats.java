@@ -12,11 +12,11 @@ import com.ccp.especifications.db.utils.decorators.configurations.CcpEntityTrans
 import com.ccp.especifications.db.utils.decorators.engine.CcpEntityConfigurator;
 import com.ccp.especifications.db.utils.decorators.engine.CcpEntityExpurgableOptions;
 import com.ccp.especifications.db.utils.decorators.engine.CcpEntityFactory;
-import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidator;
+import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidatorRequired;
 import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeNumber;
+import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeNumberNatural;
 import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeString;
-import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeTime;
-import com.ccp.json.validations.fields.enums.CcpJsonFieldType;
+import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeTimeBefore;
 import com.jn.json.transformers.JnJsonTransformersDefaultEntityFields;
 
 @CcpEntitySpecifications(
@@ -32,26 +32,25 @@ public class JnEntityLoginStats implements CcpEntityConfigurator {
 	public static final CcpEntity INSTANCE = new CcpEntityFactory(JnEntityLoginStats.class).entityInstance;
 	
 	public static enum Fields implements CcpEntityField{
-		@CcpJsonFieldValidator(type = CcpJsonFieldType.String)
 		@CcpJsonFieldTypeString(minLength = 35, maxLength = 50)
 		email(true), 
-		@CcpJsonFieldValidator(required = true, type = CcpJsonFieldType.Number)
+		@CcpJsonFieldValidatorRequired
 		@CcpJsonFieldTypeNumber(minValue = -1_000_000, maxValue = 1_000_000)
 		balance(false), 
-		@CcpJsonFieldValidator(required = true, type = CcpJsonFieldType.TimeBeforeCurrentDate)
-		@CcpJsonFieldTypeTime(intervalType = CcpEntityExpurgableOptions.yearly, maxValue = 100, minValue = 0)
+		@CcpJsonFieldValidatorRequired
+		@CcpJsonFieldTypeTimeBefore(intervalType = CcpEntityExpurgableOptions.yearly, maxValue = 100, minValue = 0)
 		lastAccess(false), 
-		@CcpJsonFieldValidator(required = true, type = CcpJsonFieldType.Number)
-		@CcpJsonFieldTypeNumber(minValue = 0, maxValue = 1000)
+		@CcpJsonFieldValidatorRequired
+		@CcpJsonFieldTypeNumberNatural(maxValue = 1000)
 		countAccess(false),
-		@CcpJsonFieldValidator(required = true, type = CcpJsonFieldType.Number)
-		@CcpJsonFieldTypeNumber(minValue = 0, maxValue = 1000)
+		@CcpJsonFieldValidatorRequired
+		@CcpJsonFieldTypeNumberNatural(maxValue = 1000)
 		openedTickets(false), 
-		@CcpJsonFieldValidator(required = true, type = CcpJsonFieldType.Number)
-		@CcpJsonFieldTypeNumber(minValue = 0, maxValue = 1000)
+		@CcpJsonFieldValidatorRequired
+		@CcpJsonFieldTypeNumberNatural(maxValue = 1000)
 		closedTickets(false), 
-		@CcpJsonFieldValidator(required = true, type = CcpJsonFieldType.Number)
-		@CcpJsonFieldTypeNumber(minValue = 0, maxValue = 1000)
+		@CcpJsonFieldValidatorRequired
+		@CcpJsonFieldTypeNumberNatural(maxValue = 1000)
 		balanceTransacionsCount(false)
 		;
 		

@@ -7,6 +7,7 @@ import com.jn.messages.JnSendMessage;
 import com.jn.messages.JnSendMessageIgnoringProcessErrors;
 
 public class JnBusinessNotifyError implements CcpTopic{
+	//TODO JSON VALIDATIONS	
 
 	public static final JnBusinessNotifyError INSTANCE = new JnBusinessNotifyError();
 	

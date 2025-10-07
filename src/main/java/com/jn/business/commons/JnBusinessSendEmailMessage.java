@@ -13,6 +13,7 @@ import com.jn.utils.JnDeleteKeysFromCache;
 
 
 public class JnBusinessSendEmailMessage implements CcpTopic{
+	//TODO JSON VALIDATIONS	
 
 	public static final JnBusinessSendEmailMessage INSTANCE = new JnBusinessSendEmailMessage(); 
 	

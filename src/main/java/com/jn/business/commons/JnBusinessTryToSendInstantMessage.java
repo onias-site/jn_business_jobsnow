@@ -5,6 +5,7 @@ import com.ccp.especifications.mensageria.receiver.CcpTopic;
 import com.jn.entities.JnEntityInstantMessengerParametersToSend;
 
 public class JnBusinessTryToSendInstantMessage implements CcpTopic {
+	//TODO JSON VALIDATIONS	
 	
 	public static final JnBusinessTryToSendInstantMessage INSTANCE = new JnBusinessTryToSendInstantMessage();
 	

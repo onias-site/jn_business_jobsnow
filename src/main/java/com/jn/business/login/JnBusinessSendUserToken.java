@@ -10,6 +10,7 @@ import com.jn.entities.JnEntityInstantMessengerParametersToSend;
 import com.jn.entities.JnEntityLoginToken;
 import com.jn.messages.JnSendMessage;
 public class JnBusinessSendUserToken implements CcpTopic{
+	//TODO JSON VALIDATIONS	
 	enum JsonFieldNames implements CcpJsonFieldName{
 		request, originalEmail, originalToken
 	}

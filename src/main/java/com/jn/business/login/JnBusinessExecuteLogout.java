@@ -11,7 +11,7 @@ import com.jn.entities.JnEntityLoginSessionValidation;
 import com.jn.utils.JnDeleteKeysFromCache;
 
 public class JnBusinessExecuteLogout implements CcpTopic{
-
+	//TODO JSON VALIDATIONS	
 
 	public static final JnBusinessExecuteLogout INSTANCE = new JnBusinessExecuteLogout();
 	
