@@ -14,7 +14,7 @@ import com.ccp.especifications.db.utils.decorators.engine.CcpEntityConfigurator;
 import com.ccp.especifications.db.utils.decorators.engine.CcpEntityExpurgableOptions;
 import com.ccp.especifications.db.utils.decorators.engine.CcpEntityFactory;
 import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidatorRequired;
-import com.ccp.json.validations.fields.annotations.CcpJsonCommonsFields;
+import com.ccp.json.validations.fields.annotations.CcpJsonCopyFieldValidationsFrom;
 import com.jn.entities.decorators.JnEntityExpurgable;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
 import com.jn.json.transformers.JnJsonTransformersDefaultEntityFields;
@@ -51,34 +51,34 @@ public class JnEntityHttpApiRetrySendRequest implements CcpEntityConfigurator {
 
 	public static enum Fields implements CcpEntityField{
 		@CcpJsonFieldValidatorRequired
-		@CcpJsonCommonsFields(JnJsonCommonsFields.class)
+		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		url(true), 
 		@CcpJsonFieldValidatorRequired
-		@CcpJsonCommonsFields(JnJsonCommonsFields.class)
+		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		method(true), 
 		@CcpJsonFieldValidatorRequired
-		@CcpJsonCommonsFields(JnJsonCommonsFields.class)
+		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		headers(true), 
-		@CcpJsonCommonsFields(JnJsonCommonsFields.class)
+		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		request(false), 
 		@CcpJsonFieldValidatorRequired
-		@CcpJsonCommonsFields(JnJsonCommonsFields.class)
+		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		apiName(true), 
 		@CcpJsonFieldValidatorRequired
-		@CcpJsonCommonsFields(JnJsonCommonsFields.class)
+		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		attempts(true), 
-		@CcpJsonCommonsFields(JnJsonCommonsFields.class)
+		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		response(false), 
-		@CcpJsonCommonsFields(JnJsonCommonsFields.class)
+		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		httpStatus(false),
 		@CcpJsonFieldValidatorRequired
-		@CcpJsonCommonsFields(JnJsonCommonsFields.class)
+		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		timestamp(false),
 		@CcpJsonFieldValidatorRequired
-		@CcpJsonCommonsFields(JnJsonCommonsFields.class)
+		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		date(false),
 		@CcpJsonFieldValidatorRequired
-		@CcpJsonCommonsFields(JnJsonCommonsFields.class)
+		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		details(false)
 		;
 		

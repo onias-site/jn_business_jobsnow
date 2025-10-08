@@ -7,6 +7,7 @@ public enum JnProcessStatusExistsLoginEmail implements CcpProcessStatus{
 	lockedToken(403),
 	missingEmail(404),
 	lockedPassword(421),
+	invalidJson(421),
 	loginConflict(409),
 	missingPassword(202),
 	missingAnswers(201),

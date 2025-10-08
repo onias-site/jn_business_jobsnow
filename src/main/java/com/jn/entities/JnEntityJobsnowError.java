@@ -14,7 +14,7 @@ import com.ccp.especifications.db.utils.decorators.engine.CcpEntityConfigurator;
 import com.ccp.especifications.db.utils.decorators.engine.CcpEntityExpurgableOptions;
 import com.ccp.especifications.db.utils.decorators.engine.CcpEntityFactory;
 import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidatorRequired;
-import com.ccp.json.validations.fields.annotations.CcpJsonCommonsFields;
+import com.ccp.json.validations.fields.annotations.CcpJsonCopyFieldValidationsFrom;
 import com.jn.entities.decorators.JnEntityExpurgable;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
 import com.jn.json.transformers.JnJsonTransformersDefaultEntityFields;
@@ -34,16 +34,16 @@ public class JnEntityJobsnowError implements CcpEntityConfigurator {
 	
 	public static enum Fields implements CcpEntityField{
 		@CcpJsonFieldValidatorRequired
-		@CcpJsonCommonsFields(JnJsonCommonsFields.class)
+		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		cause(true), 
 		@CcpJsonFieldValidatorRequired
-		@CcpJsonCommonsFields(JnJsonCommonsFields.class)
+		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		stackTrace(true), 
 		@CcpJsonFieldValidatorRequired
-		@CcpJsonCommonsFields(JnJsonCommonsFields.class)
+		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		type(true), 
 		@CcpJsonFieldValidatorRequired
-		@CcpJsonCommonsFields(JnJsonCommonsFields.class)
+		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		message(false)
 		;
 		

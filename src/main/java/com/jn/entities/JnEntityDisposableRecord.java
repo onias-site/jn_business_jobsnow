@@ -14,7 +14,7 @@ import com.ccp.especifications.db.utils.decorators.engine.CcpEntityConfigurator;
 import com.ccp.especifications.db.utils.decorators.engine.CcpEntityFactory;
 import com.ccp.especifications.db.utils.decorators.engine.CcpEntityReadOnly;
 import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidatorRequired;
-import com.ccp.json.validations.fields.annotations.CcpJsonCommonsFields;
+import com.ccp.json.validations.fields.annotations.CcpJsonCopyFieldValidationsFrom;
 import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeString;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
 import com.jn.json.transformers.JnJsonTransformersDefaultEntityFields;
@@ -34,22 +34,22 @@ public class JnEntityDisposableRecord implements CcpEntityConfigurator {
 
 	public static enum Fields implements CcpEntityField{
 		@CcpJsonFieldValidatorRequired
-		@CcpJsonCommonsFields(JnJsonCommonsFields.class)
+		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		timestamp(false),
 		@CcpJsonFieldValidatorRequired
 		@CcpJsonFieldTypeString(minLength = 7, maxLength = 100)
 		format(false),
 		@CcpJsonFieldValidatorRequired
-		@CcpJsonCommonsFields(JnJsonCommonsFields.class)
+		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		entity(true), 
 		@CcpJsonFieldValidatorRequired
-		@CcpJsonCommonsFields(JnJsonCommonsFields.class)
+		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		date(false),
 		@CcpJsonFieldValidatorRequired
-		@CcpJsonCommonsFields(JnJsonCommonsFields.class)
+		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		json(false),
 		@CcpJsonFieldValidatorRequired
-		@CcpJsonCommonsFields(JnJsonCommonsFields.class)
+		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		id(true), 
 		;
 		

@@ -12,7 +12,7 @@ import com.ccp.especifications.db.utils.decorators.configurations.CcpEntityTrans
 import com.ccp.especifications.db.utils.decorators.engine.CcpEntityConfigurator;
 import com.ccp.especifications.db.utils.decorators.engine.CcpEntityFactory;
 import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidatorRequired;
-import com.ccp.json.validations.fields.annotations.CcpJsonCommonsFields;
+import com.ccp.json.validations.fields.annotations.CcpJsonCopyFieldValidationsFrom;
 import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeBoolean;
 import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeNumberNatural;
 import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeString;
@@ -55,9 +55,9 @@ public class JnEntityAsyncTask implements CcpEntityConfigurator {
 		@CcpJsonFieldValidatorRequired
 		@CcpJsonFieldTypeString
 		operationType(false),
-		@CcpJsonCommonsFields(JnJsonCommonsFields.class)
+		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		operation(false),
-		@CcpJsonCommonsFields(JnJsonCommonsFields.class)
+		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		response(false)
 		;
 		private final boolean primaryKey;

@@ -8,16 +8,12 @@ import com.ccp.especifications.db.bulk.handlers.CcpBulkHandlerSave;
 import com.ccp.especifications.db.bulk.handlers.CcpEntityBulkHandlerTransferRecordToReverseEntity;
 import com.ccp.especifications.db.utils.CcpEntity;
 import com.ccp.especifications.mensageria.receiver.CcpTopic;
-import com.ccp.json.validations.fields.annotations.CcpJsonCommonsFields;
-import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidatorRequired;
-import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeString;
 import com.jn.db.bulk.JnExecuteBulkOperation;
 import com.jn.db.bulk.handlers.JnBulkHandlerRegisterLogin;
 import com.jn.db.bulk.handlers.JnBulkHandlerSolveLoginConflict;
 import com.jn.entities.JnEntityLoginPassword;
 import com.jn.entities.JnEntityLoginPasswordAttempts;
 import com.jn.entities.JnEntityLoginSessionValidation;
-import com.jn.json.fields.validation.JnJsonCommonsFields;
 import com.jn.utils.JnDeleteKeysFromCache;
 public class JnBusinessUpdatePassword implements CcpTopic {
 	//TODO JSON VALIDATIONS	
@@ -55,19 +51,4 @@ public class JnBusinessUpdatePassword implements CcpTopic {
 		return CcpOtherConstants.EMPTY_JSON;
 	}
 	
-	@CcpJsonFieldValidatorRequired
-	@CcpJsonCommonsFields(JnJsonCommonsFields.class)
-	Object userAgent;
-	@CcpJsonFieldValidatorRequired
-	@CcpJsonCommonsFields(JnJsonCommonsFields.class)
-	Object ip;
-	@CcpJsonFieldValidatorRequired
-	@CcpJsonCommonsFields(JnJsonCommonsFields.class)
-	Object email;
-	@CcpJsonFieldValidatorRequired
-	@CcpJsonFieldTypeString(minLength = 8, maxLength = 20, regexValidation = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#&()–[{}]:;',?/*~$^+=<>]).{8,20}$")
-	Object password;
-	@CcpJsonFieldValidatorRequired
-	@CcpJsonCommonsFields(JnJsonCommonsFields.class)
-	Object token;
 }

@@ -12,7 +12,7 @@ import com.ccp.especifications.db.utils.decorators.configurations.CcpEntityTrans
 import com.ccp.especifications.db.utils.decorators.engine.CcpEntityConfigurator;
 import com.ccp.especifications.db.utils.decorators.engine.CcpEntityFactory;
 import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidatorRequired;
-import com.ccp.json.validations.fields.annotations.CcpJsonCommonsFields;
+import com.ccp.json.validations.fields.annotations.CcpJsonCopyFieldValidationsFrom;
 import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeString;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
 import com.jn.json.transformers.JnJsonTransformersDefaultEntityFields;
@@ -31,20 +31,20 @@ public class JnEntityRecordToReprocess implements CcpEntityConfigurator {
 
 	public static enum Fields implements CcpEntityField{
 		@CcpJsonFieldValidatorRequired
-		@CcpJsonCommonsFields(JnJsonCommonsFields.class)
+		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		timestamp(true), 
 		@CcpJsonFieldValidatorRequired
-		@CcpJsonCommonsFields(JnJsonCommonsFields.class)
+		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		operation(false),
 		@CcpJsonFieldValidatorRequired
-		@CcpJsonCommonsFields(JnJsonCommonsFields.class)
+		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		entity(true), 
 		@CcpJsonFieldValidatorRequired
-		@CcpJsonCommonsFields(JnJsonCommonsFields.class)
+		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		id(true),
-		@CcpJsonCommonsFields(JnJsonCommonsFields.class)
+		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		json(false), 
-		@CcpJsonCommonsFields(JnJsonCommonsFields.class)
+		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		status(false),
 		@CcpJsonFieldTypeString
 		reason(false), 

@@ -13,7 +13,7 @@ import com.ccp.especifications.db.utils.decorators.configurations.CcpEntityTwin;
 import com.ccp.especifications.db.utils.decorators.engine.CcpEntityConfigurator;
 import com.ccp.especifications.db.utils.decorators.engine.CcpEntityFactory;
 import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidatorRequired;
-import com.ccp.json.validations.fields.annotations.CcpJsonCommonsFields;
+import com.ccp.json.validations.fields.annotations.CcpJsonCopyFieldValidationsFrom;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
 import com.jn.json.transformers.JnJsonTransformersDefaultEntityFields;
 @CcpEntityTwin(twinEntityName = "contact_us_solved")
@@ -31,19 +31,19 @@ public class JnEntityContactUs implements CcpEntityConfigurator {
 	
 	public static enum Fields implements CcpEntityField{
 		@CcpJsonFieldValidatorRequired
-		@CcpJsonCommonsFields(JnJsonCommonsFields.class)
+		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		subjectType(true), 
 		@CcpJsonFieldValidatorRequired
-		@CcpJsonCommonsFields(JnJsonCommonsFields.class)
+		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		email(true), 
 		@CcpJsonFieldValidatorRequired
-		@CcpJsonCommonsFields(JnJsonCommonsFields.class)
+		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		subject(false), 
 		@CcpJsonFieldValidatorRequired
-		@CcpJsonCommonsFields(JnJsonCommonsFields.class)
+		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		chatId(false), 
 		@CcpJsonFieldValidatorRequired
-		@CcpJsonCommonsFields(JnJsonCommonsFields.class)
+		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		sender(false)
 		;
 		

@@ -15,8 +15,9 @@ import com.ccp.especifications.db.utils.decorators.configurations.CcpEntityTrans
 import com.ccp.especifications.db.utils.decorators.engine.CcpEntityConfigurator;
 import com.ccp.especifications.db.utils.decorators.engine.CcpEntityFactory;
 import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidatorRequired;
-import com.ccp.json.validations.fields.annotations.CcpJsonCommonsFields;
+import com.ccp.json.validations.fields.annotations.CcpJsonCopyFieldValidationsFrom;
 import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeNumberNatural;
+import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeString;
 import com.jn.entities.decorators.JnEntityVersionable;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
 import com.jn.json.transformers.JnJsonTransformersDefaultEntityFields;
@@ -36,12 +37,12 @@ public class JnEntityHttpApiParameters implements CcpEntityConfigurator{
 	
 	public static enum Fields implements CcpEntityField{
 		@CcpJsonFieldValidatorRequired
-		@CcpJsonCommonsFields(JnJsonCommonsFields.class)
+		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		apiName(true), 
 		@CcpJsonFieldValidatorRequired
-		@CcpJsonCommonsFields(JnJsonCommonsFields.class)
+		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		url(false), 
-		@CcpJsonCommonsFields(JnJsonCommonsFields.class)
+		@CcpJsonFieldTypeString
 		token(false), 
 		@CcpJsonFieldValidatorRequired
 		@CcpJsonFieldTypeNumberNatural(maxValue = 5)
@@ -50,7 +51,7 @@ public class JnEntityHttpApiParameters implements CcpEntityConfigurator{
 		@CcpJsonFieldTypeNumberNatural
 		sleep(false), 
 		@CcpJsonFieldValidatorRequired
-		@CcpJsonCommonsFields(JnJsonCommonsFields.class)
+		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		method(false)
 		;
 		

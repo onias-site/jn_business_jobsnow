@@ -54,7 +54,7 @@ public enum JnJsonCommonsFields{
 	@CcpJsonFieldTypeString(maxLength = 30)
 	templateId,
 	
-	@CcpJsonFieldTypeString(maxLength = 30)
+	@CcpJsonFieldTypeString(allowedValues = {"portuguese", "english", "spanish"})
 	language, 
 	
 	@CcpJsonFieldTypeString(maxLength = 500)
@@ -75,7 +75,7 @@ public enum JnJsonCommonsFields{
 	@CcpJsonFieldTypeString
 	status,
 	
-	@CcpJsonFieldTypeString
+	@CcpJsonFieldTypeString(minLength = 8, maxLength = 20)
 	token,
 	
 	@CcpJsonFieldTypeString
@@ -105,14 +105,9 @@ public enum JnJsonCommonsFields{
 	@CcpJsonFieldTypeString
 	userAgent,
 	
-	
 	@CcpJsonFieldTypeNumberNatural(minValue = 200, maxValue = 599)
 	httpStatus,
 	
-
-
-
-
-
-
+	@CcpJsonFieldTypeString(minLength = 8, maxLength = 20)
+	password,
 }

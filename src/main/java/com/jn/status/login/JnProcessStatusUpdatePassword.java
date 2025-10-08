@@ -8,6 +8,7 @@ public enum JnProcessStatusUpdatePassword implements CcpProcessStatus{
 	missingEmail(404),
 	missingToken(404),
 	wrongToken(421),
+	invalidJson(422),
 	tokenLockedRecently(429),
 	expectedStatus(200),
 	;

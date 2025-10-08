@@ -12,7 +12,7 @@ import com.ccp.especifications.db.utils.decorators.configurations.CcpEntityTrans
 import com.ccp.especifications.db.utils.decorators.engine.CcpEntityConfigurator;
 import com.ccp.especifications.db.utils.decorators.engine.CcpEntityFactory;
 import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidatorRequired;
-import com.ccp.json.validations.fields.annotations.CcpJsonCommonsFields;
+import com.ccp.json.validations.fields.annotations.CcpJsonCopyFieldValidationsFrom;
 import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeNestedJson;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
 import com.jn.json.transformers.JnJsonTransformersDefaultEntityFields;
@@ -31,7 +31,7 @@ public class JnEntityLoginConflict implements CcpEntityConfigurator {
 	
 	public static enum Fields implements CcpEntityField{
 		@CcpJsonFieldValidatorRequired
-		@CcpJsonCommonsFields(JnJsonCommonsFields.class)
+		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		email(true), 
 		@CcpJsonFieldValidatorRequired
 		@CcpJsonFieldTypeNestedJson(validationClass = JnEntityLoginSessionValidation.Fields.class)
