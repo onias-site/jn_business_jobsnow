@@ -90,9 +90,9 @@ public class JnFunctionMensageriaSender implements Function<CcpJsonRepresentatio
 				.put(JnEntityAsyncTask.Fields.operationType, this.operationType)
 				.put(JnEntityAsyncTask.Fields.data, formattedCurrentDateTime)
 				.put(JnEntityAsyncTask.Fields.messageId, UUID.randomUUID())
+				.put(JnEntityAsyncTask.Fields.request, json.asPrettyJson())
 				.put(JnEntityAsyncTask.Fields.operation, this.operation)
 				.put(JnEntityAsyncTask.Fields.topic, this.topic)
-				.put(JnEntityAsyncTask.Fields.request, json)
 				.putAll(json)
 				;
 		return messageDetails;

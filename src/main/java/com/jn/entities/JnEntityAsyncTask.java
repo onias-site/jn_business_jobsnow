@@ -35,7 +35,6 @@ public class JnEntityAsyncTask implements CcpEntityConfigurator {
 		@CcpJsonFieldValidatorRequired
 		@CcpJsonFieldTypeNumberNatural
 		started(false), 
-		@CcpJsonFieldValidatorRequired
 		@CcpJsonFieldTypeNumberNatural
 		finished(false), 
 		@CcpJsonFieldTypeNumberNatural
@@ -51,7 +50,6 @@ public class JnEntityAsyncTask implements CcpEntityConfigurator {
 		@CcpJsonFieldValidatorRequired
 		@CcpJsonFieldTypeString
 		messageId(true), 
-		@CcpJsonFieldValidatorRequired
 		@CcpJsonFieldTypeBoolean
 		success(false),
 		@CcpJsonFieldValidatorRequired

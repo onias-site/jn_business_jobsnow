@@ -2,7 +2,6 @@ package com.jn.json.fields.validation;
 
 import com.ccp.decorators.CcpEmailDecorator;
 import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeNestedJson;
-import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeNumber;
 import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeNumberNatural;
 import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeString;
 
@@ -20,7 +19,7 @@ public enum JnJsonCommonsFields{
 	@CcpJsonFieldTypeNumberNatural
 	timestamp, 
 	
-	@CcpJsonFieldTypeString(maxLength = 23)
+	@CcpJsonFieldTypeString(exactLength = 23)//dd/MM/yyyy HH:mm:ss.SSS
 	date,
 	
 	@CcpJsonFieldTypeString(maxLength = 30)
@@ -40,7 +39,7 @@ public enum JnJsonCommonsFields{
 	@CcpJsonFieldTypeString(maxLength = 30)
 	subject, 
 	
-	@CcpJsonFieldTypeString( minLength = 5, maxLength = 500)
+	@CcpJsonFieldTypeString(minLength = 5, maxLength = 500)
 	message, 
 	
 	@CcpJsonFieldTypeNumberNatural
@@ -76,7 +75,7 @@ public enum JnJsonCommonsFields{
 	@CcpJsonFieldTypeString
 	status,
 	
-	@CcpJsonFieldTypeString(minLength = 7)
+	@CcpJsonFieldTypeString
 	token,
 	
 	@CcpJsonFieldTypeString
@@ -94,10 +93,10 @@ public enum JnJsonCommonsFields{
 	@CcpJsonFieldTypeNumberNatural
 	attempts,
 	
-	@CcpJsonFieldTypeString(regexValidation = "")//TODO REGEX
+	@CcpJsonFieldTypeString(minLength = 7, maxLength = 15)
 	ip,
 	
-	@CcpJsonFieldTypeString(regexValidation = "")//TODO REGEX
+	@CcpJsonFieldTypeString(regexValidation = "^[-+]?([1-8]?\\d(\\.\\d+)?|90(\\.0+)?),\\s*[-+]?(180(\\.0+)?|((1[0-7]\\d)|([1-9]?\\d))(\\.\\d+)?)$")
 	coordinates,
 	
 	@CcpJsonFieldTypeString(regexValidation = "^([a-fA-F0-9][:-]){5}[a-fA-F0-9][:-]$")
@@ -107,9 +106,8 @@ public enum JnJsonCommonsFields{
 	userAgent,
 	
 	
-	@CcpJsonFieldTypeNumber(minValue = 200, maxValue = 599)
+	@CcpJsonFieldTypeNumberNatural(minValue = 200, maxValue = 599)
 	httpStatus,
-	
 	
 
 
