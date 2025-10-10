@@ -20,10 +20,8 @@ import com.jn.json.transformers.JnJsonTransformersDefaultEntityFields;
 @CcpEntityTwin(
 		twinEntityName = "jobsnow_solved_error"
 
-		,afterReactivateRecordWhenNotFound = {},
-		afterInactivateRecordWhenFound = {}, 
-		afterReactivateRecordWhenFound = {}, 
-		afterInactivateRecordWhenNotFound = {}
+		,afterReactivate = {},
+		afterInactivate = {}
 		)
 @CcpEntityDecorators(decorators = JnEntityVersionable.class)
 @CcpEntitySpecifications(

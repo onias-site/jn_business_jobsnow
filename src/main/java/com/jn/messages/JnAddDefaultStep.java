@@ -2,9 +2,9 @@ package com.jn.messages;
 
 public class JnAddDefaultStep {
 
-	final JnSendMessage getMessage;
+	final JnSendMessageToUser getMessage;
 
-	JnAddDefaultStep(JnSendMessage getMessage) {
+	JnAddDefaultStep(JnSendMessageToUser getMessage) {
 		this.getMessage = getMessage;
 	}
 
@@ -16,7 +16,7 @@ public class JnAddDefaultStep {
 		return new JnSoWithAllAddedStepsAnd(this.getMessage);
 	}
 
-	public JnSendMessage and() {
+	public JnSendMessageToUser and() {
 		return this.getMessage;
 	}
 }

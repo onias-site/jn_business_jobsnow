@@ -6,10 +6,10 @@ import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.especifications.db.utils.CcpEntity;
 import com.jn.entities.JnEntityJobsnowWarning;
 
-public class JnSendMessageAndJustErrors extends JnSendMessage{
+public class JnSendMessageAndJustErrors extends JnSendMessageToUser{
 
 	
-	public JnSendMessage addOneStep(Function<CcpJsonRepresentation, CcpJsonRepresentation> step, CcpEntity parameterEntity, CcpEntity messageEntity) {
+	public JnSendMessageToUser addOneStep(Function<CcpJsonRepresentation, CcpJsonRepresentation> step, CcpEntity parameterEntity, CcpEntity messageEntity) {
 		Function<CcpJsonRepresentation, CcpJsonRepresentation> process = values -> {
 			try {
 				CcpJsonRepresentation apply = step.apply(values);
@@ -21,7 +21,7 @@ public class JnSendMessageAndJustErrors extends JnSendMessage{
 				return values;
 			}
 		};
-		JnSendMessage addFlow = super.addOneStep(process, parameterEntity, messageEntity);
+		JnSendMessageToUser addFlow = super.addOneStep(process, parameterEntity, messageEntity);
 		return addFlow;
 	}	
 }

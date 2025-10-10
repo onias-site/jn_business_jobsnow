@@ -5,14 +5,14 @@ import com.ccp.dependency.injection.CcpDependencyInjection;
 import com.ccp.especifications.db.crud.CcpCrud;
 import com.ccp.especifications.db.crud.CcpSelectUnionAll;
 import com.ccp.especifications.email.CcpEmailSender;
-import com.ccp.especifications.mensageria.receiver.CcpTopic;
+import com.ccp.especifications.mensageria.receiver.CcpBusiness;
 import com.jn.entities.JnEntityEmailMessageSent;
 import com.jn.entities.JnEntityEmailParametersToSend;
 import com.jn.entities.JnEntityEmailReportedAsSpam;
 import com.jn.utils.JnDeleteKeysFromCache;
 
 
-public class JnBusinessSendEmailMessage implements CcpTopic{
+public class JnBusinessSendEmailMessage implements CcpBusiness{
 	//TODO JSON VALIDATIONS	
 
 	public static final JnBusinessSendEmailMessage INSTANCE = new JnBusinessSendEmailMessage(); 

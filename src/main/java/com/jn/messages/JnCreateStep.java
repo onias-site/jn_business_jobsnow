@@ -6,9 +6,9 @@ import com.ccp.decorators.CcpJsonRepresentation;
 
 public class JnCreateStep {
 
-	final JnSendMessage getMessage;
+	final JnSendMessageToUser getMessage;
 
-	JnCreateStep(JnSendMessage getMessage) {
+	JnCreateStep(JnSendMessageToUser getMessage) {
 		this.getMessage = getMessage;
 	}
 	

@@ -1,9 +1,9 @@
 package com.jn.mensageria;
 
 import com.ccp.decorators.CcpJsonRepresentation;
-import com.ccp.especifications.mensageria.receiver.CcpTopic;
+import com.ccp.especifications.mensageria.receiver.CcpBusiness;
 
-public interface JnTopic extends CcpTopic{
+public interface JnBusiness extends CcpBusiness{
 	
 	default CcpJsonRepresentation sendToMensageria(CcpJsonRepresentation json) {
 		JnFunctionMensageriaSender jms = new JnFunctionMensageriaSender(this);

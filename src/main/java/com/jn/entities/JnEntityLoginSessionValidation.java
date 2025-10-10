@@ -23,10 +23,8 @@ import com.jn.json.transformers.JnJsonTransformersDefaultEntityFields;
 @CcpEntityTwin(
 		twinEntityName = "login_session_terminated",
 
-		afterReactivateRecordWhenNotFound = {},
-		afterInactivateRecordWhenFound = {}, 
-		afterReactivateRecordWhenFound = {}, 
-		afterInactivateRecordWhenNotFound = {}
+		afterReactivate = {},
+		afterInactivate = {}
 		)
 @CcpEntitySpecifications(
 		jsonValidation = JnEntityLoginSessionValidation.Fields.class,

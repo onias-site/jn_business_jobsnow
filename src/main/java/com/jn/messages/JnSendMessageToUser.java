@@ -20,7 +20,7 @@ import com.jn.entities.JnEntityInstantMessengerParametersToSend;
 import com.jn.entities.JnEntityInstantMessengerTemplateMessage;
 import com.jn.utils.JnDeleteKeysFromCache;
 
-public class JnSendMessage {
+public class JnSendMessageToUser {
 	enum JsonFieldNames implements CcpJsonFieldName{
 		message, msg
 	}
@@ -36,19 +36,19 @@ public class JnSendMessage {
 	}
 	
 	public JnAddDefaultStep addDefaultProcessForEmailSending() {
-		JnSendMessage addOneStep = this.addOneStep(JnBusinessSendEmailMessage.INSTANCE, JnEntityEmailParametersToSend.ENTITY, JnEntityEmailTemplateMessage.ENTITY);
+		JnSendMessageToUser addOneStep = this.addOneStep(JnBusinessSendEmailMessage.INSTANCE, JnEntityEmailParametersToSend.ENTITY, JnEntityEmailTemplateMessage.ENTITY);
 		return new JnAddDefaultStep(addOneStep);
 	}
 
 	
 	public JnAddDefaultStep addDefaultStepForTelegramSending() {
-		JnSendMessage addOneStep = this.addOneStep(JnBusinessTryToSendInstantMessage.INSTANCE, JnEntityInstantMessengerParametersToSend.ENTITY, JnEntityInstantMessengerTemplateMessage.ENTITY);
+		JnSendMessageToUser addOneStep = this.addOneStep(JnBusinessTryToSendInstantMessage.INSTANCE, JnEntityInstantMessengerParametersToSend.ENTITY, JnEntityInstantMessengerTemplateMessage.ENTITY);
 		return new JnAddDefaultStep(addOneStep);
 	}
 	
-	JnSendMessage addOneStep(Function<CcpJsonRepresentation, CcpJsonRepresentation> process, CcpEntity parameterEntity, CcpEntity messageEntity) {
+	JnSendMessageToUser addOneStep(Function<CcpJsonRepresentation, CcpJsonRepresentation> process, CcpEntity parameterEntity, CcpEntity messageEntity) {
 		
-		JnSendMessage getMessage = new JnSendMessage();
+		JnSendMessageToUser getMessage = new JnSendMessageToUser();
 		
 		getMessage.parameterEntities.addAll(this.parameterEntities);
 		getMessage.messageEntities.addAll(this.messageEntities);

@@ -19,10 +19,8 @@ import com.jn.json.transformers.JnJsonTransformersDefaultEntityFields;
 @CcpEntityTwin(
 		twinEntityName = "login_token_locked"
 
-		,afterReactivateRecordWhenNotFound = {},
-		afterInactivateRecordWhenFound = {}, 
-		afterReactivateRecordWhenFound = {}, 
-		afterInactivateRecordWhenNotFound = {}
+		,afterReactivate = {},
+		afterInactivate = {}
 		)
 @CcpEntitySpecifications(
 		jsonValidation = JnEntityLoginToken.Fields.class,

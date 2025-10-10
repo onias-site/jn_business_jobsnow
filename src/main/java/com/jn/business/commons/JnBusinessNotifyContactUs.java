@@ -1,26 +1,22 @@
 package com.jn.business.commons;
 
 import com.ccp.decorators.CcpJsonRepresentation;
-import com.ccp.especifications.mensageria.receiver.CcpTopic;
+import com.ccp.especifications.mensageria.receiver.CcpBusiness;
 import com.jn.entities.JnEntityContactUs;
-import com.jn.messages.JnSendMessage;
+import com.jn.messages.JnSendMessageToUser;
 
-public class JnBusinessNotifyContactUs implements CcpTopic{
+public class JnBusinessNotifyContactUs implements CcpBusiness{
 	//TODO JSON VALIDATIONS	
 
 	public static final JnBusinessNotifyContactUs INSTANCE = new JnBusinessNotifyContactUs();
 	
-	private JnBusinessNotifyContactUs() {
-		
-	}
+	private JnBusinessNotifyContactUs() {}
 	
 	public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
 
-		JnSendMessage x = new JnSendMessage();
+		JnSendMessageToUser x = new JnSendMessageToUser();
 		JnBusinessNotifySupport.INSTANCE.apply(json, JnBusinessNotifyContactUs.class.getName(), JnEntityContactUs.ENTITY, x);
 		
 		return json;
 	}
-	
-
 }

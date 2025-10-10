@@ -7,7 +7,7 @@ import com.ccp.especifications.db.utils.CcpEntity;
 import com.jn.entities.JnEntityJobsnowError;
 import com.jn.entities.JnEntityJobsnowPenddingError;
 import com.jn.exceptions.JnErrorSupportLanguageIsMissing;
-import com.jn.messages.JnSendMessage;
+import com.jn.messages.JnSendMessageToUser;
 
 
 public class JnBusinessNotifySupport {
@@ -22,7 +22,7 @@ public class JnBusinessNotifySupport {
 		
 	}
 	
-	public CcpJsonRepresentation apply(CcpJsonRepresentation json, String topic, CcpEntity entityToSaveError, JnSendMessage sender) {
+	public CcpJsonRepresentation apply(CcpJsonRepresentation json, String topic, CcpEntity entityToSaveError, JnSendMessageToUser sender) {
 		String supportLanguage = new CcpStringDecorator("application_properties").propertiesFrom().environmentVariablesOrClassLoaderOrFile()
 				.getAsString(JsonFieldNames.supportLanguage);
 		

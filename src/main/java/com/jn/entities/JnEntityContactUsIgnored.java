@@ -27,11 +27,8 @@ import com.jn.json.transformers.JnJsonTransformersDefaultEntityFields;
 		)
 @CcpEntityTwin(
 		twinEntityName = "contact_us_reread"
-
-		,afterReactivateRecordWhenNotFound = {},
-		afterInactivateRecordWhenFound = {}, 
-		afterReactivateRecordWhenFound = {}, 
-		afterInactivateRecordWhenNotFound = {}
+		,afterReactivate = {},
+		afterInactivate = {}
 		)
 public class JnEntityContactUsIgnored implements CcpEntityConfigurator {
 	

@@ -2,9 +2,9 @@ package com.jn.messages;
 
 public class JnSoWithAllAddedStepsAnd {
 
-	final JnSendMessage getMessage;
+	final JnSendMessageToUser getMessage;
 
-	JnSoWithAllAddedStepsAnd(JnSendMessage getMessage) {
+	JnSoWithAllAddedStepsAnd(JnSendMessageToUser getMessage) {
 		this.getMessage = getMessage;
 	}
 	

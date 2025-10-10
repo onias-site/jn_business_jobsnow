@@ -1,10 +1,10 @@
 package com.jn.business.commons;
 
 import com.ccp.decorators.CcpJsonRepresentation;
-import com.ccp.especifications.mensageria.receiver.CcpTopic;
+import com.ccp.especifications.mensageria.receiver.CcpBusiness;
 import com.jn.entities.JnEntityInstantMessengerParametersToSend;
 
-public class JnBusinessTryToSendInstantMessage implements CcpTopic {
+public class JnBusinessTryToSendInstantMessage implements CcpBusiness {
 	//TODO JSON VALIDATIONS	
 	
 	public static final JnBusinessTryToSendInstantMessage INSTANCE = new JnBusinessTryToSendInstantMessage();

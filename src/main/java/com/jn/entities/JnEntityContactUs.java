@@ -16,11 +16,8 @@ import com.jn.json.fields.validation.JnJsonCommonsFields;
 import com.jn.json.transformers.JnJsonTransformersDefaultEntityFields;
 @CcpEntityTwin(
 		twinEntityName = "contact_us_solved" 
-
-		,afterReactivateRecordWhenNotFound = {},
-		afterInactivateRecordWhenFound = {}, 
-		afterReactivateRecordWhenFound = {}, 
-		afterInactivateRecordWhenNotFound = {}
+		,afterReactivate = {},
+		afterInactivate = {}
 		)
 @CcpEntitySpecifications(
 		jsonValidation = JnEntityContactUs.Fields.class,

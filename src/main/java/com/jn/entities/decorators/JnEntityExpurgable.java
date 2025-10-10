@@ -91,7 +91,7 @@ public final class JnEntityExpurgable extends CcpEntityDelegator implements CcpE
 	
 
 	private CcpJsonRepresentation populateAnExpurgableFromJson(CcpJsonRepresentation json) {
-		CcpJsonRepresentation handledJson = this.entity.getTransformedJsonBeforeAnyCrudOperations(json);
+		CcpJsonRepresentation handledJson = this.entity.getTransformedJsonByEachFieldInJson(json);
 		CcpJsonRepresentation onlyExistingFields = this.entity.getOnlyExistingFields(handledJson);
 		CcpJsonRepresentation expurgableId = this.getExpurgableId(json);
 		String id = this.getPrimaryKeyValues(json).asUgglyJson();

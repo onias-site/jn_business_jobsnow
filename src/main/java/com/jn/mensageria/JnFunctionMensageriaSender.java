@@ -19,7 +19,7 @@ import com.ccp.especifications.db.utils.CcpEntityCrudOperationType;
 import com.ccp.especifications.db.utils.decorators.engine.CcpEntityExpurgableOptions;
 import com.ccp.especifications.mensageria.receiver.CcpBulkHandlers;
 import com.ccp.especifications.mensageria.receiver.CcpMensageriaOperationType;
-import com.ccp.especifications.mensageria.receiver.CcpTopic;
+import com.ccp.especifications.mensageria.receiver.CcpBusiness;
 import com.ccp.especifications.mensageria.sender.CcpMensageriaSender;
 import com.jn.db.bulk.JnExecuteBulkOperation;
 import com.jn.entities.JnEntityAsyncTask;
@@ -35,7 +35,7 @@ public class JnFunctionMensageriaSender implements Function<CcpJsonRepresentatio
 	private final Class<?> jsonValidationClass;
 	private final String topic;
 	
-	public JnFunctionMensageriaSender(CcpTopic topic) {
+	public JnFunctionMensageriaSender(CcpBusiness topic) {
 		this.topic = topic.getClass().getName();
 		this.operation = CcpEntityCrudOperationType.none.name();
 		this.jsonValidationClass = topic.getJsonValidationClass();
@@ -106,8 +106,8 @@ public class JnFunctionMensageriaSender implements Function<CcpJsonRepresentatio
 	
 	private boolean canSave(CcpJsonRepresentation x) {
 		Function<CcpJsonRepresentation, CcpJsonRepresentation> process = JnMensageriaReceiver.INSTANCE.getProcess(this.topic, x);
-		if(process instanceof CcpTopic topic) {
-			boolean canSave = topic.canSave();
+		if(process instanceof CcpBusiness topic) {
+			boolean canSave = topic.canBeSavedAsAsyncTask();
 			return canSave;
 		}
 		return true;

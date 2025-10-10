@@ -3,13 +3,13 @@ package com.jn.business.login;
 
 import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.decorators.CcpJsonRepresentation.CcpJsonFieldName;
-import com.ccp.especifications.mensageria.receiver.CcpTopic;
+import com.ccp.especifications.mensageria.receiver.CcpBusiness;
 import com.jn.entities.JnEntityEmailTemplateMessage;
 import com.jn.entities.JnEntityInstantMessengerMessageSent;
 import com.jn.entities.JnEntityInstantMessengerParametersToSend;
 import com.jn.entities.JnEntityLoginToken;
-import com.jn.messages.JnSendMessage;
-public class JnBusinessSendUserToken implements CcpTopic{
+import com.jn.messages.JnSendMessageToUser;
+public class JnBusinessSendUserToken implements CcpBusiness{
 	//TODO JSON VALIDATIONS	
 	enum JsonFieldNames implements CcpJsonFieldName{
 		request, originalEmail, originalToken
@@ -21,10 +21,10 @@ public class JnBusinessSendUserToken implements CcpTopic{
 	
 	public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
 		String language = json.getAsString(JnEntityEmailTemplateMessage.Fields.language);
-		CcpJsonRepresentation jsonPiece = JnEntityLoginToken.ENTITY.getTransformedJsonBeforeAnyCrudOperations(json);
+		CcpJsonRepresentation jsonPiece = JnEntityLoginToken.ENTITY.getTransformedJsonByEachFieldInJson(json);
 	
 		String topic = this.getClass().getName();
-		JnSendMessage getMessage = new JnSendMessage();
+		JnSendMessageToUser getMessage = new JnSendMessageToUser();
 		
 		CcpJsonRepresentation request = json.getInnerJson(JsonFieldNames.request);
 		CcpJsonRepresentation duplicateValueFromField = request.putAll(jsonPiece)

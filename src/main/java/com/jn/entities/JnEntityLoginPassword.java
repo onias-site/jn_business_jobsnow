@@ -18,10 +18,8 @@ import com.jn.json.transformers.JnJsonTransformersDefaultEntityFields;
 @CcpEntityTwin(
 		twinEntityName = "login_password_locked"
 
-		,afterReactivateRecordWhenNotFound = {},
-		afterInactivateRecordWhenFound = {}, 
-		afterReactivateRecordWhenFound = {},
-		afterInactivateRecordWhenNotFound = {}
+		,afterReactivate = {},
+		afterInactivate = {}
 		)
 
 @CcpEntitySpecifications(
