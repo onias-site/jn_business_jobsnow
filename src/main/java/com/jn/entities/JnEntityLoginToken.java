@@ -6,26 +6,29 @@ import com.ccp.constantes.CcpOtherConstants;
 import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.especifications.db.utils.CcpEntity;
 import com.ccp.especifications.db.utils.CcpEntityField;
-import com.ccp.especifications.db.utils.decorators.configurations.CcpEntityOperationSpecification;
 import com.ccp.especifications.db.utils.decorators.configurations.CcpEntitySpecifications;
-import com.ccp.especifications.db.utils.decorators.configurations.CcpEntityTransferOperationEspecification;
 import com.ccp.especifications.db.utils.decorators.configurations.CcpEntityTwin;
 import com.ccp.especifications.db.utils.decorators.engine.CcpEntityConfigurator;
 import com.ccp.especifications.db.utils.decorators.engine.CcpEntityFactory;
+import com.ccp.json.validations.fields.annotations.CcpJsonCopyFieldValidationsFrom;
 import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidatorRequired;
 import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeString;
-import com.ccp.json.validations.fields.annotations.CcpJsonCopyFieldValidationsFrom;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
 import com.jn.json.transformers.JnJsonTransformersDefaultEntityFields;
 
-@CcpEntityTwin(twinEntityName = "login_token_locked")
+@CcpEntityTwin(
+		twinEntityName = "login_token_locked"
+
+		,afterReactivateRecordWhenNotFound = {},
+		afterInactivateRecordWhenFound = {}, 
+		afterReactivateRecordWhenFound = {}, 
+		afterInactivateRecordWhenNotFound = {}
+		)
 @CcpEntitySpecifications(
-		classWithFieldsValidationsRules = JnEntityLoginToken.Fields.class,
-		inactivate = @CcpEntityTransferOperationEspecification(whenRecordToTransferIsFound = @CcpEntityOperationSpecification(afterOperation = {}), whenRecordToTransferIsNotFound = @CcpEntityOperationSpecification(afterOperation = {})),
-		reactivate = @CcpEntityTransferOperationEspecification(whenRecordToTransferIsFound = @CcpEntityOperationSpecification(afterOperation = {}), whenRecordToTransferIsNotFound = @CcpEntityOperationSpecification(afterOperation = {})),
-		delete = @CcpEntityOperationSpecification(afterOperation = {}),
-	    save = @CcpEntityOperationSpecification(afterOperation = {}) ,
-		cacheableEntity = true
+		jsonValidation = JnEntityLoginToken.Fields.class,
+		cacheableEntity = true, 
+		afterSaveRecord = {},
+		afterDeleteRecord = {} 
 )
 public class JnEntityLoginToken implements CcpEntityConfigurator {
 	

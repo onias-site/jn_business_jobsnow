@@ -2,7 +2,7 @@ package com.jn.json.fields.validation;
 
 import com.ccp.decorators.CcpEmailDecorator;
 import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeNestedJson;
-import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeNumberNatural;
+import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeNumberUnsigned;
 import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeString;
 
 public enum JnJsonCommonsFields{
@@ -16,7 +16,7 @@ public enum JnJsonCommonsFields{
 	@CcpJsonFieldTypeString(maxLength = 500)
 	response,
 	
-	@CcpJsonFieldTypeNumberNatural
+	@CcpJsonFieldTypeNumberUnsigned
 	timestamp, 
 	
 	@CcpJsonFieldTypeString(exactLength = 23)//dd/MM/yyyy HH:mm:ss.SSS
@@ -42,7 +42,7 @@ public enum JnJsonCommonsFields{
 	@CcpJsonFieldTypeString(minLength = 5, maxLength = 500)
 	message, 
 	
-	@CcpJsonFieldTypeNumberNatural
+	@CcpJsonFieldTypeNumberUnsigned
 	chatId, 
 	
 	@CcpJsonFieldTypeString(maxLength = 30)
@@ -90,7 +90,7 @@ public enum JnJsonCommonsFields{
 	@CcpJsonFieldTypeString
 	type,
 	
-	@CcpJsonFieldTypeNumberNatural
+	@CcpJsonFieldTypeNumberUnsigned
 	attempts,
 	
 	@CcpJsonFieldTypeString(minLength = 7, maxLength = 15)
@@ -105,7 +105,7 @@ public enum JnJsonCommonsFields{
 	@CcpJsonFieldTypeString
 	userAgent,
 	
-	@CcpJsonFieldTypeNumberNatural(minValue = 200, maxValue = 599)
+	@CcpJsonFieldTypeNumberUnsigned(minValue = 200, maxValue = 599)
 	httpStatus,
 	
 	@CcpJsonFieldTypeString(minLength = 8, maxLength = 20)

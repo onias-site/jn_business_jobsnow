@@ -10,7 +10,6 @@ import com.ccp.especifications.db.utils.CcpEntityCrudOperationType;
 import com.ccp.especifications.mensageria.receiver.CcpBulkHandlers;
 import com.ccp.json.validations.fields.annotations.CcpJsonCopyFieldValidationsFrom;
 import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidatorRequired;
-import com.ccp.service.CcpService;
 import com.jn.business.login.JnBusinessEvaluateAttempts;
 import com.jn.business.login.JnBusinessExecuteLogin;
 import com.jn.business.login.JnBusinessExecuteLogout;
@@ -37,7 +36,7 @@ import com.jn.status.login.JnProcessStatusSaveAnswers;
 import com.jn.status.login.JnProcessStatusUpdatePassword;
 import com.jn.utils.JnDeleteKeysFromCache;
 
-public enum JnServiceLogin implements CcpService {
+public enum JnServiceLogin implements JnService {
 	ExecuteLogin {
 		public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
 			JnFunctionMensageriaSender lockPassword = new JnFunctionMensageriaSender(JnEntityLoginPassword.ENTITY, CcpBulkHandlers.transferToReverseEntity);
@@ -208,15 +207,6 @@ public enum JnServiceLogin implements CcpService {
 		}
 	},;
 
-	public Class<?> getJsonValidationClass() {
-		Class<?> forName;
-		try {
-			forName = Class.forName(this.getClass().getPackageName() + "." + this.name());
-		} catch (ClassNotFoundException e) {
-			throw new RuntimeException(e);
-		}
-		return forName;
-	}
 	enum JsonFieldNames implements CcpJsonFieldName{
 		originalToken, sessionToken
 	}

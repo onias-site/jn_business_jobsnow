@@ -15,13 +15,14 @@ import com.ccp.decorators.CcpTimeDecorator;
 import com.ccp.dependency.injection.CcpDependencyInjection;
 import com.ccp.especifications.db.utils.CcpEntityField;
 import com.ccp.especifications.db.utils.decorators.engine.CcpEntityExpurgableOptions;
+import com.ccp.especifications.mensageria.receiver.CcpTopic;
 import com.ccp.especifications.password.CcpPasswordHandler;
 import com.ccp.utils.CcpHashAlgorithm;
 import com.jn.entities.JnEntityLoginPassword;
 import com.jn.entities.JnEntityLoginSessionValidation;
 import com.jn.entities.JnEntityLoginToken;
 import com.jn.exceptions.JnErrorIsNotAnEmail;
-public enum JnJsonTransformersDefaultEntityFields implements Function<CcpJsonRepresentation, CcpJsonRepresentation> {
+public enum JnJsonTransformersDefaultEntityFields implements CcpTopic {
 	email(true) {
 
 		public CcpJsonRepresentation apply(CcpJsonRepresentation json) {

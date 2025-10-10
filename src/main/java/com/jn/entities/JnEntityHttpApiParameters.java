@@ -9,14 +9,12 @@ import com.ccp.especifications.db.bulk.CcpBulkItem;
 import com.ccp.especifications.db.utils.CcpEntity;
 import com.ccp.especifications.db.utils.CcpEntityField;
 import com.ccp.especifications.db.utils.decorators.configurations.CcpEntityDecorators;
-import com.ccp.especifications.db.utils.decorators.configurations.CcpEntityOperationSpecification;
 import com.ccp.especifications.db.utils.decorators.configurations.CcpEntitySpecifications;
-import com.ccp.especifications.db.utils.decorators.configurations.CcpEntityTransferOperationEspecification;
 import com.ccp.especifications.db.utils.decorators.engine.CcpEntityConfigurator;
 import com.ccp.especifications.db.utils.decorators.engine.CcpEntityFactory;
-import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidatorRequired;
 import com.ccp.json.validations.fields.annotations.CcpJsonCopyFieldValidationsFrom;
-import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeNumberNatural;
+import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidatorRequired;
+import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeNumberUnsigned;
 import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeString;
 import com.jn.entities.decorators.JnEntityVersionable;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
@@ -24,12 +22,10 @@ import com.jn.json.transformers.JnJsonTransformersDefaultEntityFields;
 
 @CcpEntityDecorators(decorators = JnEntityVersionable.class)
 @CcpEntitySpecifications(
-		classWithFieldsValidationsRules = JnEntityHttpApiParameters.Fields.class,
-		inactivate = @CcpEntityTransferOperationEspecification(whenRecordToTransferIsFound = @CcpEntityOperationSpecification(afterOperation = {}), whenRecordToTransferIsNotFound = @CcpEntityOperationSpecification(afterOperation = {})),
-		reactivate = @CcpEntityTransferOperationEspecification(whenRecordToTransferIsFound = @CcpEntityOperationSpecification(afterOperation = {}), whenRecordToTransferIsNotFound = @CcpEntityOperationSpecification(afterOperation = {})),
-		delete = @CcpEntityOperationSpecification(afterOperation = {}),
-	    save = @CcpEntityOperationSpecification(afterOperation = {}),
-		cacheableEntity = true
+		jsonValidation = JnEntityHttpApiParameters.Fields.class,
+		cacheableEntity = true, 
+		afterSaveRecord = {},
+		afterDeleteRecord = {} 
 )
 public class JnEntityHttpApiParameters implements CcpEntityConfigurator{
 
@@ -45,10 +41,10 @@ public class JnEntityHttpApiParameters implements CcpEntityConfigurator{
 		@CcpJsonFieldTypeString
 		token(false), 
 		@CcpJsonFieldValidatorRequired
-		@CcpJsonFieldTypeNumberNatural(maxValue = 5)
+		@CcpJsonFieldTypeNumberUnsigned(maxValue = 5)
 		maxTries(false), 
 		@CcpJsonFieldValidatorRequired
-		@CcpJsonFieldTypeNumberNatural
+		@CcpJsonFieldTypeNumberUnsigned
 		sleep(false), 
 		@CcpJsonFieldValidatorRequired
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)

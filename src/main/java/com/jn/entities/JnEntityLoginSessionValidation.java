@@ -7,29 +7,32 @@ import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.especifications.db.utils.CcpEntity;
 import com.ccp.especifications.db.utils.CcpEntityField;
 import com.ccp.especifications.db.utils.decorators.configurations.CcpEntityExpurgable;
-import com.ccp.especifications.db.utils.decorators.configurations.CcpEntityOperationSpecification;
 import com.ccp.especifications.db.utils.decorators.configurations.CcpEntitySpecifications;
-import com.ccp.especifications.db.utils.decorators.configurations.CcpEntityTransferOperationEspecification;
 import com.ccp.especifications.db.utils.decorators.configurations.CcpEntityTwin;
 import com.ccp.especifications.db.utils.decorators.engine.CcpEntityConfigurator;
 import com.ccp.especifications.db.utils.decorators.engine.CcpEntityExpurgableOptions;
 import com.ccp.especifications.db.utils.decorators.engine.CcpEntityFactory;
+import com.ccp.json.validations.fields.annotations.CcpJsonCopyFieldValidationsFrom;
 import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidatorRequired;
 import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeString;
-import com.ccp.json.validations.fields.annotations.CcpJsonCopyFieldValidationsFrom;
 import com.jn.entities.decorators.JnEntityExpurgable;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
 import com.jn.json.transformers.JnJsonTransformersDefaultEntityFields;
 
 @CcpEntityExpurgable(expurgTime = CcpEntityExpurgableOptions.hourly, expurgableEntityFactory = JnEntityExpurgable.class)
-@CcpEntityTwin(twinEntityName = "login_session_terminated")
+@CcpEntityTwin(
+		twinEntityName = "login_session_terminated",
+
+		afterReactivateRecordWhenNotFound = {},
+		afterInactivateRecordWhenFound = {}, 
+		afterReactivateRecordWhenFound = {}, 
+		afterInactivateRecordWhenNotFound = {}
+		)
 @CcpEntitySpecifications(
-		classWithFieldsValidationsRules = JnEntityLoginSessionValidation.Fields.class,
-		inactivate = @CcpEntityTransferOperationEspecification(whenRecordToTransferIsFound = @CcpEntityOperationSpecification(afterOperation = {}), whenRecordToTransferIsNotFound = @CcpEntityOperationSpecification(afterOperation = {})),
-		reactivate = @CcpEntityTransferOperationEspecification(whenRecordToTransferIsFound = @CcpEntityOperationSpecification(afterOperation = {}), whenRecordToTransferIsNotFound = @CcpEntityOperationSpecification(afterOperation = {})),
-		delete = @CcpEntityOperationSpecification(afterOperation = {}),
-	    save = @CcpEntityOperationSpecification(afterOperation = {}),
-		cacheableEntity = true
+		jsonValidation = JnEntityLoginSessionValidation.Fields.class,
+		cacheableEntity = true, 
+		afterSaveRecord = {},
+		afterDeleteRecord = {} 
 )
 public class JnEntityLoginSessionValidation implements CcpEntityConfigurator {
 

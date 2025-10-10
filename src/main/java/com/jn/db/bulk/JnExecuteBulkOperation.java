@@ -23,6 +23,7 @@ import com.ccp.especifications.db.crud.CcpCrud;
 import com.ccp.especifications.db.crud.CcpHandleWithSearchResultsInTheEntity;
 import com.ccp.especifications.db.crud.CcpSelectUnionAll;
 import com.ccp.especifications.db.utils.CcpEntity;
+import com.ccp.especifications.mensageria.receiver.CcpTopic;
 import com.jn.entities.JnEntityRecordToReprocess;
 import com.jn.utils.JnDeleteKeysFromCache;
 
@@ -134,11 +135,11 @@ public class JnExecuteBulkOperation implements CcpExecuteBulkOperation{
 			boolean presentInThisUnionAll = entityToSearch.isPresentInThisUnionAll(unionAll, data);
 			
 			if(presentInThisUnionAll) {
-				List<Function<CcpJsonRepresentation, CcpJsonRepresentation>> doAfterSavingIfRecordIsFound = handler.doAfterSavingIfRecordIsFound();
+				List<CcpTopic> doAfterSavingIfRecordIsFound = handler.doAfterSavingIfRecordIsFound();
 				data = data.getTransformedJson(doAfterSavingIfRecordIsFound);
 				continue;
 			}
-			List<Function<CcpJsonRepresentation, CcpJsonRepresentation>> doAfterSavingIfRecordIsNotFound = handler.doAfterSavingIfRecordIsNotFound();
+			List<CcpTopic> doAfterSavingIfRecordIsNotFound = handler.doAfterSavingIfRecordIsNotFound();
 			data = data.getTransformedJson(doAfterSavingIfRecordIsNotFound);
 		}
 		
