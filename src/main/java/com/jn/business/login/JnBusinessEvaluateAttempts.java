@@ -1,18 +1,17 @@
 package com.jn.business.login;
 
-import java.util.function.Function;
-
 import com.ccp.constantes.CcpOtherConstants;
 import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.decorators.CcpJsonRepresentation.CcpJsonFieldName;
 import com.ccp.dependency.injection.CcpDependencyInjection;
 import com.ccp.especifications.db.utils.CcpEntity;
+import com.ccp.especifications.mensageria.receiver.CcpBusiness;
 import com.ccp.especifications.password.CcpPasswordHandler;
 import com.ccp.flow.CcpErrorFlowDisturb;
 import com.ccp.process.CcpProcessStatus;
 import com.jn.mensageria.JnFunctionMensageriaSender;
 
-public class JnBusinessEvaluateAttempts implements Function<CcpJsonRepresentation, CcpJsonRepresentation>{
+public class JnBusinessEvaluateAttempts implements CcpBusiness{
 	enum JsonFieldNames implements CcpJsonFieldName{
 		entities
 	}
