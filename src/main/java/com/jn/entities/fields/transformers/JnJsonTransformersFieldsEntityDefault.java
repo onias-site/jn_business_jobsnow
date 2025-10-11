@@ -1,10 +1,5 @@
-package com.jn.json.transformers;
+package com.jn.entities.fields.transformers;
 
-import java.util.Arrays;
-import java.util.Optional;
-import java.util.function.Function;
-
-import com.ccp.constantes.CcpOtherConstants;
 import com.ccp.decorators.CcpEmailDecorator;
 import com.ccp.decorators.CcpHashDecorator;
 import com.ccp.decorators.CcpJsonRepresentation;
@@ -14,15 +9,16 @@ import com.ccp.decorators.CcpTextDecorator;
 import com.ccp.decorators.CcpTimeDecorator;
 import com.ccp.dependency.injection.CcpDependencyInjection;
 import com.ccp.especifications.db.utils.CcpEntityField;
+import com.ccp.especifications.db.utils.CcpJsonTransformersDefaultEntityField;
 import com.ccp.especifications.db.utils.decorators.engine.CcpEntityExpurgableOptions;
-import com.ccp.especifications.mensageria.receiver.CcpBusiness;
 import com.ccp.especifications.password.CcpPasswordHandler;
 import com.ccp.utils.CcpHashAlgorithm;
 import com.jn.entities.JnEntityLoginPassword;
 import com.jn.entities.JnEntityLoginSessionValidation;
 import com.jn.entities.JnEntityLoginToken;
 import com.jn.exceptions.JnErrorIsNotAnEmail;
-public enum JnJsonTransformersDefaultEntityFields implements CcpBusiness {
+
+public enum JnJsonTransformersFieldsEntityDefault implements CcpJsonTransformersDefaultEntityField {
 	email(true) {
 
 		public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
@@ -114,38 +110,14 @@ public enum JnJsonTransformersDefaultEntityFields implements CcpBusiness {
 
 	
 	
-	private JnJsonTransformersDefaultEntityFields(boolean canBePrimaryKey) {
+	private JnJsonTransformersFieldsEntityDefault(boolean canBePrimaryKey) {
 			this.canBePrimaryKey = canBePrimaryKey;
 		}
 
 	private final boolean canBePrimaryKey;
 	
-	public static Function<CcpJsonRepresentation, CcpJsonRepresentation> getTransformer(CcpEntityField field){
-		 
-		Optional<JnJsonTransformersDefaultEntityFields> findFirst = Arrays.asList(JnJsonTransformersDefaultEntityFields.values()).stream().filter(x -> x.name().equals(field.name())).findFirst();
-		 
-		 boolean notFound = findFirst.isPresent() == false;
-
-		 if(notFound) {
-			 return CcpOtherConstants.DO_NOTHING;
-		 }
-		 
-		 JnJsonTransformersDefaultEntityFields jnDefaultEntityFields = findFirst.get();
-
-		 boolean isNotPrimaryKeyField = field.isPrimaryKey() == false;
-
-		 if(isNotPrimaryKeyField) {
-			 return jnDefaultEntityFields;
-		 }
-		 
-		 if(jnDefaultEntityFields.canBePrimaryKey) {
-			 return jnDefaultEntityFields;
-		 }
-
-		 throw new RuntimeException("The field '" + jnDefaultEntityFields.name() +"' can not be a primary key");
-	}
 	
-	private String getOriginalToken() {
+	public static String getOriginalToken() {
 		CcpStringDecorator csd = new CcpStringDecorator("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789");
 		CcpTextDecorator text = csd.text();
 		CcpTextDecorator generateToken = text.generateToken(8);
@@ -154,6 +126,9 @@ public enum JnJsonTransformersDefaultEntityFields implements CcpBusiness {
 	}
 	enum JsonFieldNames implements CcpJsonFieldName{
 		originalEmail, originalToken, email
+	}
+	public boolean canBePrimaryKey() {
+		return canBePrimaryKey;
 	}
 
 }

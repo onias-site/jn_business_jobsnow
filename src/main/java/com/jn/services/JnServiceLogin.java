@@ -24,8 +24,8 @@ import com.jn.entities.JnEntityLoginSessionValidation;
 import com.jn.entities.JnEntityLoginStats;
 import com.jn.entities.JnEntityLoginToken;
 import com.jn.entities.JnEntityLoginTokenAttempts;
+import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
-import com.jn.json.transformers.JnJsonTransformersDefaultEntityFields;
 import com.jn.mensageria.JnFunctionMensageriaSender;
 import com.jn.status.login.JnProcessStatusCreateLoginEmail;
 import com.jn.status.login.JnProcessStatusCreateLoginToken;
@@ -56,7 +56,7 @@ public enum JnServiceLogin implements JnService {
 							);
 
 			CcpJsonRepresentation transformedJson = json
-					.getTransformedJson(JnJsonTransformersDefaultEntityFields.tokenHash)
+					.getTransformedJson(JnJsonTransformersFieldsEntityDefault.tokenHash)
 					.duplicateValueFromField(JsonFieldNames.originalToken, JsonFieldNames.sessionToken)
 					;
 			String methodName = new Object(){}.getClass().getEnclosingMethod().getName();
@@ -182,7 +182,7 @@ public enum JnServiceLogin implements JnService {
 							JnEntityLoginToken.Fields.email.name()
 							);
 			CcpJsonRepresentation renameField = CcpOtherConstants.EMPTY_JSON
-					.getTransformedJson(JnJsonTransformersDefaultEntityFields.tokenHash)
+					.getTransformedJson(JnJsonTransformersFieldsEntityDefault.tokenHash)
 					.renameField(JsonFieldNames.originalToken, JsonFieldNames.sessionToken)
 					.removeField(JnEntityLoginSessionValidation.Fields.token)
 					;

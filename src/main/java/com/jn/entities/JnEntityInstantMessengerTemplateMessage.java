@@ -1,28 +1,27 @@
 package com.jn.entities;
 
 import java.util.List;
-import java.util.function.Function;
 
-import com.ccp.constantes.CcpOtherConstants;
-import com.ccp.decorators.CcpJsonRepresentation;
+import com.ccp.decorators.CcpJsonRepresentation.CcpJsonFieldName;
 import com.ccp.especifications.db.bulk.CcpBulkItem;
 import com.ccp.especifications.db.utils.CcpEntity;
-import com.ccp.especifications.db.utils.CcpEntityField;
-import com.ccp.especifications.db.utils.decorators.configurations.CcpEntityDecorators;
-import com.ccp.especifications.db.utils.decorators.configurations.CcpEntitySpecifications;
+import com.ccp.especifications.db.utils.decorators.annotations.CcpEntityDecorators;
+import com.ccp.especifications.db.utils.decorators.annotations.CcpEntityFieldPrimaryKey;
+import com.ccp.especifications.db.utils.decorators.annotations.CcpEntitySpecifications;
 import com.ccp.especifications.db.utils.decorators.engine.CcpEntityConfigurator;
 import com.ccp.especifications.db.utils.decorators.engine.CcpEntityFactory;
 import com.ccp.json.validations.fields.annotations.CcpJsonCopyFieldValidationsFrom;
 import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidatorRequired;
 import com.jn.business.commons.JnBusinessNotifyError;
 import com.jn.entities.decorators.JnEntityVersionable;
+import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
-import com.jn.json.transformers.JnJsonTransformersDefaultEntityFields;
 import com.jn.utils.JnLanguage;
 
 @CcpEntityDecorators(decorators = JnEntityVersionable.class)
 @CcpEntitySpecifications(
-		jsonValidation = JnEntityInstantMessengerTemplateMessage.Fields.class,
+		entityFieldsTransformers = JnJsonTransformersFieldsEntityDefault.class,
+		entityValidation = JnEntityInstantMessengerTemplateMessage.Fields.class,
 		cacheableEntity = true, 
 		afterSaveRecord = {},
 		afterDeleteRecord = {} 
@@ -31,41 +30,20 @@ public class JnEntityInstantMessengerTemplateMessage  implements CcpEntityConfig
 
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityInstantMessengerTemplateMessage.class).entityInstance;
 
-	public static enum Fields implements CcpEntityField{
+	public static enum Fields implements CcpJsonFieldName{
+		@CcpEntityFieldPrimaryKey
+		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
+		templateId,
+		@CcpEntityFieldPrimaryKey
+		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
+		language, 
 		@CcpJsonFieldValidatorRequired
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
-		templateId(true),
+		subject, 
 		@CcpJsonFieldValidatorRequired
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
-		language(true), 
-		@CcpJsonFieldValidatorRequired
-		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
-		subject(false), 
-		@CcpJsonFieldValidatorRequired
-		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
-		message(false)
+		message
 		;
-		
-		private final boolean primaryKey;
-
-		private final Function<CcpJsonRepresentation, CcpJsonRepresentation> transformer;
-		
-		private Fields(boolean primaryKey) {
-			this(primaryKey, CcpOtherConstants.DO_NOTHING);
-		}
-
-		private Fields(boolean primaryKey, Function<CcpJsonRepresentation, CcpJsonRepresentation> transformer) {
-			this.transformer = transformer;
-			this.primaryKey = primaryKey;
-		}
-		
-		public Function<CcpJsonRepresentation, CcpJsonRepresentation> getTransformer() {
-			return this.transformer == CcpOtherConstants.DO_NOTHING ? JnJsonTransformersDefaultEntityFields.getTransformer(this) : this.transformer;
-		}
-		
-		public boolean isPrimaryKey() {
-			return this.primaryKey;
-		}
 	}
 	public List<CcpBulkItem> getFirstRecordsToInsert() {
 		List<CcpBulkItem> createBulkItems = CcpEntityConfigurator.super.toCreateBulkItems(ENTITY, "{"

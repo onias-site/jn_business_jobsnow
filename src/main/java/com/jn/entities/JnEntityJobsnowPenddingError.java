@@ -1,21 +1,18 @@
 package com.jn.entities;
 
-import java.util.function.Function;
-
-import com.ccp.constantes.CcpOtherConstants;
-import com.ccp.decorators.CcpJsonRepresentation;
+import com.ccp.decorators.CcpJsonRepresentation.CcpJsonFieldName;
 import com.ccp.especifications.db.utils.CcpEntity;
-import com.ccp.especifications.db.utils.CcpEntityField;
-import com.ccp.especifications.db.utils.decorators.configurations.CcpEntityDecorators;
-import com.ccp.especifications.db.utils.decorators.configurations.CcpEntitySpecifications;
-import com.ccp.especifications.db.utils.decorators.configurations.CcpEntityTwin;
+import com.ccp.especifications.db.utils.decorators.annotations.CcpEntityDecorators;
+import com.ccp.especifications.db.utils.decorators.annotations.CcpEntityFieldPrimaryKey;
+import com.ccp.especifications.db.utils.decorators.annotations.CcpEntitySpecifications;
+import com.ccp.especifications.db.utils.decorators.annotations.CcpEntityTwin;
 import com.ccp.especifications.db.utils.decorators.engine.CcpEntityConfigurator;
 import com.ccp.especifications.db.utils.decorators.engine.CcpEntityFactory;
 import com.ccp.json.validations.fields.annotations.CcpJsonCopyFieldValidationsFrom;
 import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidatorRequired;
 import com.jn.entities.decorators.JnEntityVersionable;
+import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
-import com.jn.json.transformers.JnJsonTransformersDefaultEntityFields;
 
 @CcpEntityTwin(
 		twinEntityName = "jobsnow_solved_error"
@@ -25,7 +22,8 @@ import com.jn.json.transformers.JnJsonTransformersDefaultEntityFields;
 		)
 @CcpEntityDecorators(decorators = JnEntityVersionable.class)
 @CcpEntitySpecifications(
-		jsonValidation = JnEntityJobsnowPenddingError.Fields.class,
+		entityFieldsTransformers = JnJsonTransformersFieldsEntityDefault.class,
+		entityValidation = JnEntityJobsnowPenddingError.Fields.class,
 		cacheableEntity = true, 
 		afterSaveRecord = {},
 		afterDeleteRecord = {} 
@@ -34,47 +32,26 @@ public class JnEntityJobsnowPenddingError implements CcpEntityConfigurator {
 
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityJobsnowPenddingError.class).entityInstance;
 	
-	public static enum Fields implements CcpEntityField{
+	public static enum Fields implements CcpJsonFieldName{
+		@CcpEntityFieldPrimaryKey
+		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
+		cause, 
+		@CcpEntityFieldPrimaryKey
+		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
+		stackTrace, 
+		@CcpEntityFieldPrimaryKey
+		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
+		type, 
 		@CcpJsonFieldValidatorRequired
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
-		cause(true), 
+		message, 
 		@CcpJsonFieldValidatorRequired
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
-		stackTrace(true), 
+		timestamp, 
 		@CcpJsonFieldValidatorRequired
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
-		type(true), 
-		@CcpJsonFieldValidatorRequired
-		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
-		message(false), 
-		@CcpJsonFieldValidatorRequired
-		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
-		timestamp(false), 
-		@CcpJsonFieldValidatorRequired
-		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
-		date(false)
+		date
 		;
-		
-		private final boolean primaryKey;
-
-		private final Function<CcpJsonRepresentation, CcpJsonRepresentation> transformer;
-		
-		private Fields(boolean primaryKey) {
-			this(primaryKey, CcpOtherConstants.DO_NOTHING);
-		}
-
-		private Fields(boolean primaryKey, Function<CcpJsonRepresentation, CcpJsonRepresentation> transformer) {
-			this.transformer = transformer;
-			this.primaryKey = primaryKey;
-		}
-		
-		public Function<CcpJsonRepresentation, CcpJsonRepresentation> getTransformer() {
-			return this.transformer == CcpOtherConstants.DO_NOTHING ? JnJsonTransformersDefaultEntityFields.getTransformer(this) : this.transformer;
-		}
-		public boolean isPrimaryKey() {
-			return this.primaryKey;
-		}
-
 	}
 
 }
