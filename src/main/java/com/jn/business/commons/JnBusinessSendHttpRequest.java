@@ -1,12 +1,11 @@
 package com.jn.business.commons;
 
-import java.util.function.Function;
-
 import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.decorators.CcpTimeDecorator;
 import com.ccp.especifications.http.CcpErrorHttp;
 import com.ccp.especifications.http.CcpErrorHttpClient;
 import com.ccp.especifications.http.CcpErrorHttpServer;
+import com.ccp.especifications.mensageria.receiver.CcpBusiness;
 import com.jn.entities.JnEntityHttpApiErrorClient;
 import com.jn.entities.JnEntityHttpApiErrorServer;
 import com.jn.entities.JnEntityHttpApiParameters;
@@ -16,7 +15,7 @@ public class JnBusinessSendHttpRequest {
 
 	public static final JnBusinessSendHttpRequest INSTANCE = new JnBusinessSendHttpRequest();
 	private JnBusinessSendHttpRequest() {}
-	public CcpJsonRepresentation execute(CcpJsonRepresentation json, Function<CcpJsonRepresentation, CcpJsonRepresentation> processThatSendsHttpRequest, JnBusinessHttpRequestType httpRequestType, String...keys) {
+	public CcpJsonRepresentation execute(CcpJsonRepresentation json, CcpBusiness processThatSendsHttpRequest, JnBusinessHttpRequestType httpRequestType, String...keys) {
 
 		CcpJsonRepresentation jsonWithApiName = json.put(JnEntityHttpApiParameters.Fields.apiName, httpRequestType);
 		CcpJsonRepresentation httpApiParameters = JnEntityHttpApiParameters.ENTITY.getOneById(jsonWithApiName);
@@ -40,7 +39,7 @@ public class JnBusinessSendHttpRequest {
 		}
 	}
 	
-	private CcpJsonRepresentation retryToSendIntantMessage(CcpErrorHttp e, CcpJsonRepresentation json, CcpJsonRepresentation httpErrorDetails, Function<CcpJsonRepresentation, CcpJsonRepresentation> processThatSendsHttpRequest, JnBusinessHttpRequestType httpRequestType, String... keys) {
+	private CcpJsonRepresentation retryToSendIntantMessage(CcpErrorHttp e, CcpJsonRepresentation json, CcpJsonRepresentation httpErrorDetails, CcpBusiness processThatSendsHttpRequest, JnBusinessHttpRequestType httpRequestType, String... keys) {
 		Integer maxTries = httpErrorDetails.getAsIntegerNumber(JnEntityHttpApiParameters.Fields.maxTries);
 		boolean exceededTries = JnEntityHttpApiRetrySendRequest.exceededTries(httpErrorDetails, JnEntityHttpApiRetrySendRequest.Fields.attempts.name(), maxTries);
 		

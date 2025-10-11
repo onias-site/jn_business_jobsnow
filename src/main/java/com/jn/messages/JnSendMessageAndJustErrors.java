@@ -1,16 +1,15 @@
 package com.jn.messages;
 
-import java.util.function.Function;
-
 import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.especifications.db.utils.CcpEntity;
+import com.ccp.especifications.mensageria.receiver.CcpBusiness;
 import com.jn.entities.JnEntityJobsnowWarning;
 
 public class JnSendMessageAndJustErrors extends JnSendMessageToUser{
 
 	
-	public JnSendMessageToUser addOneStep(Function<CcpJsonRepresentation, CcpJsonRepresentation> step, CcpEntity parameterEntity, CcpEntity messageEntity) {
-		Function<CcpJsonRepresentation, CcpJsonRepresentation> process = values -> {
+	public JnSendMessageToUser addOneStep(CcpBusiness step, CcpEntity parameterEntity, CcpEntity messageEntity) {
+		CcpBusiness process = values -> {
 			try {
 				CcpJsonRepresentation apply = step.apply(values);
 				return apply;

@@ -3,7 +3,6 @@ package com.jn.messages;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.function.Function;
 
 import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.decorators.CcpJsonRepresentation.CcpJsonFieldName;
@@ -12,6 +11,7 @@ import com.ccp.especifications.db.crud.CcpCrud;
 import com.ccp.especifications.db.crud.CcpSelectUnionAll;
 import com.ccp.especifications.db.utils.CcpEntity;
 import com.ccp.especifications.http.CcpErrorHttp;
+import com.ccp.especifications.mensageria.receiver.CcpBusiness;
 import com.jn.business.commons.JnBusinessSendEmailMessage;
 import com.jn.business.commons.JnBusinessTryToSendInstantMessage;
 import com.jn.entities.JnEntityEmailParametersToSend;
@@ -25,7 +25,7 @@ public class JnSendMessageToUser {
 		message, msg
 	}
 
-	private final List<Function<CcpJsonRepresentation, CcpJsonRepresentation>> process = new ArrayList<>();
+	private final List<CcpBusiness> process = new ArrayList<>();
 
 	private final List<CcpEntity> parameterEntities = new ArrayList<>() ;
 	
@@ -46,7 +46,7 @@ public class JnSendMessageToUser {
 		return new JnAddDefaultStep(addOneStep);
 	}
 	
-	JnSendMessageToUser addOneStep(Function<CcpJsonRepresentation, CcpJsonRepresentation> process, CcpEntity parameterEntity, CcpEntity messageEntity) {
+	JnSendMessageToUser addOneStep(CcpBusiness process, CcpEntity parameterEntity, CcpEntity messageEntity) {
 		
 		JnSendMessageToUser getMessage = new JnSendMessageToUser();
 		
@@ -102,7 +102,7 @@ public class JnSendMessageToUser {
 			for (String key : allFields) {
 				messageToSend = messageToSend.getDynamicVersion().putFilledTemplate(key, key);
 			}
-			Function<CcpJsonRepresentation, CcpJsonRepresentation> process = this.process.get(k);
+			CcpBusiness process = this.process.get(k);
 			try {
 				process.apply(messageToSend);
 			} catch (CcpErrorHttp e) {

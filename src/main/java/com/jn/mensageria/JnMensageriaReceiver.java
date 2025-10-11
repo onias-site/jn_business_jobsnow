@@ -1,11 +1,11 @@
 package com.jn.mensageria;
 
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.especifications.db.bulk.CcpExecuteBulkOperation;
 import com.ccp.especifications.db.utils.CcpEntity;
+import com.ccp.especifications.mensageria.receiver.CcpBusiness;
 import com.ccp.especifications.mensageria.receiver.CcpMensageriaReceiver;
 import com.jn.db.bulk.JnExecuteBulkOperation;
 import com.jn.entities.JnEntityAsyncTask;
@@ -23,7 +23,7 @@ public class JnMensageriaReceiver extends CcpMensageriaReceiver{
 			CcpEntity entity, 
 			CcpJsonRepresentation messageDetails, 
 			Throwable e,
-			Function<CcpJsonRepresentation, CcpJsonRepresentation> jnAsyncBusinessNotifyError
+			CcpBusiness jnAsyncBusinessNotifyError
 			) {
 		CcpJsonRepresentation response = new CcpJsonRepresentation(e);
 		JnMensageriaReceiver saveResult = this.saveResult(entity, messageDetails, response, false);
@@ -42,10 +42,10 @@ public class JnMensageriaReceiver extends CcpMensageriaReceiver{
 			CcpEntity entity,
 			String processName, 
 			CcpJsonRepresentation json,
-			Function<CcpJsonRepresentation, CcpJsonRepresentation> jnAsyncBusinessNotifyError
+			CcpBusiness jnAsyncBusinessNotifyError
 			) {
 		try {
-			Function<CcpJsonRepresentation, CcpJsonRepresentation> process = this.getProcess(processName, json);
+			CcpBusiness process = this.getProcess(processName, json);
 			CcpJsonRepresentation response = process.apply(json);
 			JnMensageriaReceiver saveResult = this.saveResult(entity, json, response);
 			return saveResult;

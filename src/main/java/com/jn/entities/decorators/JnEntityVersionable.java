@@ -2,7 +2,6 @@ package com.jn.entities.decorators;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Function;
 
 import com.ccp.constantes.CcpOtherConstants;
 import com.ccp.decorators.CcpJsonRepresentation;
@@ -14,6 +13,7 @@ import com.ccp.especifications.db.utils.CcpEntityCrudOperationType;
 import com.ccp.especifications.db.utils.CcpEntityField;
 import com.ccp.especifications.db.utils.decorators.engine.CcpEntityDecoratorFactory;
 import com.ccp.especifications.db.utils.decorators.engine.CcpEntityDelegator;
+import com.ccp.especifications.mensageria.receiver.CcpBusiness;
 import com.jn.db.bulk.JnExecuteBulkOperation;
 import com.jn.entities.JnEntityAudit;
 
@@ -91,7 +91,7 @@ public final class JnEntityVersionable extends CcpEntityDelegator implements Ccp
 		return jnEntityVersionable;
 	}
 	
-	public Function<CcpJsonRepresentation, CcpJsonRepresentation> getOperationCallback(CcpEntityCrudOperationType operation){
+	public CcpBusiness getOperationCallback(CcpEntityCrudOperationType operation){
 		return json -> operation.execute(this, json);
 	}
 

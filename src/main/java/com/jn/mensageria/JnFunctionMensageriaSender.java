@@ -4,7 +4,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import com.ccp.constantes.CcpOtherConstants;
@@ -107,7 +106,7 @@ public class JnFunctionMensageriaSender implements CcpBusiness {
 	}
 	
 	private boolean canSave(CcpJsonRepresentation x) {
-		Function<CcpJsonRepresentation, CcpJsonRepresentation> process = JnMensageriaReceiver.INSTANCE.getProcess(this.topic, x);
+		CcpBusiness process = JnMensageriaReceiver.INSTANCE.getProcess(this.topic, x);
 		if(process instanceof CcpBusiness topic) {
 			boolean canSave = topic.canBeSavedAsAsyncTask();
 			return canSave;

@@ -1,8 +1,6 @@
 package com.jn.messages;
 
-import java.util.function.Function;
-
-import com.ccp.decorators.CcpJsonRepresentation;
+import com.ccp.especifications.mensageria.receiver.CcpBusiness;
 
 public class JnCreateStep {
 
@@ -12,7 +10,7 @@ public class JnCreateStep {
 		this.getMessage = getMessage;
 	}
 	
-	public JnWithTheProcess withTheProcess(Function<CcpJsonRepresentation, CcpJsonRepresentation> process) {
+	public JnWithTheProcess withTheProcess(CcpBusiness process) {
 		return new JnWithTheProcess(this, process);
 	}
 }

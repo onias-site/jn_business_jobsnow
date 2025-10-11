@@ -1,17 +1,15 @@
 package com.jn.messages;
 
-import java.util.function.Function;
-
-import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.especifications.db.utils.CcpEntity;
+import com.ccp.especifications.mensageria.receiver.CcpBusiness;
 
 public class JnWithTheProcess {
 
 	final JnCreateStep createStep;
 	
-	final Function<CcpJsonRepresentation, CcpJsonRepresentation> process;
+	final CcpBusiness process;
 
-	public JnWithTheProcess(JnCreateStep createStep, Function<CcpJsonRepresentation, CcpJsonRepresentation> process) {
+	public JnWithTheProcess(JnCreateStep createStep, CcpBusiness process) {
 		this.createStep = createStep;
 		this.process = process;
 	}

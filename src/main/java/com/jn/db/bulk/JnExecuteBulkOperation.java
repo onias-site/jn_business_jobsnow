@@ -7,7 +7,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import com.ccp.decorators.CcpJsonRepresentation;
@@ -148,7 +147,7 @@ public class JnExecuteBulkOperation implements CcpExecuteBulkOperation{
 
 	@SuppressWarnings("unchecked")
 	public CcpJsonRepresentation executeSelectUnionAllThenSaveInTheMainAndTwinEntities(CcpJsonRepresentation json, 
-			CcpEntity mainEntity, Function<CcpJsonRepresentation, CcpJsonRepresentation> whenPresentInMainEntityOrIsNewRecord) {
+			CcpEntity mainEntity, CcpBusiness whenPresentInMainEntityOrIsNewRecord) {
 		
 		CcpEntity supportEntity = mainEntity.getTwinEntity();
 		

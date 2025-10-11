@@ -3,7 +3,6 @@ package com.jn.entities.decorators;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.function.Function;
 
 import com.ccp.constantes.CcpOtherConstants;
 import com.ccp.decorators.CcpHashDecorator;
@@ -21,6 +20,7 @@ import com.ccp.especifications.db.utils.CcpErrorBulkEntityRecordNotFound;
 import com.ccp.especifications.db.utils.decorators.engine.CcpEntityDelegator;
 import com.ccp.especifications.db.utils.decorators.engine.CcpEntityExpurgableFactory;
 import com.ccp.especifications.db.utils.decorators.engine.CcpEntityExpurgableOptions;
+import com.ccp.especifications.mensageria.receiver.CcpBusiness;
 import com.ccp.utils.CcpHashAlgorithm;
 import com.jn.db.bulk.JnExecuteBulkOperation;
 import com.jn.entities.JnEntityDisposableRecord;
@@ -227,7 +227,7 @@ public final class JnEntityExpurgable extends CcpEntityDelegator implements CcpE
 		return oneById;
 	}
 
-	public CcpJsonRepresentation getOneById(CcpJsonRepresentation json, Function<CcpJsonRepresentation, CcpJsonRepresentation> ifNotFound) {
+	public CcpJsonRepresentation getOneById(CcpJsonRepresentation json, CcpBusiness ifNotFound) {
 		
 		CcpJsonRepresentation expurgableId = this.getExpurgableId(json);
 		CcpCrud crud = CcpDependencyInjection.getDependency(CcpCrud.class);
@@ -380,7 +380,7 @@ public final class JnEntityExpurgable extends CcpEntityDelegator implements CcpE
 		return jnEntityExpurgable;
 	}	
 	
-	public Function<CcpJsonRepresentation, CcpJsonRepresentation> getOperationCallback(CcpEntityCrudOperationType operation){
+	public CcpBusiness getOperationCallback(CcpEntityCrudOperationType operation){
 		return json -> operation.execute(this, json);
 	}
 
