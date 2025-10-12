@@ -23,9 +23,10 @@ import com.jn.utils.JnLanguage;
 		entityFieldsTransformers = JnJsonTransformersFieldsEntityDefault.class,
 		entityValidation = JnEntityInstantMessengerTemplateMessage.Fields.class,
 		cacheableEntity = true, 
+		afterDeleteRecord = {},
 		beforeSaveRecord = {},
 		afterSaveRecord = {},
-		afterDeleteRecord = {} 
+		flow = {}
 )
 public class JnEntityInstantMessengerTemplateMessage  implements CcpEntityConfigurator {
 

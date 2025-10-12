@@ -16,9 +16,10 @@ import com.jn.json.fields.validation.JnJsonCommonsFields;
 		entityFieldsTransformers = JnJsonTransformersFieldsEntityDefault.class,
 		entityValidation = JnEntityRecordToReprocess.Fields.class,
 		cacheableEntity = false, 
+		afterDeleteRecord = {},
 		beforeSaveRecord = {},
 		afterSaveRecord = {},
-		afterDeleteRecord = {} 
+		flow = {}
 )
 public class JnEntityRecordToReprocess implements CcpEntityConfigurator {
 	

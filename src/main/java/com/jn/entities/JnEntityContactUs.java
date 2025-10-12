@@ -19,10 +19,11 @@ import com.jn.json.fields.validation.JnJsonCommonsFields;
 @CcpEntitySpecifications(
 		entityFieldsTransformers = JnJsonTransformersFieldsEntityDefault.class,
 		entityValidation = JnEntityContactUs.Fields.class,
-		beforeSaveRecord = {},
 		cacheableEntity = true, 
+		afterDeleteRecord = {},
+		beforeSaveRecord = {},
 		afterSaveRecord = {},
-		afterDeleteRecord = {} 
+		flow = {}
 )
 public class JnEntityContactUs implements CcpEntityConfigurator {
 

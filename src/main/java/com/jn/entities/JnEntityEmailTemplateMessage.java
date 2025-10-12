@@ -23,9 +23,10 @@ import com.jn.utils.JnLanguage;
 		entityFieldsTransformers = JnJsonTransformersFieldsEntityDefault.class,
 		entityValidation = JnEntityEmailTemplateMessage.Fields.class,
 		cacheableEntity = true, 
+		afterDeleteRecord = {},
 		beforeSaveRecord = {},
 		afterSaveRecord = {},
-		afterDeleteRecord = {} 
+		flow = {}
 )
 @CcpEntityDecorators(decorators = JnEntityVersionable.class)
 public class JnEntityEmailTemplateMessage  implements CcpEntityConfigurator{

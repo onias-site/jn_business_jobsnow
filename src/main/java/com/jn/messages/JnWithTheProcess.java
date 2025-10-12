@@ -1,7 +1,7 @@
 package com.jn.messages;
 
 import com.ccp.especifications.db.utils.CcpEntity;
-import com.ccp.especifications.mensageria.receiver.CcpBusiness;
+import com.ccp.business.CcpBusiness;
 
 public class JnWithTheProcess {
 

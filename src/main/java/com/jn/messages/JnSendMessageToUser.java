@@ -11,7 +11,7 @@ import com.ccp.especifications.db.crud.CcpCrud;
 import com.ccp.especifications.db.crud.CcpSelectUnionAll;
 import com.ccp.especifications.db.utils.CcpEntity;
 import com.ccp.especifications.http.CcpErrorHttp;
-import com.ccp.especifications.mensageria.receiver.CcpBusiness;
+import com.ccp.business.CcpBusiness;
 import com.jn.business.commons.JnBusinessSendEmailMessage;
 import com.jn.business.commons.JnBusinessTryToSendInstantMessage;
 import com.jn.entities.JnEntityEmailParametersToSend;

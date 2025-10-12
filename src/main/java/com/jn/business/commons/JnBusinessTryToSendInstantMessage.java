@@ -1,7 +1,7 @@
 package com.jn.business.commons;
 
 import com.ccp.decorators.CcpJsonRepresentation;
-import com.ccp.especifications.mensageria.receiver.CcpBusiness;
+import com.ccp.business.CcpBusiness;
 import com.jn.entities.JnEntityInstantMessengerParametersToSend;
 
 public class JnBusinessTryToSendInstantMessage implements CcpBusiness {

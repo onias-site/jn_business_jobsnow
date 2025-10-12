@@ -18,9 +18,10 @@ import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault
 		entityFieldsTransformers = JnJsonTransformersFieldsEntityDefault.class,
 		entityValidation = JnEntityLoginStats.Fields.class,
 		cacheableEntity = true, 
+		afterDeleteRecord = {},
 		beforeSaveRecord = {},
 		afterSaveRecord = {},
-		afterDeleteRecord = {} 
+		flow = {}
 )
 public class JnEntityLoginStats implements CcpEntityConfigurator {
 	

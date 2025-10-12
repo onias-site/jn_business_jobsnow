@@ -2,7 +2,7 @@ package com.jn.messages;
 
 import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.especifications.db.utils.CcpEntity;
-import com.ccp.especifications.mensageria.receiver.CcpBusiness;
+import com.ccp.business.CcpBusiness;
 import com.jn.entities.JnEntityJobsnowWarning;
 
 public class JnSendMessageAndJustErrors extends JnSendMessageToUser{

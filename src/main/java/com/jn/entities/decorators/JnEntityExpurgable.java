@@ -20,7 +20,7 @@ import com.ccp.especifications.db.utils.CcpErrorBulkEntityRecordNotFound;
 import com.ccp.especifications.db.utils.decorators.engine.CcpEntityDelegator;
 import com.ccp.especifications.db.utils.decorators.engine.CcpEntityExpurgableFactory;
 import com.ccp.especifications.db.utils.decorators.engine.CcpEntityExpurgableOptions;
-import com.ccp.especifications.mensageria.receiver.CcpBusiness;
+import com.ccp.business.CcpBusiness;
 import com.ccp.utils.CcpHashAlgorithm;
 import com.jn.db.bulk.JnExecuteBulkOperation;
 import com.jn.entities.JnEntityDisposableRecord;
