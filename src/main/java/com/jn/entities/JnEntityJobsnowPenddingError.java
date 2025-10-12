@@ -17,14 +17,15 @@ import com.jn.json.fields.validation.JnJsonCommonsFields;
 @CcpEntityTwin(
 		twinEntityName = "jobsnow_solved_error"
 
-		,afterReactivate = {},
-		afterInactivate = {}
+		,afterRecordBeenTransportedFromTwinToMainEntity = {},
+		afterRecordBeenTransportedFromMainToTwinEntity = {}
 		)
 @CcpEntityDecorators(decorators = JnEntityVersionable.class)
 @CcpEntitySpecifications(
 		entityFieldsTransformers = JnJsonTransformersFieldsEntityDefault.class,
 		entityValidation = JnEntityJobsnowPenddingError.Fields.class,
 		cacheableEntity = true, 
+		beforeSaveRecord = {},
 		afterSaveRecord = {},
 		afterDeleteRecord = {} 
 )

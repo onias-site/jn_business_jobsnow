@@ -16,6 +16,7 @@ import com.jn.json.fields.validation.JnJsonCommonsFields;
 		entityFieldsTransformers = JnJsonTransformersFieldsEntityDefault.class,
 		entityValidation = JnEntityRecordToReprocess.Fields.class,
 		cacheableEntity = false, 
+		beforeSaveRecord = {},
 		afterSaveRecord = {},
 		afterDeleteRecord = {} 
 )

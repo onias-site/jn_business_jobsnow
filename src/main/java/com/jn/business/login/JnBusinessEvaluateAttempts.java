@@ -75,7 +75,6 @@ public class JnBusinessEvaluateAttempts implements CcpBusiness{
 		CcpJsonRepresentation toReturn = json.removeField(JsonFieldNames.entities);
 		
 		if(correctSecret) {
-
 			this.topicToRegisterSuccess.apply(toReturn); 
 			return toReturn;
 		}

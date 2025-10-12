@@ -17,6 +17,7 @@ import com.jn.json.fields.validation.JnJsonCommonsFields;
 @CcpEntitySpecifications(
 		entityFieldsTransformers = JnJsonTransformersFieldsEntityDefault.class,
 		entityValidation = JnEntityAudit.Fields.class,
+		beforeSaveRecord = {},
 		cacheableEntity = false, 
 		afterSaveRecord = {},
 		afterDeleteRecord = {} 

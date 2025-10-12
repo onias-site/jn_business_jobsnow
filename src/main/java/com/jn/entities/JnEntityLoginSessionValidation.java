@@ -11,7 +11,6 @@ import com.ccp.especifications.db.utils.decorators.engine.CcpEntityConfigurator;
 import com.ccp.especifications.db.utils.decorators.engine.CcpEntityExpurgableOptions;
 import com.ccp.especifications.db.utils.decorators.engine.CcpEntityFactory;
 import com.ccp.json.validations.fields.annotations.CcpJsonCopyFieldValidationsFrom;
-import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeString;
 import com.jn.entities.decorators.JnEntityExpurgable;
 import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault;
 import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityTokenHash;
@@ -21,13 +20,14 @@ import com.jn.json.fields.validation.JnJsonCommonsFields;
 @CcpEntityTwin(
 		twinEntityName = "login_session_terminated",
 
-		afterReactivate = {},
-		afterInactivate = {}
+		afterRecordBeenTransportedFromTwinToMainEntity = {},
+		afterRecordBeenTransportedFromMainToTwinEntity = {}
 		)
 @CcpEntitySpecifications(
 		entityFieldsTransformers = JnJsonTransformersFieldsEntityDefault.class,
 		entityValidation = JnEntityLoginSessionValidation.Fields.class,
 		cacheableEntity = true, 
+		beforeSaveRecord = {},
 		afterSaveRecord = {},
 		afterDeleteRecord = {} 
 )
@@ -38,8 +38,8 @@ public class JnEntityLoginSessionValidation implements CcpEntityConfigurator {
 		@CcpEntityFieldPrimaryKey
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		email, 
-		@CcpJsonFieldTypeString
 		@CcpEntityFieldPrimaryKey
+		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		@CcpEntityFieldTransformer(JnJsonTransformersFieldsEntityTokenHash.class)
 		token, 
 		@CcpEntityFieldPrimaryKey

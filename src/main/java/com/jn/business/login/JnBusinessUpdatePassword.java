@@ -14,9 +14,9 @@ import com.jn.db.bulk.handlers.JnBulkHandlerSolveLoginConflict;
 import com.jn.entities.JnEntityLoginPassword;
 import com.jn.entities.JnEntityLoginPasswordAttempts;
 import com.jn.entities.JnEntityLoginSessionValidation;
+import com.jn.services.JnServiceLogin;
 import com.jn.utils.JnDeleteKeysFromCache;
 public class JnBusinessUpdatePassword implements CcpBusiness {
-	//TODO JSON VALIDATIONS	
 	enum JsonFieldNames implements CcpJsonFieldName{
 		sessionToken
 	}
@@ -36,8 +36,8 @@ public class JnBusinessUpdatePassword implements CcpBusiness {
 
 		CcpJsonRepresentation renameField = json.renameField(JsonFieldNames.sessionToken, JnEntityLoginSessionValidation.Fields.token);
 		CcpBulkHandlerSave updatePassword = new CcpBulkHandlerSave(JnEntityLoginPassword.ENTITY);
-		JnExecuteBulkOperation.INSTANCE.
-		executeSelectUnionAllThenExecuteBulkOperation(
+		JnExecuteBulkOperation.INSTANCE
+		.executeSelectUnionAllThenExecuteBulkOperation(
 				renameField 
 				, JnDeleteKeysFromCache.INSTANCE
 				, updatePassword
@@ -49,6 +49,10 @@ public class JnBusinessUpdatePassword implements CcpBusiness {
 				);
 		
 		return CcpOtherConstants.EMPTY_JSON;
+	}
+
+	public Class<?> getJsonValidationClass() {
+		return JnServiceLogin.SavePassword.getJsonValidationClass();
 	}
 	
 }

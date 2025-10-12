@@ -16,8 +16,6 @@ import com.ccp.especifications.db.bulk.CcpBulkOperationResult;
 import com.ccp.especifications.db.bulk.CcpDbBulkExecutor;
 import com.ccp.especifications.db.bulk.CcpEntityBulkOperationType;
 import com.ccp.especifications.db.bulk.CcpExecuteBulkOperation;
-import com.ccp.especifications.db.bulk.handlers.CcpBulkHandlerSave;
-import com.ccp.especifications.db.bulk.handlers.CcpBulkHandlerSaveTwin;
 import com.ccp.especifications.db.crud.CcpCrud;
 import com.ccp.especifications.db.crud.CcpHandleWithSearchResultsInTheEntity;
 import com.ccp.especifications.db.crud.CcpSelectUnionAll;
@@ -145,39 +143,6 @@ public class JnExecuteBulkOperation implements CcpExecuteBulkOperation{
 		return unionAll;
 	}
 
-	@SuppressWarnings("unchecked")
-	public CcpJsonRepresentation executeSelectUnionAllThenSaveInTheMainAndTwinEntities(CcpJsonRepresentation json, 
-			CcpEntity mainEntity, CcpBusiness whenPresentInMainEntityOrIsNewRecord) {
-		
-		CcpEntity supportEntity = mainEntity.getTwinEntity();
-		
-		CcpBulkHandlerSave saveMainEntity = new CcpBulkHandlerSave(mainEntity);
-		
-		CcpBulkHandlerSaveTwin saveSupportEntity = new CcpBulkHandlerSaveTwin(supportEntity);
-		
-		CcpHandleWithSearchResultsInTheEntity<List<CcpBulkItem>>[] array = new CcpHandleWithSearchResultsInTheEntity[]{
-				saveMainEntity,
-				saveSupportEntity
-		};
-		
-		CcpSelectUnionAll result = this.executeSelectUnionAllThenExecuteBulkOperation(json, JnDeleteKeysFromCache.INSTANCE, array);
-		
-		boolean isPresentInMainEntity = mainEntity.isPresentInThisUnionAll(result, json);
-		
-		if(isPresentInMainEntity) {
-			CcpJsonRepresentation apply = whenPresentInMainEntityOrIsNewRecord.apply(json);
-			return apply;
-		}
-		
-		boolean isNewRecord = false == supportEntity.isPresentInThisUnionAll(result, json);
-
-		if(isNewRecord) {
-			CcpJsonRepresentation apply = whenPresentInMainEntityOrIsNewRecord.apply(json);
-			return apply;
-		}
-			
-		return json;
-	}
 
 	public JnExecuteBulkOperation executeBulk(CcpJsonRepresentation json, CcpEntityBulkOperationType operation, CcpEntity...entities) {
 		

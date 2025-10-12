@@ -13,12 +13,13 @@ import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault
 import com.jn.json.fields.validation.JnJsonCommonsFields;
 @CcpEntityTwin(
 		twinEntityName = "contact_us_solved" 
-		,afterReactivate = {},
-		afterInactivate = {}
+		,afterRecordBeenTransportedFromTwinToMainEntity = {},
+		afterRecordBeenTransportedFromMainToTwinEntity = {}
 		)
 @CcpEntitySpecifications(
 		entityFieldsTransformers = JnJsonTransformersFieldsEntityDefault.class,
 		entityValidation = JnEntityContactUs.Fields.class,
+		beforeSaveRecord = {},
 		cacheableEntity = true, 
 		afterSaveRecord = {},
 		afterDeleteRecord = {} 

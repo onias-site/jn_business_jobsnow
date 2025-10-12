@@ -19,13 +19,14 @@ import com.jn.json.fields.validation.JnJsonCommonsFields;
 		entityFieldsTransformers = JnJsonTransformersFieldsEntityDefault.class,
 		entityValidation = JnEntityContactUsIgnored.Fields.class,
 		cacheableEntity = true, 
+		beforeSaveRecord = {},
 		afterSaveRecord = {},
 		afterDeleteRecord = {} 
 		)
 @CcpEntityTwin(
 		twinEntityName = "contact_us_reread"
-		,afterReactivate = {},
-		afterInactivate = {}
+		,afterRecordBeenTransportedFromTwinToMainEntity = {},
+		afterRecordBeenTransportedFromMainToTwinEntity = {}
 		)
 public class JnEntityContactUsIgnored implements CcpEntityConfigurator {
 	

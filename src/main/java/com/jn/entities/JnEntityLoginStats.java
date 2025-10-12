@@ -18,6 +18,7 @@ import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault
 		entityFieldsTransformers = JnJsonTransformersFieldsEntityDefault.class,
 		entityValidation = JnEntityLoginStats.Fields.class,
 		cacheableEntity = true, 
+		beforeSaveRecord = {},
 		afterSaveRecord = {},
 		afterDeleteRecord = {} 
 )

@@ -9,19 +9,19 @@ import com.ccp.especifications.db.utils.decorators.engine.CcpEntityConfigurator;
 import com.ccp.especifications.db.utils.decorators.engine.CcpEntityFactory;
 import com.ccp.json.validations.fields.annotations.CcpJsonCopyFieldValidationsFrom;
 import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidatorRequired;
-import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeString;
 import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
 @CcpEntityTwin(
 		twinEntityName = "login_password_locked"
-		,afterReactivate = {},
-		afterInactivate = {}
+		,afterRecordBeenTransportedFromTwinToMainEntity = {}
+		,afterRecordBeenTransportedFromMainToTwinEntity = {}
 		)
 
 @CcpEntitySpecifications(
 		entityFieldsTransformers = JnJsonTransformersFieldsEntityDefault.class,
 		entityValidation = JnEntityLoginPassword.Fields.class,
 		cacheableEntity = true, 
+		beforeSaveRecord = {},
 		afterSaveRecord = {},
 		afterDeleteRecord = {} 
 )
@@ -35,7 +35,7 @@ public class JnEntityLoginPassword implements CcpEntityConfigurator {
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		email, 
 		@CcpJsonFieldValidatorRequired
-		@CcpJsonFieldTypeString
+		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		password
 		;
 	}
