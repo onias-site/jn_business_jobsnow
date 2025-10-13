@@ -30,13 +30,13 @@ public enum JnJsonCommonsFields{
 	@CcpJsonFieldTypeNestedJson
 	json,
 	
-	@CcpJsonFieldTypeString(maxLength = 20)
+	@CcpJsonFieldTypeString(maxLength = 100)
 	subjectType, 
 	
 	@CcpJsonFieldTypeString(regexValidation = CcpEmailDecorator.EMAIL_REGEX, minLength = 7, maxLength = 100)
 	email, 
 	
-	@CcpJsonFieldTypeString(maxLength = 30)
+	@CcpJsonFieldTypeString(maxLength = 100)
 	subject, 
 	
 	@CcpJsonFieldTypeString(minLength = 5, maxLength = 500)
@@ -75,9 +75,6 @@ public enum JnJsonCommonsFields{
 	@CcpJsonFieldTypeString
 	status,
 	
-	@CcpJsonFieldTypeString(minLength = 8, maxLength = 20)
-	token,
-	
 	@CcpJsonFieldTypeString
 	recipient,
 	
@@ -108,6 +105,4 @@ public enum JnJsonCommonsFields{
 	@CcpJsonFieldTypeNumberUnsigned(minValue = 200, maxValue = 599)
 	httpStatus,
 	
-	@CcpJsonFieldTypeString(minLength = 8, maxLength = 20)
-	password,
 }

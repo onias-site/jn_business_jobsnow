@@ -27,7 +27,6 @@ public final class JnEntityVersionable extends CcpEntityDelegator implements Ccp
 		super(entity);
 	}
 	
-	
 	private boolean isVersionableEntity() {
 		List<String> primaryKeyNames = this.entity.getPrimaryKeyNames();
 		int primaryKeyFieldsSize = primaryKeyNames.size();
@@ -75,15 +74,15 @@ public final class JnEntityVersionable extends CcpEntityDelegator implements Ccp
 	}
 	
 	public CcpJsonRepresentation createOrUpdate(CcpJsonRepresentation json) {
-		
-		List<CcpBulkItem> bulkItems = this.toBulkItems(json, CcpEntityBulkOperationType.create);
+		CcpJsonRepresentation handledJson = this.getTransformedJsonByEachFieldInJson(json);
+		this.validateJson(handledJson.putAll(json));
+		CcpJsonRepresentation transformedJsonBeforeOperation = this.getTransformedJsonBeforeOperation(handledJson, CcpEntityCrudOperationType.save);
+		CcpJsonRepresentation onlyExistingFields = this.getOnlyExistingFields(transformedJsonBeforeOperation);
+	
+		List<CcpBulkItem> bulkItems = this.toBulkItems(onlyExistingFields, CcpEntityBulkOperationType.create);
 		JnExecuteBulkOperation.INSTANCE.executeBulk(bulkItems);
-		return json;
-	}
-	public CcpJsonRepresentation createOrUpdate(CcpJsonRepresentation json, String id) {
-		List<CcpBulkItem> bulkItems = this.toBulkItems(json, CcpEntityBulkOperationType.create);
-		JnExecuteBulkOperation.INSTANCE.executeBulk(bulkItems);
-		return json;
+		CcpJsonRepresentation transformedJsonAfterOperation = this.getTransformedJsonAfterOperation(transformedJsonBeforeOperation, CcpEntityCrudOperationType.save);
+		return transformedJsonAfterOperation;
 	}
 
 	public CcpEntity getEntity(CcpEntity entity) {
