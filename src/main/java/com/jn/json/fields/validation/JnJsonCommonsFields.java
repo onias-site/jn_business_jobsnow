@@ -10,7 +10,7 @@ public enum JnJsonCommonsFields{
 	@CcpJsonFieldTypeString
 	request, 
 	
-	@CcpJsonFieldTypeString
+	@CcpJsonFieldTypeString(allowsEmptyString = true)
 	operation,
 	
 	@CcpJsonFieldTypeString(maxLength = 500)

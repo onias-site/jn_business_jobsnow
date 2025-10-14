@@ -65,16 +65,11 @@ public final class JnEntityVersionable extends CcpEntityDelegator implements Ccp
 		return json;
 	}
 	
-	public CcpJsonRepresentation save(CcpJsonRepresentation json) {
-		CcpJsonRepresentation handledJson = this.getTransformedJsonByEachFieldInJson(json);
-		this.validateJson(handledJson.putAll(json));
-		CcpJsonRepresentation transformedJsonBeforeOperation = this.getTransformedJsonBeforeOperation(handledJson, CcpEntityCrudOperationType.save);
-		CcpJsonRepresentation onlyExistingFields = this.getOnlyExistingFields(transformedJsonBeforeOperation);
-	
-		List<CcpBulkItem> bulkItems = this.toBulkItems(onlyExistingFields, CcpEntityBulkOperationType.create);
+	public CcpJsonRepresentation save(CcpJsonRepresentation json, String id) {
+		
+		List<CcpBulkItem> bulkItems = this.toBulkItems(json, CcpEntityBulkOperationType.create);
 		JnExecuteBulkOperation.INSTANCE.executeBulk(bulkItems);
-		CcpJsonRepresentation transformedJsonAfterOperation = this.getTransformedJsonAfterOperation(transformedJsonBeforeOperation, CcpEntityCrudOperationType.save);
-		return transformedJsonAfterOperation;
+		return json;
 	}
 
 	public CcpEntity getEntity(CcpEntity entity) {

@@ -20,7 +20,7 @@ public class JnAsyncWriterEntity extends CcpEntityDelegator implements CcpEntity
 		return new JnAsyncWriterEntity(entity);
 	}
 	
-	public CcpJsonRepresentation save(CcpJsonRepresentation json) {
+	public CcpJsonRepresentation save(CcpJsonRepresentation json, String id) {
 		JnFunctionMensageriaSender sender = new JnFunctionMensageriaSender(this.entity, CcpEntityCrudOperationType.save);
 		CcpJsonRepresentation apply = sender.apply(json);
 		return apply;
