@@ -4,7 +4,7 @@ import com.ccp.constantes.CcpOtherConstants;
 import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.decorators.CcpJsonRepresentation.CcpJsonFieldName;
 import com.ccp.especifications.db.crud.CcpGetEntityId;
-import com.ccp.especifications.db.utils.CcpEntityCrudOperationType;
+import com.ccp.especifications.db.utils.CcpEntityOperationType;
 import com.ccp.business.CcpBusiness;
 import com.ccp.json.validations.fields.annotations.CcpJsonCopyFieldValidationsFrom;
 import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidatorRequired;
@@ -37,7 +37,7 @@ import com.jn.utils.JnDeleteKeysFromCache;
 public enum JnServiceLogin implements JnService {
 	ExecuteLogin {
 		public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
-			CcpBusiness lockPassword = JnEntityLoginPassword.ENTITY.getOperationCallback(CcpEntityCrudOperationType.transferToReverseEntity);
+			CcpBusiness lockPassword = JnEntityLoginPassword.ENTITY.getOperationCallback(CcpEntityOperationType.transferToReverseEntity);
 			JnFunctionMensageriaSender executeLogin = new JnFunctionMensageriaSender(JnBusinessExecuteLogin.INSTANCE);
 			CcpBusiness evaluateTries =
 					new JnBusinessEvaluateAttempts(
@@ -80,7 +80,7 @@ public enum JnServiceLogin implements JnService {
 	},
 	CreateLoginEmail {
 		public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
-			CcpBusiness action = JnEntityLoginEmail.ENTITY.getOperationCallback(CcpEntityCrudOperationType.save);
+			CcpBusiness action = JnEntityLoginEmail.ENTITY.getOperationCallback(CcpEntityOperationType.save);
 			CcpJsonRepresentation result = new CcpGetEntityId(json)
 			.toBeginProcedureAnd()
 				.ifThisIdIsPresentInEntity(JnEntityLoginToken.ENTITY.getTwinEntity()).returnStatus(JnProcessStatusCreateLoginEmail.lockedToken).and()
@@ -127,7 +127,7 @@ public enum JnServiceLogin implements JnService {
 	},
 	SaveAnswers {
 		public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
-			CcpBusiness action = JnEntityLoginAnswers.ENTITY.getOperationCallback(CcpEntityCrudOperationType.save);
+			CcpBusiness action = JnEntityLoginAnswers.ENTITY.getOperationCallback(CcpEntityOperationType.save);
 			 
 			new CcpGetEntityId(json)
 			.toBeginProcedureAnd()
@@ -162,7 +162,7 @@ public enum JnServiceLogin implements JnService {
 	},
 	SavePassword {
 		public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
-			CcpBusiness lockToken = JnEntityLoginToken.ENTITY.getOperationCallback(CcpEntityCrudOperationType.transferToReverseEntity);
+			CcpBusiness lockToken = JnEntityLoginToken.ENTITY.getOperationCallback(CcpEntityOperationType.transferToReverseEntity);
 			JnFunctionMensageriaSender updatePassword = new JnFunctionMensageriaSender(JnBusinessUpdatePassword.INSTANCE);
 			CcpBusiness evaluateAttempts =
 					new JnBusinessEvaluateAttempts(

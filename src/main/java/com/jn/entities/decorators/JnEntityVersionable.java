@@ -9,7 +9,7 @@ import com.ccp.decorators.CcpTimeDecorator;
 import com.ccp.especifications.db.bulk.CcpBulkItem;
 import com.ccp.especifications.db.bulk.CcpEntityBulkOperationType;
 import com.ccp.especifications.db.utils.CcpEntity;
-import com.ccp.especifications.db.utils.CcpEntityCrudOperationType;
+import com.ccp.especifications.db.utils.CcpEntityOperationType;
 import com.ccp.especifications.db.utils.CcpEntityField;
 import com.ccp.especifications.db.utils.decorators.engine.CcpEntityDecoratorFactory;
 import com.ccp.especifications.db.utils.decorators.engine.CcpEntityDelegator;
@@ -77,7 +77,7 @@ public final class JnEntityVersionable extends CcpEntityDelegator implements Ccp
 		return jnEntityVersionable;
 	}
 	
-	public CcpBusiness getOperationCallback(CcpEntityCrudOperationType operation){
+	public CcpBusiness getOperationCallback(CcpEntityOperationType operation){
 		return json -> operation.execute(this, json);
 	}
 

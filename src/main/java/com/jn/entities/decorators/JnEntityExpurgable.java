@@ -15,7 +15,7 @@ import com.ccp.especifications.db.crud.CcpCrud;
 import com.ccp.especifications.db.crud.CcpSelectUnionAll;
 import com.ccp.especifications.db.utils.CcpDbRequester;
 import com.ccp.especifications.db.utils.CcpEntity;
-import com.ccp.especifications.db.utils.CcpEntityCrudOperationType;
+import com.ccp.especifications.db.utils.CcpEntityOperationType;
 import com.ccp.especifications.db.utils.CcpErrorBulkEntityRecordNotFound;
 import com.ccp.especifications.db.utils.decorators.engine.CcpEntityDelegator;
 import com.ccp.especifications.db.utils.decorators.engine.CcpEntityExpurgableFactory;
@@ -120,11 +120,11 @@ public final class JnEntityExpurgable extends CcpEntityDelegator implements CcpE
 	public CcpJsonRepresentation save(CcpJsonRepresentation json) {
 		CcpJsonRepresentation handledJson = this.getTransformedJsonByEachFieldInJson(json);
 		this.validateJson(handledJson.putAll(json));
-		CcpJsonRepresentation transformedJsonBeforeOperation = this.getTransformedJsonBeforeOperation(handledJson, CcpEntityCrudOperationType.save);
+		CcpJsonRepresentation transformedJsonBeforeOperation = this.getTransformedJsonBeforeOperation(handledJson, CcpEntityOperationType.save);
 		CcpJsonRepresentation onlyExistingFields = this.getOnlyExistingFields(transformedJsonBeforeOperation);
 		String id = this.getId(json);
 		this.save(onlyExistingFields, id);
-		CcpJsonRepresentation transformedJsonAfterOperation = this.getTransformedJsonAfterOperation(transformedJsonBeforeOperation, CcpEntityCrudOperationType.save);
+		CcpJsonRepresentation transformedJsonAfterOperation = this.getTransformedJsonAfterOperation(transformedJsonBeforeOperation, CcpEntityOperationType.save);
 		return transformedJsonAfterOperation;
 	}
 	
@@ -369,7 +369,7 @@ public final class JnEntityExpurgable extends CcpEntityDelegator implements CcpE
 		return jnEntityExpurgable;
 	}	
 	
-	public CcpBusiness getOperationCallback(CcpEntityCrudOperationType operation){
+	public CcpBusiness getOperationCallback(CcpEntityOperationType operation){
 		return json -> operation.execute(this, json);
 	}
 

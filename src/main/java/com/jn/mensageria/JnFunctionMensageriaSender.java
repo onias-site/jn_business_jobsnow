@@ -14,7 +14,7 @@ import com.ccp.dependency.injection.CcpDependencyInjection;
 import com.ccp.especifications.db.bulk.CcpBulkItem;
 import com.ccp.especifications.db.bulk.CcpEntityBulkOperationType;
 import com.ccp.especifications.db.utils.CcpEntity;
-import com.ccp.especifications.db.utils.CcpEntityCrudOperationType;
+import com.ccp.especifications.db.utils.CcpEntityOperationType;
 import com.ccp.especifications.db.utils.decorators.engine.CcpEntityExpurgableOptions;
 import com.ccp.business.CcpBusiness;
 import com.ccp.especifications.mensageria.sender.CcpMensageriaSender;
@@ -39,7 +39,7 @@ public class JnFunctionMensageriaSender implements CcpBusiness {
 		this.operation = "";
 	}
 
-	protected JnFunctionMensageriaSender(CcpEntity entity, CcpEntityCrudOperationType operation) {
+	protected JnFunctionMensageriaSender(CcpEntity entity, CcpEntityOperationType operation) {
 		this.jsonValidationClass = operation.getJsonValidationClass(entity);
 		Class<?> configurationClass = entity.getConfigurationClass();
 		this.topic = configurationClass.getName();
