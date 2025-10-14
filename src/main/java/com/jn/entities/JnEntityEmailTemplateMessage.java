@@ -28,7 +28,7 @@ import com.jn.utils.JnLanguage;
 		afterSaveRecord = {},
 		flow = {}
 )
-@CcpEntityDecorators(decorators = JnEntityVersionable.class)
+@CcpEntityDecorators(JnEntityVersionable.class)
 public class JnEntityEmailTemplateMessage  implements CcpEntityConfigurator{
 
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityEmailTemplateMessage.class).entityInstance;

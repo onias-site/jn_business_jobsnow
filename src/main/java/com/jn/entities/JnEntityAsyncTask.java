@@ -48,9 +48,6 @@ public class JnEntityAsyncTask implements CcpEntityConfigurator {
 		messageId, 
 		@CcpJsonFieldTypeBoolean
 		success,
-		@CcpJsonFieldValidatorRequired
-		@CcpJsonFieldTypeString
-		operationType,
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		operation,
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)

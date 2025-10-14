@@ -27,7 +27,7 @@ public enum JnJsonTransformersFieldsEntityDefault implements CcpJsonTransformers
 			String value = json.getAsString(oldField);
 			CcpEmailDecorator email = new CcpStringDecorator(value).email();
 			
-			boolean isNotAnEmail = email.isValid() == false;
+			boolean isNotAnEmail = false == email.isValid();
 			
 			if(isNotAnEmail) {
 				throw new JnErrorIsNotAnEmail(value, json);

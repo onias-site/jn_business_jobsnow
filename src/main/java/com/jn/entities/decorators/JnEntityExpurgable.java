@@ -118,7 +118,7 @@ public final class JnEntityExpurgable extends CcpEntityDelegator implements CcpE
 	}
 
 	
-	public CcpJsonRepresentation createOrUpdate(CcpJsonRepresentation json) {
+	public CcpJsonRepresentation save(CcpJsonRepresentation json) {
 		
 		CcpJsonRepresentation handledJson = this.getTransformedJsonByEachFieldInJson(json);
 		this.validateJson(handledJson.putAll(json));
@@ -141,19 +141,6 @@ public final class JnEntityExpurgable extends CcpEntityDelegator implements CcpE
 		return json;
 	}
 
-	public boolean delete(String id) {
-		
-		boolean delete =  this.entity.delete(id);
-		
-		if(delete == false) {
-			return false;
-		}
-		CcpJsonRepresentation json = this.getOneById(id);
-		List<CcpBulkItem> bulkItems = this.toBulkItems(json, CcpEntityBulkOperationType.delete);
-		JnExecuteBulkOperation.INSTANCE.executeBulk(bulkItems);
-		return true;
-	}
-	
 	public boolean exists(CcpJsonRepresentation json) {
 		
 		CcpJsonRepresentation expurgableId = this.getExpurgableId(json);
@@ -167,7 +154,7 @@ public final class JnEntityExpurgable extends CcpEntityDelegator implements CcpE
 			return true;
 		}
 	
-		boolean isNotPresentInCopyEntity = JnEntityDisposableRecord.ENTITY.isPresentInThisUnionAll(unionAll, expurgableId) == false;
+		boolean isNotPresentInCopyEntity = false == JnEntityDisposableRecord.ENTITY.isPresentInThisUnionAll(unionAll, expurgableId);
 		
 		if(isNotPresentInCopyEntity) {
 			return false;
@@ -201,7 +188,7 @@ public final class JnEntityExpurgable extends CcpEntityDelegator implements CcpE
 			return requiredEntityRow;
 		}
 	
-		boolean isNotPresentInCopyEntity = JnEntityDisposableRecord.ENTITY.isPresentInThisUnionAll(unionAll, allValuesTogether) == false;
+		boolean isNotPresentInCopyEntity = false == JnEntityDisposableRecord.ENTITY.isPresentInThisUnionAll(unionAll, allValuesTogether);
 
 		if(isNotPresentInCopyEntity) {
 			String calculateId = this.getId(allValuesTogether);
@@ -239,7 +226,7 @@ public final class JnEntityExpurgable extends CcpEntityDelegator implements CcpE
 			return requiredEntityRow;
 		}
 	
-		boolean isNotPresentInCopyEntity = JnEntityDisposableRecord.ENTITY.isPresentInThisUnionAll(unionAll, allValuesTogether) == false;
+		boolean isNotPresentInCopyEntity = false == JnEntityDisposableRecord.ENTITY.isPresentInThisUnionAll(unionAll, allValuesTogether);
 
 		if(isNotPresentInCopyEntity) {
 			CcpJsonRepresentation apply = ifNotFound.apply(allValuesTogether);
@@ -307,7 +294,7 @@ public final class JnEntityExpurgable extends CcpEntityDelegator implements CcpE
 		
 		CcpJsonRepresentation expurgableId = this.getExpurgableId(json);
 
-		boolean notFoundInDisposable = JnEntityDisposableRecord.ENTITY.isPresentInThisUnionAll(unionAll, expurgableId) == false;
+		boolean notFoundInDisposable = false == JnEntityDisposableRecord.ENTITY.isPresentInThisUnionAll(unionAll, expurgableId);
 		
 		if(notFoundInDisposable) {
 			return false;
@@ -328,7 +315,7 @@ public final class JnEntityExpurgable extends CcpEntityDelegator implements CcpE
 		
 		String timeStampFieldName = JnEntityDisposableRecord.Fields.timestamp.name();
 		
-		boolean recordNotFound = requiredEntityRow.getDynamicVersion().containsAllFields(timeStampFieldName) == false;
+		boolean recordNotFound = false == requiredEntityRow.getDynamicVersion().containsAllFields(timeStampFieldName);
 	
 		if(recordNotFound) {
 			return false;
@@ -349,7 +336,7 @@ public final class JnEntityExpurgable extends CcpEntityDelegator implements CcpE
 		
 		CcpJsonRepresentation recordFromUnionAll = unionAll.getEntityRow(index, id);
 
-		boolean recordFound = recordFromUnionAll.isEmpty() == false;
+		boolean recordFound = false == recordFromUnionAll.isEmpty();
 		
 		if(recordFound) {
 			return recordFromUnionAll;
@@ -358,7 +345,7 @@ public final class JnEntityExpurgable extends CcpEntityDelegator implements CcpE
 		CcpJsonRepresentation expurgableId = this.getExpurgableId(json);
 		CcpJsonRepresentation recordFromDisposable = JnEntityDisposableRecord.ENTITY.getRecordFromUnionAll(unionAll, expurgableId);
 		
-		boolean isInvalid = this.isValidTimestamp(recordFromDisposable) == false;
+		boolean isInvalid = false == this.isValidTimestamp(recordFromDisposable);
 	
 		if(isInvalid) {
 			throw new CcpErrorBulkEntityRecordNotFound(this, expurgableId);

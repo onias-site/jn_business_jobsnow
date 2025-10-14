@@ -55,7 +55,7 @@ public class JnBusinessSendInstantMessage {
 		try {
 			CcpJsonRepresentation instantMessengerData = instantMessenger.sendMessage(json);
 			CcpJsonRepresentation instantMessageSent = json.putAll(instantMessengerData);
-			JnEntityInstantMessengerMessageSent.ENTITY.createOrUpdate(instantMessageSent);
+			JnEntityInstantMessengerMessageSent.ENTITY.save(instantMessageSent);
 			return json;
 		} catch (CcpErrorInstantMessageTooManyRequests e) {
 			
@@ -84,7 +84,7 @@ public class JnBusinessSendInstantMessage {
 	}
 
 	private CcpJsonRepresentation saveBlockedBot(CcpJsonRepresentation putAll, String token) {
-		JnEntityInstantMessengerBotLocked.ENTITY.createOrUpdate(putAll.put(JnEntityInstantMessengerBotLocked.Fields.token, token));
+		JnEntityInstantMessengerBotLocked.ENTITY.save(putAll.put(JnEntityInstantMessengerBotLocked.Fields.token, token));
 		return putAll;
 	}
 

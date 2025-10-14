@@ -34,7 +34,7 @@ public class JnBusinessSendHttpRequest {
 			CcpJsonRepresentation httpErrorDetails = e.entity.putAll(jsonWithHttpApiParameters).put(JnEntityHttpApiErrorClient.Fields.details, details);
 			String request = httpErrorDetails.getAsString(JnEntityHttpApiErrorClient.Fields.request);
 			httpErrorDetails = httpErrorDetails.put(JnEntityHttpApiErrorClient.Fields.request, request);
-			JnEntityHttpApiErrorClient.ENTITY.createOrUpdate(httpErrorDetails);
+			JnEntityHttpApiErrorClient.ENTITY.save(httpErrorDetails);
 			throw e;
 		}
 	}
@@ -44,7 +44,7 @@ public class JnBusinessSendHttpRequest {
 		boolean exceededTries = JnEntityHttpApiRetrySendRequest.exceededTries(httpErrorDetails, JnEntityHttpApiRetrySendRequest.Fields.attempts.name(), maxTries);
 		
 		if(exceededTries) {
-			JnEntityHttpApiErrorServer.ENTITY.createOrUpdate(httpErrorDetails);
+			JnEntityHttpApiErrorServer.ENTITY.save(httpErrorDetails);
 			throw e;
 		}
 		

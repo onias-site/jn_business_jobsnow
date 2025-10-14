@@ -88,24 +88,13 @@ public class JnExecuteBulkOperation implements CcpExecuteBulkOperation{
 
 	private JnExecuteBulkOperation deleteKeysFromCache(List<CcpBulkOperationResult> allResults) {
 		Set<String> keysToDeleteInCache = new ArrayList<>(allResults).stream()
-		.filter(x -> x.hasError() == false)
+		.filter(x -> false == x.hasError())
 		.map(x -> x.getCacheKey())
 		.collect(Collectors.toSet());
 		String[] array = keysToDeleteInCache.toArray(new String[keysToDeleteInCache.size()]);
 		
 		JnDeleteKeysFromCache.INSTANCE.accept(array);
 		return this;
-	}
-	
-	public CcpSelectUnionAll changeStatus(CcpJsonRepresentation json, CcpEntity entity) {
-		CcpCrud crud = CcpDependencyInjection.getDependency(CcpCrud.class);
-		CcpSelectUnionAll unionAll = crud.unionBetweenMainAndTwinEntities(json, JnDeleteKeysFromCache.INSTANCE, entity);
-		CcpEntity twinEntity = entity.getTwinEntity();
-		CcpBulkItem twin = twinEntity.toBulkItemToCreateOrDelete(unionAll, json);
-		CcpBulkItem main = entity.toBulkItemToCreateOrDelete(unionAll, json);
-		
-		this.executeBulk(main, twin);
-		return unionAll;
 	}
 	
 	@SuppressWarnings("unchecked")

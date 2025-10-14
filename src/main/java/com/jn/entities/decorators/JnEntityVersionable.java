@@ -59,21 +59,13 @@ public final class JnEntityVersionable extends CcpEntityDelegator implements Ccp
 	}
 	
 
-	public boolean delete(String id) {
-		boolean delete = this.entity.delete(id);
-		CcpJsonRepresentation json = this.entity.getOneById(id);
-		List<CcpBulkItem> bulkItems = this.toBulkItems(json, CcpEntityBulkOperationType.delete);
-		JnExecuteBulkOperation.INSTANCE.executeBulk(bulkItems);
-		return delete;
-	}
-
 	public CcpJsonRepresentation delete(CcpJsonRepresentation json) {
 		List<CcpBulkItem> bulkItems = this.toBulkItems(json, CcpEntityBulkOperationType.delete);
 		JnExecuteBulkOperation.INSTANCE.executeBulk(bulkItems);
 		return json;
 	}
 	
-	public CcpJsonRepresentation createOrUpdate(CcpJsonRepresentation json) {
+	public CcpJsonRepresentation save(CcpJsonRepresentation json) {
 		CcpJsonRepresentation handledJson = this.getTransformedJsonByEachFieldInJson(json);
 		this.validateJson(handledJson.putAll(json));
 		CcpJsonRepresentation transformedJsonBeforeOperation = this.getTransformedJsonBeforeOperation(handledJson, CcpEntityCrudOperationType.save);

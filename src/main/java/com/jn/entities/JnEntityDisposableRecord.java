@@ -14,7 +14,7 @@ import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeString;
 import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
 
-@CcpEntityDecorators(decorators = CcpEntityReadOnly.class)
+@CcpEntityDecorators(CcpEntityReadOnly.class)
 @CcpEntitySpecifications(
 		entityFieldsTransformers = JnJsonTransformersFieldsEntityDefault.class,
 		entityValidation = JnEntityDisposableRecord.Fields.class,

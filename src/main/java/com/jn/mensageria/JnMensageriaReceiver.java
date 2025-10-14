@@ -14,7 +14,7 @@ import com.jn.utils.JnDeleteKeysFromCache;
 public class JnMensageriaReceiver extends CcpMensageriaReceiver{
 	
 	private JnMensageriaReceiver() {
-		super(JnEntityAsyncTask.Fields.operationType.name(), JnEntityAsyncTask.Fields.operation.name());
+		super(JnEntityAsyncTask.Fields.operation.name());
 	}
 	
 	public static final JnMensageriaReceiver INSTANCE = new JnMensageriaReceiver();
@@ -65,7 +65,7 @@ public class JnMensageriaReceiver extends CcpMensageriaReceiver{
 				.put(JnEntityAsyncTask.Fields.response, response)
 				.put(JnEntityAsyncTask.Fields.finished, finished)
 				.put(JnEntityAsyncTask.Fields.success, success);
-		entity.createOrUpdate(processResult);
+		entity.save(processResult);
 		return this;
 	}
 

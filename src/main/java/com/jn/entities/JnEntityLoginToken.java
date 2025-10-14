@@ -11,10 +11,8 @@ import com.ccp.json.validations.fields.annotations.CcpJsonCopyFieldValidationsFr
 import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidatorRequired;
 import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
-
 @CcpEntityTwin(
 		twinEntityName = "login_token_locked"
-
 		,afterRecordBeenTransportedFromTwinToMainEntity = {},
 		afterRecordBeenTransportedFromMainToTwinEntity = {}
 		)

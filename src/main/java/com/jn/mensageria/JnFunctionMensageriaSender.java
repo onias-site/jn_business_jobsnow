@@ -16,9 +16,7 @@ import com.ccp.especifications.db.bulk.CcpEntityBulkOperationType;
 import com.ccp.especifications.db.utils.CcpEntity;
 import com.ccp.especifications.db.utils.CcpEntityCrudOperationType;
 import com.ccp.especifications.db.utils.decorators.engine.CcpEntityExpurgableOptions;
-import com.ccp.especifications.mensageria.receiver.CcpBulkHandlers;
 import com.ccp.business.CcpBusiness;
-import com.ccp.especifications.mensageria.receiver.CcpMensageriaOperationType;
 import com.ccp.especifications.mensageria.sender.CcpMensageriaSender;
 import com.jn.db.bulk.JnExecuteBulkOperation;
 import com.jn.entities.JnEntityAsyncTask;
@@ -31,30 +29,19 @@ public class JnFunctionMensageriaSender implements CcpBusiness {
 	
 	private final CcpMensageriaSender mensageriaSender = CcpDependencyInjection.getDependency(CcpMensageriaSender.class);
 	
-	private final String operationType;
 	private final String operation;
 	private final Class<?> jsonValidationClass;
 	private final String topic;
 	
 	public JnFunctionMensageriaSender(CcpBusiness topic) {
-		this.topic = topic.getClass().getName();
-		this.operation = CcpEntityCrudOperationType.none.name();
 		this.jsonValidationClass = topic.getJsonValidationClass();
-		this.operationType = CcpMensageriaOperationType.none.name();
+		this.topic = topic.getClass().getName();
+		this.operation = "";
 	}
 
-	public JnFunctionMensageriaSender(CcpEntity entity, CcpEntityCrudOperationType operation) {
-		this.operationType = CcpMensageriaOperationType.entityCrud.name();
-		Class<?> configurationClass = entity.getConfigurationClass();
+	protected JnFunctionMensageriaSender(CcpEntity entity, CcpEntityCrudOperationType operation) {
 		this.jsonValidationClass = operation.getJsonValidationClass(entity);
-		this.topic = configurationClass.getName();
-		this.operation = operation.name();
-	}
-
-	public JnFunctionMensageriaSender(CcpEntity entity, CcpBulkHandlers operation) {
-		this.operationType = CcpMensageriaOperationType.entityBulkHandler.name();
 		Class<?> configurationClass = entity.getConfigurationClass();
-		this.jsonValidationClass = operation.getJsonValidationClass(entity);
 		this.topic = configurationClass.getName();
 		this.operation = operation.name();
 	}
@@ -71,7 +58,7 @@ public class JnFunctionMensageriaSender implements CcpBusiness {
 		
 		CcpJsonRepresentation messageDetails = this.getMessageDetails(put); 
 		
-		JnEntityAsyncTask.ENTITY.createOrUpdate(messageDetails);
+		JnEntityAsyncTask.ENTITY.save(messageDetails);
 		CcpJsonRepresentation put2 = messageDetails.put(JsonFieldNames.mensageriaReceiver, JnMensageriaReceiver.class.getName());
 		this.mensageriaSender.sendToMensageria(this.topic, this.jsonValidationClass, put2);
 
@@ -88,7 +75,6 @@ public class JnFunctionMensageriaSender implements CcpBusiness {
 		
 		CcpJsonRepresentation messageDetails = CcpOtherConstants.EMPTY_JSON
 				.put(JnEntityAsyncTask.Fields.started, System.currentTimeMillis())
-				.put(JnEntityAsyncTask.Fields.operationType, this.operationType)
 				.put(JnEntityAsyncTask.Fields.data, formattedCurrentDateTime)
 				.put(JnEntityAsyncTask.Fields.messageId, UUID.randomUUID())
 				.put(JnEntityAsyncTask.Fields.request, json.asPrettyJson())

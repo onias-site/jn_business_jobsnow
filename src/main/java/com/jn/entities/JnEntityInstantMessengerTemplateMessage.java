@@ -18,7 +18,7 @@ import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault
 import com.jn.json.fields.validation.JnJsonCommonsFields;
 import com.jn.utils.JnLanguage;
 
-@CcpEntityDecorators(decorators = JnEntityVersionable.class)
+@CcpEntityDecorators(JnEntityVersionable.class)
 @CcpEntitySpecifications(
 		entityFieldsTransformers = JnJsonTransformersFieldsEntityDefault.class,
 		entityValidation = JnEntityInstantMessengerTemplateMessage.Fields.class,

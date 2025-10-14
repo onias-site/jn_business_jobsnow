@@ -5,7 +5,6 @@ import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.decorators.CcpJsonRepresentation.CcpJsonFieldName;
 import com.ccp.especifications.db.crud.CcpGetEntityId;
 import com.ccp.especifications.db.utils.CcpEntityCrudOperationType;
-import com.ccp.especifications.mensageria.receiver.CcpBulkHandlers;
 import com.ccp.business.CcpBusiness;
 import com.ccp.json.validations.fields.annotations.CcpJsonCopyFieldValidationsFrom;
 import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidatorRequired;
@@ -38,7 +37,7 @@ import com.jn.utils.JnDeleteKeysFromCache;
 public enum JnServiceLogin implements JnService {
 	ExecuteLogin {
 		public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
-			JnFunctionMensageriaSender lockPassword = new JnFunctionMensageriaSender(JnEntityLoginPassword.ENTITY, CcpBulkHandlers.transferToReverseEntity);
+			CcpBusiness lockPassword = JnEntityLoginPassword.ENTITY.getOperationCallback(CcpEntityCrudOperationType.transferToReverseEntity);
 			JnFunctionMensageriaSender executeLogin = new JnFunctionMensageriaSender(JnBusinessExecuteLogin.INSTANCE);
 			CcpBusiness evaluateTries =
 					new JnBusinessEvaluateAttempts(
@@ -163,7 +162,7 @@ public enum JnServiceLogin implements JnService {
 	},
 	SavePassword {
 		public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
-			JnFunctionMensageriaSender lockToken = new JnFunctionMensageriaSender(JnEntityLoginToken.ENTITY, CcpBulkHandlers.transferToReverseEntity);
+			CcpBusiness lockToken = JnEntityLoginToken.ENTITY.getOperationCallback(CcpEntityCrudOperationType.transferToReverseEntity);
 			JnFunctionMensageriaSender updatePassword = new JnFunctionMensageriaSender(JnBusinessUpdatePassword.INSTANCE);
 			CcpBusiness evaluateAttempts =
 					new JnBusinessEvaluateAttempts(

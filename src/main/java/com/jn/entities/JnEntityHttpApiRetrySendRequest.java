@@ -38,8 +38,8 @@ public class JnEntityHttpApiRetrySendRequest implements CcpEntityConfigurator {
 			
 			boolean exists = ENTITY.exists(put);
 			
-			if(exists == false) {
-				ENTITY.createOrUpdate(put);
+			if(false == exists) {
+				ENTITY.save(put);
 				return false;
 			}
 		}

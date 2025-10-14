@@ -111,7 +111,7 @@ public class JnSendMessageToUser {
 			k++;
 		}
 		CcpJsonRepresentation renameField = entityValues.renameField(JsonFieldNames.msg, JsonFieldNames.message);
-		entityToSave.createOrUpdate(renameField);
+		entityToSave.save(renameField);
 		return entityValues;
 	}
 }

@@ -44,7 +44,7 @@ public class JnBusinessNotifySupport {
 		.andWithTheSupportLanguage(supportLanguage)
 		.sendAllMessages();
 		
-		JnEntityJobsnowPenddingError.ENTITY.createOrUpdate(result);
+		JnEntityJobsnowPenddingError.ENTITY.save(result);
 		
 
 		return json;

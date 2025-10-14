@@ -40,7 +40,7 @@ public class JnBusinessSendEmailMessage implements CcpBusiness{
 		}
 		
 		JnBusinessSendHttpRequest.INSTANCE.execute(json, x -> emailSender.send(x),JnBusinessHttpRequestType.email, JnEntityEmailParametersToSend.Fields.subjectType.name());
-		JnEntityEmailMessageSent.ENTITY.createOrUpdate(json);
+		JnEntityEmailMessageSent.ENTITY.save(json);
 		return json;
 	}
 

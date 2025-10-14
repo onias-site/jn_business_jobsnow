@@ -1,15 +1,14 @@
 package com.jn.business.login;
 
+import com.ccp.business.CcpBusiness;
 import com.ccp.constantes.CcpOtherConstants;
 import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.decorators.CcpJsonRepresentation.CcpJsonFieldName;
 import com.ccp.dependency.injection.CcpDependencyInjection;
 import com.ccp.especifications.db.utils.CcpEntity;
-import com.ccp.business.CcpBusiness;
 import com.ccp.especifications.password.CcpPasswordHandler;
 import com.ccp.flow.CcpErrorFlowDisturb;
 import com.ccp.process.CcpProcessStatus;
-import com.jn.mensageria.JnFunctionMensageriaSender;
 
 public class JnBusinessEvaluateAttempts implements CcpBusiness{
 	enum JsonFieldNames implements CcpJsonFieldName{
@@ -28,9 +27,9 @@ public class JnBusinessEvaluateAttempts implements CcpBusiness{
 	
 	private final CcpProcessStatus statusToReturnWhenExceedAttempts;
 	
-	private final JnFunctionMensageriaSender topicToRegisterSuccess;
+	private final CcpBusiness topicToRegisterSuccess;
 
-	private final JnFunctionMensageriaSender topicToCreateTheLockWhenExceedTries;
+	private final CcpBusiness topicToCreateTheLockWhenExceedTries;
 	
 	private final String fieldAttempsName;
 	
@@ -43,8 +42,8 @@ public class JnBusinessEvaluateAttempts implements CcpBusiness{
 			String userFieldName, 
 			CcpProcessStatus statusToReturnWhenExceedAttempts, 
 			CcpProcessStatus statusToReturnWhenWrongType,
-			JnFunctionMensageriaSender topicToCreateTheLockWhenExceedTries,
-			JnFunctionMensageriaSender topicToRegisterSuccess,
+			CcpBusiness topicToCreateTheLockWhenExceedTries,
+			CcpBusiness topicToRegisterSuccess,
 			String fieldAttempsName,
 			String fieldEmailName
 			) { 
@@ -93,7 +92,7 @@ public class JnBusinessEvaluateAttempts implements CcpBusiness{
 				.getDynamicVersion().put(this.fieldAttempsName, attemptsFromDatabase + 1)
 				.getDynamicVersion().put(this.fieldEmailName, email)
 				;
-		this.entityToGetTheAttempts.createOrUpdate(put);
+		this.entityToGetTheAttempts.save(put);
 		throw new CcpErrorFlowDisturb(toReturn, this.statusToReturnWhenWrongType);
 	}
 	
