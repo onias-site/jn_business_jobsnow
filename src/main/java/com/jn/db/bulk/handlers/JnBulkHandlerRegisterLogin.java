@@ -5,9 +5,9 @@ import java.util.List;
 
 import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.especifications.db.bulk.CcpBulkItem;
-import com.ccp.especifications.db.bulk.CcpEntityBulkOperationType;
+import com.ccp.especifications.db.bulk.CcpBulkEntityOperationType;
 import com.ccp.especifications.db.crud.CcpHandleWithSearchResultsInTheEntity;
-import com.ccp.especifications.db.utils.CcpEntity;
+import com.ccp.especifications.db.utils.entity.CcpEntity;
 import com.jn.entities.JnEntityLoginSessionConflict;
 import com.jn.entities.JnEntityLoginSessionValidation;
 
@@ -25,8 +25,8 @@ public class JnBulkHandlerRegisterLogin implements CcpHandleWithSearchResultsInT
 	}
 
 	private List<CcpBulkItem> getBulkItems(CcpJsonRepresentation json) {
-		CcpBulkItem newSession = JnEntityLoginSessionConflict.ENTITY.getMainBulkItem(json, CcpEntityBulkOperationType.create);
-		CcpBulkItem newLogin = JnEntityLoginSessionValidation.ENTITY.getMainBulkItem(json, CcpEntityBulkOperationType.create);
+		CcpBulkItem newSession = JnEntityLoginSessionConflict.ENTITY.getMainBulkItem(json, CcpBulkEntityOperationType.create);
+		CcpBulkItem newLogin = JnEntityLoginSessionValidation.ENTITY.getMainBulkItem(json, CcpBulkEntityOperationType.create);
 		List<CcpBulkItem> asList = Arrays.asList(newLogin, newSession);
 		return asList;
 	}

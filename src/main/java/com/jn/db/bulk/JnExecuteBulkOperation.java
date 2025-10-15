@@ -13,13 +13,13 @@ import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.dependency.injection.CcpDependencyInjection;
 import com.ccp.especifications.db.bulk.CcpBulkItem;
 import com.ccp.especifications.db.bulk.CcpBulkOperationResult;
-import com.ccp.especifications.db.bulk.CcpDbBulkExecutor;
-import com.ccp.especifications.db.bulk.CcpEntityBulkOperationType;
+import com.ccp.especifications.db.bulk.CcpBulkExecutor;
+import com.ccp.especifications.db.bulk.CcpBulkEntityOperationType;
 import com.ccp.especifications.db.bulk.CcpExecuteBulkOperation;
 import com.ccp.especifications.db.crud.CcpCrud;
 import com.ccp.especifications.db.crud.CcpHandleWithSearchResultsInTheEntity;
 import com.ccp.especifications.db.crud.CcpSelectUnionAll;
-import com.ccp.especifications.db.utils.CcpEntity;
+import com.ccp.especifications.db.utils.entity.CcpEntity;
 import com.ccp.business.CcpBusiness;
 import com.jn.entities.JnEntityRecordToReprocess;
 import com.jn.utils.JnDeleteKeysFromCache;
@@ -31,7 +31,7 @@ public class JnExecuteBulkOperation implements CcpExecuteBulkOperation{
 	
 	private JnExecuteBulkOperation() {}
 	
-	public JnExecuteBulkOperation executeBulk(List<CcpJsonRepresentation> records, CcpEntityBulkOperationType operation, CcpEntity entity) {
+	public JnExecuteBulkOperation executeBulk(List<CcpJsonRepresentation> records, CcpBulkEntityOperationType operation, CcpEntity entity) {
 		
 		boolean emptyRecords = records.isEmpty();
 		
@@ -45,7 +45,7 @@ public class JnExecuteBulkOperation implements CcpExecuteBulkOperation{
 		return executeBulk;
 	}
 	
-	public JnExecuteBulkOperation executeBulk(CcpJsonRepresentation json, CcpEntity entity, CcpEntityBulkOperationType operation) {
+	public JnExecuteBulkOperation executeBulk(CcpJsonRepresentation json, CcpEntity entity, CcpBulkEntityOperationType operation) {
 		CcpEntity twinEntity = entity.getTwinEntity();
 		CcpBulkItem bulkItem = entity.getMainBulkItem(json, operation);
 		CcpBulkItem bulkItem2 = twinEntity.getMainBulkItem(json, operation);
@@ -67,7 +67,7 @@ public class JnExecuteBulkOperation implements CcpExecuteBulkOperation{
 			return this;
 		}
 
-		CcpDbBulkExecutor dbBulkExecutor = CcpDependencyInjection.getDependency(CcpDbBulkExecutor.class);
+		CcpBulkExecutor dbBulkExecutor = CcpDependencyInjection.getDependency(CcpBulkExecutor.class);
 		
 		for (CcpBulkItem item : items) {
 			dbBulkExecutor = dbBulkExecutor.addRecord(item);
@@ -76,7 +76,7 @@ public class JnExecuteBulkOperation implements CcpExecuteBulkOperation{
 		return commitAndSaveErrorsAndDeleteRecordsFromCache;
 	}
 	
-	private JnExecuteBulkOperation commitAndSaveErrorsAndDeleteRecordsFromCache(CcpDbBulkExecutor dbBulkExecutor) {
+	private JnExecuteBulkOperation commitAndSaveErrorsAndDeleteRecordsFromCache(CcpBulkExecutor dbBulkExecutor) {
 
 		List<CcpBulkOperationResult> allResults = dbBulkExecutor.getBulkOperationResult();
 		List<CcpBulkOperationResult> errors = allResults.stream().filter(x -> x.hasError()).collect(Collectors.toList());
@@ -133,7 +133,7 @@ public class JnExecuteBulkOperation implements CcpExecuteBulkOperation{
 	}
 
 
-	public JnExecuteBulkOperation executeBulk(CcpJsonRepresentation json, CcpEntityBulkOperationType operation, CcpEntity...entities) {
+	public JnExecuteBulkOperation executeBulk(CcpJsonRepresentation json, CcpBulkEntityOperationType operation, CcpEntity...entities) {
 		
 		List<CcpBulkItem> items = new ArrayList<>();
  		

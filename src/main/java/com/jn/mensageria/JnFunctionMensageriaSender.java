@@ -12,10 +12,10 @@ import com.ccp.decorators.CcpJsonRepresentation.CcpJsonFieldName;
 import com.ccp.decorators.CcpTimeDecorator;
 import com.ccp.dependency.injection.CcpDependencyInjection;
 import com.ccp.especifications.db.bulk.CcpBulkItem;
-import com.ccp.especifications.db.bulk.CcpEntityBulkOperationType;
-import com.ccp.especifications.db.utils.CcpEntity;
-import com.ccp.especifications.db.utils.CcpEntityOperationType;
-import com.ccp.especifications.db.utils.decorators.engine.CcpEntityExpurgableOptions;
+import com.ccp.especifications.db.bulk.CcpBulkEntityOperationType;
+import com.ccp.especifications.db.utils.entity.CcpEntity;
+import com.ccp.especifications.db.utils.entity.CcpEntityOperationType;
+import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityExpurgableOptions;
 import com.ccp.business.CcpBusiness;
 import com.ccp.especifications.mensageria.sender.CcpMensageriaSender;
 import com.jn.db.bulk.JnExecuteBulkOperation;
@@ -87,7 +87,7 @@ public class JnFunctionMensageriaSender implements CcpBusiness {
 	
 	private CcpBulkItem toBulkItem(CcpEntity entity, CcpJsonRepresentation json) {
 		String asyncTaskId = entity.calculateId(json);
-		CcpBulkItem bulkItem = new CcpBulkItem(json, CcpEntityBulkOperationType.create, entity, asyncTaskId);
+		CcpBulkItem bulkItem = new CcpBulkItem(json, CcpBulkEntityOperationType.create, entity, asyncTaskId);
 		return bulkItem;
 	}
 	

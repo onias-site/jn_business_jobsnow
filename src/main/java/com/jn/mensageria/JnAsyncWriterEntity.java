@@ -1,11 +1,10 @@
 package com.jn.mensageria;
 
 import com.ccp.decorators.CcpJsonRepresentation;
-import com.ccp.especifications.db.utils.CcpEntity;
-import com.ccp.especifications.db.utils.CcpEntityOperationType;
-import com.ccp.especifications.db.utils.decorators.engine.CcpEntityDecoratorFactory;
-import com.ccp.especifications.db.utils.decorators.engine.CcpEntityDelegator;
-//TODO ANNOTATION PARA ESSA ENTITY
+import com.ccp.especifications.db.utils.entity.CcpEntity;
+import com.ccp.especifications.db.utils.entity.CcpEntityOperationType;
+import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityDecoratorFactory;
+import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityDelegator;
 
 public class JnAsyncWriterEntity extends CcpEntityDelegator implements CcpEntityDecoratorFactory   {
 

@@ -7,12 +7,12 @@ import com.ccp.constantes.CcpOtherConstants;
 import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.decorators.CcpTimeDecorator;
 import com.ccp.especifications.db.bulk.CcpBulkItem;
-import com.ccp.especifications.db.bulk.CcpEntityBulkOperationType;
-import com.ccp.especifications.db.utils.CcpEntity;
-import com.ccp.especifications.db.utils.CcpEntityOperationType;
-import com.ccp.especifications.db.utils.CcpEntityField;
-import com.ccp.especifications.db.utils.decorators.engine.CcpEntityDecoratorFactory;
-import com.ccp.especifications.db.utils.decorators.engine.CcpEntityDelegator;
+import com.ccp.especifications.db.bulk.CcpBulkEntityOperationType;
+import com.ccp.especifications.db.utils.entity.CcpEntity;
+import com.ccp.especifications.db.utils.entity.CcpEntityOperationType;
+import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityDecoratorFactory;
+import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityDelegator;
+import com.ccp.especifications.db.utils.entity.fields.CcpEntityField;
 import com.ccp.business.CcpBusiness;
 import com.jn.db.bulk.JnExecuteBulkOperation;
 import com.jn.entities.JnEntityAudit;
@@ -35,14 +35,14 @@ public final class JnVersionableEntity extends CcpEntityDelegator implements Ccp
 		return thisEntityHasMoreFieldsBesidesPrimaryKeys;
 	}
 	
-	private final CcpBulkItem getVersionableToBulkOperationToBulkOperation(CcpJsonRepresentation json, CcpEntityBulkOperationType operation) {
+	private final CcpBulkItem getVersionableToBulkOperationToBulkOperation(CcpJsonRepresentation json, CcpBulkEntityOperationType operation) {
 		
 		CcpJsonRepresentation audit = this.getAuditRecord(json, operation);
-		CcpBulkItem ccpBulkItem = JnEntityAudit.ENTITY.getMainBulkItem(audit, CcpEntityBulkOperationType.create);
+		CcpBulkItem ccpBulkItem = JnEntityAudit.ENTITY.getMainBulkItem(audit, CcpBulkEntityOperationType.create);
 		return ccpBulkItem;
 	}
 
-	private CcpJsonRepresentation getAuditRecord(CcpJsonRepresentation json, CcpEntityBulkOperationType operation) {
+	private CcpJsonRepresentation getAuditRecord(CcpJsonRepresentation json, CcpBulkEntityOperationType operation) {
 		CcpJsonRepresentation oneById = this.entity.getOneById(json, x -> json);
 		String id = this.entity.getPrimaryKeyValues(json).asUgglyJson();
 		String entityName = this.entity.getEntityName();
@@ -60,14 +60,14 @@ public final class JnVersionableEntity extends CcpEntityDelegator implements Ccp
 	
 
 	public CcpJsonRepresentation delete(CcpJsonRepresentation json) {
-		List<CcpBulkItem> bulkItems = this.toBulkItems(json, CcpEntityBulkOperationType.delete);
+		List<CcpBulkItem> bulkItems = this.toBulkItems(json, CcpBulkEntityOperationType.delete);
 		JnExecuteBulkOperation.INSTANCE.executeBulk(bulkItems);
 		return json;
 	}
 	
 	public CcpJsonRepresentation save(CcpJsonRepresentation json, String id) {
 		
-		List<CcpBulkItem> bulkItems = this.toBulkItems(json, CcpEntityBulkOperationType.create);
+		List<CcpBulkItem> bulkItems = this.toBulkItems(json, CcpBulkEntityOperationType.create);
 		JnExecuteBulkOperation.INSTANCE.executeBulk(bulkItems);
 		return json;
 	}
@@ -81,7 +81,7 @@ public final class JnVersionableEntity extends CcpEntityDelegator implements Ccp
 		return json -> operation.execute(this, json);
 	}
 
-	public List<CcpBulkItem> toBulkItems(CcpJsonRepresentation json, CcpEntityBulkOperationType operation) {
+	public List<CcpBulkItem> toBulkItems(CcpJsonRepresentation json, CcpBulkEntityOperationType operation) {
 		
 		String calculateId = super.calculateId(json);
 		CcpBulkItem mainBulkItem = new CcpBulkItem(json, operation, this, calculateId);
@@ -98,7 +98,7 @@ public final class JnVersionableEntity extends CcpEntityDelegator implements Ccp
 		return asList;
 	}
 	
-	public CcpBulkItem getMainBulkItem(CcpJsonRepresentation json, CcpEntityBulkOperationType operation) {
+	public CcpBulkItem getMainBulkItem(CcpJsonRepresentation json, CcpBulkEntityOperationType operation) {
 		CcpBulkItem bulkItem = this.toBulkItems(json, operation).stream().filter(x -> x.entity.getEntityName().equals(this.entity.getEntityName())).findFirst().get();
 		return bulkItem;
 	}
