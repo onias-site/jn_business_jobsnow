@@ -16,14 +16,14 @@ import com.ccp.especifications.db.utils.decorators.engine.CcpEntityDelegator;
 import com.ccp.business.CcpBusiness;
 import com.jn.db.bulk.JnExecuteBulkOperation;
 import com.jn.entities.JnEntityAudit;
-
-public final class JnEntityVersionable extends CcpEntityDelegator implements CcpEntityDecoratorFactory {
+//TODO ANNOTATION PARA ESSA ENTITY
+public final class JnVersionableEntity extends CcpEntityDelegator implements CcpEntityDecoratorFactory {
 	
-	private JnEntityVersionable() {
+	private JnVersionableEntity() {
 		super(null);
 	}
 	
-	protected JnEntityVersionable(CcpEntity entity) {
+	protected JnVersionableEntity(CcpEntity entity) {
 		super(entity);
 	}
 	
@@ -73,7 +73,7 @@ public final class JnEntityVersionable extends CcpEntityDelegator implements Ccp
 	}
 
 	public CcpEntity getEntity(CcpEntity entity) {
-		JnEntityVersionable jnEntityVersionable = new JnEntityVersionable(entity);
+		JnVersionableEntity jnEntityVersionable = new JnVersionableEntity(entity);
 		return jnEntityVersionable;
 	}
 	
@@ -94,7 +94,7 @@ public final class JnEntityVersionable extends CcpEntityDelegator implements Ccp
 			CcpBulkItem versionableToBulkOperation = this.getVersionableToBulkOperationToBulkOperation(json, operation);
 			asList.add(versionableToBulkOperation);
 		}
-
+		
 		return asList;
 	}
 	

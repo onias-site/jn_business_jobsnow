@@ -5,6 +5,7 @@ import com.ccp.especifications.db.utils.CcpEntity;
 import com.ccp.especifications.db.utils.CcpEntityOperationType;
 import com.ccp.especifications.db.utils.decorators.engine.CcpEntityDecoratorFactory;
 import com.ccp.especifications.db.utils.decorators.engine.CcpEntityDelegator;
+//TODO ANNOTATION PARA ESSA ENTITY
 
 public class JnAsyncWriterEntity extends CcpEntityDelegator implements CcpEntityDecoratorFactory   {
 

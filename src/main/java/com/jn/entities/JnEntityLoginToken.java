@@ -2,7 +2,6 @@ package com.jn.entities;
 
 import com.ccp.decorators.CcpJsonRepresentation.CcpJsonFieldName;
 import com.ccp.especifications.db.utils.CcpEntity;
-import com.ccp.especifications.db.utils.decorators.annotations.CcpEntityDecorators;
 import com.ccp.especifications.db.utils.decorators.annotations.CcpEntityFieldPrimaryKey;
 import com.ccp.especifications.db.utils.decorators.annotations.CcpEntitySpecifications;
 import com.ccp.especifications.db.utils.decorators.annotations.CcpEntityTwin;
@@ -12,7 +11,6 @@ import com.ccp.json.validations.fields.annotations.CcpJsonCopyFieldValidationsFr
 import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidatorRequired;
 import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
-import com.jn.mensageria.JnAsyncWriterEntity;
 
 //@CcpEntityDecorators({JnAsyncWriterEntity.class})
 @CcpEntityTwin(

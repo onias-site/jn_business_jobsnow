@@ -26,16 +26,16 @@ import com.jn.db.bulk.JnExecuteBulkOperation;
 import com.jn.entities.JnEntityDisposableRecord;
 import com.jn.utils.JnDeleteKeysFromCache;
 
-public final class JnEntityExpurgable extends CcpEntityDelegator implements CcpEntityExpurgableFactory {
+public final class JnExpurgableEntity extends CcpEntityDelegator implements CcpEntityExpurgableFactory {
 
 	private final CcpEntityExpurgableOptions timeOption;
 	
-	private JnEntityExpurgable() {
+	private JnExpurgableEntity() {
 		super(null);
 		this.timeOption = null;
 	}
 	
-	protected JnEntityExpurgable(CcpEntity entity, CcpEntityExpurgableOptions timeOption) {
+	protected JnExpurgableEntity(CcpEntity entity, CcpEntityExpurgableOptions timeOption) {
 		super(entity);
 		this.timeOption = timeOption;
 	}
@@ -365,7 +365,7 @@ public final class JnEntityExpurgable extends CcpEntityDelegator implements CcpE
 	}
 
 	public CcpEntity getEntity(CcpEntity entity, CcpEntityExpurgableOptions timeOption) {
-		JnEntityExpurgable jnEntityExpurgable = new JnEntityExpurgable(entity, timeOption);
+		JnExpurgableEntity jnEntityExpurgable = new JnExpurgableEntity(entity, timeOption);
 		return jnEntityExpurgable;
 	}	
 	
