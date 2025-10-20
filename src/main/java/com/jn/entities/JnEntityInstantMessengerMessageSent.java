@@ -45,7 +45,7 @@ public class JnEntityInstantMessengerMessageSent implements CcpEntityConfigurato
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		subjectType, 
 		@CcpEntityFieldPrimaryKey
-		@CcpJsonFieldTypeNumberUnsigned(maxValue = 10000)
+		@CcpJsonFieldTypeNumberUnsigned
 		interval
 		;
 	}

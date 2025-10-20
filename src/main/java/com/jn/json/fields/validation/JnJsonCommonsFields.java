@@ -39,7 +39,7 @@ public enum JnJsonCommonsFields{
 	@CcpJsonFieldTypeString(maxLength = 100)
 	subject, 
 	
-	@CcpJsonFieldTypeString(minLength = 5, maxLength = 5000)
+	@CcpJsonFieldTypeString(minLength = 5, maxLength = 500_000)
 	message, 
 	
 	@CcpJsonFieldTypeNumberUnsigned

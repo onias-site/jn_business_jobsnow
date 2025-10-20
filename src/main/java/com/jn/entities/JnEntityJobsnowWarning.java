@@ -32,7 +32,7 @@ public class JnEntityJobsnowWarning implements CcpEntityConfigurator {
 	public static enum Fields implements CcpJsonFieldName{
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		cause, 
-		@CcpEntityFieldPrimaryKey
+		@CcpJsonFieldValidatorRequired
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		stackTrace, 
 		@CcpEntityFieldPrimaryKey
