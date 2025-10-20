@@ -32,7 +32,7 @@ public class JnBusinessNotifySupport {
 			throw new JnErrorSupportLanguageIsMissing();
 		}
 
-		CcpJsonRepresentation duplicateValueFromField = json.renameField(JnEntityJobsnowError.Fields.message, JsonFieldNames.msg);
+		CcpJsonRepresentation duplicateValueFromField = json.duplicateValueFromField(JnEntityJobsnowError.Fields.message, JsonFieldNames.msg);
 		CcpJsonRepresentation result = sender
 		.addDefaultProcessForEmailSending()
 		.and()
