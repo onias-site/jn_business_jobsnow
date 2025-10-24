@@ -124,8 +124,8 @@ public enum JnJsonTransformersFieldsEntityDefault implements CcpJsonTransformers
 		String originalToken = generateToken.content;
 		return originalToken;
 	}
-	enum JsonFieldNames implements CcpJsonFieldName{
-		originalEmail, originalToken, email
+	public static enum JsonFieldNames implements CcpJsonFieldName{
+		originalEmail, originalToken, email, token
 	}
 	public boolean canBePrimaryKey() {
 		return canBePrimaryKey;

@@ -1,5 +1,7 @@
 package com.jn.status.login;
 
+import com.ccp.business.CcpBusiness;
+import com.ccp.flow.CcpErrorFlowDisturb;
 import com.ccp.process.CcpProcessStatus;
 
 public enum JnProcessStatusExecuteLogin implements CcpProcessStatus{
@@ -27,5 +29,14 @@ public enum JnProcessStatusExecuteLogin implements CcpProcessStatus{
 
 	public int asNumber() {
 		return status;
+	}
+	
+	public CcpBusiness flowDisturb() {
+		
+		CcpBusiness result = json -> {
+			throw new CcpErrorFlowDisturb(json, this);
+		};
+		
+		return result;
 	}
 }

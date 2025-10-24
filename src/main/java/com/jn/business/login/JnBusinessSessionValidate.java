@@ -1,45 +1,30 @@
 package com.jn.business.login;
 
-import com.ccp.constantes.CcpOtherConstants;
+import com.ccp.business.CcpBusiness;
 import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.decorators.CcpJsonRepresentation.CcpJsonFieldName;
-import com.ccp.especifications.db.crud.CcpGetEntityId;
-import com.ccp.business.CcpBusiness;
-import com.ccp.flow.CcpErrorFlowDisturb;
-import com.jn.entities.JnEntityLoginEmail;
-import com.jn.entities.JnEntityLoginPassword;
 import com.jn.entities.JnEntityLoginSessionValidation;
-import com.jn.entities.JnEntityLoginToken;
 import com.jn.status.login.JnProcessStatusExecuteLogin;
-import com.jn.utils.JnDeleteKeysFromCache;
-public class JnBusinessSessionValidate implements CcpBusiness{
-	enum JsonFieldNames implements CcpJsonFieldName{
-		sessionToken
-	}
 
-	private JnBusinessSessionValidate() {}
+public class JnBusinessSessionValidate implements CcpBusiness{
+	
+	enum JsonFieldNames implements CcpJsonFieldName{sessionToken}
+
+	private JnBusinessSessionValidate(){}
 	
 	public static final JnBusinessSessionValidate INSTANCE = new JnBusinessSessionValidate();
 	
 	public CcpJsonRepresentation apply(CcpJsonRepresentation json) { 
 		
-		boolean isSessionLess = json.getAsString(JsonFieldNames.sessionToken).trim().isEmpty(); 
+		CcpBusiness missingSessionToken = JnProcessStatusExecuteLogin.missingSessionToken.flowDisturb();
+		json.whenFieldsAreNotFound(missingSessionToken, JsonFieldNames.sessionToken);
 		
-		if(isSessionLess) {
-			throw new CcpErrorFlowDisturb(JnProcessStatusExecuteLogin.missingSessionToken);
-		}
+		CcpJsonRepresentation duplicateValueFromField = json.duplicateValueFromField(JsonFieldNames.sessionToken, JnEntityLoginSessionValidation.Fields.token);
 		
-		String context = new Object(){}.getClass().getEnclosingMethod().getName();
-		new CcpGetEntityId(json.duplicateValueFromField(JsonFieldNames.sessionToken, JnEntityLoginSessionValidation.Fields.token)) 
-		.toBeginProcedureAnd()
-		.ifThisIdIsNotPresentInEntity(JnEntityLoginSessionValidation.ENTITY).returnStatus(JnProcessStatusExecuteLogin.invalidSession).and()
-		.ifThisIdIsPresentInEntity(JnEntityLoginToken.ENTITY.getTwinEntity()).returnStatus(JnProcessStatusExecuteLogin.lockedToken).and()
-		.ifThisIdIsPresentInEntity(JnEntityLoginPassword.ENTITY.getTwinEntity()).returnStatus(JnProcessStatusExecuteLogin.lockedPassword).and()
-		.ifThisIdIsNotPresentInEntity(JnEntityLoginPassword.ENTITY).returnStatus(JnProcessStatusExecuteLogin.missingSavePassword).and()
-		.ifThisIdIsNotPresentInEntity(JnEntityLoginEmail.ENTITY).returnStatus(JnProcessStatusExecuteLogin.missingSavingEmail)
-		.andFinallyReturningTheseFields("sessionToken")
-		.endThisProcedureRetrievingTheResultingData(context, CcpOtherConstants.DO_NOTHING, JnDeleteKeysFromCache.INSTANCE);
-		return json; 
+		CcpBusiness invalidSession = JnProcessStatusExecuteLogin.invalidSession.flowDisturb();
+		CcpJsonRepresentation oneById = JnEntityLoginSessionValidation.ENTITY.getOneById(duplicateValueFromField, invalidSession);
+		
+		return oneById; 
 	}
 
 }
