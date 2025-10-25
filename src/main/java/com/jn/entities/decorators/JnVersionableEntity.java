@@ -16,7 +16,6 @@ import com.ccp.especifications.db.utils.entity.fields.CcpEntityField;
 import com.ccp.business.CcpBusiness;
 import com.jn.db.bulk.JnExecuteBulkOperation;
 import com.jn.entities.JnEntityAudit;
-//TODO ANNOTATION PARA ESSA ENTITY
 public final class JnVersionableEntity extends CcpEntityDelegator implements CcpEntityDecoratorFactory {
 	
 	private JnVersionableEntity() {

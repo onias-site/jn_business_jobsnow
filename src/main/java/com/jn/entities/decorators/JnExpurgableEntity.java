@@ -41,8 +41,8 @@ public final class JnExpurgableEntity extends CcpEntityDelegator implements CcpE
 	}
 
 	private final String getId(CcpJsonRepresentation json) {
-		Long timestamp = json.getOrDefault(JnEntityDisposableRecord.Fields.timestamp, System.currentTimeMillis());
-		String formattedTimestamp = this.timeOption.getFormattedDate(timestamp);
+
+		String formattedTimestamp = this.extractFormatedCurrentTimestamp(json);
 
 		ArrayList<Object> onlyPrimaryKeysValues = new ArrayList<>();
 		onlyPrimaryKeysValues.add(formattedTimestamp);
@@ -53,6 +53,20 @@ public final class JnExpurgableEntity extends CcpEntityDelegator implements CcpE
 		CcpHashDecorator hash2 = new CcpStringDecorator(replace).hash();
 		String hash = hash2.asString(CcpHashAlgorithm.SHA1);
 		return hash;
+	}
+
+	private String extractFormatedCurrentTimestamp(CcpJsonRepresentation json) {
+		try {
+			Long timestamp = json.getOrDefault(JnEntityDisposableRecord.Fields.timestamp, System.currentTimeMillis());
+			String formattedTimestamp = this.timeOption.getFormattedDate(timestamp);
+			return formattedTimestamp;
+			
+		} catch (Exception e) {
+			String timestamp = json.getOrDefault(JnEntityDisposableRecord.Fields.timestamp, "" + System.currentTimeMillis());
+			Long valueOf = Long.valueOf(timestamp);
+			String formattedTimestamp = this.timeOption.getFormattedDate(valueOf);
+			return formattedTimestamp;
+		}
 	}
 
 	private CcpJsonRepresentation getExpurgableId(CcpJsonRepresentation json) {

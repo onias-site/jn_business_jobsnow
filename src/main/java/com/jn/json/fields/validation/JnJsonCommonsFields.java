@@ -22,7 +22,7 @@ public enum JnJsonCommonsFields{
 	@CcpJsonFieldTypeString(exactLength = 23)//dd/MM/yyyy HH:mm:ss.SSS
 	date,
 	
-	@CcpJsonFieldTypeString(maxLength = 30)
+	@CcpJsonFieldTypeString(maxLength = 50)
 	entity, 
 	@CcpJsonFieldTypeString
 	id,
@@ -51,7 +51,7 @@ public enum JnJsonCommonsFields{
 	@CcpJsonFieldTypeNestedJson
 	moreParameters,
 	
-	@CcpJsonFieldTypeString(maxLength = 30)
+	@CcpJsonFieldTypeString(maxLength = 100)
 	templateId,
 	
 	@CcpJsonFieldTypeString(allowedValues = {"portuguese", "english", "spanish"})

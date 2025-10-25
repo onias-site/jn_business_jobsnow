@@ -31,10 +31,10 @@ public class JnEntityLoginConflict implements CcpEntityConfigurator {
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		email, 
 		@CcpJsonFieldValidatorRequired
-		@CcpJsonFieldTypeNestedJson(jsonValidation = JnEntityLoginSessionValidation.Fields.class)
+		@CcpJsonFieldTypeNestedJson()
 		oldLogin, 
 		@CcpJsonFieldValidatorRequired
-		@CcpJsonFieldTypeNestedJson(jsonValidation = JnEntityLoginSessionValidation.Fields.class)
+		@CcpJsonFieldTypeNestedJson()
 		newLogin
 		;
 	}

@@ -31,12 +31,11 @@ import com.jn.json.fields.validation.JnJsonCommonsFields;
 		afterSaveRecord = {},
 		flow = {}
 )
-public class JnEntityEmailParametersToSend  implements CcpEntityConfigurator{
+public class JnEntityEmailParametersToSend implements CcpEntityConfigurator{
 
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityEmailParametersToSend.class).entityInstance;
  
 	public static enum Fields implements CcpJsonFieldName{
-		@CcpJsonFieldValidatorRequired
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		@CcpEntityFieldTransformer(JnJsonTransformersFieldsEntityDoNothing.class)
 		email, 
@@ -61,8 +60,8 @@ public class JnEntityEmailParametersToSend  implements CcpEntityConfigurator{
 						+ JnBusinessNotifyError.class.getName()		
 						+ "\"," + "	\"templateId\": \""
 						+ JnBusinessNotifyError.class.getName()		
-						+ "\"" + "}",
-				"{" + "	\"sender\": \"devs.jobsnow@gmail.com\"," + "	\"subjectType\": \""
+						+ "\"" + "}"
+						,"{\"sender\": \"devs.jobsnow@gmail.com\"," + "	\"subjectType\": \""
 						+ JnBusinessSendUserToken.class.getName()
 						+ "\","
 						+ "	\"templateId\": \""
@@ -72,7 +71,11 @@ public class JnEntityEmailParametersToSend  implements CcpEntityConfigurator{
 						+ "		\"linkedinName\": \"Onias\","
 						+ "		\"accessLink\": \"https://ccpjobsnow.com/#/tokenToSetPassword?email={email}&msgType=info&msgValue=newUser&token={token}\","
 						+ "		\"telegramGroupLink\": \"https://t.me/joinchat/q_PRgF_18n00NjEx\","
-						+ "		\"botAddress\": \"https://t.me/JnSuporteBot\"" + "	}" + "}");
+						+ "		\"botAddress\": \"https://t.me/JnSuporteBot\"" + "	}" + "}"
+
+				
+				)
+				;
 
 		return createBulkItems;
 	}

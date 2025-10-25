@@ -40,7 +40,6 @@ public class JnEntityInstantMessengerTemplateMessage  implements CcpEntityConfig
 		@CcpEntityFieldPrimaryKey
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		language, 
-		@CcpJsonFieldValidatorRequired
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		subject, 
 		@CcpJsonFieldValidatorRequired

@@ -104,6 +104,7 @@ public class JnSendMessageToUser {
 			}
 			CcpBusiness process = this.process.get(k);
 			try {
+				entityValues = entityValues.putAll(messageToSend);
 				process.apply(messageToSend);
 			} catch (CcpErrorHttp e) {
 				e.printStackTrace();
