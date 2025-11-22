@@ -17,11 +17,10 @@ import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault
 import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityTokenHash;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
 
-@CcpEntityCache(3600)
-@CcpEntityExpurgable(expurgTime = CcpEntityExpurgableOptions.hourly, expurgableEntityFactory = JnExpurgableEntity.class)
+@CcpEntityCache(60)
+@CcpEntityExpurgable(expurgTime = CcpEntityExpurgableOptions.minute, expurgableEntityFactory = JnExpurgableEntity.class)
 @CcpEntityTwin(
 		twinEntityName = "login_session_terminated",
-
 		afterRecordBeenTransportedFromTwinToMainEntity = {},
 		afterRecordBeenTransportedFromMainToTwinEntity = {}
 		)

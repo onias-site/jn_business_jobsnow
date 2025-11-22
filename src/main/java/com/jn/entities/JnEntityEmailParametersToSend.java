@@ -21,8 +21,8 @@ import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault
 import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDoNothing;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
 
-@CcpEntityVersionable(JnVersionableEntity.class)
 @CcpEntityCache(3600)
+@CcpEntityVersionable(JnVersionableEntity.class)
 @CcpEntitySpecifications(
 		entityFieldsTransformers = JnJsonTransformersFieldsEntityDefault.class,
 		entityValidation = JnEntityEmailParametersToSend.Fields.class,

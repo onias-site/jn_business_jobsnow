@@ -68,6 +68,7 @@ public final class JnVersionableEntity extends CcpEntityDelegator implements Ccp
 		
 		List<CcpBulkItem> bulkItems = this.toBulkItems(json, CcpBulkEntityOperationType.create);
 		JnExecuteBulkOperation.INSTANCE.executeBulk(bulkItems);
+		
 		return json;
 	}
 

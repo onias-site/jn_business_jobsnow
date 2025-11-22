@@ -39,6 +39,11 @@ public final class JnExpurgableEntity extends CcpEntityDelegator implements CcpE
 		super(entity);
 		this.timeOption = timeOption;
 	}
+	
+	public String calculateCacheId(CcpJsonRepresentation json) {
+		String id = this.getId(json);
+		return id;
+	}
 
 	private final String getId(CcpJsonRepresentation json) {
 
@@ -135,7 +140,7 @@ public final class JnExpurgableEntity extends CcpEntityDelegator implements CcpE
 		CcpJsonRepresentation handledJson = this.getTransformedJsonByEachFieldInJson(json);
 		this.validateJson(handledJson.putAll(json));
 		CcpJsonRepresentation transformedJsonBeforeOperation = this.getTransformedJsonBeforeOperation(handledJson, CcpEntityOperationType.save);
-		CcpJsonRepresentation onlyExistingFields = this.getOnlyExistingFields(transformedJsonBeforeOperation);
+		CcpJsonRepresentation onlyExistingFields = this.getOnlyExistingFields(json);
 		String id = this.getId(json);
 		this.save(onlyExistingFields, id);
 		CcpJsonRepresentation transformedJsonAfterOperation = this.getTransformedJsonAfterOperation(transformedJsonBeforeOperation, CcpEntityOperationType.save);
