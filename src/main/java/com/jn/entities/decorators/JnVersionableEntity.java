@@ -42,7 +42,7 @@ public final class JnVersionableEntity extends CcpEntityDelegator implements Ccp
 	}
 
 	private CcpJsonRepresentation getAuditRecord(CcpJsonRepresentation json, CcpBulkEntityOperationType operation) {
-		CcpJsonRepresentation oneById = this.entity.getOneById(json, x -> json);
+		CcpJsonRepresentation oneById = this.entity.getOneByIdOrHandleItIfThisIdWasNotFound(json, x -> json);
 		String id = this.entity.getPrimaryKeyValues(json).asUgglyJson();
 		String entityName = this.entity.getEntityName();
 		CcpJsonRepresentation audit = 

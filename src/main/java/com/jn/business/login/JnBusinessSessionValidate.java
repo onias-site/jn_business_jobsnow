@@ -22,7 +22,7 @@ public class JnBusinessSessionValidate implements CcpBusiness{
 		CcpJsonRepresentation duplicateValueFromField = json.duplicateValueFromField(JsonFieldNames.sessionToken, JnEntityLoginSessionValidation.Fields.token);
 		
 		CcpBusiness invalidSession = JnProcessStatusExecuteLogin.invalidSession.flowDisturb();
-		CcpJsonRepresentation oneById = JnEntityLoginSessionValidation.ENTITY.getOneById(duplicateValueFromField, invalidSession);
+		CcpJsonRepresentation oneById = JnEntityLoginSessionValidation.ENTITY.getOneByIdOrHandleItIfThisIdWasNotFound(duplicateValueFromField, invalidSession);
 		
 		CcpJsonRepresentation putAll = json.putAll(oneById);
 		
