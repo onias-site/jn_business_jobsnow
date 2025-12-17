@@ -24,7 +24,7 @@ public class JnBusinessSessionValidate implements CcpBusiness{
 		CcpBusiness invalidSession = JnProcessStatusExecuteLogin.invalidSession.flowDisturb();
 		CcpJsonRepresentation oneById = JnEntityLoginSessionValidation.ENTITY.getOneByIdOrHandleItIfThisIdWasNotFound(duplicateValueFromField, invalidSession);
 		
-		CcpJsonRepresentation putAll = json.putAll(oneById);
+		CcpJsonRepresentation putAll = json.mergeWithAnotherJson(oneById);
 		
 		return putAll; 
 	}

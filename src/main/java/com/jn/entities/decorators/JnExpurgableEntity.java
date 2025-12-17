@@ -138,7 +138,7 @@ public final class JnExpurgableEntity extends CcpEntityDelegator implements CcpE
 
 	public CcpJsonRepresentation save(CcpJsonRepresentation json) {
 		CcpJsonRepresentation handledJson = this.getTransformedJsonByEachFieldInJson(json);
-		this.validateJson(handledJson.putAll(json));
+		this.validateJson(handledJson.mergeWithAnotherJson(json));
 		CcpJsonRepresentation transformedJsonBeforeOperation = this.getTransformedJsonBeforeOperation(handledJson, CcpEntityOperationType.save);
 		CcpJsonRepresentation onlyExistingFields = this.getOnlyExistingFields(json);
 		String id = this.getId(json);
@@ -168,7 +168,7 @@ public final class JnExpurgableEntity extends CcpEntityDelegator implements CcpE
 		
 		CcpJsonRepresentation expurgableId = this.getExpurgableId(json);
 		CcpCrud crud = CcpDependencyInjection.getDependency(CcpCrud.class);
-		CcpJsonRepresentation allValuesTogether = expurgableId.putAll(json);
+		CcpJsonRepresentation allValuesTogether = expurgableId.mergeWithAnotherJson(json);
 		CcpSelectUnionAll unionAll = crud.unionAll(allValuesTogether, JnDeleteKeysFromCache.INSTANCE, this, JnEntityDisposableRecord.ENTITY);
 
 		boolean isPresentInOriginalEntity = this.isPresentInThisUnionAll(unionAll, allValuesTogether);
@@ -200,7 +200,7 @@ public final class JnExpurgableEntity extends CcpEntityDelegator implements CcpE
 		
 		CcpCrud crud = CcpDependencyInjection.getDependency(CcpCrud.class);
 		CcpJsonRepresentation expurgableId = this.getExpurgableId(json);
-		CcpJsonRepresentation allValuesTogether = expurgableId.putAll(json);
+		CcpJsonRepresentation allValuesTogether = expurgableId.mergeWithAnotherJson(json);
 		
 		CcpSelectUnionAll unionAll = crud.unionAll(allValuesTogether, JnDeleteKeysFromCache.INSTANCE, this, JnEntityDisposableRecord.ENTITY);
 
@@ -239,7 +239,7 @@ public final class JnExpurgableEntity extends CcpEntityDelegator implements CcpE
 		
 		CcpJsonRepresentation expurgableId = this.getExpurgableId(json);
 		CcpCrud crud = CcpDependencyInjection.getDependency(CcpCrud.class);
-		CcpJsonRepresentation allValuesTogether = expurgableId.putAll(json);
+		CcpJsonRepresentation allValuesTogether = expurgableId.mergeWithAnotherJson(json);
 		CcpSelectUnionAll unionAll = crud.unionAll(allValuesTogether, JnDeleteKeysFromCache.INSTANCE, this, JnEntityDisposableRecord.ENTITY);
 
 		boolean isPresentInOriginalEntity = this.isPresentInThisUnionAll(unionAll, allValuesTogether);

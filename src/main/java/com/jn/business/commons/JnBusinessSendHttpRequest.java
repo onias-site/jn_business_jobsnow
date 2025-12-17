@@ -19,19 +19,19 @@ public class JnBusinessSendHttpRequest {
 
 		CcpJsonRepresentation jsonWithApiName = json.put(JnEntityHttpApiParameters.Fields.apiName, httpRequestType);
 		CcpJsonRepresentation httpApiParameters = JnEntityHttpApiParameters.ENTITY.getOneById(jsonWithApiName);
-		CcpJsonRepresentation jsonWithHttpApiParameters = json.putAll(httpApiParameters);
+		CcpJsonRepresentation jsonWithHttpApiParameters = json.mergeWithAnotherJson(httpApiParameters);
 		
 		try {
 			CcpJsonRepresentation apply = processThatSendsHttpRequest.apply(jsonWithHttpApiParameters);
 			return apply;
 		}catch (CcpErrorHttpServer e) {
 			String details = jsonWithHttpApiParameters.getDynamicVersion().getJsonPiece(keys).asUgglyJson();
-			CcpJsonRepresentation httpErrorDetails = e.entity.putAll(jsonWithHttpApiParameters).put(JnEntityHttpApiErrorClient.Fields.details, details);
+			CcpJsonRepresentation httpErrorDetails = e.entity.mergeWithAnotherJson(jsonWithHttpApiParameters).put(JnEntityHttpApiErrorClient.Fields.details, details);
 			CcpJsonRepresentation retryToSendIntantMessage = this.retryToSendIntantMessage(e, json, httpErrorDetails, processThatSendsHttpRequest, httpRequestType, keys);
 			return retryToSendIntantMessage;
 		}catch (CcpErrorHttpClient e) {
 			String details = jsonWithHttpApiParameters.getDynamicVersion().getJsonPiece(keys).asUgglyJson();
-			CcpJsonRepresentation httpErrorDetails = e.entity.putAll(jsonWithHttpApiParameters).put(JnEntityHttpApiErrorClient.Fields.details, details);
+			CcpJsonRepresentation httpErrorDetails = e.entity.mergeWithAnotherJson(jsonWithHttpApiParameters).put(JnEntityHttpApiErrorClient.Fields.details, details);
 			String request = httpErrorDetails.getAsString(JnEntityHttpApiErrorClient.Fields.request);
 			httpErrorDetails = httpErrorDetails.put(JnEntityHttpApiErrorClient.Fields.request, request);
 			JnEntityHttpApiErrorClient.ENTITY.save(httpErrorDetails);

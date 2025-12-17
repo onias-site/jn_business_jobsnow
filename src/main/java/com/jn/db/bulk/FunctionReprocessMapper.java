@@ -22,9 +22,9 @@ class FunctionReprocessMapper implements Function<CcpBulkOperationResult, CcpJso
 		CcpJsonRepresentation put = CcpOtherConstants.EMPTY_JSON
 				.put(JnEntityRecordToReprocess.Fields.timestamp, currentTimeMillis);
 		CcpBulkItem bulkItem = result.getBulkItem();
-		CcpJsonRepresentation putAll = put.putAll(bulkItem.json);
+		CcpJsonRepresentation putAll = put.mergeWithAnotherJson(bulkItem.json);
 		CcpJsonRepresentation errorDetails = result.getErrorDetails();
-		CcpJsonRepresentation putAll2 = putAll.putAll(errorDetails);
+		CcpJsonRepresentation putAll2 = putAll.mergeWithAnotherJson(errorDetails);
 		CcpJsonRepresentation renameKey = putAll2.renameField(JsonFieldNames.type, JnEntityRecordToReprocess.Fields.errorType);
 		CcpJsonRepresentation jsonPiece = renameKey.getJsonPiece( JnEntityRecordToReprocess.Fields.errorType,  JnEntityRecordToReprocess.Fields.reason);
 		return jsonPiece;

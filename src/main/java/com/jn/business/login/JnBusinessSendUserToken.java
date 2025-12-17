@@ -27,7 +27,7 @@ public class JnBusinessSendUserToken implements CcpBusiness{
 		JnSendMessageToUser getMessage = new JnSendMessageToUser();
 		
 		CcpJsonRepresentation request = json.getInnerJson(JsonFieldNames.request);
-		CcpJsonRepresentation duplicateValueFromField = request.putAll(jsonPiece)
+		CcpJsonRepresentation duplicateValueFromField = request.mergeWithAnotherJson(jsonPiece)
 				.duplicateValueFromField(JsonFieldNames.originalEmail, JnEntityLoginToken.Fields.email, 
 						JnEntityInstantMessengerParametersToSend.Fields.recipient)
 				.duplicateValueFromField(JsonFieldNames.originalToken, JnEntityInstantMessengerMessageSent.Fields.token)

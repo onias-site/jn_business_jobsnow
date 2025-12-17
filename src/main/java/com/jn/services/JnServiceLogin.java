@@ -182,7 +182,7 @@ public enum JnServiceLogin implements JnService {
 					.renameField(JsonFieldNames.originalToken, JsonFieldNames.sessionToken)
 					.removeField(JnEntityLoginSessionValidation.Fields.token)
 					;
-			CcpJsonRepresentation putAll = json.putAll(renameField);
+			CcpJsonRepresentation putAll = json.mergeWithAnotherJson(renameField);
 			
 			CcpJsonRepresentation result =  new CcpGetEntityId(putAll)
 			.toBeginProcedureAnd()

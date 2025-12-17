@@ -90,10 +90,10 @@ public class JnSendMessageToUser {
 			
 			CcpJsonRepresentation parameterData = parameterEntity.getRequiredEntityRow(unionAll, idToSearch);
 			CcpJsonRepresentation moreParameters = parameterData.getInnerJson(JnEntityEmailParametersToSend.Fields.moreParameters);
-			CcpJsonRepresentation allParameters = parameterData.removeField(JnEntityEmailParametersToSend.Fields.moreParameters).putAll(moreParameters);
+			CcpJsonRepresentation allParameters = parameterData.removeField(JnEntityEmailParametersToSend.Fields.moreParameters).mergeWithAnotherJson(moreParameters);
 			CcpJsonRepresentation messageData = messageEntity.getRequiredEntityRow(unionAll, idToSearch);
 			
-			CcpJsonRepresentation allDataTogether = allParameters.putAll(entityValues).putAll(messageData);
+			CcpJsonRepresentation allDataTogether = allParameters.mergeWithAnotherJson(entityValues).mergeWithAnotherJson(messageData);
 			
  			Set<String> allFields = allDataTogether.fieldSet();
 			
@@ -104,7 +104,7 @@ public class JnSendMessageToUser {
 			}
 			CcpBusiness process = this.process.get(k);
 			try {
-				entityValues = entityValues.putAll(messageToSend);
+				entityValues = entityValues.mergeWithAnotherJson(messageToSend);
 				process.apply(messageToSend);
 			} catch (CcpErrorHttp e) {
 				e.printStackTrace();

@@ -54,7 +54,7 @@ public class JnBusinessSendInstantMessage {
 		
 		try {
 			CcpJsonRepresentation instantMessengerData = instantMessenger.sendMessage(json);
-			CcpJsonRepresentation instantMessageSent = json.putAll(instantMessengerData);
+			CcpJsonRepresentation instantMessageSent = json.mergeWithAnotherJson(instantMessengerData);
 			JnEntityInstantMessengerMessageSent.ENTITY.save(instantMessageSent);
 			return json;
 		} catch (CcpErrorInstantMessageTooManyRequests e) {

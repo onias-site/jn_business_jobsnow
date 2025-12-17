@@ -80,7 +80,7 @@ public class JnFunctionMensageriaSender implements CcpBusiness {
 				.put(JnEntityAsyncTask.Fields.request, json.asPrettyJson())
 				.put(JnEntityAsyncTask.Fields.operation, this.operation)
 				.put(JnEntityAsyncTask.Fields.topic, this.topic)
-				.putAll(json)
+				.mergeWithAnotherJson(json)
 				;
 		return messageDetails;
 	}
