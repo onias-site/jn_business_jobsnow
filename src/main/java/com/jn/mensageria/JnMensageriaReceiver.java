@@ -3,6 +3,7 @@ package com.jn.mensageria;
 import java.util.function.Consumer;
 
 import com.ccp.decorators.CcpJsonRepresentation;
+import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.especifications.db.bulk.CcpExecuteBulkOperation;
 import com.ccp.especifications.db.utils.entity.CcpEntity;
 import com.ccp.business.CcpBusiness;

@@ -3,6 +3,7 @@ package com.jn.business.login;
 
 import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.decorators.CcpJsonRepresentation.CcpJsonFieldName;
+import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.business.CcpBusiness;
 import com.jn.entities.JnEntityEmailTemplateMessage;
 import com.jn.entities.JnEntityInstantMessengerMessageSent;

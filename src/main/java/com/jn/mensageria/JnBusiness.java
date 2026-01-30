@@ -1,6 +1,7 @@
 package com.jn.mensageria;
 
 import com.ccp.decorators.CcpJsonRepresentation;
+import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.business.CcpBusiness;
 
 public interface JnBusiness extends CcpBusiness{
