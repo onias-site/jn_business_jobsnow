@@ -3,7 +3,6 @@ package com.jn.business.commons;
 import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.decorators.CcpStringDecorator;
 import com.ccp.decorators.CcpJsonRepresentation.CcpJsonFieldName;
-import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.especifications.db.utils.entity.CcpEntity;
 import com.jn.entities.JnEntityJobsnowError;
 import com.jn.entities.JnEntityJobsnowPenddingError;

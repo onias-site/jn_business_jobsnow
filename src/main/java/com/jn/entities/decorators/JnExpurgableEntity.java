@@ -8,7 +8,6 @@ import com.ccp.business.CcpBusiness;
 import com.ccp.constantes.CcpOtherConstants;
 import com.ccp.decorators.CcpHashDecorator;
 import com.ccp.decorators.CcpJsonRepresentation;
-import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.decorators.CcpStringDecorator;
 import com.ccp.dependency.injection.CcpDependencyInjection;
 import com.ccp.especifications.db.bulk.CcpBulkItem;

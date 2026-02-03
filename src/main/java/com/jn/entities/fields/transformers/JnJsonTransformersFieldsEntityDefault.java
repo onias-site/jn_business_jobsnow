@@ -4,7 +4,6 @@ import com.ccp.decorators.CcpEmailDecorator;
 import com.ccp.decorators.CcpHashDecorator;
 import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.decorators.CcpJsonRepresentation.CcpJsonFieldName;
-import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.decorators.CcpStringDecorator;
 import com.ccp.decorators.CcpTextDecorator;
 import com.ccp.decorators.CcpTimeDecorator;

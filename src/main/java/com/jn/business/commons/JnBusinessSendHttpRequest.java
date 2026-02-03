@@ -1,7 +1,6 @@
 package com.jn.business.commons;
 
 import com.ccp.decorators.CcpJsonRepresentation;
-import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.decorators.CcpTimeDecorator;
 import com.ccp.especifications.http.CcpErrorHttp;
 import com.ccp.especifications.http.CcpErrorHttpClient;
