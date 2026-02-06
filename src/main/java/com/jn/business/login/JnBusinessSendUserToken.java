@@ -1,4 +1,3 @@
-
 package com.jn.business.login;
 
 import com.ccp.decorators.CcpJsonRepresentation;
@@ -24,7 +23,6 @@ public class JnBusinessSendUserToken implements CcpBusiness{
 		CcpJsonRepresentation jsonPiece = JnEntityLoginToken.ENTITY.getTransformedJsonByEachFieldInJson(json);
 	
 		String topic = this.getClass().getName();
-		JnSendMessageToUser getMessage = new JnSendMessageToUser();
 		
 		CcpJsonRepresentation request = json.getInnerJson(JsonFieldNames.request);
 		CcpJsonRepresentation duplicateValueFromField = request.mergeWithAnotherJson(jsonPiece)
@@ -32,6 +30,8 @@ public class JnBusinessSendUserToken implements CcpBusiness{
 						JnEntityInstantMessengerParametersToSend.Fields.recipient)
 				.duplicateValueFromField(JsonFieldNames.originalToken, JnEntityInstantMessengerMessageSent.Fields.token)
 				;
+		JnSendMessageToUser getMessage = new JnSendMessageToUser();
+
 		getMessage
 		.addDefaultProcessForEmailSending()
 		.soWithAllAddedProcessAnd()

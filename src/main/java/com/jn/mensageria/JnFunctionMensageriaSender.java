@@ -17,6 +17,7 @@ import com.ccp.especifications.db.utils.entity.CcpEntity;
 import com.ccp.especifications.db.utils.entity.CcpEntityOperationType;
 import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityExpurgableOptions;
 import com.ccp.business.CcpBusiness;
+import com.ccp.especifications.mensageria.receiver.CcpMensageriaReceiver;
 import com.ccp.especifications.mensageria.sender.CcpMensageriaSender;
 import com.jn.db.bulk.JnExecuteBulkOperation;
 import com.jn.entities.JnEntityAsyncTask;
@@ -24,13 +25,12 @@ import com.jn.entities.JnEntityAsyncTask;
 public class JnFunctionMensageriaSender implements CcpBusiness {
 	
 	enum JsonFieldNames implements CcpJsonFieldName{
-		mensageriaReceiver
 	}
 	
 	private final CcpMensageriaSender mensageriaSender = CcpDependencyInjection.getDependency(CcpMensageriaSender.class);
 	
-	private final String operation;
 	private final Class<?> jsonValidationClass;
+	private final String operation;
 	private final String topic;
 	
 	public JnFunctionMensageriaSender(CcpBusiness topic) {
@@ -59,7 +59,7 @@ public class JnFunctionMensageriaSender implements CcpBusiness {
 		CcpJsonRepresentation messageDetails = this.getMessageDetails(put); 
 		
 		JnEntityAsyncTask.ENTITY.save(messageDetails);
-		CcpJsonRepresentation put2 = messageDetails.put(JsonFieldNames.mensageriaReceiver, JnMensageriaReceiver.class.getName());
+		CcpJsonRepresentation put2 = messageDetails.put(CcpMensageriaReceiver.Fields.mensageriaReceiver, JnMensageriaReceiver.class.getName());
 		this.mensageriaSender.sendToMensageria(this.topic, this.jsonValidationClass, put2);
 
 		return messageDetails;

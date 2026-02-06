@@ -11,9 +11,9 @@ import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityFactor
 import com.ccp.especifications.db.utils.entity.fields.annotations.CcpEntityFieldPrimaryKey;
 import com.ccp.json.validations.fields.annotations.CcpJsonCopyFieldValidationsFrom;
 import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidatorRequired;
+import com.jn.entities.decorators.JnVersionableEntity;
 import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
-import com.jn.mensageria.JnAsyncWriterEntity;
 
 @CcpEntityTwin(
 		twinEntityName = "login_password_locked"
@@ -21,7 +21,7 @@ import com.jn.mensageria.JnAsyncWriterEntity;
 		,afterRecordBeenTransportedFromMainToTwinEntity = {}
 		)
 
-@CcpEntityVersionable(JnAsyncWriterEntity.class)
+@CcpEntityVersionable(JnVersionableEntity.class)
 @CcpEntityCache(3600)
 @CcpEntitySpecifications(
 		entityFieldsTransformers = JnJsonTransformersFieldsEntityDefault.class,
