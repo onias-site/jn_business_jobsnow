@@ -9,6 +9,12 @@ public enum JnJsonCommonsFields{
 	
 	@CcpJsonFieldTypeString
 	request, 
+
+	@CcpJsonFieldTypeString(minLength = 10, maxLength = 500)
+	description,
+
+	@CcpJsonFieldTypeString(minLength = 10, maxLength = 500)
+	explanation,
 	
 	@CcpJsonFieldTypeString(allowsEmptyString = true)
 	operation,
