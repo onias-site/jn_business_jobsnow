@@ -17,7 +17,7 @@ public class JnBusinessSessionValidate implements CcpBusiness{
 	public CcpJsonRepresentation apply(CcpJsonRepresentation json) { 
 		
 		CcpBusiness missingSessionToken = JnProcessStatusExecuteLogin.missingSessionToken.flowDisturb();
-		json.whenFieldsAreNotFound(missingSessionToken, JsonFieldNames.sessionToken);
+		json = json.whenFieldsAreNotFound(missingSessionToken, JsonFieldNames.sessionToken);
 		
 		CcpJsonRepresentation duplicateValueFromField = json.duplicateValueFromField(JsonFieldNames.sessionToken, JnEntityLoginSessionValidation.Fields.token);
 		
