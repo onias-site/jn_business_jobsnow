@@ -10,6 +10,7 @@ import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityExpurg
 import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityFactory;
 import com.ccp.especifications.db.utils.entity.fields.annotations.CcpEntityFieldPrimaryKey;
 import com.ccp.json.validations.fields.annotations.CcpJsonCopyFieldValidationsFrom;
+import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidatorArray;
 import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidatorRequired;
 import com.jn.entities.decorators.JnExpurgableEntity;
 import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault;
@@ -31,9 +32,11 @@ public class JnEntityJobsnowError implements CcpEntityConfigurator {
 	
 	public static enum Fields implements CcpJsonFieldName{
 		@CcpEntityFieldPrimaryKey
+		@CcpJsonFieldValidatorArray(nonRepeatedItems = false)
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		cause, 
 		@CcpEntityFieldPrimaryKey
+		@CcpJsonFieldValidatorArray(nonRepeatedItems = false)
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		stackTrace, 
 		@CcpEntityFieldPrimaryKey
