@@ -10,8 +10,12 @@ public enum JnJsonCommonsFields{
 	@CcpJsonFieldTypeString
 	request, 
 
+	@CcpJsonFieldTypeString(regexValidation = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[^A-Za-z0-9]).{8,}$")
+	password,
+	
 	@CcpJsonFieldTypeString(minLength = 10, maxLength = 500)
 	description,
+	
 
 	@CcpJsonFieldTypeString(minLength = 10, maxLength = 500)
 	explanation,
