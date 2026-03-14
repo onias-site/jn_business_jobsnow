@@ -87,8 +87,8 @@ public enum JnServiceLogin implements JnService {
 				.ifThisIdIsPresentInEntity(JnEntityLoginPassword.ENTITY.getTwinEntity()).returnStatus(JnProcessStatusCreateLoginEmail.lockedPassword).and()
 				.ifThisIdIsPresentInEntity(JnEntityLoginSessionConflict.ENTITY).returnStatus(JnProcessStatusCreateLoginEmail.loginConflict).and()
 				.ifThisIdIsNotPresentInEntity(JnEntityLoginEmail.ENTITY).executeAction(action).and()
-				.ifThisIdIsNotPresentInEntity(JnEntityLoginPassword.ENTITY).returnStatus(JnProcessStatusCreateLoginEmail.missingSavePassword).and()
-				.ifThisIdIsNotPresentInEntity(JnEntityLoginAnswers.ENTITY).returnStatus(JnProcessStatusCreateLoginEmail.missingSaveAnswers).andFinallyReturningTheseFields("x")
+				.ifThisIdIsNotPresentInEntity(JnEntityLoginAnswers.ENTITY).returnStatus(JnProcessStatusCreateLoginEmail.missingSaveAnswers).and()
+				.ifThisIdIsNotPresentInEntity(JnEntityLoginPassword.ENTITY).returnStatus(JnProcessStatusCreateLoginEmail.missingSavePassword).andFinallyReturningTheseFields("x")
 			.endThisProcedureRetrievingTheResultingData(this.name(), CcpOtherConstants.DO_NOTHING, JnDeleteKeysFromCache.INSTANCE);
 
 			return result;
@@ -150,7 +150,6 @@ public enum JnServiceLogin implements JnService {
 			.toBeginProcedureAnd()
 				.ifThisIdIsPresentInEntity(JnEntityLoginToken.ENTITY.getTwinEntity()).returnStatus(JnProcessStatusCreateLoginToken.statusLockedToken).and()
 				.ifThisIdIsNotPresentInEntity(JnEntityLoginEmail.ENTITY).returnStatus(JnProcessStatusUpdatePassword.missingEmail).and()
-				.ifThisIdIsNotPresentInEntity(JnEntityLoginAnswers.ENTITY).returnStatus(JnProcessStatusCreateLoginToken.missingSaveAnswers).and()
 				.ifThisIdIsPresentInEntity(JnEntityLoginToken.ENTITY).returnStatus(JnProcessStatusCreateLoginToken.statusAlreadySentToken).and()
 				.ifThisIdIsNotPresentInEntity(JnEntityLoginToken.ENTITY).executeAction(new JnFunctionMensageriaSender(JnBusinessSendUserToken.INSTANCE))
 				.andFinallyReturningTheseFields(json.fieldSet())

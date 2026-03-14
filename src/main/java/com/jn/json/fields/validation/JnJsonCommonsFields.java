@@ -1,6 +1,5 @@
 package com.jn.json.fields.validation;
 
-import com.ccp.decorators.CcpEmailDecorator;
 import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeNestedJson;
 import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeNumberUnsigned;
 import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeString;
@@ -43,7 +42,9 @@ public enum JnJsonCommonsFields{
 	@CcpJsonFieldTypeString(maxLength = 100)
 	subjectType, 
 	
-	@CcpJsonFieldTypeString(regexValidation = CcpEmailDecorator.EMAIL_REGEX, minLength = 7, maxLength = 100)
+	@CcpJsonFieldTypeString(
+//			regexValidation = CcpEmailDecorator.EMAIL_REGEX, 
+	minLength = 7, maxLength = 100)
 	email, 
 	
 	@CcpJsonFieldTypeString(maxLength = 100)
