@@ -69,6 +69,7 @@ public enum JnServiceLogin implements JnService {
 				.ifThisIdIsPresentInEntity(JnEntityLoginSessionConflict.ENTITY).returnStatus(JnProcessStatusExecuteLogin.loginConflict).and()
 				.ifThisIdIsNotPresentInEntity(JnEntityLoginPassword.ENTITY).returnStatus(JnProcessStatusExecuteLogin.missingSavePassword).and()
 				.ifThisIdIsPresentInEntity(JnEntityLoginPassword.ENTITY).executeAction(evaluateTries).andFinallyReturningTheseFields(
+						JnEntityLoginPasswordAttempts.Fields.attempts.name(),
 						JnEntityLoginToken.Fields.userAgent.name(),
 						JnEntityLoginToken.Fields.email.name(),
 						JnEntityLoginToken.Fields.ip.name(),

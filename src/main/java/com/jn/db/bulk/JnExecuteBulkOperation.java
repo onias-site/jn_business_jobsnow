@@ -113,7 +113,7 @@ public class JnExecuteBulkOperation implements CcpExecuteBulkOperation{
 		this.executeBulk(all);
 
 		CcpJsonRepresentation data = json;
-	
+		
 		for (CcpHandleWithSearchResultsInTheEntity<List<CcpBulkItem>> handler : handlers) {
 			
 			CcpEntity entityToSearch = handler.getEntityToSearch();

@@ -11,7 +11,7 @@ public enum JnProcessStatusExecuteLogin implements CcpProcessStatus{
 	lockedPassword(423),
 	expectedStatus(200),
 	invalidSession(401),
-	wrongPassword(421),
+	wrongPassword(427),
 	loginConflict(409),
 	invalidEmail(400),
 	missingSavingEmail(404),

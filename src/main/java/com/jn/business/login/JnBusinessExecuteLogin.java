@@ -1,12 +1,12 @@
 package com.jn.business.login;
 
+import com.ccp.business.CcpBusiness;
 import com.ccp.constantes.CcpOtherConstants;
 import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.decorators.CcpJsonRepresentation.CcpJsonFieldName;
 import com.ccp.especifications.db.bulk.handlers.CcpBulkHandlerDelete;
 import com.ccp.especifications.db.bulk.handlers.CcpEntityBulkHandlerTransferRecordToReverseEntity;
 import com.ccp.especifications.db.utils.entity.CcpEntity;
-import com.ccp.business.CcpBusiness;
 import com.jn.db.bulk.JnExecuteBulkOperation;
 import com.jn.db.bulk.handlers.JnBulkHandlerRegisterLogin;
 import com.jn.entities.JnEntityLoginPassword;
@@ -31,6 +31,7 @@ public class JnBusinessExecuteLogin implements CcpBusiness {
 		CcpEntity twinEntity = JnEntityLoginPassword.ENTITY.getTwinEntity();
 		CcpEntityBulkHandlerTransferRecordToReverseEntity executeUnlock = twinEntity.getTransferRecordToReverseEntity();
 		CcpEntity entityAttempts = JnEntityLoginPasswordAttempts.ENTITY;
+		
 		CcpBulkHandlerDelete removeAttempts = new CcpBulkHandlerDelete(entityAttempts);
 
 		JnExecuteBulkOperation.INSTANCE.

@@ -81,7 +81,8 @@ public class JnBusinessEvaluateAttempts implements CcpBusiness{
 		String attemptsEntityName = this.entityToGetTheAttempts.getEntityName();
 		Double attemptsFromDatabase = json.getDynamicVersion().getValueFromPath(0d,"_entities", attemptsEntityName, this.fieldAttempsName);
 		//LATER PARAMETRIZAR O 3
-		boolean exceededAttempts = attemptsFromDatabase >= 3;
+		double updatedAttempts = attemptsFromDatabase + 1;
+		boolean exceededAttempts = updatedAttempts >= 3;
 		if(exceededAttempts) {
 			this.topicToCreateTheLockWhenExceedTries.apply(toReturn);
 			throw new CcpErrorFlowDisturb(toReturn, this.statusToReturnWhenExceedAttempts);
@@ -89,11 +90,14 @@ public class JnBusinessEvaluateAttempts implements CcpBusiness{
 		
 		String email = json.getDynamicVersion().getAsString(this.fieldEmailName);
 		CcpJsonRepresentation put = CcpOtherConstants.EMPTY_JSON
-				.getDynamicVersion().put(this.fieldAttempsName, attemptsFromDatabase + 1)
+				.getDynamicVersion().put(this.fieldAttempsName, updatedAttempts)
 				.getDynamicVersion().put(this.fieldEmailName, email)
 				;
 		this.entityToGetTheAttempts.save(put);
-		throw new CcpErrorFlowDisturb(toReturn, this.statusToReturnWhenWrongType);
+		String[] returnedFields = new String[] {
+				this.fieldAttempsName
+		};
+		throw new CcpErrorFlowDisturb(toReturn.getDynamicVersion().put(this.fieldAttempsName, updatedAttempts), this.statusToReturnWhenWrongType, returnedFields);
 	}
 	
 	

@@ -396,4 +396,17 @@ public final class JnExpurgableEntity extends CcpEntityDelegator implements CcpE
 		CcpBulkItem bulkItem = this.toBulkItems(json, operation).stream().filter(x -> x.entity.getEntityName().equals(this.entity.getEntityName())).findFirst().get();
 		return bulkItem;
 	}
+	
+	public CcpJsonRepresentation getJsonWithExtraFields(CcpJsonRepresentation json) {
+		CcpJsonRepresentation populateAnExpurgableFromJson = this.populateAnExpurgableFromJson(json);
+		CcpJsonRepresentation jsonPiece = populateAnExpurgableFromJson
+		.getJsonPiece(
+				JnEntityDisposableRecord.Fields.entity,
+				JnEntityDisposableRecord.Fields.id
+				);
+		
+		CcpJsonRepresentation mergeWithAnotherJson = json.mergeWithAnotherJson(jsonPiece);
+
+		return mergeWithAnotherJson;
+	}
 }
