@@ -37,7 +37,7 @@ public final class JnVersionableEntity extends CcpEntityDelegator implements Ccp
 	private final CcpBulkItem getVersionableToBulkOperationToBulkOperation(CcpJsonRepresentation json, CcpBulkEntityOperationType operation) {
 		
 		CcpJsonRepresentation audit = this.getAuditRecord(json, operation);
-		CcpBulkItem ccpBulkItem = JnEntityAudit.ENTITY.getMainBulkItem(audit, CcpBulkEntityOperationType.create);
+		CcpBulkItem ccpBulkItem = JnEntityAudit.ENTITY.toBulkItem(audit, CcpBulkEntityOperationType.create);
 		return ccpBulkItem;
 	}
 

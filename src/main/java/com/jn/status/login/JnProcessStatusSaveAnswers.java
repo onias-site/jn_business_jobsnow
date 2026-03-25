@@ -6,7 +6,7 @@ public enum JnProcessStatusSaveAnswers implements CcpProcessStatus{
 	invalidEmail(400),
 	lockedToken(403),
 	tokenFaltando(404),
-	lockedPassword(421),
+	lockedPassword(427),
 	loginConflict(409),
 	missingPassword(202),
 	expectedStatus(200),

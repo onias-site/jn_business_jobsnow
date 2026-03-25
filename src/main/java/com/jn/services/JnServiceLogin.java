@@ -117,7 +117,7 @@ public enum JnServiceLogin implements JnService {
 			CcpBusiness action = new JnFunctionMensageriaSender(JnBusinessExecuteLogout.INSTANCE);
 			new CcpGetEntityId(json) 
 			.toBeginProcedureAnd()
-				.ifThisIdIsNotPresentInEntity(JnEntityLoginSessionConflict.ENTITY).returnStatus(JnProcessStatusExecuteLogout.missingLogin).and()
+				.ifThisIdIsNotPresentInEntity(JnEntityLoginSessionValidation.ENTITY).returnStatus(JnProcessStatusExecuteLogout.missingLogin).and()
 				.executeAction(action).andFinallyReturningTheseFields("x")
 			.endThisProcedure(this.name(), CcpOtherConstants.DO_NOTHING, JnDeleteKeysFromCache.INSTANCE)
 			;

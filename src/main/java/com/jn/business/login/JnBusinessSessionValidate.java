@@ -16,17 +16,17 @@ public class JnBusinessSessionValidate implements CcpBusiness{
 	
 	public CcpJsonRepresentation apply(CcpJsonRepresentation json) { 
 		
-		CcpBusiness missingSessionToken = JnProcessStatusExecuteLogin.missingSessionToken.flowDisturb();
-		json = json.whenFieldsAreNotFound(missingSessionToken, JsonFieldNames.sessionToken);
+		CcpBusiness throwMissingSessionToken = JnProcessStatusExecuteLogin.missingSessionToken.flowDisturb();
+		json = json.whenFieldsAreNotFound(throwMissingSessionToken, JsonFieldNames.sessionToken);
 		
 		CcpJsonRepresentation duplicateValueFromField = json.duplicateValueFromField(JsonFieldNames.sessionToken, JnEntityLoginSessionValidation.Fields.token);
 		
-		CcpBusiness invalidSession = JnProcessStatusExecuteLogin.invalidSession.flowDisturb();
-		CcpJsonRepresentation oneById = JnEntityLoginSessionValidation.ENTITY.getOneByIdOrHandleItIfThisIdWasNotFound(duplicateValueFromField, invalidSession);
+		CcpBusiness throwInvalidSession = JnProcessStatusExecuteLogin.invalidSession.flowDisturb();
 		
-		CcpJsonRepresentation putAll = json.mergeWithAnotherJson(oneById);
+		JnEntityLoginSessionValidation.ENTITY.getOneByIdOrHandleItIfThisIdWasNotFound(duplicateValueFromField, throwInvalidSession);
 		
-		return putAll; 
+		
+		return json; 
 	}
 
 }
