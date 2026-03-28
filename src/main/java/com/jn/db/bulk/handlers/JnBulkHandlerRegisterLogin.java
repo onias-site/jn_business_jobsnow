@@ -3,6 +3,7 @@ package com.jn.db.bulk.handlers;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.ccp.business.CcpBusiness;
 import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.especifications.db.bulk.CcpBulkEntityOperationType;
 import com.ccp.especifications.db.bulk.CcpBulkItem;
@@ -23,10 +24,12 @@ public class JnBulkHandlerRegisterLogin implements CcpHandleWithSearchResultsInT
 		List<CcpBulkItem> bulkItems = this.getBulkItems(json);
 		return bulkItems;
 	}
-
+	//FIXME LGPD VS EXPURGABLE
 	private List<CcpBulkItem> getBulkItems(CcpJsonRepresentation json) {
-		var newSession = JnEntityLoginSessionConflict.ENTITY.toBulkItems(json, CcpBulkEntityOperationType.create);
-		var newLogin = JnEntityLoginSessionValidation.ENTITY.toBulkItems(json, CcpBulkEntityOperationType.create);
+		CcpJsonRepresentation sessionConflictLgpd = JnEntityLoginSessionConflict.ENTITY.getTransformedJsonByEachFieldInJson(json);
+		var newSession = JnEntityLoginSessionConflict.ENTITY.toBulkItems(sessionConflictLgpd, CcpBulkEntityOperationType.create);
+		CcpJsonRepresentation sessionValidationLgpd = JnEntityLoginSessionValidation.ENTITY.getTransformedJsonByEachFieldInJson(json);
+		var newLogin = JnEntityLoginSessionValidation.ENTITY.toBulkItems(sessionValidationLgpd, CcpBulkEntityOperationType.create);
 		var asList = new ArrayList<CcpBulkItem>();
 		asList.addAll(newSession);
 		asList.addAll(newLogin);

@@ -41,8 +41,9 @@ public final class JnExpurgableEntity extends CcpEntityDelegator implements CcpE
 		this.timeOption = timeOption;
 	}
 	
-	public String calculateCacheId(CcpJsonRepresentation json) {
-		String id = this.getId(json);
+	public String calculateCacheId(CcpJsonRepresentation json1) {
+		CcpJsonRepresentation json = this.getTransformedJsonByEachFieldInJson(json1);
+		String id = this.calculateId(json);
 		return id;
 	}
 	
@@ -61,7 +62,7 @@ public final class JnExpurgableEntity extends CcpEntityDelegator implements CcpE
 	}
 
 
-	private final String getId(CcpJsonRepresentation json) {
+	public final String calculateId(CcpJsonRepresentation json) {
 
 		String formattedTimestamp = this.extractFormatedCurrentTimestamp(json);
 
@@ -105,7 +106,7 @@ public final class JnExpurgableEntity extends CcpEntityDelegator implements CcpE
 	
 	public List<CcpBulkItem> toBulkItems(CcpJsonRepresentation json, CcpBulkEntityOperationType operation) {
 
-		String mainEntityId = this.getId(json);
+		String mainEntityId = this.calculateId(json);
 		CcpBulkItem mainItem = new CcpBulkItem(json, operation, this, mainEntityId, x -> this.getOnlyExistingFields(x));
 		CcpBulkItem expurgableToBulkOperation = this.getExpurgableToBulkOperation(json, operation);
 		List<CcpBulkItem> asList = Arrays.asList(mainItem, expurgableToBulkOperation);
@@ -140,14 +141,6 @@ public final class JnExpurgableEntity extends CcpEntityDelegator implements CcpE
 		return expurgable;
 	}
 
-	public boolean create(CcpJsonRepresentation json) {
-		
-		
-		List<CcpBulkItem> bulkItems = this.toBulkItems(json, CcpBulkEntityOperationType.create);
-		JnExecuteBulkOperation.INSTANCE.executeBulk(bulkItems);
-		return true;
-	}
-	
 	public CcpJsonRepresentation save(CcpJsonRepresentation json) {
 
 		CcpJsonRepresentation handledJson = this.getTransformedJsonByEachFieldInJson(json);
@@ -159,7 +152,7 @@ public final class JnExpurgableEntity extends CcpEntityDelegator implements CcpE
 		return transformedJsonAfterOperation;
 	}
 
-	public CcpJsonRepresentation save(CcpJsonRepresentation json, String id1) {
+	public CcpJsonRepresentation save(CcpJsonRepresentation json, String id) {
 		
 		List<CcpBulkItem> bulkItems = this.toBulkItems(json, CcpBulkEntityOperationType.create);
 		JnExecuteBulkOperation.INSTANCE.executeBulk(bulkItems);
@@ -168,8 +161,9 @@ public final class JnExpurgableEntity extends CcpEntityDelegator implements CcpE
 	}
 	
 
-	public CcpJsonRepresentation delete(CcpJsonRepresentation json) {
+	public CcpJsonRepresentation delete(CcpJsonRepresentation json1) {
 		
+		CcpJsonRepresentation json = this.getTransformedJsonByEachFieldInJson(json1);
 		
 		List<CcpBulkItem> bulkItems = this.toBulkItems(json, CcpBulkEntityOperationType.delete);
 		JnExecuteBulkOperation.INSTANCE.executeBulk(bulkItems);
@@ -177,8 +171,8 @@ public final class JnExpurgableEntity extends CcpEntityDelegator implements CcpE
 		return json;
 	}
 
-	public boolean exists(CcpJsonRepresentation json) {
-		
+	public boolean exists(CcpJsonRepresentation json1) {
+		CcpJsonRepresentation json = this.getTransformedJsonByEachFieldInJson(json1);
 		CcpJsonRepresentation expurgableId = this.getExpurgableId(json);
 		CcpCrud crud = CcpDependencyInjection.getDependency(CcpCrud.class);
 		CcpJsonRepresentation allValuesTogether = expurgableId.mergeWithAnotherJson(json);
@@ -209,7 +203,9 @@ public final class JnExpurgableEntity extends CcpEntityDelegator implements CcpE
 	}
 	
 	
-	public CcpJsonRepresentation getOneById(CcpJsonRepresentation json) {
+	public CcpJsonRepresentation getOneById(CcpJsonRepresentation json1) {
+		
+		CcpJsonRepresentation json = this.getTransformedJsonByEachFieldInJson(json1);
 		
 		CcpCrud crud = CcpDependencyInjection.getDependency(CcpCrud.class);
 		CcpJsonRepresentation expurgableId = this.getExpurgableId(json);
@@ -227,9 +223,10 @@ public final class JnExpurgableEntity extends CcpEntityDelegator implements CcpE
 		boolean isNotPresentInCopyEntity = false == JnEntityDisposableRecord.ENTITY.isPresentInThisUnionAll(unionAll, allValuesTogether);
 
 		if(isNotPresentInCopyEntity) {
-			String calculateId = this.getId(allValuesTogether);
-			CcpJsonRepresentation oneById =  this.entity.getOneById(calculateId);
-			return oneById;
+		//FIXME
+			//			String calculateId = this.calculateId(allValuesTogether);
+//			CcpJsonRepresentation oneById =  this.entity.getOneById(calculateId);
+//			return oneById;
 		}
 
 		CcpJsonRepresentation requiredEntityRow = JnEntityDisposableRecord.ENTITY.getRequiredEntityRow(unionAll, allValuesTogether);
@@ -242,14 +239,16 @@ public final class JnExpurgableEntity extends CcpEntityDelegator implements CcpE
 			return innerJson;
 		}
 
-		String calculateId = this.getId(allValuesTogether);
-		CcpJsonRepresentation oneById =  this.entity.getOneById(calculateId);
+		//FIXME
+//		String calculateId = this.calculateId(allValuesTogether);
+//		CcpJsonRepresentation oneById =  this.entity.getOneById(calculateId);
 		
-		return oneById;
+		return json;
 	}
 
-	public CcpJsonRepresentation getOneByIdOrHandleItIfThisIdWasNotFound(CcpJsonRepresentation json, CcpBusiness ifNotFound) {
+	public CcpJsonRepresentation getOneByIdOrHandleItIfThisIdWasNotFound(CcpJsonRepresentation json1, CcpBusiness ifNotFound) {
 		
+		CcpJsonRepresentation json = this.getTransformedJsonByEachFieldInJson(json1);
 		CcpJsonRepresentation expurgableId = this.getExpurgableId(json);
 		CcpCrud crud = CcpDependencyInjection.getDependency(CcpCrud.class);
 		CcpJsonRepresentation allValuesTogether = expurgableId.mergeWithAnotherJson(json);
@@ -288,7 +287,7 @@ public final class JnExpurgableEntity extends CcpEntityDelegator implements CcpE
 	
 	private List<CcpJsonRepresentation> getParametersToSearchExpurgable(CcpJsonRepresentation json) {
 		
-		String id = this.getId(json);
+		String id = this.calculateId(json);
 
 		CcpDbRequester dependency = CcpDependencyInjection.getDependency(CcpDbRequester.class);
 		
@@ -306,8 +305,11 @@ public final class JnExpurgableEntity extends CcpEntityDelegator implements CcpE
 	}
 
 
-	public List<CcpJsonRepresentation> getParametersToSearch(CcpJsonRepresentation json) {
+	public List<CcpJsonRepresentation> getParametersToSearch(CcpJsonRepresentation json1) {
+		
+		CcpJsonRepresentation json = this.getTransformedJsonByEachFieldInJson(json1);
 		List<CcpJsonRepresentation> mainParametersToSearch =  this.getParametersToSearchExpurgable(json);
+		
 		CcpJsonRepresentation expurgableId = this.getExpurgableId(json);
 		List<CcpJsonRepresentation> othersParametersToSearch = JnEntityDisposableRecord.ENTITY.getParametersToSearch(expurgableId);
 		ArrayList<CcpJsonRepresentation> result = new ArrayList<>();
@@ -316,9 +318,11 @@ public final class JnExpurgableEntity extends CcpEntityDelegator implements CcpE
 		return result;
 	}
 
-	public boolean isPresentInThisUnionAll(CcpSelectUnionAll unionAll, CcpJsonRepresentation json) {
+	public boolean isPresentInThisUnionAll(CcpSelectUnionAll unionAll, CcpJsonRepresentation json1) {
 
-		String id = this.getId(json);
+		CcpJsonRepresentation json = this.getTransformedJsonByEachFieldInJson(json1);
+
+		String id = this.calculateId(json);
 
 		String entityName = this.getEntityName();
 		
@@ -365,9 +369,10 @@ public final class JnExpurgableEntity extends CcpEntityDelegator implements CcpE
 		return false;
 	}
 
-	public CcpJsonRepresentation getRecordFromUnionAll(CcpSelectUnionAll unionAll, CcpJsonRepresentation json) {
-	
-		String id = this.getId(json);
+	public CcpJsonRepresentation getRecordFromUnionAll(CcpSelectUnionAll unionAll, CcpJsonRepresentation json1) {
+		CcpJsonRepresentation json = this.getTransformedJsonByEachFieldInJson(json1);
+
+		String id = this.calculateId(json);
 		String index = this.getEntityName();
 		
 		CcpJsonRepresentation recordFromUnionAll = unionAll.getEntityRow(index, id);
@@ -405,7 +410,8 @@ public final class JnExpurgableEntity extends CcpEntityDelegator implements CcpE
 		return json -> operation.execute(this, json);
 	}
 
-	public CcpBulkItem getMainBulkItem(CcpJsonRepresentation json, CcpBulkEntityOperationType operation) {
+	public CcpBulkItem getMainBulkItem(CcpJsonRepresentation json1, CcpBulkEntityOperationType operation) {
+		CcpJsonRepresentation json = this.getTransformedJsonByEachFieldInJson(json1);
 		CcpBulkItem bulkItem = this.toBulkItems(json, operation).stream().filter(x -> x.entity.getEntityName().equals(this.entity.getEntityName())).findFirst().get();
 		return bulkItem;
 	}

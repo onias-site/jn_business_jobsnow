@@ -15,7 +15,7 @@ import com.jn.entities.decorators.JnExpurgableEntity;
 import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
 
-@CcpEntityExpurgable(expurgTime = CcpEntityExpurgableOptions.hourly, expurgableEntityFactory = JnExpurgableEntity.class)
+@CcpEntityExpurgable(expurgTime = CcpEntityExpurgableOptions.daily, expurgableEntityFactory = JnExpurgableEntity.class)
 @CcpEntityCache(3600)
 @CcpEntitySpecifications(
 		entityFieldsTransformers = JnJsonTransformersFieldsEntityDefault.class,

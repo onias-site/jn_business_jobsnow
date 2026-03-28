@@ -5,6 +5,7 @@ import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.decorators.CcpJsonRepresentation.CcpJsonFieldName;
 import com.ccp.especifications.db.crud.CcpGetEntityId;
 import com.ccp.especifications.db.utils.entity.CcpEntityOperationType;
+import com.ccp.flow.CcpErrorFlowDisturb;
 import com.ccp.business.CcpBusiness;
 import com.ccp.json.validations.fields.annotations.CcpJsonCopyFieldValidationsFrom;
 import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidatorRequired;
@@ -13,6 +14,8 @@ import com.jn.business.login.JnBusinessExecuteLogin;
 import com.jn.business.login.JnBusinessExecuteLogout;
 import com.jn.business.login.JnBusinessSendUserToken;
 import com.jn.business.login.JnBusinessUpdatePassword;
+import com.jn.entities.JnEntityDisposableRecord;
+import com.jn.entities.JnEntityEmailMessageSent;
 import com.jn.entities.JnEntityLoginAnswers;
 import com.jn.entities.JnEntityLoginEmail;
 import com.jn.entities.JnEntityLoginPassword;
@@ -69,13 +72,13 @@ public enum JnServiceLogin implements JnService {
 				.ifThisIdIsPresentInEntity(JnEntityLoginSessionConflict.ENTITY).returnStatus(JnProcessStatusExecuteLogin.loginConflict).and()
 				.ifThisIdIsNotPresentInEntity(JnEntityLoginPassword.ENTITY).returnStatus(JnProcessStatusExecuteLogin.missingSavePassword).and()
 				.ifThisIdIsPresentInEntity(JnEntityLoginPassword.ENTITY).executeAction(evaluateTries).andFinallyReturningTheseFields(
+						JnEntityLoginSessionValidation.Fields.userAgent.name(),
 						JnEntityLoginPasswordAttempts.Fields.attempts.name(),
-						JnEntityLoginToken.Fields.userAgent.name(),
+						JnEntityLoginSessionValidation.Fields.ip.name(),
 						JnEntityLoginToken.Fields.email.name(),
-						JnEntityLoginToken.Fields.ip.name(),
 						"sessionToken" 
 						)
-			.endThisProcedureRetrievingTheResultingData(methodName, CcpOtherConstants.DO_NOTHING, JnDeleteKeysFromCache.INSTANCE);
+			.endThisProcedureRetrievingTheResultingData(methodName, CcpOtherConstants.DO_NOTHING, CcpOtherConstants.DO_NOTHING, JnDeleteKeysFromCache.INSTANCE);
 			return findById; 
 		}
 	},
@@ -90,7 +93,7 @@ public enum JnServiceLogin implements JnService {
 				.ifThisIdIsNotPresentInEntity(JnEntityLoginEmail.ENTITY).executeAction(action).and()
 				.ifThisIdIsNotPresentInEntity(JnEntityLoginAnswers.ENTITY).returnStatus(JnProcessStatusCreateLoginEmail.missingSaveAnswers).and()
 				.ifThisIdIsNotPresentInEntity(JnEntityLoginPassword.ENTITY).returnStatus(JnProcessStatusCreateLoginEmail.missingSavePassword).andFinallyReturningTheseFields("x")
-			.endThisProcedureRetrievingTheResultingData(this.name(), CcpOtherConstants.DO_NOTHING, JnDeleteKeysFromCache.INSTANCE);
+			.endThisProcedureRetrievingTheResultingData(this.name(), CcpOtherConstants.DO_NOTHING, CcpOtherConstants.DO_NOTHING, JnDeleteKeysFromCache.INSTANCE);
 
 			return result;
 		}
@@ -107,7 +110,7 @@ public enum JnServiceLogin implements JnService {
 					.ifThisIdIsPresentInEntity(JnEntityLoginSessionConflict.ENTITY).returnStatus(JnProcessStatusExistsLoginEmail.loginConflict).and()
 					.ifThisIdIsNotPresentInEntity(JnEntityLoginAnswers.ENTITY).returnStatus(JnProcessStatusExistsLoginEmail.missingAnswers).and()
 					.ifThisIdIsNotPresentInEntity(JnEntityLoginPassword.ENTITY).returnStatus(JnProcessStatusExistsLoginEmail.missingPassword).andFinallyReturningTheseFields("x")
-				.endThisProcedure(this.name(), CcpOtherConstants.DO_NOTHING, JnDeleteKeysFromCache.INSTANCE)
+				.endThisProcedure(this.name(), CcpOtherConstants.DO_NOTHING, CcpOtherConstants.DO_NOTHING, JnDeleteKeysFromCache.INSTANCE)
 				;
 			 return json;
 		}
@@ -118,8 +121,9 @@ public enum JnServiceLogin implements JnService {
 			new CcpGetEntityId(json) 
 			.toBeginProcedureAnd()
 				.ifThisIdIsNotPresentInEntity(JnEntityLoginSessionValidation.ENTITY).returnStatus(JnProcessStatusExecuteLogout.missingLogin).and()
-				.executeAction(action).andFinallyReturningTheseFields("x")
-			.endThisProcedure(this.name(), CcpOtherConstants.DO_NOTHING, JnDeleteKeysFromCache.INSTANCE)
+				.executeAction(action)
+				.andFinallyReturningTheseFields("x")
+			.endThisProcedure(this.name(), CcpOtherConstants.DO_NOTHING, CcpOtherConstants.DO_NOTHING, JnDeleteKeysFromCache.INSTANCE)
 			;
 			 
 			return json;
@@ -140,21 +144,35 @@ public enum JnServiceLogin implements JnService {
 	 			.and().ifThisIdIsNotPresentInEntity(JnEntityLoginPassword.ENTITY).returnStatus(JnProcessStatusSaveAnswers.missingPassword)
 				
 				.andFinallyReturningTheseFields("x")
-			.endThisProcedure(this.name(), CcpOtherConstants.DO_NOTHING, JnDeleteKeysFromCache.INSTANCE)
+			.endThisProcedure(this.name(), CcpOtherConstants.DO_NOTHING, CcpOtherConstants.DO_NOTHING, JnDeleteKeysFromCache.INSTANCE)
 			;
 			return json; 
 		}
 	},
 	CreateLoginToken {
 		public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
-			CcpJsonRepresentation result = new CcpGetEntityId(json)
+			
+			CcpJsonRepresentation put = json.put(JnEntityEmailMessageSent.Fields.subjectType, JnBusinessSendUserToken.class.getName());
+			
+			JnFunctionMensageriaSender sendUserToken = new JnFunctionMensageriaSender(JnBusinessSendUserToken.INSTANCE);
+			
+			CcpBusiness returnsDataAboutSentTokenInEmailMessage = x -> {
+				
+				CcpJsonRepresentation dataWithTimeStamp = JnEntityDisposableRecord.getDataWithTimeStamp(JnEntityLoginToken.ENTITY, 
+						json
+						);
+				
+				throw new CcpErrorFlowDisturb(dataWithTimeStamp, JnProcessStatusCreateLoginToken.statusAlreadySentToken,new String[] {"expirationDate", "dateItWasSaved"});
+			};
+			
+			CcpJsonRepresentation result = new CcpGetEntityId(put)
 			.toBeginProcedureAnd()
 				.ifThisIdIsPresentInEntity(JnEntityLoginToken.ENTITY.getTwinEntity()).returnStatus(JnProcessStatusCreateLoginToken.statusLockedToken).and()
+				.ifThisIdIsPresentInEntity(JnEntityEmailMessageSent.ENTITY).executeAction(returnsDataAboutSentTokenInEmailMessage).and()
 				.ifThisIdIsNotPresentInEntity(JnEntityLoginEmail.ENTITY).returnStatus(JnProcessStatusUpdatePassword.missingEmail).and()
-				.ifThisIdIsPresentInEntity(JnEntityLoginToken.ENTITY).returnStatus(JnProcessStatusCreateLoginToken.statusAlreadySentToken).and()
-				.ifThisIdIsNotPresentInEntity(JnEntityLoginToken.ENTITY).executeAction(new JnFunctionMensageriaSender(JnBusinessSendUserToken.INSTANCE))
+				.ifThisIdIsNotPresentInEntity(JnEntityLoginToken.ENTITY).executeAction(sendUserToken)
 				.andFinallyReturningTheseFields(json.fieldSet())
-			.endThisProcedureRetrievingTheResultingData(this.name(), CcpOtherConstants.DO_NOTHING, JnDeleteKeysFromCache.INSTANCE);
+			.endThisProcedureRetrievingTheResultingData(this.name(), CcpOtherConstants.DO_NOTHING, CcpOtherConstants.DO_NOTHING, JnDeleteKeysFromCache.INSTANCE);
 
 			return result;
 		}
@@ -192,12 +210,12 @@ public enum JnServiceLogin implements JnService {
 				.ifThisIdIsNotPresentInEntity(JnEntityLoginEmail.ENTITY).returnStatus(JnProcessStatusUpdatePassword.missingEmail).and()
 				.ifThisIdIsNotPresentInEntity(JnEntityLoginToken.ENTITY).returnStatus(JnProcessStatusUpdatePassword.missingToken).and()
 				.executeAction(evaluateAttempts).andFinallyReturningTheseFields(
-						JnEntityLoginToken.Fields.userAgent.name(),
+						JnEntityLoginSessionValidation.Fields.userAgent.name(),
+						JnEntityLoginSessionValidation.Fields.ip.name(),
 						JnEntityLoginToken.Fields.email.name(),
-						JnEntityLoginToken.Fields.ip.name(),
 						"sessionToken" 
 						)	
-			.endThisProcedureRetrievingTheResultingData(this.name(), CcpOtherConstants.DO_NOTHING, JnDeleteKeysFromCache.INSTANCE);
+			.endThisProcedureRetrievingTheResultingData(this.name(), CcpOtherConstants.DO_NOTHING, CcpOtherConstants.DO_NOTHING, JnDeleteKeysFromCache.INSTANCE);
 			
 			return result;
 		}
