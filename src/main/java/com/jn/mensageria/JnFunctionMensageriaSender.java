@@ -39,7 +39,7 @@ public class JnFunctionMensageriaSender implements CcpBusiness {
 		this.operation = "";
 	}
 
-	protected JnFunctionMensageriaSender(CcpEntity entity, CcpEntityOperationType operation) {
+	public JnFunctionMensageriaSender(CcpEntity entity, CcpEntityOperationType operation) {
 		this.jsonValidationClass = operation.getJsonValidationClass(entity);
 		Class<?> configurationClass = entity.getConfigurationClass();
 		this.topic = configurationClass.getName();
@@ -86,8 +86,7 @@ public class JnFunctionMensageriaSender implements CcpBusiness {
 	}
 	
 	private CcpBulkItem toBulkItem(CcpEntity entity, CcpJsonRepresentation json) {
-		String asyncTaskId = entity.calculateId(json);
-		CcpBulkItem bulkItem = new CcpBulkItem(json, CcpBulkEntityOperationType.create, entity, asyncTaskId);
+		CcpBulkItem bulkItem = new CcpBulkItem(json, CcpBulkEntityOperationType.create, entity);
 		return bulkItem;
 	}
 	

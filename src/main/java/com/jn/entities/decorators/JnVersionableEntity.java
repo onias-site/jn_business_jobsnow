@@ -65,10 +65,8 @@ public final class JnVersionableEntity extends CcpEntityDelegator implements Ccp
 	}
 	
 	public CcpJsonRepresentation save(CcpJsonRepresentation json, String id) {
-		
 		List<CcpBulkItem> bulkItems = this.toBulkItems(json, CcpBulkEntityOperationType.create);
 		JnExecuteBulkOperation.INSTANCE.executeBulk(bulkItems);
-		
 		return json;
 	}
 
@@ -83,8 +81,7 @@ public final class JnVersionableEntity extends CcpEntityDelegator implements Ccp
 
 	public List<CcpBulkItem> toBulkItems(CcpJsonRepresentation json, CcpBulkEntityOperationType operation) {
 		
-		String calculateId = super.calculateId(json);
-		CcpBulkItem mainBulkItem = new CcpBulkItem(json, operation, this, calculateId);
+		CcpBulkItem mainBulkItem = new CcpBulkItem(json, operation, this);
 		List<CcpBulkItem> asList = new ArrayList<>();
 		asList.add(mainBulkItem);
 		

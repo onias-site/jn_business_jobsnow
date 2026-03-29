@@ -106,8 +106,7 @@ public final class JnExpurgableEntity extends CcpEntityDelegator implements CcpE
 	
 	public List<CcpBulkItem> toBulkItems(CcpJsonRepresentation json, CcpBulkEntityOperationType operation) {
 
-		String mainEntityId = this.calculateId(json);
-		CcpBulkItem mainItem = new CcpBulkItem(json, operation, this, mainEntityId, x -> this.getOnlyExistingFields(x));
+		CcpBulkItem mainItem = new CcpBulkItem(json, operation, this);
 		CcpBulkItem expurgableToBulkOperation = this.getExpurgableToBulkOperation(json, operation);
 		List<CcpBulkItem> asList = Arrays.asList(mainItem, expurgableToBulkOperation);
 		return asList;
@@ -117,9 +116,7 @@ public final class JnExpurgableEntity extends CcpEntityDelegator implements CcpE
 		
 		CcpJsonRepresentation recordCopy = this.populateAnExpurgableFromJson(json);
 		
-		String calculateId = JnEntityDisposableRecord.ENTITY.calculateId(recordCopy);
-		
-		CcpBulkItem ccpBulkItem = new CcpBulkItem(recordCopy, operation, JnEntityDisposableRecord.ENTITY, calculateId);
+		CcpBulkItem ccpBulkItem = new CcpBulkItem(recordCopy, operation, JnEntityDisposableRecord.ENTITY);
 		
 		return ccpBulkItem;
 	}

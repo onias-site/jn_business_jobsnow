@@ -3,7 +3,6 @@ package com.jn.db.bulk.handlers;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.ccp.business.CcpBusiness;
 import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.especifications.db.bulk.CcpBulkEntityOperationType;
 import com.ccp.especifications.db.bulk.CcpBulkItem;
