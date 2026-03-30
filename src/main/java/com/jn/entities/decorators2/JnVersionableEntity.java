@@ -21,20 +21,10 @@ public class JnVersionableEntity extends CcpDefaultEntityDelegator<CcpEntityVers
 	final Class<?>  clazz;
 	
 	public JnVersionableEntity(CcpEntity2 entity, Class<?> clazz) {
-		super(entity, 2, JnExecuteBulkOperation.INSTANCE, JnDeleteKeysFromCache.INSTANCE);
+		super(entity, JnExecuteBulkOperation.INSTANCE, JnDeleteKeysFromCache.INSTANCE);
 		this.clazz = clazz;
 	}
-	
-	public boolean isThisEntityDecorated(Class<CcpEntityVersionable> annotation) {
-		boolean annotationPresent = this.clazz.isAnnotationPresent(annotation);
-		return annotationPresent;
-	}
 
-	public CcpEntityVersionable getAnnotation() {
-		CcpEntityVersionable annotation = this.clazz.getAnnotation(CcpEntityVersionable.class);
-		return annotation;
-	}
-	
 	private boolean isVersionableEntity() {
 		CcpEntityDetails entityDetails = this.getEntityDetails();
 		int primaryKeyFieldsSize = entityDetails.primaryKeyNames.size();

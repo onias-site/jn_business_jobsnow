@@ -59,13 +59,13 @@ public final class JnVersionableEntity extends CcpEntityDelegator implements Ccp
 	
 
 	public CcpJsonRepresentation delete(CcpJsonRepresentation json) {
-		List<CcpBulkItem> bulkItems = this.toBulkItems(json, CcpBulkEntityOperationType.delete);
+		List<CcpBulkItem> bulkItems = this.getBulkItemsList(json, CcpBulkEntityOperationType.delete);
 		JnExecuteBulkOperation.INSTANCE.executeBulk(bulkItems);
 		return json;
 	}
 	
 	public CcpJsonRepresentation save(CcpJsonRepresentation json, String id) {
-		List<CcpBulkItem> bulkItems = this.toBulkItems(json, CcpBulkEntityOperationType.create);
+		List<CcpBulkItem> bulkItems = this.getBulkItemsList(json, CcpBulkEntityOperationType.create);
 		JnExecuteBulkOperation.INSTANCE.executeBulk(bulkItems);
 		return json;
 	}
@@ -79,7 +79,7 @@ public final class JnVersionableEntity extends CcpEntityDelegator implements Ccp
 		return json -> operation.execute(this, json);
 	}
 
-	public List<CcpBulkItem> toBulkItems(CcpJsonRepresentation json, CcpBulkEntityOperationType operation) {
+	public List<CcpBulkItem> getBulkItemsList(CcpJsonRepresentation json, CcpBulkEntityOperationType operation) {
 		
 		CcpBulkItem mainBulkItem = new CcpBulkItem(json, operation, this);
 		List<CcpBulkItem> asList = new ArrayList<>();
@@ -96,7 +96,7 @@ public final class JnVersionableEntity extends CcpEntityDelegator implements Ccp
 	}
 	
 	public CcpBulkItem getMainBulkItem(CcpJsonRepresentation json, CcpBulkEntityOperationType operation) {
-		CcpBulkItem bulkItem = this.toBulkItems(json, operation).stream().filter(x -> x.entity.getEntityName().equals(this.entity.getEntityName())).findFirst().get();
+		CcpBulkItem bulkItem = this.getBulkItemsList(json, operation).stream().filter(x -> x.entity.getEntityName().equals(this.entity.getEntityName())).findFirst().get();
 		return bulkItem;
 	}
 

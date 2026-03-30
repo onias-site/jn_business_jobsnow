@@ -14,7 +14,7 @@ import com.ccp.especifications.db.bulk.CcpErrorBulkEntityRecordNotFound;
 import com.ccp.especifications.db.crud.CcpCrud;
 import com.ccp.especifications.db.crud.CcpSelectUnionAll;
 import com.ccp.especifications.db.utils.entity.CcpEntity2;
-import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityExpurgable;
+import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityDisposable;
 import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityExpurgableOptions;
 import com.ccp.especifications.db.utils.entity.decorators.engine2.CcpDefaultEntityDelegator;
 import com.ccp.especifications.db.utils.entity.decorators.engine2.CcpEntityDetails;
@@ -23,32 +23,15 @@ import com.jn.db.bulk.JnExecuteBulkOperation;
 import com.jn.entities.JnEntityDisposableRecord;
 import com.jn.utils.JnDeleteKeysFromCache;
 
-public class JnDisposableEntity extends CcpDefaultEntityDelegator<CcpEntityExpurgable>{
+public class JnDisposableEntity extends CcpDefaultEntityDelegator<CcpEntityDisposable>{
 	
 	private final CcpEntityExpurgableOptions timeOption;
 	final Class<?>  clazz;
 
-	private JnDisposableEntity() {
-		super(null, 1, JnExecuteBulkOperation.INSTANCE, JnDeleteKeysFromCache.INSTANCE);
-		this.timeOption = null;
-		this.clazz = null;
-	}
-	
 	protected JnDisposableEntity(CcpEntity2 entity, Class<?> clazz, CcpEntityExpurgableOptions timeOption) {
-		super(entity, 2, JnExecuteBulkOperation.INSTANCE, JnDeleteKeysFromCache.INSTANCE);
+		super(entity, JnExecuteBulkOperation.INSTANCE, JnDeleteKeysFromCache.INSTANCE);
 		this.timeOption = timeOption;
 		this.clazz = clazz;
-
-	}
-	
-	public boolean isThisEntityDecorated(Class<CcpEntityExpurgable> annotation) {
-		boolean annotationPresent = this.clazz.isAnnotationPresent(annotation);
-		return annotationPresent;
-	}
-
-	public CcpEntityExpurgable getAnnotation() {
-		CcpEntityExpurgable annotation = this.clazz.getAnnotation(CcpEntityExpurgable.class);
-		return annotation;
 	}
 	
 	private CcpJsonRepresentation getExpurgableId(CcpJsonRepresentation json) {

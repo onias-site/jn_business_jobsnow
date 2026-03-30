@@ -40,7 +40,7 @@ public class JnExecuteBulkOperation implements CcpExecuteBulkOperation{
 		}
 		var response = new ArrayList<CcpBulkItem>();
 		for (CcpJsonRepresentation json : records) {
-			List<CcpBulkItem> bulkItems = entity.toBulkItems(json, operation);
+			List<CcpBulkItem> bulkItems = entity.getBulkItemsList(json, operation);
 			response.addAll(bulkItems);
 		}
 		
@@ -50,8 +50,8 @@ public class JnExecuteBulkOperation implements CcpExecuteBulkOperation{
 	
 	public JnExecuteBulkOperation executeBulk(CcpJsonRepresentation json, CcpEntity entity, CcpBulkEntityOperationType operation) {
 		CcpEntity twinEntity = entity.getTwinEntity();
-		var bulkItem = entity.toBulkItems(json, operation);
-		var bulkItem2 = twinEntity.toBulkItems(json, operation);
+		var bulkItem = entity.getBulkItemsList(json, operation);
+		var bulkItem2 = twinEntity.getBulkItemsList(json, operation);
 		ArrayList<CcpBulkItem> arrayList = new ArrayList<CcpBulkItem>(bulkItem);
 		arrayList.addAll(bulkItem2);
 		JnExecuteBulkOperation executeBulk = this.executeBulk(arrayList);
@@ -143,7 +143,7 @@ public class JnExecuteBulkOperation implements CcpExecuteBulkOperation{
 		List<CcpBulkItem> items = new ArrayList<>();
  		
 		for (CcpEntity entity : entities) {
-			List<CcpBulkItem> bulkItems = entity.toBulkItems(json, operation);
+			List<CcpBulkItem> bulkItems = entity.getBulkItemsList(json, operation);
 			for (CcpBulkItem bulkItem : bulkItems) {
 				items.add(bulkItem);
 			}			

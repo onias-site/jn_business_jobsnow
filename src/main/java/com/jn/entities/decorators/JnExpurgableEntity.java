@@ -104,7 +104,7 @@ public final class JnExpurgableEntity extends CcpEntityDelegator implements CcpE
 		return expurgableId;
 	}
 	
-	public List<CcpBulkItem> toBulkItems(CcpJsonRepresentation json, CcpBulkEntityOperationType operation) {
+	public List<CcpBulkItem> getBulkItemsList(CcpJsonRepresentation json, CcpBulkEntityOperationType operation) {
 
 		CcpBulkItem mainItem = new CcpBulkItem(json, operation, this);
 		CcpBulkItem expurgableToBulkOperation = this.getExpurgableToBulkOperation(json, operation);
@@ -151,7 +151,7 @@ public final class JnExpurgableEntity extends CcpEntityDelegator implements CcpE
 
 	public CcpJsonRepresentation save(CcpJsonRepresentation json, String id) {
 		
-		List<CcpBulkItem> bulkItems = this.toBulkItems(json, CcpBulkEntityOperationType.create);
+		List<CcpBulkItem> bulkItems = this.getBulkItemsList(json, CcpBulkEntityOperationType.create);
 		JnExecuteBulkOperation.INSTANCE.executeBulk(bulkItems);
 		
 		return json;
@@ -162,7 +162,7 @@ public final class JnExpurgableEntity extends CcpEntityDelegator implements CcpE
 		
 		CcpJsonRepresentation json = this.getTransformedJsonByEachFieldInJson(json1);
 		
-		List<CcpBulkItem> bulkItems = this.toBulkItems(json, CcpBulkEntityOperationType.delete);
+		List<CcpBulkItem> bulkItems = this.getBulkItemsList(json, CcpBulkEntityOperationType.delete);
 		JnExecuteBulkOperation.INSTANCE.executeBulk(bulkItems);
 		
 		return json;
@@ -409,7 +409,7 @@ public final class JnExpurgableEntity extends CcpEntityDelegator implements CcpE
 
 	public CcpBulkItem getMainBulkItem(CcpJsonRepresentation json1, CcpBulkEntityOperationType operation) {
 		CcpJsonRepresentation json = this.getTransformedJsonByEachFieldInJson(json1);
-		CcpBulkItem bulkItem = this.toBulkItems(json, operation).stream().filter(x -> x.entity.getEntityName().equals(this.entity.getEntityName())).findFirst().get();
+		CcpBulkItem bulkItem = this.getBulkItemsList(json, operation).stream().filter(x -> x.entity.getEntityName().equals(this.entity.getEntityName())).findFirst().get();
 		return bulkItem;
 	}
 	

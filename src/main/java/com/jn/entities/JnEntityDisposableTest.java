@@ -3,7 +3,7 @@ package com.jn.entities;
 import com.ccp.decorators.CcpJsonRepresentation.CcpJsonFieldName;
 import com.ccp.especifications.db.utils.entity.CcpEntity;
 import com.ccp.especifications.db.utils.entity.annotations.CcpEntitySpecifications;
-import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityExpurgable;
+import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityDisposable;
 import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityConfigurator;
 import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityExpurgableOptions;
 import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityFactory;
@@ -13,7 +13,7 @@ import com.jn.entities.decorators.JnExpurgableEntity;
 import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
 
-@CcpEntityExpurgable(expurgTime = CcpEntityExpurgableOptions.minute, expurgableEntityFactory = JnExpurgableEntity.class)
+@CcpEntityDisposable(expurgTime = CcpEntityExpurgableOptions.minute, expurgableEntityFactory = JnExpurgableEntity.class)
 @CcpEntitySpecifications(
 		entityFieldsTransformers = JnJsonTransformersFieldsEntityDefault.class,
 		entityValidation = JnEntityDisposableTest.Fields.class,
