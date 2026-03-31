@@ -20,12 +20,11 @@ public class JnBusinessSendUserToken implements CcpBusiness{
 	
 	public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
 		String language = json.getAsString(JnEntityEmailTemplateMessage.Fields.language);
-		CcpJsonRepresentation jsonPiece = JnEntityLoginToken.ENTITY.getTransformedJsonByEachFieldInJson(json);
 	
 		String topic = this.getClass().getName();
 		
 		CcpJsonRepresentation request = json.getInnerJson(JsonFieldNames.request);
-		CcpJsonRepresentation duplicateValueFromField = request.mergeWithAnotherJson(jsonPiece)
+		CcpJsonRepresentation duplicateValueFromField = request.mergeWithAnotherJson(json)
 				.duplicateValueFromField(JsonFieldNames.originalEmail, JnEntityLoginToken.Fields.email, 
 						JnEntityInstantMessengerParametersToSend.Fields.recipient)
 				.duplicateValueFromField(JsonFieldNames.originalToken, JnEntityInstantMessengerMessageSent.Fields.token)

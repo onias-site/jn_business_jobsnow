@@ -1,18 +1,15 @@
-package com.jn.entities.decorators2;
+package com.jn.entities.decorators;
 
 import com.ccp.decorators.CcpJsonRepresentation;
-import com.ccp.especifications.db.utils.entity.CcpEntity2;
+import com.ccp.especifications.db.utils.entity.CcpEntity;
 import com.ccp.especifications.db.utils.entity.CcpEntityOperationType;
-import com.ccp.especifications.db.utils.entity.decorators.engine2.CcpEntityDelegator;
+import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityDelegator;
 import com.jn.mensageria.JnFunctionMensageriaSender;
 
 public class JnAsyncWriterEntity extends CcpEntityDelegator  {
 
-	final Class<?> clazz;
-
-	public JnAsyncWriterEntity(CcpEntity2 entity, Class<?> clazz) {
+	public JnAsyncWriterEntity(CcpEntity entity, Class<?> clazz) {
 		super(entity);
-		this.clazz = clazz;
 	}
 
 	public CcpJsonRepresentation delete(CcpJsonRepresentation json) {

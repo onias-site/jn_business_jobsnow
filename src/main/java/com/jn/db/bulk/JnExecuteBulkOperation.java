@@ -11,16 +11,15 @@ import java.util.stream.Collectors;
 
 import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.dependency.injection.CcpDependencyInjection;
+import com.ccp.especifications.db.bulk.CcpBulkEntityOperationType;
+import com.ccp.especifications.db.bulk.CcpBulkExecutor;
 import com.ccp.especifications.db.bulk.CcpBulkItem;
 import com.ccp.especifications.db.bulk.CcpBulkOperationResult;
-import com.ccp.especifications.db.bulk.CcpBulkExecutor;
-import com.ccp.especifications.db.bulk.CcpBulkEntityOperationType;
 import com.ccp.especifications.db.bulk.CcpExecuteBulkOperation;
 import com.ccp.especifications.db.crud.CcpCrud;
 import com.ccp.especifications.db.crud.CcpHandleWithSearchResultsInTheEntity;
 import com.ccp.especifications.db.crud.CcpSelectUnionAll;
 import com.ccp.especifications.db.utils.entity.CcpEntity;
-import com.ccp.business.CcpBusiness;
 import com.jn.entities.JnEntityRecordToReprocess;
 import com.jn.utils.JnDeleteKeysFromCache;
 
@@ -40,7 +39,7 @@ public class JnExecuteBulkOperation implements CcpExecuteBulkOperation{
 		}
 		var response = new ArrayList<CcpBulkItem>();
 		for (CcpJsonRepresentation json : records) {
-			List<CcpBulkItem> bulkItems = entity.getBulkItemsList(json, operation);
+			List<CcpBulkItem> bulkItems = entity.getEntityDetails().getBulkItemsList(json, operation);
 			response.addAll(bulkItems);
 		}
 		
@@ -50,8 +49,8 @@ public class JnExecuteBulkOperation implements CcpExecuteBulkOperation{
 	
 	public JnExecuteBulkOperation executeBulk(CcpJsonRepresentation json, CcpEntity entity, CcpBulkEntityOperationType operation) {
 		CcpEntity twinEntity = entity.getTwinEntity();
-		var bulkItem = entity.getBulkItemsList(json, operation);
-		var bulkItem2 = twinEntity.getBulkItemsList(json, operation);
+		var bulkItem = entity.getEntityDetails().getBulkItemsList(json, operation);
+		var bulkItem2 = twinEntity.getEntityDetails().getBulkItemsList(json, operation);
 		ArrayList<CcpBulkItem> arrayList = new ArrayList<CcpBulkItem>(bulkItem);
 		arrayList.addAll(bulkItem2);
 		JnExecuteBulkOperation executeBulk = this.executeBulk(arrayList);
@@ -126,12 +125,12 @@ public class JnExecuteBulkOperation implements CcpExecuteBulkOperation{
 			boolean presentInThisUnionAll = entityToSearch.isPresentInThisUnionAll(unionAll, data);
 			
 			if(presentInThisUnionAll) {
-				List<CcpBusiness> doAfterSavingIfRecordIsFound = handler.doAfterSavingIfRecordIsFound();
-				data = data.getTransformedJson(doAfterSavingIfRecordIsFound);
+//				List<CcpBusiness> doAfterSavingIfRecordIsFound = handler.doAfterSavingIfRecordIsFound();
+//				data = data.getTransformedJson(doAfterSavingIfRecordIsFound);
 				continue;
 			}
-			List<CcpBusiness> doAfterSavingIfRecordIsNotFound = handler.doAfterSavingIfRecordIsNotFound();
-			data = data.getTransformedJson(doAfterSavingIfRecordIsNotFound);
+//			List<CcpBusiness> doAfterSavingIfRecordIsNotFound = handler.doAfterSavingIfRecordIsNotFound();
+//			data = data.getTransformedJson(doAfterSavingIfRecordIsNotFound);
 		}
 		
 		return unionAll;
@@ -143,7 +142,7 @@ public class JnExecuteBulkOperation implements CcpExecuteBulkOperation{
 		List<CcpBulkItem> items = new ArrayList<>();
  		
 		for (CcpEntity entity : entities) {
-			List<CcpBulkItem> bulkItems = entity.getBulkItemsList(json, operation);
+			List<CcpBulkItem> bulkItems = entity.getEntityDetails().getBulkItemsList(json, operation);
 			for (CcpBulkItem bulkItem : bulkItems) {
 				items.add(bulkItem);
 			}			

@@ -8,7 +8,7 @@ import com.ccp.decorators.CcpStringDecorator;
 import com.ccp.decorators.CcpTextDecorator;
 import com.ccp.decorators.CcpTimeDecorator;
 import com.ccp.dependency.injection.CcpDependencyInjection;
-import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityExpurgableOptions;
+import com.ccp.especifications.db.utils.entity.decorators.enums.CcpEntityExpurgableOptions;
 import com.ccp.especifications.db.utils.entity.fields.CcpEntityField;
 import com.ccp.especifications.db.utils.entity.fields.CcpJsonTransformersDefaultEntityField;
 import com.ccp.especifications.password.CcpPasswordHandler;

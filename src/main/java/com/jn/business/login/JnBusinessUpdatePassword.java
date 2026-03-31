@@ -28,10 +28,10 @@ public class JnBusinessUpdatePassword implements CcpBusiness {
 	@SuppressWarnings("unchecked")
 	public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
 
-		CcpEntityBulkHandlerTransferRecordToReverseEntity executeLogout = JnEntityLoginSessionValidation.ENTITY.getTransferRecordToReverseEntity();
+		CcpEntityBulkHandlerTransferRecordToReverseEntity executeLogout = new CcpEntityBulkHandlerTransferRecordToReverseEntity(JnEntityLoginSessionValidation.ENTITY);
 		
 		CcpEntity twinEntity = JnEntityLoginPassword.ENTITY.getTwinEntity();
-		CcpEntityBulkHandlerTransferRecordToReverseEntity registerPasswordUnlock = twinEntity.getTransferRecordToReverseEntity();
+		CcpEntityBulkHandlerTransferRecordToReverseEntity registerPasswordUnlock =new CcpEntityBulkHandlerTransferRecordToReverseEntity(twinEntity);
 		CcpBulkHandlerDelete removePasswordAttempts = new CcpBulkHandlerDelete(JnEntityLoginPasswordAttempts.ENTITY);
 
 		CcpJsonRepresentation renameField = json.renameField(JsonFieldNames.sessionToken, JnEntityLoginSessionValidation.Fields.token);

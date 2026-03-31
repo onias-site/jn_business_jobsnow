@@ -29,7 +29,7 @@ public class JnBusinessExecuteLogin implements CcpBusiness {
 		CcpJsonRepresentation renameField = json.renameField(JsonFieldNames.sessionToken, JnEntityLoginSessionValidation.Fields.token);
 		
 		CcpEntity twinEntity = JnEntityLoginPassword.ENTITY.getTwinEntity();
-		CcpEntityBulkHandlerTransferRecordToReverseEntity executeUnlock = twinEntity.getTransferRecordToReverseEntity();
+		CcpEntityBulkHandlerTransferRecordToReverseEntity executeUnlock = new CcpEntityBulkHandlerTransferRecordToReverseEntity(twinEntity);
 		CcpEntity entityAttempts = JnEntityLoginPasswordAttempts.ENTITY;
 		
 		CcpBulkHandlerDelete removeAttempts = new CcpBulkHandlerDelete(entityAttempts);

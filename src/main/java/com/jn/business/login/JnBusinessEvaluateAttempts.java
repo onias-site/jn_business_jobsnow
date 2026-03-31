@@ -63,7 +63,7 @@ public class JnBusinessEvaluateAttempts implements CcpBusiness{
 
 	public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
 		
-		String secretFromDatabase = json.getDynamicVersion().getValueFromPath("","_entities", this.entityToGetTheSecret.getEntityName(), this.databaseFieldName);
+		String secretFromDatabase = json.getDynamicVersion().getValueFromPath("","_entities", this.entityToGetTheSecret.getEntityDetails().entityName, this.databaseFieldName);
 		
 		String secretFomUser = json.getDynamicVersion().getAsString(this.userFieldName);
 		
@@ -78,7 +78,7 @@ public class JnBusinessEvaluateAttempts implements CcpBusiness{
 			return toReturn;
 		}
 
-		String attemptsEntityName = this.entityToGetTheAttempts.getEntityName();
+		String attemptsEntityName = this.entityToGetTheAttempts.getEntityDetails().entityName;
 		Double attemptsFromDatabase = json.getDynamicVersion().getValueFromPath(0d,"_entities", attemptsEntityName, this.fieldAttempsName);
 		//LATER PARAMETRIZAR O 3
 		double updatedAttempts = attemptsFromDatabase + 1;

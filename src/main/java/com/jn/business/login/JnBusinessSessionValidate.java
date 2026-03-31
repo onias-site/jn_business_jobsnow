@@ -27,7 +27,7 @@ public class JnBusinessSessionValidate implements CcpBusiness{
 		
 		CcpJsonRepresentation duplicateValueFromField = json.duplicateValueFromField(JsonFieldNames.sessionToken, JnEntityLoginSessionValidation.Fields.token);
 		
-		CcpBusiness lockPassword = JnEntityLoginPassword.ENTITY.getTwinEntity().getOperationCallback(CcpEntityOperationType.save);
+		CcpBusiness lockPassword = JnEntityLoginPassword.ENTITY.getTwinEntity().getEntityDetails().getOperationCallback(CcpEntityOperationType.save);
 		
 		CcpBusiness incrementAttempts = JnEntityLoginSessionTokenAttempts.incrementAttempts(3, lockPassword);
 		

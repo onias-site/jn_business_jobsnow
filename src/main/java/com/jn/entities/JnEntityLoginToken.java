@@ -7,17 +7,17 @@ import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityC
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityDisposable;
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityTwin;
 import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityConfigurator;
-import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityExpurgableOptions;
 import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityFactory;
+import com.ccp.especifications.db.utils.entity.decorators.enums.CcpEntityExpurgableOptions;
 import com.ccp.especifications.db.utils.entity.fields.annotations.CcpEntityFieldPrimaryKey;
 import com.ccp.json.validations.fields.annotations.CcpJsonCopyFieldValidationsFrom;
 import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidatorRequired;
-import com.jn.entities.decorators.JnExpurgableEntity;
+import com.jn.entities.decorators.JnDisposableEntity;
 import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
 
 @CcpEntityCache(86400)
-@CcpEntityDisposable(expurgTime = CcpEntityExpurgableOptions.monthly, expurgableEntityFactory = JnExpurgableEntity.class)
+@CcpEntityDisposable(expurgTime = CcpEntityExpurgableOptions.monthly, expurgableEntityFactory = JnDisposableEntity.class)
 @CcpEntityTwin(
 		twinEntityName = "login_token_locked"
 		,afterRecordBeenTransportedFromTwinToMainEntity = {}

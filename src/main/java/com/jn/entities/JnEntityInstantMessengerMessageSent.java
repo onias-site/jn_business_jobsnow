@@ -6,20 +6,20 @@ import com.ccp.especifications.db.utils.entity.annotations.CcpEntitySpecificatio
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityCache;
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityDisposable;
 import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityConfigurator;
-import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityExpurgableOptions;
 import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityFactory;
+import com.ccp.especifications.db.utils.entity.decorators.enums.CcpEntityExpurgableOptions;
 import com.ccp.especifications.db.utils.entity.fields.annotations.CcpEntityFieldPrimaryKey;
 import com.ccp.especifications.db.utils.entity.fields.annotations.CcpEntityFieldTransformer;
 import com.ccp.json.validations.fields.annotations.CcpJsonCopyFieldValidationsFrom;
 import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeNumberUnsigned;
 import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeString;
-import com.jn.entities.decorators.JnExpurgableEntity;
+import com.jn.entities.decorators.JnDisposableEntity;
 import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault;
 import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityTokenHash;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
 
 @CcpEntityCache(3600)
-@CcpEntityDisposable(expurgTime = CcpEntityExpurgableOptions.hourly, expurgableEntityFactory = JnExpurgableEntity.class)
+@CcpEntityDisposable(expurgTime = CcpEntityExpurgableOptions.hourly, expurgableEntityFactory = JnDisposableEntity.class)
 @CcpEntitySpecifications(
 		entityFieldsTransformers = JnJsonTransformersFieldsEntityDefault.class,
 		entityValidation = JnEntityInstantMessengerMessageSent.Fields.class,

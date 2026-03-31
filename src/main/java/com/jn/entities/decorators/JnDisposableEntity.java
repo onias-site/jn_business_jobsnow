@@ -1,4 +1,4 @@
-package com.jn.entities.decorators2;
+package com.jn.entities.decorators;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,11 +13,11 @@ import com.ccp.especifications.db.bulk.CcpBulkItem;
 import com.ccp.especifications.db.bulk.CcpErrorBulkEntityRecordNotFound;
 import com.ccp.especifications.db.crud.CcpCrud;
 import com.ccp.especifications.db.crud.CcpSelectUnionAll;
-import com.ccp.especifications.db.utils.entity.CcpEntity2;
+import com.ccp.especifications.db.utils.entity.CcpEntity;
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityDisposable;
-import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityExpurgableOptions;
-import com.ccp.especifications.db.utils.entity.decorators.engine2.CcpDefaultEntityDelegator;
-import com.ccp.especifications.db.utils.entity.decorators.engine2.CcpEntityDetails;
+import com.ccp.especifications.db.utils.entity.decorators.engine.CcpDefaultEntityDelegator;
+import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityDetails;
+import com.ccp.especifications.db.utils.entity.decorators.enums.CcpEntityExpurgableOptions;
 import com.ccp.utils.CcpHashAlgorithm;
 import com.jn.db.bulk.JnExecuteBulkOperation;
 import com.jn.entities.JnEntityDisposableRecord;
@@ -28,9 +28,9 @@ public class JnDisposableEntity extends CcpDefaultEntityDelegator<CcpEntityDispo
 	private final CcpEntityExpurgableOptions timeOption;
 	final Class<?>  clazz;
 
-	protected JnDisposableEntity(CcpEntity2 entity, Class<?> clazz, CcpEntityExpurgableOptions timeOption) {
+	protected JnDisposableEntity(CcpEntity entity, Class<?> clazz) {
 		super(entity, JnExecuteBulkOperation.INSTANCE, JnDeleteKeysFromCache.INSTANCE);
-		this.timeOption = timeOption;
+		this.timeOption = clazz.getAnnotation(CcpEntityDisposable.class).expurgTime();
 		this.clazz = clazz;
 	}
 	
@@ -148,9 +148,9 @@ public class JnDisposableEntity extends CcpDefaultEntityDelegator<CcpEntityDispo
 		return true;
 	}
 	
-	public List<CcpEntity2> getAssociatedEntities() {
-		List<CcpEntity2> associatedEntities = this.entity.getAssociatedEntities();
-		ArrayList<CcpEntity2> result = new ArrayList<CcpEntity2>(associatedEntities);
+	public List<CcpEntity> getAssociatedEntities() {
+		List<CcpEntity> associatedEntities = this.entity.getAssociatedEntities();
+		ArrayList<CcpEntity> result = new ArrayList<CcpEntity>(associatedEntities);
 		//FIXME
 		//		result.add(JnEntityDisposableRecord.ENTITY);
 		return result;

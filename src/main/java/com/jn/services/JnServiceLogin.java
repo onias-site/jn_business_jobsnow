@@ -40,7 +40,7 @@ import com.jn.utils.JnDeleteKeysFromCache;
 public enum JnServiceLogin implements JnService {
 	ExecuteLogin {
 		public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
-			CcpBusiness lockPassword = JnEntityLoginPassword.ENTITY.getOperationCallback(CcpEntityOperationType.transferToReverseEntity);
+			CcpBusiness lockPassword = JnEntityLoginPassword.ENTITY.getEntityDetails().getOperationCallback(CcpEntityOperationType.delete);
 			JnFunctionMensageriaSender executeLogin = new JnFunctionMensageriaSender(JnBusinessExecuteLogin.INSTANCE);
 			CcpBusiness evaluateTries =
 					new JnBusinessEvaluateAttempts(
@@ -84,7 +84,7 @@ public enum JnServiceLogin implements JnService {
 	},
 	CreateLoginEmail {
 		public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
-			CcpBusiness action = JnEntityLoginEmail.ENTITY.getOperationCallback(CcpEntityOperationType.save);
+			CcpBusiness action = JnEntityLoginEmail.ENTITY.getEntityDetails().getOperationCallback(CcpEntityOperationType.save);
 			CcpJsonRepresentation result = new CcpGetEntityId(json)
 			.toBeginProcedureAnd()
 				.ifThisIdIsPresentInEntity(JnEntityLoginToken.ENTITY.getTwinEntity()).returnStatus(JnProcessStatusCreateLoginEmail.lockedToken).and()
@@ -132,7 +132,7 @@ public enum JnServiceLogin implements JnService {
 	},
 	SaveAnswers {
 		public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
-			CcpBusiness action = JnEntityLoginAnswers.ENTITY.getOperationCallback(CcpEntityOperationType.save);
+			CcpBusiness action = JnEntityLoginAnswers.ENTITY.getEntityDetails().getOperationCallback(CcpEntityOperationType.save);
 			 
 			new CcpGetEntityId(json)
 			.toBeginProcedureAnd()
@@ -180,7 +180,7 @@ public enum JnServiceLogin implements JnService {
 	},
 	SavePassword {
 		public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
-			CcpBusiness lockToken = JnEntityLoginToken.ENTITY.getOperationCallback(CcpEntityOperationType.transferToReverseEntity);
+			CcpBusiness lockToken = JnEntityLoginToken.ENTITY.getEntityDetails().getOperationCallback(CcpEntityOperationType.delete);
 			JnFunctionMensageriaSender updatePassword = new JnFunctionMensageriaSender(JnBusinessUpdatePassword.INSTANCE);
 			CcpBusiness evaluateAttempts =
 					new JnBusinessEvaluateAttempts(
