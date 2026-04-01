@@ -27,10 +27,19 @@ public class JnAsyncWriterEntity extends CcpEntityDelegator  {
 		return apply;
 	}
 
+	public CcpJsonRepresentation transferDataTo(CcpJsonRepresentation json, CcpEntity... entities) {
+		CcpJsonRepresentation apply = this.sendToMensageria(json, CcpEntityOperationType.transferDataTo);
+		return apply;
+	}
+
+	public CcpJsonRepresentation copyDataTo(CcpJsonRepresentation json, CcpEntity... entities) {
+		CcpJsonRepresentation apply = this.sendToMensageria(json, CcpEntityOperationType.copyDataTo);
+		return apply;
+	}
+	
 	private CcpJsonRepresentation sendToMensageria(CcpJsonRepresentation json, CcpEntityOperationType operation) {
 	
-//		FIXME JnFunctionMensageriaSender sender = new JnFunctionMensageriaSender(this.entity, operation);
-		JnFunctionMensageriaSender sender = new JnFunctionMensageriaSender(null, operation);
+		JnFunctionMensageriaSender sender = new JnFunctionMensageriaSender(this.entity, operation);
 		CcpJsonRepresentation apply = sender.apply(json);
 		return apply;
 	}

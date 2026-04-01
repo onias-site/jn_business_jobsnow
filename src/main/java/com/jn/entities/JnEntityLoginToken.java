@@ -2,9 +2,10 @@ package com.jn.entities;
 
 import com.ccp.decorators.CcpJsonRepresentation.CcpJsonFieldName;
 import com.ccp.especifications.db.utils.entity.CcpEntity;
-import com.ccp.especifications.db.utils.entity.annotations.CcpEntitySpecifications;
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityCache;
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityDisposable;
+import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityFieldsTransformer;
+import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityFieldsValidator;
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityTwin;
 import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityConfigurator;
 import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityFactory;
@@ -23,14 +24,8 @@ import com.jn.json.fields.validation.JnJsonCommonsFields;
 		,afterRecordBeenTransportedFromTwinToMainEntity = {}
 		,afterRecordBeenTransportedFromMainToTwinEntity = {}
 		)
-@CcpEntitySpecifications(
-		entityFieldsTransformers = JnJsonTransformersFieldsEntityDefault.class,
-		entityValidation = JnEntityLoginToken.Fields.class,
-		afterDeleteRecord = {},
-		beforeSaveRecord = {},
-		afterSaveRecord = {},
-		flow = {}
-)
+@CcpEntityFieldsTransformer(classReferenceWithTheFields = JnJsonTransformersFieldsEntityDefault.class)
+@CcpEntityFieldsValidator(classReferenceWithTheFields = JnEntityAsyncTask.Fields.class)
 public class JnEntityLoginToken implements CcpEntityConfigurator {
 	
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityLoginToken.class).entityInstance;

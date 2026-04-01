@@ -4,8 +4,9 @@ import com.ccp.business.CcpBusiness;
 import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.decorators.CcpJsonRepresentation.CcpJsonFieldName;
 import com.ccp.especifications.db.utils.entity.CcpEntity;
-import com.ccp.especifications.db.utils.entity.annotations.CcpEntitySpecifications;
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityCache;
+import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityFieldsTransformer;
+import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityFieldsValidator;
 import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityConfigurator;
 import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityFactory;
 import com.ccp.especifications.db.utils.entity.fields.annotations.CcpEntityFieldPrimaryKey;
@@ -15,14 +16,8 @@ import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault
 import com.jn.json.fields.validation.JnJsonCommonsFields;
 
 @CcpEntityCache(3600)
-@CcpEntitySpecifications(
-		entityFieldsTransformers = JnJsonTransformersFieldsEntityDefault.class,
-		entityValidation = JnEntityLoginSessionTokenAttempts.Fields.class,
-		afterDeleteRecord = {},
-		beforeSaveRecord = {},
-		afterSaveRecord = {},
-		flow = {}
-)
+@CcpEntityFieldsTransformer(classReferenceWithTheFields = JnJsonTransformersFieldsEntityDefault.class)
+@CcpEntityFieldsValidator(classReferenceWithTheFields = JnEntityAsyncTask.Fields.class)
 public class JnEntityLoginSessionTokenAttempts implements CcpEntityConfigurator {
 
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityLoginSessionTokenAttempts.class).entityInstance;
@@ -41,7 +36,7 @@ public class JnEntityLoginSessionTokenAttempts implements CcpEntityConfigurator 
 	public static CcpBusiness incrementAttempts(Integer maxAttempts, CcpBusiness whenExceedAttempts) {
 		CcpBusiness result = json -> {
 			
-			CcpJsonRepresentation record = json.getInnerJson(ExtraFields1._entities).getDynamicVersion().getInnerJson(ENTITY.getEntityName());
+			CcpJsonRepresentation record = json.getInnerJson(ExtraFields1._entities).getDynamicVersion().getInnerJson(ENTITY.getEntityDetails().entityName);
 			Double attempts = record.getOrDefault(Fields.attempts, 0d);
 			Double updatedAttempts = attempts + 1;
 			
@@ -62,7 +57,7 @@ public class JnEntityLoginSessionTokenAttempts implements CcpEntityConfigurator 
 
 	public static CcpBusiness resetAttempts() {
 		CcpBusiness result = json -> {
-			CcpJsonRepresentation record = json.getInnerJson(ExtraFields1._entities).getDynamicVersion().getInnerJson(ENTITY.getEntityName());
+			CcpJsonRepresentation record = json.getInnerJson(ExtraFields1._entities).getDynamicVersion().getInnerJson(ENTITY.getEntityDetails().entityName);
 			
 			boolean noAttemps = record.isEmpty();
 			

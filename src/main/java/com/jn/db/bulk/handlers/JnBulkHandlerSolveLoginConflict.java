@@ -22,7 +22,7 @@ public class JnBulkHandlerSolveLoginConflict implements CcpHandleWithSearchResul
 	
 	public List<CcpBulkItem> whenRecordWasFoundInTheEntitySearch(CcpJsonRepresentation json, CcpJsonRepresentation recordFound) {
 	
-		var deleteLoginConflict = JnEntityLoginSessionConflict.ENTITY.getEntityDetails().getBulkItemsList(json, CcpBulkEntityOperationType.delete);
+		var deleteLoginConflict = JnEntityLoginSessionConflict.ENTITY.toBulkItems(json, CcpBulkEntityOperationType.delete);
 		var asList = new ArrayList<CcpBulkItem>();
 		asList.addAll(deleteLoginConflict);
 		return asList;

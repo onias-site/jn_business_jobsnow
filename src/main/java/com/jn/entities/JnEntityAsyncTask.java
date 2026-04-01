@@ -2,7 +2,8 @@ package com.jn.entities;
 
 import com.ccp.decorators.CcpJsonRepresentation.CcpJsonFieldName;
 import com.ccp.especifications.db.utils.entity.CcpEntity;
-import com.ccp.especifications.db.utils.entity.annotations.CcpEntitySpecifications;
+import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityFieldsTransformer;
+import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityFieldsValidator;
 import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityConfigurator;
 import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityFactory;
 import com.ccp.especifications.db.utils.entity.fields.annotations.CcpEntityFieldPrimaryKey;
@@ -14,15 +15,8 @@ import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeNumberUn
 import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeString;
 import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
-
-@CcpEntitySpecifications(
-		entityFieldsTransformers = JnJsonTransformersFieldsEntityDefault.class,
-		entityValidation = JnEntityAsyncTask.Fields.class,
-		afterDeleteRecord = {},
-		beforeSaveRecord = {},
-		afterSaveRecord = {},
-		flow = {}
-)
+@CcpEntityFieldsTransformer(classReferenceWithTheFields = JnJsonTransformersFieldsEntityDefault.class)
+@CcpEntityFieldsValidator(classReferenceWithTheFields = JnEntityAsyncTask.Fields.class)
 public class JnEntityAsyncTask implements CcpEntityConfigurator {
 
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityAsyncTask.class).entityInstance;

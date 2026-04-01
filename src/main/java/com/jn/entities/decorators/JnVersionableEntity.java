@@ -31,8 +31,9 @@ public class JnVersionableEntity extends CcpDefaultEntityDelegator<CcpEntityVers
 	
 	private final CcpBulkItem getVersionableToBulkOperationToBulkOperation(CcpJsonRepresentation json, CcpBulkEntityOperationType operation) {
 		
-		CcpJsonRepresentation audit = this.getAuditRecord(json, operation);
-		CcpBulkItem ccpBulkItem = new CcpBulkItem(audit, CcpBulkEntityOperationType.create, JnEntityAudit.ENTITY);
+		CcpJsonRepresentation versionable = this.getAuditRecord(json, operation);
+		String calculateId = JnEntityAudit.ENTITY.calculateId(versionable);
+		CcpBulkItem ccpBulkItem = new CcpBulkItem(versionable, CcpBulkEntityOperationType.create, JnEntityAudit.ENTITY, calculateId);
 				
 		return ccpBulkItem;
 	}
@@ -64,8 +65,7 @@ public class JnVersionableEntity extends CcpDefaultEntityDelegator<CcpEntityVers
 	public List<CcpEntity> getAssociatedEntities() {
 		List<CcpEntity> associatedEntities = this.entity.getAssociatedEntities();
 		ArrayList<CcpEntity> result = new ArrayList<CcpEntity>(associatedEntities);
-		//FIXME
-		//		result.add(JnEntityAudit.ENTITY);
+		result.add(JnEntityAudit.ENTITY);
 		return result;
 	}
 	
@@ -76,7 +76,6 @@ public class JnVersionableEntity extends CcpDefaultEntityDelegator<CcpEntityVers
 	
 
 	public List<CcpBulkItem> toBulkItems(CcpJsonRepresentation json, CcpBulkEntityOperationType operation) {
-		//FIXME
 		List<CcpBulkItem> bulkItems = this.entity.toBulkItems(json, operation);
 		List<CcpBulkItem> asList = new ArrayList<>(bulkItems);
 		

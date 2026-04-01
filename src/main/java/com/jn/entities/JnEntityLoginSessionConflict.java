@@ -2,9 +2,10 @@ package com.jn.entities;
 
 import com.ccp.decorators.CcpJsonRepresentation.CcpJsonFieldName;
 import com.ccp.especifications.db.utils.entity.CcpEntity;
-import com.ccp.especifications.db.utils.entity.annotations.CcpEntitySpecifications;
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityCache;
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityDisposable;
+import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityFieldsTransformer;
+import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityFieldsValidator;
 import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityConfigurator;
 import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityFactory;
 import com.ccp.especifications.db.utils.entity.decorators.enums.CcpEntityExpurgableOptions;
@@ -16,14 +17,8 @@ import com.jn.json.fields.validation.JnJsonCommonsFields;
 
 @CcpEntityCache(3600)
 @CcpEntityDisposable(expurgTime = CcpEntityExpurgableOptions.hourly, expurgableEntityFactory = JnDisposableEntity.class)
-@CcpEntitySpecifications(
-		entityFieldsTransformers = JnJsonTransformersFieldsEntityDefault.class,
-		entityValidation = JnEntityLoginSessionConflict.Fields.class,
-		afterDeleteRecord = {},
-		beforeSaveRecord = {},
-		afterSaveRecord = {},
-		flow = {}
-)
+@CcpEntityFieldsTransformer(classReferenceWithTheFields = JnJsonTransformersFieldsEntityDefault.class)
+@CcpEntityFieldsValidator(classReferenceWithTheFields = JnEntityAsyncTask.Fields.class)
 public class JnEntityLoginSessionConflict implements CcpEntityConfigurator {
 
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityLoginSessionConflict.class).entityInstance;

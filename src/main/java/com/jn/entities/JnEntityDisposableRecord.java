@@ -4,9 +4,11 @@ import com.ccp.constantes.CcpOtherConstants;
 import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.decorators.CcpJsonRepresentation.CcpJsonFieldName;
 import com.ccp.especifications.db.utils.entity.CcpEntity;
-import com.ccp.especifications.db.utils.entity.annotations.CcpEntitySpecifications;
+import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityFieldsTransformer;
+import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityFieldsValidator;
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityOlyReadable;
 import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityConfigurator;
+import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityDetails;
 import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityFactory;
 import com.ccp.especifications.db.utils.entity.decorators.enums.CcpEntityExpurgableOptions;
 import com.ccp.especifications.db.utils.entity.fields.annotations.CcpEntityFieldPrimaryKey;
@@ -17,14 +19,8 @@ import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault
 import com.jn.json.fields.validation.JnJsonCommonsFields;
 
 @CcpEntityOlyReadable
-@CcpEntitySpecifications(
-		entityFieldsTransformers = JnJsonTransformersFieldsEntityDefault.class,
-		entityValidation = JnEntityDisposableRecord.Fields.class,
-		afterDeleteRecord = {},
-		beforeSaveRecord = {},
-		afterSaveRecord = {},
-		flow = {}
-)
+@CcpEntityFieldsTransformer(classReferenceWithTheFields = JnJsonTransformersFieldsEntityDefault.class)
+@CcpEntityFieldsValidator(classReferenceWithTheFields = JnEntityAsyncTask.Fields.class)
 public class JnEntityDisposableRecord implements CcpEntityConfigurator {
 
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityDisposableRecord.class).entityInstance;
@@ -55,9 +51,9 @@ public class JnEntityDisposableRecord implements CcpEntityConfigurator {
 	
 	 public static CcpJsonRepresentation getDataWithTimeStamp(CcpEntity entity, CcpJsonRepresentation json) {
 		
-		CcpJsonRepresentation transformedJsonByEachFieldInJson = entity.getTransformedJsonByEachFieldInJson(json);
-		String id = entity.getPrimaryKeyValues(transformedJsonByEachFieldInJson).asUgglyJson();
-		String entityName = entity.getEntityName();
+		CcpEntityDetails entityDetails = entity.getEntityDetails();
+		String id = entityDetails.getPrimaryKeyValues(json).asUgglyJson();
+		String entityName = entityDetails.entityName;
 		
 		CcpJsonRepresentation idToSearch = CcpOtherConstants
 				.EMPTY_JSON

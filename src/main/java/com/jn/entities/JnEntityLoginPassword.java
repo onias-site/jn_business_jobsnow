@@ -2,8 +2,9 @@ package com.jn.entities;
 
 import com.ccp.decorators.CcpJsonRepresentation.CcpJsonFieldName;
 import com.ccp.especifications.db.utils.entity.CcpEntity;
-import com.ccp.especifications.db.utils.entity.annotations.CcpEntitySpecifications;
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityCache;
+import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityFieldsTransformer;
+import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityFieldsValidator;
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityTwin;
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityVersionable;
 import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityConfigurator;
@@ -23,14 +24,8 @@ import com.jn.json.fields.validation.JnJsonCommonsFields;
 
 @CcpEntityVersionable(JnVersionableEntity.class)
 @CcpEntityCache(3600)
-@CcpEntitySpecifications(
-		entityFieldsTransformers = JnJsonTransformersFieldsEntityDefault.class,
-		entityValidation = JnEntityLoginPassword.Fields.class,
-		afterDeleteRecord = {},
-		beforeSaveRecord = {},
-		afterSaveRecord = {},
-		flow = {}
-)
+@CcpEntityFieldsTransformer(classReferenceWithTheFields = JnJsonTransformersFieldsEntityDefault.class)
+@CcpEntityFieldsValidator(classReferenceWithTheFields = JnEntityAsyncTask.Fields.class)
 
 public class JnEntityLoginPassword implements CcpEntityConfigurator {
 	

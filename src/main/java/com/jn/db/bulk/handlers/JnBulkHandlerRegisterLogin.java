@@ -25,8 +25,8 @@ public class JnBulkHandlerRegisterLogin implements CcpHandleWithSearchResultsInT
 	}
 
 	private List<CcpBulkItem> getBulkItems(CcpJsonRepresentation json) {
-		var newSession = JnEntityLoginSessionConflict.ENTITY.getEntityDetails().getBulkItemsList(json, CcpBulkEntityOperationType.create);
-		var newLogin = JnEntityLoginSessionValidation.ENTITY.getEntityDetails().getBulkItemsList(json, CcpBulkEntityOperationType.create);
+		var newSession = JnEntityLoginSessionConflict.ENTITY.toBulkItems(json, CcpBulkEntityOperationType.create);
+		var newLogin = JnEntityLoginSessionValidation.ENTITY.toBulkItems(json, CcpBulkEntityOperationType.create);
 		var asList = new ArrayList<CcpBulkItem>();
 		asList.addAll(newSession);
 		asList.addAll(newLogin);

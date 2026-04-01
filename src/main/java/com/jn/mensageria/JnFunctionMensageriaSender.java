@@ -1,23 +1,22 @@
 package com.jn.mensageria;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
+import com.ccp.business.CcpBusiness;
 import com.ccp.constantes.CcpOtherConstants;
 import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.decorators.CcpJsonRepresentation.CcpJsonFieldName;
 import com.ccp.decorators.CcpTimeDecorator;
 import com.ccp.dependency.injection.CcpDependencyInjection;
-import com.ccp.especifications.db.bulk.CcpBulkItem;
 import com.ccp.especifications.db.bulk.CcpBulkEntityOperationType;
+import com.ccp.especifications.db.bulk.CcpBulkItem;
 import com.ccp.especifications.db.utils.entity.CcpEntity;
 import com.ccp.especifications.db.utils.entity.CcpEntityOperationType;
 import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityDetails;
 import com.ccp.especifications.db.utils.entity.decorators.enums.CcpEntityExpurgableOptions;
-import com.ccp.business.CcpBusiness;
 import com.ccp.especifications.mensageria.receiver.CcpMensageriaReceiver;
 import com.ccp.especifications.mensageria.sender.CcpMensageriaSender;
 import com.jn.db.bulk.JnExecuteBulkOperation;
@@ -86,11 +85,6 @@ public class JnFunctionMensageriaSender implements CcpBusiness {
 		return messageDetails;
 	}
 	
-	private CcpBulkItem toBulkItem(CcpEntity entity, CcpJsonRepresentation json) {
-		CcpBulkItem bulkItem = new CcpBulkItem(json, CcpBulkEntityOperationType.create, entity);
-		return bulkItem;
-	}
-	
 	private boolean canSave(CcpJsonRepresentation x) {
 		CcpBusiness process = JnMensageriaReceiver.INSTANCE.getProcess(this.topic, x);
 		if(process instanceof CcpBusiness topic) {
@@ -101,13 +95,27 @@ public class JnFunctionMensageriaSender implements CcpBusiness {
 	}
 	
 	private JnFunctionMensageriaSender sendToMensageria(CcpEntity entity, CcpJsonRepresentation... messages) {
-		List<CcpJsonRepresentation> msgs = Arrays.asList(messages).stream().map(json -> this.getMessageDetails(json)).collect(Collectors.toList());
-		List<CcpBulkItem> bulkItems = msgs.stream().filter(x -> this.canSave(x)).map(msg -> this.toBulkItem(entity, msg)).collect(Collectors.toList());
+		
+		List<CcpBulkItem> bulkItems = new ArrayList<>();
+		List<CcpJsonRepresentation> msgs = new ArrayList<>();
+		
+		for (CcpJsonRepresentation json : messages) {
+			CcpJsonRepresentation messageDetails = this.getMessageDetails(json);
+			
+			boolean canNotSave = false == this.canSave(messageDetails);
+			if(canNotSave) {
+				continue;
+			}
+			List<CcpBulkItem> bulkItemsList = entity.toBulkItems(messageDetails, CcpBulkEntityOperationType.create);	
+			bulkItems.addAll(bulkItemsList);
+			msgs.add(messageDetails);
+		}
+		
 		JnExecuteBulkOperation.INSTANCE.executeBulk(bulkItems);
 		this.mensageriaSender.sendToMensageria(this.topic, this.jsonValidationClass, msgs);
 		return this;
 	}
-	
+
 	public JnFunctionMensageriaSender sendToMensageria(List<CcpJsonRepresentation> messages) {
 		
 		int size = messages.size();

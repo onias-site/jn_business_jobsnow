@@ -6,7 +6,7 @@ import com.ccp.decorators.CcpJsonRepresentation.CcpJsonFieldName;
 public enum JnServiceAsyncTask implements JnService {
 	GetAsyncTaskStatusById{
 		public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
-			//FIXME
+			//TODO
 
 //			String asyncTaskId = json.getAsString(JsonFieldNames.asyncTaskId);
 

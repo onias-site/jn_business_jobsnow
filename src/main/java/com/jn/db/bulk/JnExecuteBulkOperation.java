@@ -23,45 +23,11 @@ import com.ccp.especifications.db.utils.entity.CcpEntity;
 import com.jn.entities.JnEntityRecordToReprocess;
 import com.jn.utils.JnDeleteKeysFromCache;
 
-
 public class JnExecuteBulkOperation implements CcpExecuteBulkOperation{
 
 	public static final JnExecuteBulkOperation INSTANCE = new JnExecuteBulkOperation();
 	
 	private JnExecuteBulkOperation() {}
-	
-	public JnExecuteBulkOperation executeBulk(List<CcpJsonRepresentation> records, CcpBulkEntityOperationType operation, CcpEntity entity) {
-		
-		boolean emptyRecords = records.isEmpty();
-		
-		if(emptyRecords) {
-			return this;
-		}
-		var response = new ArrayList<CcpBulkItem>();
-		for (CcpJsonRepresentation json : records) {
-			List<CcpBulkItem> bulkItems = entity.getEntityDetails().getBulkItemsList(json, operation);
-			response.addAll(bulkItems);
-		}
-		
-		JnExecuteBulkOperation executeBulk = this.executeBulk(response);
-		return executeBulk;
-	}
-	
-	public JnExecuteBulkOperation executeBulk(CcpJsonRepresentation json, CcpEntity entity, CcpBulkEntityOperationType operation) {
-		CcpEntity twinEntity = entity.getTwinEntity();
-		var bulkItem = entity.getEntityDetails().getBulkItemsList(json, operation);
-		var bulkItem2 = twinEntity.getEntityDetails().getBulkItemsList(json, operation);
-		ArrayList<CcpBulkItem> arrayList = new ArrayList<CcpBulkItem>(bulkItem);
-		arrayList.addAll(bulkItem2);
-		JnExecuteBulkOperation executeBulk = this.executeBulk(arrayList);
-		return executeBulk;
-	}
-	
-	public JnExecuteBulkOperation executeBulk(CcpBulkItem... items) {
-		List<CcpBulkItem> asList = Arrays.asList(items);
-		JnExecuteBulkOperation executeBulk = this.executeBulk(asList);
-		return executeBulk;
-	}
 	
 	public JnExecuteBulkOperation executeBulk(Collection<CcpBulkItem> items) {
 		
@@ -142,7 +108,7 @@ public class JnExecuteBulkOperation implements CcpExecuteBulkOperation{
 		List<CcpBulkItem> items = new ArrayList<>();
  		
 		for (CcpEntity entity : entities) {
-			List<CcpBulkItem> bulkItems = entity.getEntityDetails().getBulkItemsList(json, operation);
+			List<CcpBulkItem> bulkItems = entity.toBulkItems(json, operation);
 			for (CcpBulkItem bulkItem : bulkItems) {
 				items.add(bulkItem);
 			}			

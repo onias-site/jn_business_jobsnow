@@ -80,8 +80,8 @@ public class JnDisposableEntity extends CcpDefaultEntityDelegator<CcpEntityDispo
 	private final CcpBulkItem getExpurgableToBulkOperation(CcpJsonRepresentation json, CcpBulkEntityOperationType operation) {
 		
 		CcpJsonRepresentation recordCopy = this.populateAnExpurgableFromJson(json);
-		
-		CcpBulkItem ccpBulkItem = new CcpBulkItem(recordCopy, operation, JnEntityDisposableRecord.ENTITY);
+		String calculateId = JnEntityDisposableRecord.ENTITY.calculateId(json);
+		CcpBulkItem ccpBulkItem = new CcpBulkItem(recordCopy, operation, JnEntityDisposableRecord.ENTITY, calculateId);
 		
 		return ccpBulkItem;
 	}
@@ -122,8 +122,7 @@ public class JnDisposableEntity extends CcpDefaultEntityDelegator<CcpEntityDispo
 		CcpJsonRepresentation expurgableId = this.getExpurgableId(json);
 		CcpCrud crud = CcpDependencyInjection.getDependency(CcpCrud.class);
 		CcpJsonRepresentation allValuesTogether = expurgableId.mergeWithAnotherJson(json);
-		//FIXME
-		CcpSelectUnionAll unionAll = crud.unionAll(allValuesTogether, JnDeleteKeysFromCache.INSTANCE, null, JnEntityDisposableRecord.ENTITY);
+		CcpSelectUnionAll unionAll = crud.unionAll(allValuesTogether, JnDeleteKeysFromCache.INSTANCE, this, JnEntityDisposableRecord.ENTITY);
 
 		boolean isPresentInOriginalEntity = this.isPresentInThisUnionAll(unionAll, allValuesTogether);
 		
@@ -151,8 +150,7 @@ public class JnDisposableEntity extends CcpDefaultEntityDelegator<CcpEntityDispo
 	public List<CcpEntity> getAssociatedEntities() {
 		List<CcpEntity> associatedEntities = this.entity.getAssociatedEntities();
 		ArrayList<CcpEntity> result = new ArrayList<CcpEntity>(associatedEntities);
-		//FIXME
-		//		result.add(JnEntityDisposableRecord.ENTITY);
+		result.add(JnEntityDisposableRecord.ENTITY);
 		return result;
 	}
 	
@@ -161,8 +159,7 @@ public class JnDisposableEntity extends CcpDefaultEntityDelegator<CcpEntityDispo
 		CcpCrud crud = CcpDependencyInjection.getDependency(CcpCrud.class);
 		CcpJsonRepresentation expurgableId = this.getExpurgableId(json);
 		CcpJsonRepresentation allValuesTogether = expurgableId.mergeWithAnotherJson(json);
-		//FIXME
-		CcpSelectUnionAll unionAll = crud.unionAll(allValuesTogether, JnDeleteKeysFromCache.INSTANCE, null, JnEntityDisposableRecord.ENTITY);
+		CcpSelectUnionAll unionAll = crud.unionAll(allValuesTogether, JnDeleteKeysFromCache.INSTANCE, this, JnEntityDisposableRecord.ENTITY);
 
 		boolean isPresentInOriginalEntity = this.isPresentInThisUnionAll(unionAll, allValuesTogether);
 		
@@ -231,8 +228,7 @@ public class JnDisposableEntity extends CcpDefaultEntityDelegator<CcpEntityDispo
 		boolean isInvalid = false == this.isValidTimestamp(recordFromDisposable);
 	
 		if(isInvalid) {
-			//FIXME
-			throw new CcpErrorBulkEntityRecordNotFound(null, expurgableId);
+			throw new CcpErrorBulkEntityRecordNotFound(this, expurgableId);
 		}
 		
 		CcpJsonRepresentation innerJson = recordFromDisposable.getInnerJson(JnEntityDisposableRecord.Fields.json);
