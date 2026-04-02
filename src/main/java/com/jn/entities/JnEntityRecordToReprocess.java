@@ -16,7 +16,7 @@ import com.jn.json.fields.validation.JnJsonCommonsFields;
 
 @CcpEntityOlyReadable
 @CcpEntityFieldsTransformer(classReferenceWithTheFields = JnJsonTransformersFieldsEntityDefault.class)
-@CcpEntityFieldsValidator(classReferenceWithTheFields = JnEntityAsyncTask.Fields.class)
+@CcpEntityFieldsValidator(classReferenceWithTheFields = JnEntityRecordToReprocess.Fields.class)
 public class JnEntityRecordToReprocess implements CcpEntityConfigurator {
 	
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityRecordToReprocess.class).entityInstance;

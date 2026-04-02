@@ -18,7 +18,7 @@ import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault
 
 @CcpEntityCache(3600)
 @CcpEntityFieldsTransformer(classReferenceWithTheFields = JnJsonTransformersFieldsEntityDefault.class)
-@CcpEntityFieldsValidator(classReferenceWithTheFields = JnEntityAsyncTask.Fields.class)
+@CcpEntityFieldsValidator(classReferenceWithTheFields = JnEntityLoginStats.Fields.class)
 public class JnEntityLoginStats implements CcpEntityConfigurator {
 	
 	public static final CcpEntity INSTANCE = new CcpEntityFactory(JnEntityLoginStats.class).entityInstance;

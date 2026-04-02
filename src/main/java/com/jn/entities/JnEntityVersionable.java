@@ -7,6 +7,7 @@ import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityF
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityOlyReadable;
 import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityConfigurator;
 import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityFactory;
+import com.ccp.especifications.db.utils.entity.fields.annotations.CcpEntityFieldNotUpdatable;
 import com.ccp.especifications.db.utils.entity.fields.annotations.CcpEntityFieldPrimaryKey;
 import com.ccp.json.validations.fields.annotations.CcpJsonCopyFieldValidationsFrom;
 import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidatorRequired;
@@ -15,11 +16,11 @@ import com.jn.json.fields.validation.JnJsonCommonsFields;
 
 @CcpEntityOlyReadable
 @CcpEntityFieldsTransformer(classReferenceWithTheFields = JnJsonTransformersFieldsEntityDefault.class)
-@CcpEntityFieldsValidator(classReferenceWithTheFields = JnEntityAudit.Fields.class)
+@CcpEntityFieldsValidator(classReferenceWithTheFields = JnEntityVersionable.Fields.class)
 
-public class JnEntityAudit implements CcpEntityConfigurator {
+public class JnEntityVersionable implements CcpEntityConfigurator {
 
-	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityAudit.class).entityInstance;
+	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityVersionable.class).entityInstance;
 
 	public static enum Fields implements CcpJsonFieldName{
 		@CcpEntityFieldPrimaryKey
@@ -28,6 +29,7 @@ public class JnEntityAudit implements CcpEntityConfigurator {
 		@CcpJsonFieldValidatorRequired
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		operation,
+		@CcpEntityFieldNotUpdatable
 		@CcpJsonFieldValidatorRequired
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		date,
@@ -37,6 +39,7 @@ public class JnEntityAudit implements CcpEntityConfigurator {
 		@CcpEntityFieldPrimaryKey
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		id,
+		@CcpEntityFieldNotUpdatable
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		json
 		;

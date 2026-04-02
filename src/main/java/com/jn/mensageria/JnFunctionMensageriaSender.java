@@ -21,6 +21,7 @@ import com.ccp.especifications.mensageria.receiver.CcpMensageriaReceiver;
 import com.ccp.especifications.mensageria.sender.CcpMensageriaSender;
 import com.jn.db.bulk.JnExecuteBulkOperation;
 import com.jn.entities.JnEntityAsyncTask;
+import com.jn.utils.JnDeleteKeysFromCache;
 
 public class JnFunctionMensageriaSender implements CcpBusiness {
 	
@@ -111,7 +112,7 @@ public class JnFunctionMensageriaSender implements CcpBusiness {
 			msgs.add(messageDetails);
 		}
 		
-		JnExecuteBulkOperation.INSTANCE.executeBulk(bulkItems);
+		JnExecuteBulkOperation.INSTANCE.executeBulk(bulkItems, JnDeleteKeysFromCache.INSTANCE);
 		this.mensageriaSender.sendToMensageria(this.topic, this.jsonValidationClass, msgs);
 		return this;
 	}

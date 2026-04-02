@@ -1,9 +1,7 @@
 package com.jn.db.bulk;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -16,9 +14,6 @@ import com.ccp.especifications.db.bulk.CcpBulkExecutor;
 import com.ccp.especifications.db.bulk.CcpBulkItem;
 import com.ccp.especifications.db.bulk.CcpBulkOperationResult;
 import com.ccp.especifications.db.bulk.CcpExecuteBulkOperation;
-import com.ccp.especifications.db.crud.CcpCrud;
-import com.ccp.especifications.db.crud.CcpHandleWithSearchResultsInTheEntity;
-import com.ccp.especifications.db.crud.CcpSelectUnionAll;
 import com.ccp.especifications.db.utils.entity.CcpEntity;
 import com.jn.entities.JnEntityRecordToReprocess;
 import com.jn.utils.JnDeleteKeysFromCache;
@@ -29,7 +24,9 @@ public class JnExecuteBulkOperation implements CcpExecuteBulkOperation{
 	
 	private JnExecuteBulkOperation() {}
 	
-	public JnExecuteBulkOperation executeBulk(Collection<CcpBulkItem> items) {
+	public JnExecuteBulkOperation executeBulk(Collection<CcpBulkItem> bulkItems,  Consumer<String[]> functionToDeleteKeysInTheCache) {
+		
+		List<CcpBulkItem> items = bulkItems.stream().filter(item -> item.operation.persistable).collect(Collectors.toList());
 		
 		boolean emptyItems = items.isEmpty();
 		
@@ -42,16 +39,16 @@ public class JnExecuteBulkOperation implements CcpExecuteBulkOperation{
 		for (CcpBulkItem item : items) {
 			dbBulkExecutor = dbBulkExecutor.addRecord(item);
 		}
- 		JnExecuteBulkOperation commitAndSaveErrorsAndDeleteRecordsFromCache = this.commitAndSaveErrorsAndDeleteRecordsFromCache(dbBulkExecutor);
+ 		JnExecuteBulkOperation commitAndSaveErrorsAndDeleteRecordsFromCache = this.commitAndSaveErrorsAndDeleteRecordsFromCache(dbBulkExecutor, functionToDeleteKeysInTheCache);
 		return commitAndSaveErrorsAndDeleteRecordsFromCache;
 	}
 	
-	private JnExecuteBulkOperation commitAndSaveErrorsAndDeleteRecordsFromCache(CcpBulkExecutor dbBulkExecutor) {
+	private JnExecuteBulkOperation commitAndSaveErrorsAndDeleteRecordsFromCache(CcpBulkExecutor dbBulkExecutor, Consumer<String[]> functionToDeleteKeysInTheCache) {
 
 		List<CcpBulkOperationResult> allResults = dbBulkExecutor.getBulkOperationResult();
 		List<CcpBulkOperationResult> errors = allResults.stream().filter(x -> x.hasError()).collect(Collectors.toList());
 		List<CcpBulkItem> collect = errors.stream().map(x -> x.getReprocess(FunctionReprocessMapper.INSTANCE, JnEntityRecordToReprocess.ENTITY)).collect(Collectors.toList());
-		this.executeBulk(collect);
+		this.executeBulk(collect, functionToDeleteKeysInTheCache);
 		JnExecuteBulkOperation deleteKeysFromCache = this.deleteKeysFromCache(allResults);
 		return deleteKeysFromCache; 
 	}
@@ -67,43 +64,7 @@ public class JnExecuteBulkOperation implements CcpExecuteBulkOperation{
 		return this;
 	}
 	
-	@SuppressWarnings("unchecked")
-	public CcpSelectUnionAll executeSelectUnionAllThenExecuteBulkOperation(CcpJsonRepresentation json,  Consumer<String[]> functionToDeleteKeysInTheCache, CcpHandleWithSearchResultsInTheEntity<List<CcpBulkItem>> ... handlers) {
-		Set<CcpEntity> collect = Arrays.asList(handlers).stream().map(x -> x.getEntityToSearch()).collect(Collectors.toSet());
-		CcpEntity[] array = collect.toArray(new CcpEntity[collect.size()]);
-		CcpCrud crud = CcpDependencyInjection.getDependency(CcpCrud.class);
-		CcpSelectUnionAll unionAll = crud.unionAll(json, functionToDeleteKeysInTheCache, array);
-		 
-		Set<CcpBulkItem> all = new HashSet<>();
-		
-		for (CcpHandleWithSearchResultsInTheEntity<List<CcpBulkItem>> handler : handlers) {
-			List<CcpBulkItem> list =  unionAll.handleRecordInUnionAll(json, handler);
-			all.addAll(list); 
-		}
-		this.executeBulk(all);
-
-		CcpJsonRepresentation data = json;
-		
-		for (CcpHandleWithSearchResultsInTheEntity<List<CcpBulkItem>> handler : handlers) {
-			
-			CcpEntity entityToSearch = handler.getEntityToSearch();
-			
-			boolean presentInThisUnionAll = entityToSearch.isPresentInThisUnionAll(unionAll, data);
-			
-			if(presentInThisUnionAll) {
-//				List<CcpBusiness> doAfterSavingIfRecordIsFound = handler.doAfterSavingIfRecordIsFound();
-//				data = data.getTransformedJson(doAfterSavingIfRecordIsFound);
-				continue;
-			}
-//			List<CcpBusiness> doAfterSavingIfRecordIsNotFound = handler.doAfterSavingIfRecordIsNotFound();
-//			data = data.getTransformedJson(doAfterSavingIfRecordIsNotFound);
-		}
-		
-		return unionAll;
-	}
-
-
-	public JnExecuteBulkOperation executeBulk(CcpJsonRepresentation json, CcpBulkEntityOperationType operation, CcpEntity...entities) {
+	public JnExecuteBulkOperation executeBulk(CcpJsonRepresentation json, CcpBulkEntityOperationType operation,  Consumer<String[]> functionToDeleteKeysInTheCache, CcpEntity...entities) {
 		
 		List<CcpBulkItem> items = new ArrayList<>();
  		
@@ -114,7 +75,7 @@ public class JnExecuteBulkOperation implements CcpExecuteBulkOperation{
 			}			
 		}
 		
-		JnExecuteBulkOperation executeBulk = this.executeBulk(items);
+		JnExecuteBulkOperation executeBulk = this.executeBulk(items, functionToDeleteKeysInTheCache);
 		return executeBulk;
 	}
 }

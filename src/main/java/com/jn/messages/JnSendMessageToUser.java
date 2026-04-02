@@ -88,10 +88,10 @@ public class JnSendMessageToUser {
 			
 			CcpEntity parameterEntity = this.parameterEntities.get(k);
 			
-			CcpJsonRepresentation parameterData = parameterEntity.getRequiredEntityRow(unionAll, idToSearch);
+			CcpJsonRepresentation parameterData = parameterEntity.getEntityDetails().getRequiredEntityRow(unionAll, idToSearch);
 			CcpJsonRepresentation moreParameters = parameterData.getInnerJson(JnEntityEmailParametersToSend.Fields.moreParameters);
 			CcpJsonRepresentation allParameters = parameterData.removeField(JnEntityEmailParametersToSend.Fields.moreParameters).mergeWithAnotherJson(moreParameters);
-			CcpJsonRepresentation messageData = messageEntity.getRequiredEntityRow(unionAll, idToSearch);
+			CcpJsonRepresentation messageData = messageEntity.getEntityDetails().getRequiredEntityRow(unionAll, idToSearch);
 			
 			CcpJsonRepresentation allDataTogether = allParameters.mergeWithAnotherJson(entityValues).mergeWithAnotherJson(messageData);
 			

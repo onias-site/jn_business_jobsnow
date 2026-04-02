@@ -136,7 +136,8 @@ public class JnDisposableEntity extends CcpDefaultEntityDelegator<CcpEntityDispo
 			return false;
 		}
 		
-		CcpJsonRepresentation requiredEntityRow = JnEntityDisposableRecord.ENTITY.getRequiredEntityRow(unionAll, expurgableId);
+		CcpEntityDetails entityDetails = JnEntityDisposableRecord.ENTITY.getEntityDetails();
+		CcpJsonRepresentation requiredEntityRow = entityDetails.getRequiredEntityRow(unionAll, expurgableId);
 		Long timeStamp = requiredEntityRow.getAsLongNumber(JnEntityDisposableRecord.Fields.timestamp);
 		
 		boolean obsoleteTimeStamp = timeStamp <= System.currentTimeMillis();
@@ -164,7 +165,8 @@ public class JnDisposableEntity extends CcpDefaultEntityDelegator<CcpEntityDispo
 		boolean isPresentInOriginalEntity = this.isPresentInThisUnionAll(unionAll, allValuesTogether);
 		
 		if(isPresentInOriginalEntity) {
-			CcpJsonRepresentation requiredEntityRow = this.getRequiredEntityRow(unionAll, allValuesTogether);
+			CcpEntityDetails entityDetails = this.getEntityDetails();
+			CcpJsonRepresentation requiredEntityRow = entityDetails.getRequiredEntityRow(unionAll, allValuesTogether);
 			return requiredEntityRow;
 		}
 	
@@ -175,7 +177,8 @@ public class JnDisposableEntity extends CcpDefaultEntityDelegator<CcpEntityDispo
 			return oneById;
 		}
 
-		CcpJsonRepresentation requiredEntityRow = JnEntityDisposableRecord.ENTITY.getRequiredEntityRow(unionAll, allValuesTogether);
+		CcpEntityDetails entityDetails = JnEntityDisposableRecord.ENTITY.getEntityDetails();
+		CcpJsonRepresentation requiredEntityRow = entityDetails.getRequiredEntityRow(unionAll, allValuesTogether);
 		Long timeStamp = requiredEntityRow.getAsLongNumber(JnEntityDisposableRecord.Fields.timestamp);
 		
 		boolean validTimeStamp = timeStamp > System.currentTimeMillis();
@@ -255,7 +258,7 @@ public class JnDisposableEntity extends CcpDefaultEntityDelegator<CcpEntityDispo
 			return false;
 		}
 		
-		CcpJsonRepresentation requiredEntityRow = JnEntityDisposableRecord.ENTITY.getRequiredEntityRow(unionAll, expurgableId);
+		CcpJsonRepresentation requiredEntityRow = entityDetails.getRequiredEntityRow(unionAll, expurgableId);
 		
 		boolean valid = this.isValidTimestamp(requiredEntityRow);
 		
