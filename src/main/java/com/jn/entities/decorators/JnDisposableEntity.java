@@ -80,7 +80,7 @@ public class JnDisposableEntity extends CcpDefaultEntityDelegator<CcpEntityDispo
 	private final CcpBulkItem getExpurgableToBulkOperation(CcpJsonRepresentation json, CcpBulkEntityOperationType operation) {
 		
 		CcpJsonRepresentation recordCopy = this.populateAnExpurgableFromJson(json);
-		String calculateId = JnEntityDisposableRecord.ENTITY.calculateId(json);
+		String calculateId = JnEntityDisposableRecord.ENTITY.calculateId(recordCopy);
 		CcpBulkItem ccpBulkItem = new CcpBulkItem(recordCopy, operation, JnEntityDisposableRecord.ENTITY, calculateId);
 		
 		return ccpBulkItem;
@@ -136,8 +136,7 @@ public class JnDisposableEntity extends CcpDefaultEntityDelegator<CcpEntityDispo
 			return false;
 		}
 		
-		CcpEntityDetails entityDetails = JnEntityDisposableRecord.ENTITY.getEntityDetails();
-		CcpJsonRepresentation requiredEntityRow = entityDetails.getRequiredEntityRow(unionAll, expurgableId);
+		CcpJsonRepresentation requiredEntityRow = JnEntityDisposableRecord.ENTITY.getRecordFromUnionAll(unionAll, expurgableId);
 		Long timeStamp = requiredEntityRow.getAsLongNumber(JnEntityDisposableRecord.Fields.timestamp);
 		
 		boolean obsoleteTimeStamp = timeStamp <= System.currentTimeMillis();
@@ -165,8 +164,7 @@ public class JnDisposableEntity extends CcpDefaultEntityDelegator<CcpEntityDispo
 		boolean isPresentInOriginalEntity = this.isPresentInThisUnionAll(unionAll, allValuesTogether);
 		
 		if(isPresentInOriginalEntity) {
-			CcpEntityDetails entityDetails = this.getEntityDetails();
-			CcpJsonRepresentation requiredEntityRow = entityDetails.getRequiredEntityRow(unionAll, allValuesTogether);
+			CcpJsonRepresentation requiredEntityRow = this.getRecordFromUnionAll(unionAll, allValuesTogether);
 			return requiredEntityRow;
 		}
 	
@@ -177,8 +175,7 @@ public class JnDisposableEntity extends CcpDefaultEntityDelegator<CcpEntityDispo
 			return oneById;
 		}
 
-		CcpEntityDetails entityDetails = JnEntityDisposableRecord.ENTITY.getEntityDetails();
-		CcpJsonRepresentation requiredEntityRow = entityDetails.getRequiredEntityRow(unionAll, allValuesTogether);
+		CcpJsonRepresentation requiredEntityRow = JnEntityDisposableRecord.ENTITY.getRecordFromUnionAll(unionAll, allValuesTogether);
 		Long timeStamp = requiredEntityRow.getAsLongNumber(JnEntityDisposableRecord.Fields.timestamp);
 		
 		boolean validTimeStamp = timeStamp > System.currentTimeMillis();
@@ -258,7 +255,9 @@ public class JnDisposableEntity extends CcpDefaultEntityDelegator<CcpEntityDispo
 			return false;
 		}
 		
-		CcpJsonRepresentation requiredEntityRow = entityDetails.getRequiredEntityRow(unionAll, expurgableId);
+		CcpJsonRepresentation mergeWithAnotherJson = expurgableId.mergeWithAnotherJson(json);
+		
+		CcpJsonRepresentation requiredEntityRow = this.getRecordFromUnionAll(unionAll, mergeWithAnotherJson);
 		
 		boolean valid = this.isValidTimestamp(requiredEntityRow);
 		

@@ -1,9 +1,5 @@
 package com.jn.entities.decorators;
 
-import java.util.Arrays;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.especifications.db.utils.entity.CcpEntity;
 import com.ccp.especifications.db.utils.entity.CcpEntityOperationType;
@@ -31,28 +27,21 @@ public class JnAsyncWriterEntity extends CcpEntityDelegator  {
 		return apply;
 	}
 
-	public CcpJsonRepresentation transferDataTo(CcpJsonRepresentation json, CcpEntity... entities) {
-		CcpJsonRepresentation apply = this.sendToMensageria(json, CcpEntityOperationType.transferDataTo, entities);
+	public CcpJsonRepresentation transferDataTo(CcpJsonRepresentation json, CcpEntity entities) {
+		CcpJsonRepresentation put = json.put(CcpEntityOperationType.Fields.entityToTransfer, entities);
+		CcpJsonRepresentation apply = this.sendToMensageria(put, CcpEntityOperationType.transferDataTo);
 		return apply;
 	}
 
-	public CcpJsonRepresentation copyDataTo(CcpJsonRepresentation json, CcpEntity... entities) {
-		CcpJsonRepresentation apply = this.sendToMensageria(json, CcpEntityOperationType.copyDataTo, entities);
+	public CcpJsonRepresentation copyDataTo(CcpJsonRepresentation json, CcpEntity entities) {
+		CcpJsonRepresentation put = json.put(CcpEntityOperationType.Fields.entityToTransfer, entities);
+		CcpJsonRepresentation apply = this.sendToMensageria(put, CcpEntityOperationType.copyDataTo);
 		return apply;
 	}
 	
-	private CcpJsonRepresentation sendToMensageria(CcpJsonRepresentation json, CcpEntityOperationType operation, CcpEntity... entities) {
-		Set<String> collectEntitiesNames = this.collectEntitiesNames(entities);
-		CcpJsonRepresentation put = json.put(CcpEntityOperationType.Fields.entities, collectEntitiesNames);
+	private CcpJsonRepresentation sendToMensageria(CcpJsonRepresentation json, CcpEntityOperationType operation) {
 		JnFunctionMensageriaSender sender = new JnFunctionMensageriaSender(this.entity, operation);
-		CcpJsonRepresentation apply = sender.apply(put);
+		CcpJsonRepresentation apply = sender.apply(json);
 		return apply;
-	}
-
-	private Set<String> collectEntitiesNames(CcpEntity... entities){
-		Set<String> collect = Arrays.asList(entities).stream()
-		.map(x -> x.getEntityDetails().configurationClass.getName())
-		.collect(Collectors.toSet());
-		return collect;
 	}
 }

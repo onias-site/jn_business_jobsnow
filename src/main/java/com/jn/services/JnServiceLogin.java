@@ -64,7 +64,7 @@ public enum JnServiceLogin implements JnService {
 			CcpJsonRepresentation findById =  new CcpGetEntityId(transformedJson)
 			.toBeginProcedureAnd()
 				.loadThisIdFromEntity(JnEntityLoginPassword.ENTITY).and()
-				.loadThisIdFromEntity(JnEntityLoginStats.INSTANCE).and()
+				.loadThisIdFromEntity(JnEntityLoginStats.ENTITY).and()
 				.loadThisIdFromEntity(JnEntityLoginPasswordAttempts.ENTITY).and()
 				.ifThisIdIsPresentInEntity(JnEntityLoginToken.ENTITY.getTwinEntity()).returnStatus(JnProcessStatusExecuteLogin.lockedToken).and()
 				.ifThisIdIsNotPresentInEntity(JnEntityLoginEmail.ENTITY).returnStatus(JnProcessStatusExecuteLogin.missingSavingEmail).and()
@@ -204,7 +204,7 @@ public enum JnServiceLogin implements JnService {
 			
 			CcpJsonRepresentation result =  new CcpGetEntityId(putAll)
 			.toBeginProcedureAnd()
-				.loadThisIdFromEntity(JnEntityLoginStats.INSTANCE).and()
+				.loadThisIdFromEntity(JnEntityLoginStats.ENTITY).and()
 				.loadThisIdFromEntity(JnEntityLoginTokenAttempts.ENTITY).and()
 				.ifThisIdIsPresentInEntity(JnEntityLoginToken.ENTITY.getTwinEntity()).returnStatus(JnProcessStatusUpdatePassword.lockedToken).and()
 				.ifThisIdIsNotPresentInEntity(JnEntityLoginEmail.ENTITY).returnStatus(JnProcessStatusUpdatePassword.missingEmail).and()
