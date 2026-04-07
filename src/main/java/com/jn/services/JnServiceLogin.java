@@ -238,7 +238,6 @@ class SavePassword{
 	@CcpJsonFieldValidatorRequired
 	@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 	Object password;
-	@CcpJsonFieldValidatorRequired
 	@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 	Object token;
 }

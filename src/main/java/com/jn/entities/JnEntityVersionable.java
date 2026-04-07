@@ -39,7 +39,6 @@ public class JnEntityVersionable implements CcpEntityConfigurator {
 		@CcpEntityFieldPrimaryKey
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		id,
-		@CcpEntityFieldNotUpdatable
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		json
 		;

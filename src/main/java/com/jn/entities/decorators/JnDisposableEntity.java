@@ -2,10 +2,12 @@ package com.jn.entities.decorators;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.ccp.constantes.CcpOtherConstants;
 import com.ccp.decorators.CcpHashDecorator;
 import com.ccp.decorators.CcpJsonRepresentation;
+import com.ccp.decorators.CcpJsonRepresentation.CcpDynamicJsonRepresentation;
 import com.ccp.decorators.CcpStringDecorator;
 import com.ccp.dependency.injection.CcpDependencyInjection;
 import com.ccp.especifications.db.bulk.CcpBulkEntityOperationType;
@@ -13,6 +15,7 @@ import com.ccp.especifications.db.bulk.CcpBulkItem;
 import com.ccp.especifications.db.bulk.CcpErrorBulkEntityRecordNotFound;
 import com.ccp.especifications.db.crud.CcpCrud;
 import com.ccp.especifications.db.crud.CcpSelectUnionAll;
+import com.ccp.especifications.db.utils.CcpDbRequester;
 import com.ccp.especifications.db.utils.entity.CcpEntity;
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityDisposable;
 import com.ccp.especifications.db.utils.entity.decorators.engine.CcpDefaultEntityDelegator;
@@ -91,12 +94,13 @@ public class JnDisposableEntity extends CcpDefaultEntityDelegator<CcpEntityDispo
 		CcpEntityDetails entityDetails = this.getEntityDetails();
 		String id = entityDetails.getPrimaryKeyValues(json).asUgglyJson();
 		Long timestamp = json.getOrDefault(JnEntityDisposableRecord.Fields.timestamp, System.currentTimeMillis());
+		CcpJsonRepresentation onlyExistingFields = entityDetails.getOnlyExistingFields(json);
 		Long nextTimeStamp = this.timeOption.getNextTimeStamp(timestamp);
 		String nextDate = this.timeOption.getNextDate(timestamp);
 		CcpJsonRepresentation expurgable = expurgableId
 				.put(JnEntityDisposableRecord.Fields.format, this.timeOption.format)
 				.put(JnEntityDisposableRecord.Fields.timestamp, nextTimeStamp)
-				.put(JnEntityDisposableRecord.Fields.json, json)
+				.put(JnEntityDisposableRecord.Fields.json,onlyExistingFields)
 				.put(JnEntityDisposableRecord.Fields.date, nextDate)
 				.put(JnEntityDisposableRecord.Fields.id, id)
 				;
@@ -197,9 +201,34 @@ public class JnDisposableEntity extends CcpDefaultEntityDelegator<CcpEntityDispo
 		return result;
 	}
 	
+	private CcpJsonRepresentation replaceParameterToSearch(CcpJsonRepresentation parameterToSearch, CcpJsonRepresentation json) {
+
+		CcpDbRequester dependency = CcpDependencyInjection.getDependency(CcpDbRequester.class);
+		String fieldNameToEntity = dependency.getFieldNameToEntity();
+		
+		CcpDynamicJsonRepresentation dynamicVersion = parameterToSearch.getDynamicVersion();
+		String entityName = dynamicVersion.getAsString(fieldNameToEntity);
+		
+		CcpEntityDetails entityDetails = this.getEntityDetails();
+		boolean isAnotherEntity = false == entityName.equals(entityDetails.entityName);
+	
+		if(isAnotherEntity) {
+			return parameterToSearch;
+		}
+		
+		String fieldNameToId = dependency.getFieldNameToId();
+		String id = this.calculateId(json);
+		CcpJsonRepresentation put = dynamicVersion.put(fieldNameToId, id);
+		return put;
+	}
+	
 	public List<CcpJsonRepresentation> getParametersToSearch(CcpJsonRepresentation json) {
 		
-		List<CcpJsonRepresentation> mainParametersToSearch =  this.entity.getParametersToSearch(json);
+		List<CcpJsonRepresentation> mainParametersToSearch =  this.entity.getParametersToSearch(json)
+				.stream()
+				.map(p -> this.replaceParameterToSearch(p, json))
+				.collect(Collectors.toList())
+				;
 		
 		CcpJsonRepresentation expurgableId = this.getExpurgableId(json);
 		List<CcpJsonRepresentation> othersParametersToSearch = JnEntityDisposableRecord.ENTITY.getParametersToSearch(expurgableId);
@@ -267,9 +296,48 @@ public class JnDisposableEntity extends CcpDefaultEntityDelegator<CcpEntityDispo
 		return false;
 	}
 
+	private CcpBulkItem replaceId(CcpBulkItem item) {
+		
+		boolean isAnotherEntity = this.isAnotherEntity(item);
+		
+		if(isAnotherEntity) {
+			return item;
+		}
+		
+		String id = this.calculateId(item.json);
+		CcpBulkItem ccpBulkItem = new CcpBulkItem(item.json, item.operation, this.getEntityDetails().entity, id);
+		return ccpBulkItem;
+		
+	}
+
+	private boolean isAnotherEntity(CcpBulkItem item) {
+		
+		CcpEntityDetails thisEntityDetails = this.getEntityDetails();
+		CcpEntityDetails itemEntityDetails = item.entity.getEntityDetails();
+		
+		boolean isThisEntity = itemEntityDetails.entityName.equals(thisEntityDetails.entityName);
+		if(isThisEntity) {
+			return false;
+		}
+
+		CcpEntityDetails twinEntityDetails = this.getEntityDetails().entity.getTwinEntity().getEntityDetails();
+		boolean isTwinEntity = itemEntityDetails.entityName.equals(twinEntityDetails.entityName);
+		if(isTwinEntity) {
+			return false;
+		}
+		
+		return true;
+	}
+	
+	
 
 	public List<CcpBulkItem> toBulkItems(CcpJsonRepresentation json, CcpBulkEntityOperationType operation) {
-		List<CcpBulkItem> bulkItems = this.entity.toBulkItems(json, operation);
+		List<CcpBulkItem> bulkItems2 = this.entity.toBulkItems(json, operation);
+		List<CcpBulkItem> bulkItems = bulkItems2
+				.stream()
+				.map(item -> this.replaceId(item))
+				.collect(Collectors.toList())
+				;
 		ArrayList<CcpBulkItem> items = new ArrayList<>(bulkItems);
 		CcpBulkItem expurgableToBulkOperation = this.getExpurgableToBulkOperation(json, operation);
 		items.add(expurgableToBulkOperation);

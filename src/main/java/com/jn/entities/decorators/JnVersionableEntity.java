@@ -24,17 +24,23 @@ public class JnVersionableEntity extends CcpDefaultEntityDelegator<CcpEntityVers
 
 	private final CcpBulkItem getVersionableToBulkOperationToBulkOperation(CcpJsonRepresentation json, CcpBulkEntityOperationType operation) {
 		
-		CcpJsonRepresentation versionable = this.getAuditRecord(json, operation);
+		CcpJsonRepresentation versionable = this.getVersionableRecord(json, operation);
 		String calculateId = JnEntityVersionable.ENTITY.calculateId(versionable);
 		CcpBulkItem ccpBulkItem = new CcpBulkItem(versionable, CcpBulkEntityOperationType.create, JnEntityVersionable.ENTITY, calculateId);
 				
 		return ccpBulkItem;
 	}
 
-	private CcpJsonRepresentation getAuditRecord(CcpJsonRepresentation json, CcpBulkEntityOperationType operation) {
-		CcpJsonRepresentation oneById = this.entity.getEntityDetails().getOneByIdOrHandleItIfThisIdWasNotFound(json, x -> json);
+	private CcpJsonRepresentation getVersionableRecord(CcpJsonRepresentation json, CcpBulkEntityOperationType operation) {
 		CcpEntityDetails entityDetails = this.entity.getEntityDetails();
-		String id = entityDetails.getPrimaryKeyValues(json).asUgglyJson();
+		CcpJsonRepresentation oneById = this.entity.getEntityDetails().getOneByIdOrHandleItIfThisIdWasNotFound(json, x -> 
+		
+		{
+			CcpJsonRepresentation handledJson = entityDetails.entity.getHandledJson(json);
+			CcpJsonRepresentation onlyExistingFields = entityDetails.getOnlyExistingFields(handledJson);
+			return onlyExistingFields;
+		});
+		String id = entityDetails.getPrimaryKeyValues(oneById).asUgglyJson();
 		CcpJsonRepresentation audit = 
 				CcpOtherConstants.EMPTY_JSON
 				.put(JnEntityVersionable.Fields.timestamp, System.currentTimeMillis())
@@ -71,14 +77,6 @@ public class JnVersionableEntity extends CcpDefaultEntityDelegator<CcpEntityVers
 	public List<CcpBulkItem> toBulkItems(CcpJsonRepresentation json, CcpBulkEntityOperationType operation) {
 		List<CcpBulkItem> bulkItems = this.entity.toBulkItems(json, operation);
 		List<CcpBulkItem> asList = new ArrayList<>(bulkItems);
-		
-		CcpEntityDetails entityDetails = this.entity.getEntityDetails();
-		
-		boolean doesNotCreateVersionsToSameRecord = operation.doesNotCreateVersionsToSameRecord(entityDetails);
-	
-		if(doesNotCreateVersionsToSameRecord) {
-			return asList;
-		}
 		
 		CcpBulkItem versionableToBulkOperation = this.getVersionableToBulkOperationToBulkOperation(json, operation);
 		asList.add(versionableToBulkOperation);
