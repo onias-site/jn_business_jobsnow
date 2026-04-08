@@ -69,7 +69,7 @@ public class JnBusinessSendInstantMessage {
 	private CcpJsonRepresentation retryToSendMessage(CcpJsonRepresentation json) {
 		
 		Integer maxTriesToSendMessage = json.getAsIntegerNumber(JsonFieldNames.maxTriesToSendMessage);
-		Integer triesToSendMessage = json.getOrDefault(JsonFieldNames.triesToSendMessage, 1);
+		Integer triesToSendMessage = json.getOrDefault(JsonFieldNames.triesToSendMessage, () -> 1);
 		
 		if(triesToSendMessage >= maxTriesToSendMessage) {
 			throw new JnErrorUnableToSendInstantMessage(json);

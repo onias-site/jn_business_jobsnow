@@ -37,7 +37,7 @@ public class JnEntityLoginSessionTokenAttempts implements CcpEntityConfigurator 
 		CcpBusiness result = json -> {
 			
 			CcpJsonRepresentation record = json.getInnerJson(ExtraFields1._entities).getDynamicVersion().getInnerJson(ENTITY.getEntityDetails().entityName);
-			Double attempts = record.getOrDefault(Fields.attempts, 0d);
+			Double attempts = record.getOrDefault(Fields.attempts, () -> 0d);
 			Double updatedAttempts = attempts + 1;
 			
 			boolean excedeedAttempts = updatedAttempts >= maxAttempts;

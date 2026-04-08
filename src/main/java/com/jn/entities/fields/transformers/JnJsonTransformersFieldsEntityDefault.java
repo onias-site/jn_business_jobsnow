@@ -1,5 +1,6 @@
 package com.jn.entities.fields.transformers;
 
+
 import com.ccp.decorators.CcpEmailDecorator;
 import com.ccp.decorators.CcpHashDecorator;
 import com.ccp.decorators.CcpJsonRepresentation;
@@ -14,7 +15,6 @@ import com.ccp.especifications.db.utils.entity.fields.CcpJsonTransformersDefault
 import com.ccp.especifications.password.CcpPasswordHandler;
 import com.ccp.utils.CcpHashAlgorithm;
 import com.jn.entities.JnEntityLoginPassword;
-import com.jn.entities.JnEntityLoginSessionValidation;
 import com.jn.entities.JnEntityLoginToken;
 import com.jn.exceptions.JnErrorIsNotAnEmail;
 
@@ -42,13 +42,22 @@ public enum JnJsonTransformersFieldsEntityDefault implements CcpJsonTransformers
 	},
 	password(false) {
 		public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
+			
+			boolean passwordAlreadyCalculated = json.containsAllFields(JsonFieldNames.passwordAlreadyCalculated);
+			
+			if(passwordAlreadyCalculated) {
+				return json;
+			}
+			
 			String token = json.getAsString(JnEntityLoginPassword.Fields.password);
 			
 			CcpPasswordHandler dependency = CcpDependencyInjection.getDependency(CcpPasswordHandler.class);
 			
 			String passwordHash = dependency.getHash(token); 
 			
-			CcpJsonRepresentation put = json.put(JnEntityLoginPassword.Fields.password, passwordHash);
+			CcpJsonRepresentation put = json.put(JnEntityLoginPassword.Fields.password, passwordHash)
+					.put(JsonFieldNames.passwordAlreadyCalculated, true)
+					;
 			
 			return put;
 		}
@@ -56,8 +65,8 @@ public enum JnJsonTransformersFieldsEntityDefault implements CcpJsonTransformers
 	},
 	token(false) {
 		public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
-			String createOriginalToken = super.getOriginalToken();
-			String originalToken = json.getOrDefault(JsonFieldNames.originalToken, createOriginalToken);
+
+			String originalToken = json.getOrDefault(JsonFieldNames.originalToken, () -> super.getOriginalToken());
 			 
 			CcpPasswordHandler dependency = CcpDependencyInjection.getDependency(CcpPasswordHandler.class);
 			
@@ -74,13 +83,15 @@ public enum JnJsonTransformersFieldsEntityDefault implements CcpJsonTransformers
 	},
 	timestamp(true) {
 		public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
-			CcpTimeDecorator ctd = new CcpTimeDecorator();
-			String formattedDateTime = ctd.getFormattedDateTime(CcpEntityExpurgableOptions.millisecond.format);
+			
 			boolean containsAllFields = json.getDynamicVersion().containsAllFields(CcpEntityField.TIMESTAMP.name());
 			
 			if(containsAllFields) {
 				return json;
 			}
+
+			CcpTimeDecorator ctd = new CcpTimeDecorator();
+			String formattedDateTime = ctd.getFormattedDateTime(CcpEntityExpurgableOptions.millisecond.format);
 			
 			CcpJsonRepresentation put = json.put(CcpEntityField.TIMESTAMP, ctd.content)
 					.put(CcpEntityField.DATE, formattedDateTime);
@@ -94,7 +105,7 @@ public enum JnJsonTransformersFieldsEntityDefault implements CcpJsonTransformers
 
 		public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
 			
-			String originalToken = json.getOrDefault(JnEntityLoginSessionValidation.Fields.token, super.getOriginalToken());
+			String originalToken = json.getOrDefault(JsonFieldNames.token, () -> super.getOriginalToken());
 			CcpHashDecorator hash = new CcpStringDecorator(originalToken).hash();
 			
 			String token = hash.asString(CcpHashAlgorithm.SHA1);
@@ -125,7 +136,7 @@ public enum JnJsonTransformersFieldsEntityDefault implements CcpJsonTransformers
 		return originalToken;
 	}
 	public static enum JsonFieldNames implements CcpJsonFieldName{
-		originalEmail, originalToken, email, token
+		originalEmail, originalToken, email, token, passwordAlreadyCalculated
 	}
 	public boolean canBePrimaryKey() {
 		return canBePrimaryKey;

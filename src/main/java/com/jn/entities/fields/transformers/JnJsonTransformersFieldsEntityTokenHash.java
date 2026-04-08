@@ -12,7 +12,7 @@ import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault
 public class JnJsonTransformersFieldsEntityTokenHash implements CcpJsonTransformersDefaultEntityField{
 
 	public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
-		String originalToken = json.getOrDefault(JnEntityLoginSessionValidation.Fields.token, JnJsonTransformersFieldsEntityDefault.getOriginalToken());
+		String originalToken = json.getOrDefault(JnEntityLoginSessionValidation.Fields.token, () -> JnJsonTransformersFieldsEntityDefault.getOriginalToken());
 		CcpHashDecorator hash = new CcpStringDecorator(originalToken).hash();
 		
 		String token = hash.asString(CcpHashAlgorithm.SHA1);
