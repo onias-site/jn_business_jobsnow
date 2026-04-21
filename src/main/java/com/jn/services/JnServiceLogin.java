@@ -1,19 +1,19 @@
 package com.jn.services;
 
+import com.ccp.business.CcpBusiness;
 import com.ccp.constantes.CcpOtherConstants;
 import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.decorators.CcpJsonRepresentation.CcpJsonFieldName;
 import com.ccp.especifications.db.crud.CcpGetEntityId;
 import com.ccp.especifications.db.utils.entity.CcpEntityOperationType;
-import com.ccp.flow.CcpErrorFlowDisturb;
-import com.ccp.business.CcpBusiness;
+import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityDetails;
 import com.ccp.json.validations.fields.annotations.CcpJsonCopyFieldValidationsFrom;
 import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidatorRequired;
 import com.jn.business.login.JnBusinessEvaluateAttempts;
 import com.jn.business.login.JnBusinessExecuteLogin;
 import com.jn.business.login.JnBusinessExecuteLogout;
+import com.jn.business.login.JnBusinessSavePassword;
 import com.jn.business.login.JnBusinessSendUserToken;
-import com.jn.business.login.JnBusinessUpdatePassword;
 import com.jn.entities.JnEntityDisposableRecord;
 import com.jn.entities.JnEntityEmailMessageSent;
 import com.jn.entities.JnEntityLoginAnswers;
@@ -38,6 +38,7 @@ import com.jn.status.login.JnProcessStatusUpdatePassword;
 import com.jn.utils.JnDeleteKeysFromCache;
 
 public enum JnServiceLogin implements JnService {
+	
 	ExecuteLogin {
 		public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
 			CcpBusiness lockPassword = JnEntityLoginPassword.ENTITY.getEntityDetails().getOperationCallback(CcpEntityOperationType.delete);
@@ -56,13 +57,20 @@ public enum JnServiceLogin implements JnService {
 							JnEntityLoginPassword.Fields.email.name()
 							);
 
+			
+			CcpJsonRepresentation idToSearchDataAboutToken = JnEntityDisposableRecord.getIdToSearch(JnEntityLoginToken.ENTITY, json);
+			
 			CcpJsonRepresentation transformedJson = json
 					.getTransformedJson(JnJsonTransformersFieldsEntityDefault.tokenHash)
 					.duplicateValueFromField(JsonFieldNames.originalToken, JsonFieldNames.sessionToken)
+					.mergeWithAnotherJson(idToSearchDataAboutToken)	
 					;
-			String methodName = new Object(){}.getClass().getEnclosingMethod().getName();
+			
+			
+			String methodName = this.name();
 			CcpJsonRepresentation findById =  new CcpGetEntityId(transformedJson)
 			.toBeginProcedureAnd()
+				.loadThisIdFromEntity(JnEntityDisposableRecord.ENTITY).and()
 				.loadThisIdFromEntity(JnEntityLoginPassword.ENTITY).and()
 				.loadThisIdFromEntity(JnEntityLoginStats.ENTITY).and()
 				.loadThisIdFromEntity(JnEntityLoginPasswordAttempts.ENTITY).and()
@@ -76,9 +84,10 @@ public enum JnServiceLogin implements JnService {
 						JnEntityLoginPasswordAttempts.Fields.attempts.name(),
 						JnEntityLoginSessionValidation.Fields.ip.name(),
 						JnEntityLoginToken.Fields.email.name(),
-						"sessionToken" 
+						"sessionToken"
+						,"expirationDate", "dateItWasSaved"
 						)
-			.endThisProcedureRetrievingTheResultingData(methodName, CcpOtherConstants.DO_NOTHING, CcpOtherConstants.DO_NOTHING, JnDeleteKeysFromCache.INSTANCE);
+			.endThisProcedureRetrievingTheResultingData(methodName, CcpOtherConstants.DO_NOTHING, LoadDataAboutToken.INSTANCE, JnDeleteKeysFromCache.INSTANCE);
 			return findById; 
 		}
 	},
@@ -156,19 +165,10 @@ public enum JnServiceLogin implements JnService {
 			
 			JnFunctionMensageriaSender sendUserToken = new JnFunctionMensageriaSender(JnBusinessSendUserToken.INSTANCE);
 			
-			CcpBusiness returnsDataAboutSentTokenInEmailMessage = x -> {
-				
-				CcpJsonRepresentation dataWithTimeStamp = JnEntityDisposableRecord.getDataWithTimeStamp(JnEntityLoginToken.ENTITY, 
-						json
-						);
-				
-				throw new CcpErrorFlowDisturb(dataWithTimeStamp, JnProcessStatusCreateLoginToken.statusAlreadySentToken,new String[] {"expirationDate", "dateItWasSaved"});
-			};
 			
 			CcpJsonRepresentation result = new CcpGetEntityId(put)
 			.toBeginProcedureAnd()
 				.ifThisIdIsPresentInEntity(JnEntityLoginToken.ENTITY.getTwinEntity()).returnStatus(JnProcessStatusCreateLoginToken.statusLockedToken).and()
-				.ifThisIdIsPresentInEntity(JnEntityEmailMessageSent.ENTITY).executeAction(returnsDataAboutSentTokenInEmailMessage).and()
 				.ifThisIdIsNotPresentInEntity(JnEntityLoginEmail.ENTITY).returnStatus(JnProcessStatusUpdatePassword.missingEmail).and()
 				.ifThisIdIsNotPresentInEntity(JnEntityLoginToken.ENTITY).executeAction(sendUserToken)
 				.andFinallyReturningTheseFields(json.fieldSet())
@@ -181,7 +181,7 @@ public enum JnServiceLogin implements JnService {
 	SavePassword {
 		public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
 			CcpBusiness lockToken = JnEntityLoginToken.ENTITY.getEntityDetails().getOperationCallback(CcpEntityOperationType.delete);
-			JnFunctionMensageriaSender updatePassword = new JnFunctionMensageriaSender(JnBusinessUpdatePassword.INSTANCE);
+			JnFunctionMensageriaSender updatePassword = new JnFunctionMensageriaSender(JnBusinessSavePassword.INSTANCE);
 			CcpBusiness evaluateAttempts =
 					new JnBusinessEvaluateAttempts(
 							JnEntityLoginTokenAttempts.ENTITY, 
@@ -201,10 +201,13 @@ public enum JnServiceLogin implements JnService {
 					.removeField(JnEntityLoginSessionValidation.Fields.token)
 					;
 			CcpJsonRepresentation putAll = json.mergeWithAnotherJson(renameField);
+			CcpJsonRepresentation idToSearchDataAboutToken = JnEntityDisposableRecord.getIdToSearch(JnEntityLoginToken.ENTITY, json);
 			
-			CcpJsonRepresentation result =  new CcpGetEntityId(putAll)
+			CcpJsonRepresentation mergeWithAnotherJson = putAll.mergeWithAnotherJson(idToSearchDataAboutToken);
+			CcpJsonRepresentation result =  new CcpGetEntityId(mergeWithAnotherJson)
 			.toBeginProcedureAnd()
-				.loadThisIdFromEntity(JnEntityLoginStats.ENTITY).and()
+			.loadThisIdFromEntity(JnEntityLoginStats.ENTITY).and()
+			.loadThisIdFromEntity(JnEntityDisposableRecord.ENTITY).and()
 				.loadThisIdFromEntity(JnEntityLoginTokenAttempts.ENTITY).and()
 				.ifThisIdIsPresentInEntity(JnEntityLoginToken.ENTITY.getTwinEntity()).returnStatus(JnProcessStatusUpdatePassword.lockedToken).and()
 				.ifThisIdIsNotPresentInEntity(JnEntityLoginEmail.ENTITY).returnStatus(JnProcessStatusUpdatePassword.missingEmail).and()
@@ -213,9 +216,10 @@ public enum JnServiceLogin implements JnService {
 						JnEntityLoginSessionValidation.Fields.userAgent.name(),
 						JnEntityLoginSessionValidation.Fields.ip.name(),
 						JnEntityLoginToken.Fields.email.name(),
-						"sessionToken" 
+						"sessionToken",
+						"expirationDate", "dateItWasSaved"
 						)	
-			.endThisProcedureRetrievingTheResultingData(this.name(), CcpOtherConstants.DO_NOTHING, CcpOtherConstants.DO_NOTHING, JnDeleteKeysFromCache.INSTANCE);
+			.endThisProcedureRetrievingTheResultingData(this.name(), CcpOtherConstants.DO_NOTHING, LoadDataAboutToken.INSTANCE, JnDeleteKeysFromCache.INSTANCE);
 			
 			return result;
 		}
@@ -225,6 +229,21 @@ public enum JnServiceLogin implements JnService {
 		originalToken, sessionToken
 	}
 }
+
+class LoadDataAboutToken implements CcpBusiness{
+	
+	public static final LoadDataAboutToken INSTANCE = new LoadDataAboutToken();
+
+	public CcpJsonRepresentation apply(CcpJsonRepresentation jsn) {
+		CcpEntityDetails entityDetails = JnEntityDisposableRecord.ENTITY.getEntityDetails();
+		CcpJsonRepresentation innerJsonFromPath = jsn.getDynamicVersion().getInnerJsonFromPath("_entities", entityDetails.entityName);
+		CcpJsonRepresentation dataWithTimeStamp = JnEntityDisposableRecord.getDataWithTimeStamp(innerJsonFromPath);
+		CcpJsonRepresentation mergeWithAnotherJson = dataWithTimeStamp.mergeWithAnotherJson(jsn);
+		return mergeWithAnotherJson;
+	}
+	
+}
+
 class SavePassword{
 	@CcpJsonFieldValidatorRequired
 	@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)

@@ -42,5 +42,4 @@ public class JnEntityJobsnowError implements CcpEntityConfigurator {
 		message
 		;
 	}
-
 }

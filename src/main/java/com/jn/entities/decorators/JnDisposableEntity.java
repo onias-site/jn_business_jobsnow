@@ -257,7 +257,7 @@ public class JnDisposableEntity extends CcpDefaultEntityDelegator<CcpEntityDispo
 		boolean isInvalid = false == this.isValidTimestamp(recordFromDisposable);
 	
 		if(isInvalid) {
-			throw new CcpErrorBulkEntityRecordNotFound(this, expurgableId);
+			throw new CcpErrorBulkEntityRecordNotFound(JnEntityDisposableRecord.ENTITY, expurgableId);
 		}
 		
 		CcpJsonRepresentation innerJson = recordFromDisposable.getInnerJson(JnEntityDisposableRecord.Fields.json);

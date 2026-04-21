@@ -36,13 +36,16 @@ public class JnEntityLoginSessionValidation implements CcpEntityConfigurator {
 		@CcpEntityFieldPrimaryKey
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		email, 
+		
 		@CcpEntityFieldPrimaryKey
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		@CcpEntityFieldTransformer(JnJsonTransformersFieldsEntityTokenHash.class)
-		token, 
+		token,
+		
 		@CcpEntityFieldPrimaryKey
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
-		ip, 
+		ip,
+		
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		coordinates, 
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)

@@ -7,6 +7,7 @@ import com.jn.entities.JnEntityEmailTemplateMessage;
 import com.jn.entities.JnEntityInstantMessengerMessageSent;
 import com.jn.entities.JnEntityInstantMessengerParametersToSend;
 import com.jn.entities.JnEntityLoginToken;
+import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault;
 import com.jn.messages.JnSendMessageToUser;
 public class JnBusinessSendUserToken implements CcpBusiness{
 	//TODO JSON VALIDATIONS	
@@ -25,6 +26,7 @@ public class JnBusinessSendUserToken implements CcpBusiness{
 		
 		CcpJsonRepresentation request = json.getInnerJson(JsonFieldNames.request);
 		CcpJsonRepresentation duplicateValueFromField = request.mergeWithAnotherJson(json)
+				.getTransformedJson(JnJsonTransformersFieldsEntityDefault.token)
 				.duplicateValueFromField(JsonFieldNames.originalEmail, JnEntityLoginToken.Fields.email, 
 						JnEntityInstantMessengerParametersToSend.Fields.recipient)
 				.duplicateValueFromField(JsonFieldNames.originalToken, JnEntityInstantMessengerMessageSent.Fields.token)

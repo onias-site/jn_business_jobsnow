@@ -16,14 +16,14 @@ import com.jn.entities.JnEntityLoginPasswordAttempts;
 import com.jn.entities.JnEntityLoginSessionValidation;
 import com.jn.services.JnServiceLogin;
 import com.jn.utils.JnDeleteKeysFromCache;
-public class JnBusinessUpdatePassword implements CcpBusiness {
+public class JnBusinessSavePassword implements CcpBusiness {
 	enum JsonFieldNames implements CcpJsonFieldName{
 		sessionToken
 	}
  
-	public static final JnBusinessUpdatePassword INSTANCE = new JnBusinessUpdatePassword();
+	public static final JnBusinessSavePassword INSTANCE = new JnBusinessSavePassword();
 	
-	private JnBusinessUpdatePassword() {}
+	private JnBusinessSavePassword() {}
 
 	@SuppressWarnings("unchecked")
 	public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
@@ -31,7 +31,7 @@ public class JnBusinessUpdatePassword implements CcpBusiness {
 		CcpEntityBulkHandlerTransferRecordToTwinEntity executeLogout = new CcpEntityBulkHandlerTransferRecordToTwinEntity(JnEntityLoginSessionValidation.ENTITY);
 		
 		CcpEntity twinEntity = JnEntityLoginPassword.ENTITY.getTwinEntity();
-		CcpEntityBulkHandlerTransferRecordToTwinEntity registerPasswordUnlock =new CcpEntityBulkHandlerTransferRecordToTwinEntity(twinEntity);
+		CcpEntityBulkHandlerTransferRecordToTwinEntity registerPasswordUnlock = new CcpEntityBulkHandlerTransferRecordToTwinEntity(twinEntity);
 		CcpBulkHandlerDelete removePasswordAttempts = new CcpBulkHandlerDelete(JnEntityLoginPasswordAttempts.ENTITY);
 
 		CcpJsonRepresentation renameField = json.renameField(JsonFieldNames.sessionToken, JnEntityLoginSessionValidation.Fields.token);

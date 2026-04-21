@@ -56,8 +56,36 @@ public class JnEntityDisposableRecord implements CcpEntityConfigurator {
 	
 	 public static CcpJsonRepresentation getDataWithTimeStamp(CcpEntity entity, CcpJsonRepresentation json) {
 		
+		CcpJsonRepresentation idToSearch = getIdToSearch(entity, json);
+		
+		CcpJsonRepresentation oneById = ENTITY.getOneById(idToSearch);
+		CcpJsonRepresentation put = getDataWithTimeStamp(oneById);
+		
+		return put;
+	
+	}
+
+	public static CcpJsonRepresentation getDataWithTimeStamp(CcpJsonRepresentation oneById) {
+		CcpJsonRepresentation jsonPiece = oneById.getJsonPiece(Fields.json, Fields.timestamp, Fields.format, Fields.date);
+		Long timestamp = jsonPiece.getAsLongNumber(Fields.timestamp);
+		String format = jsonPiece.getAsString(Fields.format);
+		
+		String dateItWasSaved = CcpEntityExpurgableOptions.getPastDate(format, timestamp);
+		
+		CcpJsonRepresentation innerJson = oneById.getInnerJson(Fields.json);
+		CcpJsonRepresentation removeFields = jsonPiece.removeFields(Fields.json, Fields.timestamp, Fields.format);
+		CcpJsonRepresentation renameField = removeFields.renameField(Fields.date, ExtraFields.expirationDate);
+		CcpJsonRepresentation mergeWithAnotherJson = innerJson.mergeWithAnotherJson(renameField);
+		CcpJsonRepresentation put = mergeWithAnotherJson.put(ExtraFields.dateItWasSaved, dateItWasSaved);
+		return put;
+	}
+
+
+
+	public static CcpJsonRepresentation getIdToSearch(CcpEntity entity, CcpJsonRepresentation json) {
 		CcpEntityDetails entityDetails = entity.getEntityDetails();
-		String id = entityDetails.getPrimaryKeyValues(json).asUgglyJson();
+		CcpJsonRepresentation handledJson = entity.getHandledJson(json);
+		String id = entityDetails.getPrimaryKeyValues(handledJson).asUgglyJson();
 		String entityName = entityDetails.entityName;
 		
 		CcpJsonRepresentation idToSearch = CcpOtherConstants
@@ -65,23 +93,7 @@ public class JnEntityDisposableRecord implements CcpEntityConfigurator {
 				.put(Fields.id, id)
 				.put(Fields.entity, entityName)
 				;
-		
-		
-		CcpJsonRepresentation oneById = ENTITY.getOneById(idToSearch);
-		CcpJsonRepresentation jsonPiece = oneById.getJsonPiece(Fields.json, Fields.timestamp, Fields.format, Fields.date);
-		Long timestamp = jsonPiece.getAsLongNumber(Fields.timestamp);
-		String format = jsonPiece.getAsString(Fields.format);
-		
-		String dateItWasSaved = CcpEntityExpurgableOptions.getPastDate(format, timestamp);
-		
-		CcpJsonRepresentation innerJson = json.getInnerJson(Fields.json);
-		CcpJsonRepresentation removeFields = jsonPiece.removeFields(Fields.json, Fields.timestamp, Fields.format);
-		CcpJsonRepresentation renameField = removeFields.renameField(Fields.date, ExtraFields.expirationDate);
-		CcpJsonRepresentation mergeWithAnotherJson = innerJson.mergeWithAnotherJson(renameField);
-		CcpJsonRepresentation put = mergeWithAnotherJson.put(ExtraFields.dateItWasSaved, dateItWasSaved);
-		
-		return put;
-	
+		return idToSearch;
 	}
 }
 
