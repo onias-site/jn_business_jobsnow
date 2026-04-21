@@ -90,7 +90,7 @@ public class JnSendMessageToUser {
 			
 			CcpJsonRepresentation parameterData = parameterEntity.getRecordFromUnionAll(unionAll, idToSearch);
 			CcpJsonRepresentation moreParameters = parameterData.getInnerJson(JnEntityEmailParametersToSend.Fields.moreParameters);
-			CcpJsonRepresentation allParameters = parameterData.removeField(JnEntityEmailParametersToSend.Fields.moreParameters).mergeWithAnotherJson(moreParameters);
+			CcpJsonRepresentation allParameters = parameterData.removeFields(JnEntityEmailParametersToSend.Fields.moreParameters).mergeWithAnotherJson(moreParameters);
 			CcpJsonRepresentation messageData = messageEntity.getRecordFromUnionAll(unionAll, idToSearch);
 			
 			CcpJsonRepresentation allDataTogether = allParameters.mergeWithAnotherJson(entityValues).mergeWithAnotherJson(messageData);

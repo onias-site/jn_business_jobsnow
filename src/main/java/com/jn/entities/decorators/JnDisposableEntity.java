@@ -12,7 +12,6 @@ import com.ccp.decorators.CcpStringDecorator;
 import com.ccp.dependency.injection.CcpDependencyInjection;
 import com.ccp.especifications.db.bulk.CcpBulkEntityOperationType;
 import com.ccp.especifications.db.bulk.CcpBulkItem;
-import com.ccp.especifications.db.bulk.CcpErrorBulkEntityRecordNotFound;
 import com.ccp.especifications.db.crud.CcpCrud;
 import com.ccp.especifications.db.crud.CcpSelectUnionAll;
 import com.ccp.especifications.db.utils.CcpDbRequester;
@@ -257,7 +256,7 @@ public class JnDisposableEntity extends CcpDefaultEntityDelegator<CcpEntityDispo
 		boolean isInvalid = false == this.isValidTimestamp(recordFromDisposable);
 	
 		if(isInvalid) {
-			throw new CcpErrorBulkEntityRecordNotFound(JnEntityDisposableRecord.ENTITY, expurgableId);
+			return CcpOtherConstants.EMPTY_JSON;
 		}
 		
 		CcpJsonRepresentation innerJson = recordFromDisposable.getInnerJson(JnEntityDisposableRecord.Fields.json);

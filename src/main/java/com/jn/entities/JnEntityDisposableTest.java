@@ -14,7 +14,7 @@ import com.jn.entities.decorators.JnDisposableEntity;
 import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
 
-@CcpEntityDisposable(expurgTime = CcpEntityExpurgableOptions.minute, expurgableEntityFactory = JnDisposableEntity.class)
+@CcpEntityDisposable(expurgTime = CcpEntityExpurgableOptions.millisecond, expurgableEntityFactory = JnDisposableEntity.class)
 @CcpEntityFieldsTransformer(classReferenceWithTheFields = JnJsonTransformersFieldsEntityDefault.class)
 @CcpEntityFieldsValidator(classReferenceWithTheFields = JnEntityDisposableTest.Fields.class)
 public class JnEntityDisposableTest implements CcpEntityConfigurator {

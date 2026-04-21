@@ -71,7 +71,7 @@ public class JnBusinessEvaluateAttempts implements CcpBusiness{
 		
 		boolean correctSecret = dependency.matches(secretFomUser, secretFromDatabase);
 		
-		CcpJsonRepresentation toReturn = json.removeField(JsonFieldNames.entities);
+		CcpJsonRepresentation toReturn = json.removeFields(JsonFieldNames.entities);
 		
 		if(correctSecret) {
 			this.topicToRegisterSuccess.apply(toReturn); 
