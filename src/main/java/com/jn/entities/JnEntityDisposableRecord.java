@@ -8,7 +8,6 @@ import com.ccp.especifications.db.utils.entity.CcpEntity;
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityFieldsTransformer;
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityFieldsValidator;
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityOlyReadable;
-import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityDetails;
 import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityFactory;
 import com.ccp.especifications.db.utils.entity.decorators.enums.CcpEntityExpurgableOptions;
 import com.ccp.especifications.db.utils.entity.decorators.interfaces.CcpEntityConfigurator;
@@ -53,18 +52,15 @@ public class JnEntityDisposableRecord implements CcpEntityConfigurator {
 		;
 	}
 	
-	 
-	
 	 public static CcpJsonRepresentation getDataWithTimeStamp(CcpEntity entity, CcpJsonRepresentation json) {
 		
-		CcpJsonRepresentation idToSearch = getIdToSearch(entity, json);
+		CcpJsonRepresentation idToSearch = entity.getIdToSearchDisposableRecord(json);
 		
 		CcpJsonRepresentation oneById = ENTITY.getEntityDetails().getOneByIdOrHandleItIfThisIdWasNotFound(idToSearch, CcpOtherConstants.RETURNS_EMPTY_JSON);
 		
 		CcpJsonRepresentation whenFieldsAreFound = oneById.whenFieldsAreFound(x -> getDataWithTimeStamp(x), Fields.format);
 		
 		return whenFieldsAreFound;
-	
 	}
 
 	public static CcpJsonRepresentation getDataWithTimeStamp(CcpJsonRepresentation oneById) {
@@ -82,22 +78,6 @@ public class JnEntityDisposableRecord implements CcpEntityConfigurator {
 		CcpJsonRepresentation mergeWithAnotherJson = innerJson.mergeWithAnotherJson(renameField);
 		CcpJsonRepresentation put = mergeWithAnotherJson.put(ExtraFields.dateItWasSaved, dateItWasSaved);
 		return put;
-	}
-
-
-
-	public static CcpJsonRepresentation getIdToSearch(CcpEntity entity, CcpJsonRepresentation json) {
-		CcpEntityDetails entityDetails = entity.getEntityDetails();
-		CcpJsonRepresentation handledJson = entity.getHandledJson(json);
-		String id = entityDetails.getPrimaryKeyValues(handledJson).asUgglyJson();
-		String entityName = entityDetails.entityName;
-		
-		CcpJsonRepresentation idToSearch = CcpOtherConstants
-				.EMPTY_JSON
-				.put(Fields.id, id)
-				.put(Fields.entity, entityName)
-				;
-		return idToSearch;
 	}
 }
 

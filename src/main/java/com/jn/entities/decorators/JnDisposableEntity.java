@@ -23,6 +23,7 @@ import com.ccp.especifications.db.utils.entity.decorators.enums.CcpEntityExpurga
 import com.ccp.utils.CcpHashAlgorithm;
 import com.jn.db.bulk.JnExecuteBulkOperation;
 import com.jn.entities.JnEntityDisposableRecord;
+import com.jn.entities.JnEntityDisposableRecord.Fields;
 import com.jn.utils.JnDeleteKeysFromCache;
 
 public class JnDisposableEntity extends CcpDefaultEntityDelegator<CcpEntityDisposable>{
@@ -324,11 +325,8 @@ public class JnDisposableEntity extends CcpDefaultEntityDelegator<CcpEntityDispo
 		if(isTwinEntity) {
 			return false;
 		}
-		
 		return true;
 	}
-	
-	
 
 	public List<CcpBulkItem> toBulkItems(CcpJsonRepresentation json, CcpBulkEntityOperationType operation) {
 		List<CcpBulkItem> bulkItems2 = this.entity.toBulkItems(json, operation);
@@ -343,4 +341,18 @@ public class JnDisposableEntity extends CcpDefaultEntityDelegator<CcpEntityDispo
 		return items;
 	}
 
+	public CcpJsonRepresentation getIdToSearchDisposableRecord(CcpJsonRepresentation json) {
+		CcpEntityDetails entityDetails = this.getEntityDetails();
+		CcpJsonRepresentation handledJson = this.getHandledJson(json);
+		String id = entityDetails.getPrimaryKeyValues(handledJson).asUgglyJson();
+		String entityName = entityDetails.entityName;
+		
+		CcpJsonRepresentation idToSearch = CcpOtherConstants
+				.EMPTY_JSON
+				.put(Fields.id, id)
+				.put(Fields.entity, entityName)
+				;
+		return idToSearch;
+	}
+	
 }
