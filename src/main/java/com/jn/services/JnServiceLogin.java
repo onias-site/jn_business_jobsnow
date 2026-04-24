@@ -9,11 +9,13 @@ import com.ccp.especifications.db.utils.entity.CcpEntityOperationType;
 import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityDetails;
 import com.ccp.json.validations.fields.annotations.CcpJsonCopyFieldValidationsFrom;
 import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidatorRequired;
+import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeString;
 import com.jn.business.login.JnBusinessEvaluateAttempts;
 import com.jn.business.login.JnBusinessExecuteLogin;
 import com.jn.business.login.JnBusinessExecuteLogout;
 import com.jn.business.login.JnBusinessSavePassword;
 import com.jn.business.login.JnBusinessSendUserToken;
+import com.jn.business.login.JnBusinessSessionValidate;
 import com.jn.entities.JnEntityDisposableRecord;
 import com.jn.entities.JnEntityEmailMessageSent;
 import com.jn.entities.JnEntityLoginAnswers;
@@ -86,11 +88,22 @@ public enum JnServiceLogin implements JnService {
 						JnEntityLoginToken.Fields.email.name(),
 						"sessionToken"
 						,"expirationDate", "dateItWasSaved"
+						,JnEntityDisposableRecord.Fields.timestamp.name()
 						)
 			.endThisProcedureRetrievingTheResultingData(methodName, CcpOtherConstants.DO_NOTHING, LoadDataAboutToken.INSTANCE, JnDeleteKeysFromCache.INSTANCE);
 			return findById; 
 		}
 	},
+	
+	ValidateLogin{
+
+		public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
+			CcpJsonRepresentation apply = JnBusinessSessionValidate.INSTANCE.apply(json);
+			return apply;
+		}
+		
+	},
+	
 	CreateLoginEmail {
 		public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
 			CcpBusiness action = JnEntityLoginEmail.ENTITY.getEntityDetails().getOperationCallback(CcpEntityOperationType.save);
@@ -216,8 +229,9 @@ public enum JnServiceLogin implements JnService {
 						JnEntityLoginSessionValidation.Fields.userAgent.name(),
 						JnEntityLoginSessionValidation.Fields.ip.name(),
 						JnEntityLoginToken.Fields.email.name(),
-						"sessionToken",
-						"expirationDate", "dateItWasSaved"
+						"sessionToken"
+						,JnEntityDisposableRecord.Fields.timestamp.name()
+						,"expirationDate", "dateItWasSaved"
 						)	
 			.endThisProcedureRetrievingTheResultingData(this.name(), CcpOtherConstants.DO_NOTHING, LoadDataAboutToken.INSTANCE, JnDeleteKeysFromCache.INSTANCE);
 			
@@ -229,6 +243,19 @@ public enum JnServiceLogin implements JnService {
 		originalToken, sessionToken
 	}
 }
+
+enum ValidateLogin implements CcpJsonFieldName{
+	@CcpJsonFieldTypeString(exactLength = 8)
+	@CcpJsonFieldValidatorRequired
+	sessionToken,
+
+	@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
+	@CcpJsonFieldValidatorRequired
+	email,
+
+	
+}
+
 
 class LoadDataAboutToken implements CcpBusiness{
 	

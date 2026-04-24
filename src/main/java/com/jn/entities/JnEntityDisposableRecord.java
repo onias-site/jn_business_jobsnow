@@ -3,6 +3,7 @@ package com.jn.entities;
 import com.ccp.constantes.CcpOtherConstants;
 import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.decorators.CcpJsonRepresentation.CcpJsonFieldName;
+import com.ccp.decorators.CcpTimeDecorator;
 import com.ccp.especifications.db.utils.entity.CcpEntity;
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityFieldsTransformer;
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityFieldsValidator;
@@ -67,15 +68,17 @@ public class JnEntityDisposableRecord implements CcpEntityConfigurator {
 	}
 
 	public static CcpJsonRepresentation getDataWithTimeStamp(CcpJsonRepresentation oneById) {
-		CcpJsonRepresentation jsonPiece = oneById.getJsonPiece(Fields.json, Fields.timestamp, Fields.format, Fields.date);
+		CcpJsonRepresentation jsonPiece = oneById.getJsonPiece(Fields.json, Fields.timestamp, Fields.format);
 		Long timestamp = jsonPiece.getAsLongNumber(Fields.timestamp);
 		String format = jsonPiece.getAsString(Fields.format);
-		
-		String dateItWasSaved = CcpEntityExpurgableOptions.getPastDate(format, timestamp);
+		String newFormat = "dd/MM/yyyy à HH:mm";
+		String dateItWasSaved = CcpEntityExpurgableOptions.getPastDate(format, newFormat, timestamp).replace("à", "às");
+		CcpTimeDecorator ctd = new CcpTimeDecorator(timestamp);
+		String expirationDate = ctd.getFormattedDateTime(newFormat).replace("à", "às");
 		
 		CcpJsonRepresentation innerJson = oneById.getInnerJson(Fields.json);
-		CcpJsonRepresentation removeFields = jsonPiece.removeFields(Fields.json, Fields.timestamp, Fields.format);
-		CcpJsonRepresentation renameField = removeFields.renameField(Fields.date, ExtraFields.expirationDate);
+		CcpJsonRepresentation removeFields = jsonPiece.removeFields(Fields.json, Fields.format);
+		CcpJsonRepresentation renameField = removeFields.put(ExtraFields.expirationDate, expirationDate);
 		CcpJsonRepresentation mergeWithAnotherJson = innerJson.mergeWithAnotherJson(renameField);
 		CcpJsonRepresentation put = mergeWithAnotherJson.put(ExtraFields.dateItWasSaved, dateItWasSaved);
 		return put;
