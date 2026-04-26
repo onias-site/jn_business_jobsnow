@@ -2,6 +2,7 @@ package com.jn.db.bulk;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -26,7 +27,7 @@ public class JnExecuteBulkOperation implements CcpExecuteBulkOperation{
 	
 	public JnExecuteBulkOperation executeBulk(Collection<CcpBulkItem> bulkItems,  Consumer<String[]> functionToDeleteKeysInTheCache) {
 		
-		List<CcpBulkItem> items = bulkItems.stream().filter(item -> item.operation.persistable).collect(Collectors.toList());
+		HashSet<CcpBulkItem> items = this.sanitizeItems(bulkItems);
 		
 		boolean emptyItems = items.isEmpty();
 		
@@ -41,6 +42,37 @@ public class JnExecuteBulkOperation implements CcpExecuteBulkOperation{
 		}
  		JnExecuteBulkOperation commitAndSaveErrorsAndDeleteRecordsFromCache = this.commitAndSaveErrorsAndDeleteRecordsFromCache(dbBulkExecutor, functionToDeleteKeysInTheCache);
 		return commitAndSaveErrorsAndDeleteRecordsFromCache;
+	}
+
+	private HashSet<CcpBulkItem> sanitizeItems(Collection<CcpBulkItem> bulkItems) {
+		HashSet<CcpBulkItem> items = new HashSet<>();
+		
+		for (CcpBulkItem newerItem : bulkItems) {
+			
+			if(newerItem.operation.priority <= 0) {
+				continue;
+			}
+			
+			boolean isNewItem = false == items.contains(newerItem);
+			
+			if(isNewItem) {
+				items.add(newerItem);
+				continue;
+			}
+			
+			ArrayList<CcpBulkItem> list = new ArrayList<>(items);
+			int indexOf = list.indexOf(newerItem);
+			CcpBulkItem olderItem = list.get(indexOf);
+			
+			boolean doesNotOverride = (olderItem.operation.priority - newerItem.operation.priority) > 0;
+			
+			if(doesNotOverride) {
+				continue;
+			}
+			items.remove(olderItem);
+			items.add(newerItem);
+		}
+		return items;
 	}
 	
 	private JnExecuteBulkOperation commitAndSaveErrorsAndDeleteRecordsFromCache(CcpBulkExecutor dbBulkExecutor, Consumer<String[]> functionToDeleteKeysInTheCache) {

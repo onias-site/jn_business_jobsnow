@@ -51,18 +51,12 @@ public class JnDisposableEntity extends CcpDefaultEntityDelegator<CcpEntityDispo
 	}
 	
 	private String extractFormatedCurrentTimestamp(CcpJsonRepresentation json) {
-		try {
-			Long timestamp = json.getOrDefault(JnEntityDisposableRecord.Fields.timestamp, () -> System.currentTimeMillis());
-			String formattedTimestamp = this.timeOption.getFormattedDate(timestamp);
-			return formattedTimestamp;
-			
-		} catch (Exception e) {
-			String timestamp = json.getOrDefault(JnEntityDisposableRecord.Fields.timestamp, () -> "" + System.currentTimeMillis());
-			Long valueOf = Long.valueOf(timestamp);
-			String formattedTimestamp = this.timeOption.getFormattedDate(valueOf);
-			return formattedTimestamp;
-		}
+		long currentTimeMillis = System.currentTimeMillis();
+		String formattedTimestamp = this.timeOption.getFormattedDate(currentTimeMillis);
+		return formattedTimestamp;
 	}
+	
+	
 	private boolean isValidTimestamp(CcpJsonRepresentation requiredEntityRow) {
 		
 		String timeStampFieldName = JnEntityDisposableRecord.Fields.timestamp.name();
@@ -343,7 +337,7 @@ public class JnDisposableEntity extends CcpDefaultEntityDelegator<CcpEntityDispo
 
 	public CcpJsonRepresentation getIdToSearchDisposableRecord(CcpJsonRepresentation json) {
 		CcpEntityDetails entityDetails = this.getEntityDetails();
-		CcpJsonRepresentation handledJson = this.getHandledJson(json);
+		CcpJsonRepresentation handledJson = getEntityDetails().entity.getHandledJson(json);
 		String id = entityDetails.getPrimaryKeyValues(handledJson).asUgglyJson();
 		String entityName = entityDetails.entityName;
 		

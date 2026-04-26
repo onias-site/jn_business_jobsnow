@@ -26,11 +26,11 @@ public class JnEntityJobsnowError implements CcpEntityConfigurator {
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityJobsnowError.class).entityInstance;
 	
 	public static enum Fields implements CcpJsonFieldName{
-		@CcpEntityFieldPrimaryKey
+//		@CcpEntityFieldPrimaryKey
 		@CcpJsonFieldValidatorArray(nonRepeatedItems = false)
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		cause, 
-		@CcpEntityFieldPrimaryKey
+//		@CcpEntityFieldPrimaryKey
 		@CcpJsonFieldValidatorArray(nonRepeatedItems = false)
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		stackTrace, 

@@ -107,7 +107,6 @@ public class JnSendMessageToUser {
 				entityValues = entityValues.mergeWithAnotherJson(messageToSend);
 				process.apply(messageToSend);
 			} catch (CcpErrorHttp e) {
-				e.printStackTrace();
 			}
 			k++;
 		}
