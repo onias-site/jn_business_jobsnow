@@ -13,6 +13,7 @@ import com.ccp.especifications.db.utils.entity.fields.annotations.CcpEntityField
 import com.ccp.json.validations.fields.annotations.CcpJsonCopyFieldValidationsFrom;
 import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidatorArray;
 import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidatorRequired;
+import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeString;
 import com.jn.entities.decorators.JnDisposableEntity;
 import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
@@ -26,14 +27,16 @@ public class JnEntityJobsnowError implements CcpEntityConfigurator {
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityJobsnowError.class).entityInstance;
 	
 	public static enum Fields implements CcpJsonFieldName{
-//		@CcpEntityFieldPrimaryKey
+		//FIXME O ATRIBUTO DA ANNOTATION ABAIXO NAO FUNCIONA
 		@CcpJsonFieldValidatorArray(nonRepeatedItems = false)
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		cause, 
-//		@CcpEntityFieldPrimaryKey
 		@CcpJsonFieldValidatorArray(nonRepeatedItems = false)
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		stackTrace, 
+		@CcpEntityFieldPrimaryKey
+		@CcpJsonFieldTypeString
+		stackTraceHash,
 		@CcpEntityFieldPrimaryKey
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		type, 
