@@ -1,4 +1,4 @@
-package com.jn.business.login;
+package com.jn.business.login.solve.token;
 
 import com.ccp.business.CcpBusiness;
 import com.ccp.decorators.CcpJsonRepresentation;
@@ -6,9 +6,10 @@ import com.ccp.decorators.CcpJsonRepresentation.CcpJsonFieldName;
 import com.ccp.json.validations.fields.annotations.CcpJsonCopyFieldValidationsFrom;
 import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidatorRequired;
 import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeString;
+import com.jn.entities.JnEntityLoginToken;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
 
-public class JnBusinessNotifyAboutPendingResendLoginToken implements CcpBusiness{
+public class JnBusinessResetLoginToken implements CcpBusiness{
 	
 	enum JsonFieldNames implements CcpJsonFieldName{
 		@CcpJsonFieldTypeString(exactLength = 8)
@@ -20,11 +21,12 @@ public class JnBusinessNotifyAboutPendingResendLoginToken implements CcpBusiness
 		email,
 	}
 	
-	private JnBusinessNotifyAboutPendingResendLoginToken(){}
+	private JnBusinessResetLoginToken(){}
 	
-	public static final JnBusinessNotifyAboutPendingResendLoginToken INSTANCE = new JnBusinessNotifyAboutPendingResendLoginToken();
+	public static final JnBusinessResetLoginToken INSTANCE = new JnBusinessResetLoginToken();
 	
 	public CcpJsonRepresentation apply(CcpJsonRepresentation json) { 
+		JnEntityLoginToken.ENTITY.deleteAnyWhere(json);
 		return json; 
 	}
 
