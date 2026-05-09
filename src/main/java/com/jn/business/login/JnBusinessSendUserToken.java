@@ -2,14 +2,12 @@ package com.jn.business.login;
 
 import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.decorators.CcpJsonRepresentation.CcpJsonFieldName;
-import com.ccp.business.CcpBusiness;
-import com.jn.entities.JnEntityEmailTemplateMessage;
+import com.jn.business.messages.JnBusinessSendMessage;
 import com.jn.entities.JnEntityInstantMessengerMessageSent;
 import com.jn.entities.JnEntityInstantMessengerParametersToSend;
 import com.jn.entities.JnEntityLoginToken;
 import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault;
-import com.jn.messages.JnSendMessageToUser;
-public class JnBusinessSendUserToken implements CcpBusiness{
+public class JnBusinessSendUserToken extends JnBusinessSendMessage{
 	//TODO JSON VALIDATIONS	
 	enum JsonFieldNames implements CcpJsonFieldName{
 		request, originalEmail, originalToken
@@ -17,32 +15,21 @@ public class JnBusinessSendUserToken implements CcpBusiness{
 	
 	public static final JnBusinessSendUserToken INSTANCE = new JnBusinessSendUserToken();
 	
-	private JnBusinessSendUserToken() {}
+	private JnBusinessSendUserToken() {
+		super(JnEntityLoginToken.ENTITY);
+	}
 	
 	public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
-		String language = json.getAsString(JnEntityEmailTemplateMessage.Fields.language);
-	
-		String topic = this.getClass().getName();
 		
 		CcpJsonRepresentation request = json.getInnerJson(JsonFieldNames.request);
-		CcpJsonRepresentation duplicateValueFromField = request.mergeWithAnotherJson(json)
+		CcpJsonRepresentation transformedJson = request.mergeWithAnotherJson(json)
 				.getTransformedJson(JnJsonTransformersFieldsEntityDefault.token)
 				.duplicateValueFromField(JsonFieldNames.originalEmail, JnEntityLoginToken.Fields.email, 
 						JnEntityInstantMessengerParametersToSend.Fields.recipient)
 				.duplicateValueFromField(JsonFieldNames.originalToken, JnEntityInstantMessengerMessageSent.Fields.token)
 				;
-		JnSendMessageToUser getMessage = new JnSendMessageToUser();
-
-		getMessage
-		.addDefaultProcessForEmailSending()
-		.soWithAllAddedProcessAnd()
-		.withTheTemplateEntity(topic)
-		.andWithTheEntityToBlockMessageResend(JnEntityLoginToken.ENTITY)
-		.andWithTheMessageValuesFromJson(duplicateValueFromField)
-		.andWithTheSupportLanguage(language)
-		.sendAllMessages()
-		;
-
+		super.apply(transformedJson);
+		
 		return json;
 	}
 

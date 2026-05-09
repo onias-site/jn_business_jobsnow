@@ -3,8 +3,8 @@ package com.jn.messages;
 import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.especifications.db.utils.entity.CcpEntity;
 import com.ccp.business.CcpBusiness;
-import com.jn.business.commons.JnBusinessNotifyError;
-import com.jn.business.commons.JnBusinessNotifySupport;
+import com.jn.business.messages.JnBusinessNotifyError;
+import com.jn.business.messages.JnBusinessNotifySupport;
 import com.jn.entities.JnEntityJobsnowWarning;
 
 public class JnSendMessageIgnoringProcessErrors extends JnSendMessageToUser{

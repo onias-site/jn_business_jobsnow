@@ -15,8 +15,8 @@ import com.ccp.especifications.db.utils.entity.fields.annotations.CcpEntityField
 import com.ccp.especifications.db.utils.entity.fields.annotations.CcpEntityFieldTransformer;
 import com.ccp.json.validations.fields.annotations.CcpJsonCopyFieldValidationsFrom;
 import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidatorRequired;
-import com.jn.business.commons.JnBusinessNotifyError;
 import com.jn.business.login.JnBusinessSendUserToken;
+import com.jn.business.messages.JnBusinessNotifyError;
 import com.jn.entities.decorators.JnVersionableEntity;
 import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault;
 import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDoNothing;

@@ -1,4 +1,4 @@
-package com.jn.business.commons;
+package com.jn.business.http;
 
 public enum JnBusinessHttpRequestType {
 	instantMessenger, email

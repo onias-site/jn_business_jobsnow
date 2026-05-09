@@ -1,6 +1,7 @@
-package com.jn.business.commons;
+package com.jn.business.messages;
 
 
+import com.ccp.business.CcpBusiness;
 import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.decorators.CcpTimeDecorator;
 import com.ccp.decorators.CcpJsonRepresentation.CcpJsonFieldName;
@@ -16,16 +17,14 @@ import com.jn.entities.JnEntityInstantMessengerMessageSent;
 import com.jn.exceptions.JnErrorUnableToSendInstantMessage;
 import com.jn.utils.JnDeleteKeysFromCache;
 
-public class JnBusinessSendInstantMessage {
+public class JnBusinessSendInstantMessage implements CcpBusiness{
 	enum JsonFieldNames implements CcpJsonFieldName{
 		maxTriesToSendMessage, triesToSendMessage, sleepToSendMessage
 	}
 
 	public static final JnBusinessSendInstantMessage INSTANCE = new JnBusinessSendInstantMessage();
 	
-	private JnBusinessSendInstantMessage() {
-		
-	}
+	private JnBusinessSendInstantMessage() {}
 	
 	public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
 		CcpInstantMessenger instantMessenger = CcpDependencyInjection.getDependency(CcpInstantMessenger.class);

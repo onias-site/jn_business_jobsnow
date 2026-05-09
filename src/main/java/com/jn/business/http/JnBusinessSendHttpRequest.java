@@ -1,4 +1,4 @@
-package com.jn.business.commons;
+package com.jn.business.http;
 
 import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.decorators.CcpTimeDecorator;

@@ -1,4 +1,4 @@
-package com.jn.business.commons;
+package com.jn.business.messages;
 
 import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.decorators.CcpStringDecorator;
@@ -34,9 +34,9 @@ public class JnBusinessNotifySupport {
 
 		CcpJsonRepresentation duplicateValueFromField = json.duplicateValueFromField(JnEntityJobsnowError.Fields.message, JsonFieldNames.msg);
 		CcpJsonRepresentation result = sender
-		.addDefaultProcessForEmailSending()
+		.addDefaultProcessToEmailSending()
 		.and()
-		.addDefaultStepForTelegramSending()
+		.addDefaultStepToInstantMessageSending()
 		.soWithAllAddedProcessAnd()
 		.withTheTemplateEntity(topic)
 		.andWithTheEntityToBlockMessageResend(entityToSaveError)
