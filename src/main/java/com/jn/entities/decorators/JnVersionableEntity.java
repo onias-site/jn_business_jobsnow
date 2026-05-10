@@ -11,7 +11,7 @@ import com.ccp.especifications.db.bulk.CcpBulkItem;
 import com.ccp.especifications.db.utils.entity.CcpEntity;
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityVersionable;
 import com.ccp.especifications.db.utils.entity.decorators.engine.CcpDefaultEntityDelegator;
-import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityDetails;
+import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityMetaData;
 import com.jn.db.bulk.JnExecuteBulkOperation;
 import com.jn.entities.JnEntityVersionable;
 import com.jn.utils.JnDeleteKeysFromCache;
@@ -32,8 +32,8 @@ public class JnVersionableEntity extends CcpDefaultEntityDelegator<CcpEntityVers
 	}
 
 	private CcpJsonRepresentation getVersionableRecord(CcpJsonRepresentation json, CcpBulkEntityOperationType operation) {
-		CcpEntityDetails entityDetails = this.entity.getEntityDetails();
-		CcpJsonRepresentation oneById = this.entity.getEntityDetails().getOneByIdOrHandleItIfThisIdWasNotFound(json, x -> 
+		CcpEntityMetaData entityDetails = this.entity.getEntityMetaData();
+		CcpJsonRepresentation oneById = this.entity.getEntityMetaData().getOneByIdOrHandleItIfThisIdWasNotFound(json, x -> 
 		
 		{
 			CcpJsonRepresentation handledJson = entityDetails.entity.getHandledJson(json);

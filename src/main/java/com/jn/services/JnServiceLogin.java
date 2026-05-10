@@ -7,7 +7,7 @@ import com.ccp.decorators.CcpJsonRepresentation.CcpJsonFieldName;
 import com.ccp.especifications.db.crud.CcpGetEntityId;
 import com.ccp.especifications.db.utils.entity.CcpEntity;
 import com.ccp.especifications.db.utils.entity.CcpEntityOperationType;
-import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityDetails;
+import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityMetaData;
 import com.ccp.json.validations.fields.annotations.CcpJsonCopyFieldValidationsFrom;
 import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidatorRequired;
 import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeString;
@@ -47,7 +47,7 @@ public enum JnServiceLogin implements JnService {
 	
 	ExecuteLogin {
 		public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
-			CcpBusiness lockPassword = JnEntityLoginPassword.ENTITY.getEntityDetails().getOperationCallback(CcpEntityOperationType.delete);
+			CcpBusiness lockPassword = JnEntityLoginPassword.ENTITY.getEntityMetaData().getOperationCallback(CcpEntityOperationType.delete);
 			JnFunctionMensageriaSender executeLogin = new JnFunctionMensageriaSender(JnBusinessExecuteLogin.INSTANCE);
 			CcpBusiness evaluateTries =
 					new JnBusinessEvaluateAttempts(
@@ -111,7 +111,7 @@ public enum JnServiceLogin implements JnService {
 	
 	CreateLoginEmail {
 		public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
-			CcpBusiness action = JnEntityLoginEmail.ENTITY.getEntityDetails().getOperationCallback(CcpEntityOperationType.save);
+			CcpBusiness action = JnEntityLoginEmail.ENTITY.getEntityMetaData().getOperationCallback(CcpEntityOperationType.save);
 			CcpJsonRepresentation result = new CcpGetEntityId(json)
 			.toBeginProcedureAnd()
 				.ifThisIdIsPresentInEntity(JnEntityLoginToken.ENTITY.getTwinEntity()).returnStatus(JnProcessStatusCreateLoginEmail.lockedToken).and()
@@ -159,7 +159,7 @@ public enum JnServiceLogin implements JnService {
 	},
 	SaveAnswers {
 		public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
-			CcpBusiness action = JnEntityLoginAnswers.ENTITY.getEntityDetails().getOperationCallback(CcpEntityOperationType.save);
+			CcpBusiness action = JnEntityLoginAnswers.ENTITY.getEntityMetaData().getOperationCallback(CcpEntityOperationType.save);
 			 
 			new CcpGetEntityId(json)
 			.toBeginProcedureAnd()
@@ -198,7 +198,7 @@ public enum JnServiceLogin implements JnService {
 	},
 	SavePassword {
 		public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
-			CcpBusiness lockToken = JnEntityLoginToken.ENTITY.getEntityDetails().getOperationCallback(CcpEntityOperationType.delete);
+			CcpBusiness lockToken = JnEntityLoginToken.ENTITY.getEntityMetaData().getOperationCallback(CcpEntityOperationType.delete);
 			JnFunctionMensageriaSender updatePassword = new JnFunctionMensageriaSender(JnBusinessSavePassword.INSTANCE);
 			CcpBusiness evaluateAttempts =
 					new JnBusinessEvaluateAttempts(
@@ -251,7 +251,7 @@ public enum JnServiceLogin implements JnService {
 			
 			CcpEntity twinEntity = entity.getTwinEntity();
 			
-			CcpBusiness save = entity.getEntityDetails().getOperationCallback(CcpEntityOperationType.save);
+			CcpBusiness save = entity.getEntityMetaData().getOperationCallback(CcpEntityOperationType.save);
 			
 			CcpGetEntityId ccpGetEntityId = super.getCcpGetEntityId(json, entity);
 
@@ -278,7 +278,7 @@ public enum JnServiceLogin implements JnService {
 			
 			CcpEntity twinEntity = entity.getTwinEntity();
 
-			CcpBusiness save = entity.getEntityDetails().getOperationCallback(CcpEntityOperationType.save);
+			CcpBusiness save = entity.getEntityMetaData().getOperationCallback(CcpEntityOperationType.save);
 
 			CcpGetEntityId ccpGetEntityId = super.getCcpGetEntityId(json, entity);
 			
@@ -329,7 +329,7 @@ class LoadDataAboutToken implements CcpBusiness{
 	public static final LoadDataAboutToken INSTANCE = new LoadDataAboutToken();
 
 	public CcpJsonRepresentation apply(CcpJsonRepresentation jsn) {
-		CcpEntityDetails entityDetails = JnEntityDisposableRecord.ENTITY.getEntityDetails();
+		CcpEntityMetaData entityDetails = JnEntityDisposableRecord.ENTITY.getEntityMetaData();
 		CcpJsonRepresentation innerJsonFromPath = jsn.getDynamicVersion().getInnerJsonFromPath("_entities", entityDetails.entityName);
 		CcpJsonRepresentation dataWithTimeStamp = JnEntityDisposableRecord.getDataWithTimeStamp(innerJsonFromPath);
 		CcpJsonRepresentation mergeWithAnotherJson = dataWithTimeStamp.mergeWithAnotherJson(jsn);

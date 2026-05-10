@@ -7,7 +7,7 @@ import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.decorators.CcpJsonRepresentation.CcpJsonFieldName;
 import com.ccp.especifications.db.bulk.CcpBulkItem;
 import com.ccp.especifications.db.bulk.CcpBulkOperationResult;
-import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityDetails;
+import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityMetaData;
 import com.jn.entities.JnEntityRecordToReprocess;
 class FunctionReprocessMapper implements Function<CcpBulkOperationResult, CcpJsonRepresentation>{
 	enum JsonFieldNames implements CcpJsonFieldName{
@@ -20,8 +20,8 @@ class FunctionReprocessMapper implements Function<CcpBulkOperationResult, CcpJso
 
 	public CcpJsonRepresentation apply(CcpBulkOperationResult result) {
 		CcpBulkItem bulkItem = result.getBulkItem();
-		CcpEntityDetails entityDetails = bulkItem.entity.getEntityDetails();
-		boolean itIsTryingToStartAnInfinitLoop = entityDetails.entityName.equals(JnEntityRecordToReprocess.ENTITY.getEntityDetails().entityName);
+		CcpEntityMetaData entityDetails = bulkItem.entity.getEntityMetaData();
+		boolean itIsTryingToStartAnInfinitLoop = entityDetails.entityName.equals(JnEntityRecordToReprocess.ENTITY.getEntityMetaData().entityName);
 		if(itIsTryingToStartAnInfinitLoop) {
 			throw new RuntimeException();
 		}

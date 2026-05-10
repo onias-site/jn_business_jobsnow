@@ -15,7 +15,7 @@ import com.ccp.especifications.db.bulk.CcpBulkEntityOperationType;
 import com.ccp.especifications.db.bulk.CcpBulkItem;
 import com.ccp.especifications.db.utils.entity.CcpEntity;
 import com.ccp.especifications.db.utils.entity.CcpEntityOperationType;
-import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityDetails;
+import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityMetaData;
 import com.ccp.especifications.db.utils.entity.decorators.enums.CcpEntityExpurgableOptions;
 import com.ccp.especifications.mensageria.receiver.CcpMensageriaReceiver;
 import com.ccp.especifications.mensageria.sender.CcpMensageriaSender;
@@ -42,7 +42,7 @@ public class JnFunctionMensageriaSender implements CcpBusiness {
 
 	public JnFunctionMensageriaSender(CcpEntity entity, CcpEntityOperationType operation) {
 		this.jsonValidationClass = operation.getJsonValidationClass(entity);
-		CcpEntityDetails entityDetails = entity.getEntityDetails();
+		CcpEntityMetaData entityDetails = entity.getEntityMetaData();
 		this.topic = entityDetails.configurationClass.getName();
 		this.operation = operation.name();
 	}

@@ -18,7 +18,7 @@ import com.ccp.especifications.db.utils.CcpDbRequester;
 import com.ccp.especifications.db.utils.entity.CcpEntity;
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityDisposable;
 import com.ccp.especifications.db.utils.entity.decorators.engine.CcpDefaultEntityDelegator;
-import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityDetails;
+import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityMetaData;
 import com.ccp.especifications.db.utils.entity.decorators.enums.CcpEntityExpurgableOptions;
 import com.ccp.utils.CcpHashAlgorithm;
 import com.jn.db.bulk.JnExecuteBulkOperation;
@@ -39,7 +39,7 @@ public class JnDisposableEntity extends CcpDefaultEntityDelegator<CcpEntityDispo
 	
 	private CcpJsonRepresentation getExpurgableId(CcpJsonRepresentation json) {
 		
-		CcpEntityDetails entityDetails = this.getEntityDetails();
+		CcpEntityMetaData entityDetails = this.getEntityMetaData();
 		String id = entityDetails.getPrimaryKeyValues(json).asUgglyJson();
 		
 		
@@ -85,7 +85,7 @@ public class JnDisposableEntity extends CcpDefaultEntityDelegator<CcpEntityDispo
 	
 	private CcpJsonRepresentation populateAnExpurgableFromJson(CcpJsonRepresentation json) {
 		CcpJsonRepresentation expurgableId = this.getExpurgableId(json);
-		CcpEntityDetails entityDetails = this.getEntityDetails();
+		CcpEntityMetaData entityDetails = this.getEntityMetaData();
 		String id = entityDetails.getPrimaryKeyValues(json).asUgglyJson();
 		Long timestamp = json.getOrDefault(JnEntityDisposableRecord.Fields.timestamp, () -> System.currentTimeMillis());
 		CcpJsonRepresentation onlyExistingFields = entityDetails.getOnlyExistingFields(json);
@@ -203,7 +203,7 @@ public class JnDisposableEntity extends CcpDefaultEntityDelegator<CcpEntityDispo
 		CcpDynamicJsonRepresentation dynamicVersion = parameterToSearch.getDynamicVersion();
 		String entityName = dynamicVersion.getAsString(fieldNameToEntity);
 		
-		CcpEntityDetails entityDetails = this.getEntityDetails();
+		CcpEntityMetaData entityDetails = this.getEntityMetaData();
 		boolean isAnotherEntity = false == entityName.equals(entityDetails.entityName);
 	
 		if(isAnotherEntity) {
@@ -235,7 +235,7 @@ public class JnDisposableEntity extends CcpDefaultEntityDelegator<CcpEntityDispo
 	public CcpJsonRepresentation getRecordFromUnionAll(CcpSelectUnionAll unionAll, CcpJsonRepresentation json) {
 
 		String id = this.calculateId(json);
-		CcpEntityDetails entityDetails = this.getEntityDetails();
+		CcpEntityMetaData entityDetails = this.getEntityMetaData();
 		
 		CcpJsonRepresentation recordFromUnionAll = unionAll.getEntityRow(entityDetails.entityName, id);
 
@@ -262,7 +262,7 @@ public class JnDisposableEntity extends CcpDefaultEntityDelegator<CcpEntityDispo
 
 		String id = this.calculateId(json);
 
-		CcpEntityDetails entityDetails = this.getEntityDetails();
+		CcpEntityMetaData entityDetails = this.getEntityMetaData();
 		
 		boolean presentInThisUnionAll = unionAll.isPresent(entityDetails.entityName, id);
 
@@ -299,22 +299,22 @@ public class JnDisposableEntity extends CcpDefaultEntityDelegator<CcpEntityDispo
 		}
 		
 		String id = this.calculateId(item.json);
-		CcpBulkItem ccpBulkItem = new CcpBulkItem(item.json, item.operation, this.getEntityDetails().entity, id);
+		CcpBulkItem ccpBulkItem = new CcpBulkItem(item.json, item.operation, this.getEntityMetaData().entity, id);
 		return ccpBulkItem;
 		
 	}
 
 	private boolean isAnotherEntity(CcpBulkItem item) {
 		
-		CcpEntityDetails thisEntityDetails = this.getEntityDetails();
-		CcpEntityDetails itemEntityDetails = item.entity.getEntityDetails();
+		CcpEntityMetaData thisEntityDetails = this.getEntityMetaData();
+		CcpEntityMetaData itemEntityDetails = item.entity.getEntityMetaData();
 		
 		boolean isThisEntity = itemEntityDetails.entityName.equals(thisEntityDetails.entityName);
 		if(isThisEntity) {
 			return false;
 		}
 
-		CcpEntityDetails twinEntityDetails = this.getEntityDetails().entity.getTwinEntity().getEntityDetails();
+		CcpEntityMetaData twinEntityDetails = this.getEntityMetaData().entity.getTwinEntity().getEntityMetaData();
 		boolean isTwinEntity = itemEntityDetails.entityName.equals(twinEntityDetails.entityName);
 		if(isTwinEntity) {
 			return false;
@@ -336,8 +336,8 @@ public class JnDisposableEntity extends CcpDefaultEntityDelegator<CcpEntityDispo
 	}
 
 	public CcpJsonRepresentation getIdToSearchDisposableRecord(CcpJsonRepresentation json) {
-		CcpEntityDetails entityDetails = this.getEntityDetails();
-		CcpJsonRepresentation handledJson = getEntityDetails().entity.getHandledJson(json);
+		CcpEntityMetaData entityDetails = this.getEntityMetaData();
+		CcpJsonRepresentation handledJson = getEntityMetaData().entity.getHandledJson(json);
 		String id = entityDetails.getPrimaryKeyValues(handledJson).asUgglyJson();
 		String entityName = entityDetails.entityName;
 		
