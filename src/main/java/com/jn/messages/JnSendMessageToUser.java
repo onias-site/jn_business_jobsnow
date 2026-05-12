@@ -3,6 +3,7 @@ package com.jn.messages;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.decorators.CcpJsonRepresentation.CcpJsonFieldName;
@@ -88,10 +89,11 @@ public class JnSendMessageToUser {
 			
 			CcpEntity parameterEntity = this.parameterEntities.get(k);
 			
-			CcpJsonRepresentation parameterData = parameterEntity.getRecordFromUnionAll(unionAll, idToSearch);
+			Supplier<CcpJsonRepresentation> jsonSupplier = idToSearch.getJsonSupplier();
+			CcpJsonRepresentation parameterData = parameterEntity.getRecordFromUnionAll(unionAll, jsonSupplier);
 			CcpJsonRepresentation moreParameters = parameterData.getInnerJson(JnEntityEmailParametersToSend.Fields.moreParameters);
 			CcpJsonRepresentation allParameters = parameterData.removeFields(JnEntityEmailParametersToSend.Fields.moreParameters).mergeWithAnotherJson(moreParameters);
-			CcpJsonRepresentation messageData = messageEntity.getRecordFromUnionAll(unionAll, idToSearch);
+			CcpJsonRepresentation messageData = messageEntity.getRecordFromUnionAll(unionAll, jsonSupplier);
 			
 			CcpJsonRepresentation allDataTogether = allParameters.mergeWithAnotherJson(entityValues).mergeWithAnotherJson(messageData);
 			

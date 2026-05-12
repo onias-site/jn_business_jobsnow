@@ -48,11 +48,6 @@ public enum JnJsonCommonsFields{
 	minLength = 7, maxLength = 100)
 	email, 
 
-	@CcpJsonFieldTypeString(
-			regexValidation = CcpEmailDecorator.EMAIL_REGEX, 
-	minLength = 7, maxLength = 100)
-	supportAgent, 
-	
 	@CcpJsonFieldTypeString(maxLength = 100)
 	subject, 
 	

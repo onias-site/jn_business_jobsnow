@@ -26,8 +26,8 @@ public class JnBusinessResetLoginToken implements CcpBusiness{
 	public static final JnBusinessResetLoginToken INSTANCE = new JnBusinessResetLoginToken();
 	
 	public CcpJsonRepresentation apply(CcpJsonRepresentation json) { 
-		JnEntityLoginToken.ENTITY.deleteAnyWhere(json);
-		return json; 
+		CcpJsonRepresentation deleteAnyWhere = JnEntityLoginToken.ENTITY.deleteAnyWhere(json);
+		return deleteAnyWhere; 
 	}
 
 	

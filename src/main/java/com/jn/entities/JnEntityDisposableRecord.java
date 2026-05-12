@@ -58,7 +58,7 @@ public class JnEntityDisposableRecord implements CcpEntityConfigurator {
 		
 		CcpJsonRepresentation oneById = ENTITY.getEntityMetaData().getOneByIdOrHandleItIfThisIdWasNotFound(idToSearch, CcpOtherConstants.RETURNS_EMPTY_JSON);
 		
-		CcpJsonRepresentation whenFieldsAreFound = oneById.whenFieldsAreFound(x -> getDataWithTimeStamp(x), Fields.format);
+		CcpJsonRepresentation whenFieldsAreFound = oneById.whenAnyFieldsAreFound(x -> getDataWithTimeStamp(x), Fields.format);
 		
 		return whenFieldsAreFound;
 	}

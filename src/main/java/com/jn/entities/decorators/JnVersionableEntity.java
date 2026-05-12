@@ -2,7 +2,9 @@ package com.jn.entities.decorators;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
+import com.ccp.business.CcpBusiness;
 import com.ccp.constantes.CcpOtherConstants;
 import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.decorators.CcpTimeDecorator;
@@ -32,26 +34,37 @@ public class JnVersionableEntity extends CcpDefaultEntityDelegator<CcpEntityVers
 	}
 
 	private CcpJsonRepresentation getVersionableRecord(CcpJsonRepresentation json, CcpBulkEntityOperationType operation) {
+		
 		CcpEntityMetaData entityDetails = this.entity.getEntityMetaData();
-		CcpJsonRepresentation oneById = this.entity.getEntityMetaData().getOneByIdOrHandleItIfThisIdWasNotFound(json, x -> 
+		
+		CcpBusiness ifNotFound = x -> 
 		
 		{
 			CcpJsonRepresentation handledJson = entityDetails.entity.getHandledJson(json);
 			CcpJsonRepresentation onlyExistingFields = entityDetails.getOnlyExistingFields(handledJson);
 			return onlyExistingFields;
-		});
-		String id = entityDetails.getPrimaryKeyValues(oneById).asUgglyJson();
+		};
+		
+		CcpJsonRepresentation oneById = entityDetails.getOneByIdOrHandleItIfThisIdWasNotFound(json, ifNotFound);
+		
+		Supplier<CcpJsonRepresentation> jsonSupplier = oneById.getJsonSupplier();
+		
+		String id = entityDetails.getPrimaryKeyValues(jsonSupplier).asUgglyJson();
+		
+		String formattedDateTime = new CcpTimeDecorator().getFormattedDateTime("dd/MM/yyyy HH:mm:ss.SSS");
+		
 		CcpJsonRepresentation audit = 
 				CcpOtherConstants.EMPTY_JSON
-				.put(JnEntityVersionable.Fields.timestamp, System.currentTimeMillis())
-				.put(JnEntityVersionable.Fields.date, new CcpTimeDecorator().getFormattedDateTime("dd/MM/yyyy HH:mm:ss.SSS"))
-				.put(JnEntityVersionable.Fields.operation, operation)
-				.put(JnEntityVersionable.Fields.entity, entityDetails.entityName)
-				.put(JnEntityVersionable.Fields.json, "" + oneById)
 				.put(JnEntityVersionable.Fields.id, id)
+				.put(JnEntityVersionable.Fields.json, "" + oneById)
+				.put(JnEntityVersionable.Fields.operation, operation)
+				.put(JnEntityVersionable.Fields.date, formattedDateTime)
+				.put(JnEntityVersionable.Fields.entity, entityDetails.entityName)
+				.put(JnEntityVersionable.Fields.timestamp, System.currentTimeMillis())
 		;
 		return audit;
 	}
+
 
 
 	public CcpJsonRepresentation deleteAnyWhere(CcpJsonRepresentation json) {

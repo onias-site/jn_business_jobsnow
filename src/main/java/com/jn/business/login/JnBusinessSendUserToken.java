@@ -28,9 +28,9 @@ public class JnBusinessSendUserToken extends JnBusinessSendMessage{
 						JnEntityInstantMessengerParametersToSend.Fields.recipient)
 				.duplicateValueFromField(JsonFieldNames.originalToken, JnEntityInstantMessengerMessageSent.Fields.token)
 				;
-		super.apply(transformedJson);
+		CcpJsonRepresentation apply = super.apply(transformedJson);
 		
-		return json;
+		return apply;
 	}
 
 }
