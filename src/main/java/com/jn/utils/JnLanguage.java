@@ -1,6 +1,8 @@
 package com.jn.utils;
 
-public enum JnLanguage {
+import com.ccp.decorators.CcpJsonRepresentation.CcpJsonFieldName;
+
+public enum JnLanguage implements CcpJsonFieldName{
 
 	portuguese,
 	english,

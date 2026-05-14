@@ -7,7 +7,6 @@ import com.ccp.decorators.CcpJsonRepresentation.CcpJsonFieldName;
 import com.ccp.especifications.db.crud.CcpGetEntityId;
 import com.ccp.especifications.db.utils.entity.CcpEntity;
 import com.ccp.especifications.db.utils.entity.CcpEntityOperationType;
-import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityMetaData;
 import com.ccp.json.validations.fields.annotations.CcpJsonCopyFieldValidationsFrom;
 import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidatorRequired;
 import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeString;
@@ -53,14 +52,14 @@ public enum JnServiceLogin implements JnService {
 					new JnBusinessEvaluateAttempts(
 							JnEntityLoginPasswordAttempts.ENTITY, 
 							JnEntityLoginPassword.ENTITY,  
-							JnEntityLoginPassword.Fields.password.name(), 
-							JnEntityLoginPassword.Fields.password.name(), 
+							JnEntityLoginPassword.Fields.password, 
+							JnEntityLoginPassword.Fields.password, 
 							JnProcessStatusExecuteLogin.passwordLockedRecently,
 							JnProcessStatusExecuteLogin.wrongPassword, 
 							lockPassword, 
 							executeLogin, 
-							JnEntityLoginPasswordAttempts.Fields.attempts.name(),
-							JnEntityLoginPassword.Fields.email.name()
+							JnEntityLoginPasswordAttempts.Fields.attempts,
+							JnEntityLoginPassword.Fields.email
 							);
 
 			
@@ -204,14 +203,14 @@ public enum JnServiceLogin implements JnService {
 					new JnBusinessEvaluateAttempts(
 							JnEntityLoginTokenAttempts.ENTITY, 
 							JnEntityLoginToken.ENTITY, 
-							JnEntityLoginToken.Fields.token.name(),
-							JnEntityLoginToken.Fields.token.name(), 
+							JnEntityLoginToken.Fields.token,
+							JnEntityLoginToken.Fields.token, 
 							JnProcessStatusUpdatePassword.tokenLockedRecently,
 							JnProcessStatusUpdatePassword.wrongToken, 
 							lockToken,
 							updatePassword,  
-							JnEntityLoginTokenAttempts.Fields.attempts.name(),
-							JnEntityLoginToken.Fields.email.name()
+							JnEntityLoginTokenAttempts.Fields.attempts,
+							JnEntityLoginToken.Fields.email
 							);
 			CcpJsonRepresentation renameField = CcpOtherConstants.EMPTY_JSON
 					.getTransformedJson(JnJsonTransformersFieldsEntityDefault.tokenHash)
@@ -329,8 +328,7 @@ class LoadDataAboutToken implements CcpBusiness{
 	public static final LoadDataAboutToken INSTANCE = new LoadDataAboutToken();
 
 	public CcpJsonRepresentation apply(CcpJsonRepresentation jsn) {
-		CcpEntityMetaData entityDetails = JnEntityDisposableRecord.ENTITY.getEntityMetaData();
-		CcpJsonRepresentation innerJsonFromPath = jsn.getDynamicVersion().getInnerJsonFromPath("_entities", entityDetails.entityName);
+		CcpJsonRepresentation innerJsonFromPath = jsn.getInnerJsonFromPath(CcpEntity.JsonFieldNames._entities, JnEntityDisposableRecord.ENTITY);
 		CcpJsonRepresentation dataWithTimeStamp = JnEntityDisposableRecord.getDataWithTimeStamp(innerJsonFromPath);
 		CcpJsonRepresentation mergeWithAnotherJson = dataWithTimeStamp.mergeWithAnotherJson(jsn);
 		return mergeWithAnotherJson;

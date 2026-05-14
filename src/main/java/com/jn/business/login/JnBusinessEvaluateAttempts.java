@@ -19,9 +19,9 @@ public class JnBusinessEvaluateAttempts implements CcpBusiness{
 	
 	private final CcpEntity entityToGetTheAttempts;
 
-	private final String userFieldName;
+	private final CcpJsonFieldName userFieldName;
 	
-	private final String databaseFieldName;
+	private final CcpJsonFieldName databaseFieldName;
 
 	private final CcpProcessStatus statusToReturnWhenWrongType;
 	
@@ -31,21 +31,21 @@ public class JnBusinessEvaluateAttempts implements CcpBusiness{
 
 	private final CcpBusiness topicToCreateTheLockWhenExceedTries;
 	
-	private final String fieldAttempsName;
+	private final CcpJsonFieldName fieldAttempsName;
 	
-	private final String fieldEmailName;
+	private final CcpJsonFieldName fieldEmailName;
 
 	public JnBusinessEvaluateAttempts(
 			CcpEntity entityToGetTheAttempts, 
 			CcpEntity entityToGetTheSecret, 
-			String databaseFieldName, 
-			String userFieldName, 
+			CcpJsonFieldName databaseFieldName, 
+			CcpJsonFieldName userFieldName, 
 			CcpProcessStatus statusToReturnWhenExceedAttempts, 
 			CcpProcessStatus statusToReturnWhenWrongType,
 			CcpBusiness topicToCreateTheLockWhenExceedTries,
 			CcpBusiness topicToRegisterSuccess,
-			String fieldAttempsName,
-			String fieldEmailName
+			CcpJsonFieldName fieldAttempsName,
+			CcpJsonFieldName fieldEmailName
 			) { 
 
 		this.statusToReturnWhenExceedAttempts = statusToReturnWhenExceedAttempts;
@@ -63,9 +63,9 @@ public class JnBusinessEvaluateAttempts implements CcpBusiness{
 
 	public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
 		
-		String secretFromDatabase = json.getDynamicVersion().getValueFromPath("","_entities", this.entityToGetTheSecret.getEntityMetaData().entityName, this.databaseFieldName);
+		String secretFromDatabase = json.getValueFromPath("",CcpEntity.JsonFieldNames._entities, this.entityToGetTheSecret, this.databaseFieldName);
 		
-		String secretFomUser = json.getDynamicVersion().getAsString(this.userFieldName);
+		String secretFomUser = json.getAsString(this.userFieldName);
 		
 		CcpPasswordHandler dependency = CcpDependencyInjection.getDependency(CcpPasswordHandler.class);
 		
@@ -78,8 +78,7 @@ public class JnBusinessEvaluateAttempts implements CcpBusiness{
 			return toReturn;
 		}
 
-		String attemptsEntityName = this.entityToGetTheAttempts.getEntityMetaData().entityName;
-		Double attemptsFromDatabase = json.getDynamicVersion().getValueFromPath(0d,"_entities", attemptsEntityName, this.fieldAttempsName);
+		Double attemptsFromDatabase = json.getValueFromPath(0d, CcpEntity.JsonFieldNames._entities, this.entityToGetTheAttempts, this.fieldAttempsName);
 		//LATER PARAMETRIZAR O 3
 		double updatedAttempts = attemptsFromDatabase + 1;
 		boolean exceededAttempts = updatedAttempts >= 3;
@@ -88,16 +87,16 @@ public class JnBusinessEvaluateAttempts implements CcpBusiness{
 			throw new CcpErrorFlowDisturb(toReturn, this.statusToReturnWhenExceedAttempts);
 		}
 		
-		String email = json.getDynamicVersion().getAsString(this.fieldEmailName);
+		String email = json.getAsString(this.fieldEmailName);
 		CcpJsonRepresentation put = CcpOtherConstants.EMPTY_JSON
-				.getDynamicVersion().put(this.fieldAttempsName, updatedAttempts)
-				.getDynamicVersion().put(this.fieldEmailName, email)
+				.put(this.fieldAttempsName, updatedAttempts)
+				.put(this.fieldEmailName, email)
 				;
 		this.entityToGetTheAttempts.save(put);
 		String[] returnedFields = new String[] {
-				this.fieldAttempsName
+				this.fieldAttempsName.name()
 		};
-		throw new CcpErrorFlowDisturb(toReturn.getDynamicVersion().put(this.fieldAttempsName, updatedAttempts), this.statusToReturnWhenWrongType, returnedFields);
+		throw new CcpErrorFlowDisturb(toReturn.put(this.fieldAttempsName, updatedAttempts), this.statusToReturnWhenWrongType, returnedFields);
 	}
 	
 	

@@ -36,7 +36,7 @@ public class JnEntityLoginSessionTokenAttempts implements CcpEntityConfigurator 
 	public static CcpBusiness incrementAttempts(Integer maxAttempts, CcpBusiness whenExceedAttempts) {
 		CcpBusiness result = json -> {
 			
-			CcpJsonRepresentation record = json.getInnerJson(ExtraFields1._entities).getDynamicVersion().getInnerJson(ENTITY.getEntityMetaData().entityName);
+			CcpJsonRepresentation record = json.getInnerJsonFromPath(CcpEntity.JsonFieldNames._entities, ENTITY);
 			Double attempts = record.getOrDefault(Fields.attempts, () -> 0d);
 			Double updatedAttempts = attempts + 1;
 			
@@ -57,7 +57,7 @@ public class JnEntityLoginSessionTokenAttempts implements CcpEntityConfigurator 
 
 	public static CcpBusiness resetAttempts() {
 		CcpBusiness result = json -> {
-			CcpJsonRepresentation record = json.getInnerJson(ExtraFields1._entities).getDynamicVersion().getInnerJson(ENTITY.getEntityMetaData().entityName);
+			CcpJsonRepresentation record = json.getInnerJsonFromPath(CcpEntity.JsonFieldNames._entities, ENTITY);
 			
 			boolean noAttemps = record.isEmpty();
 			
@@ -70,11 +70,4 @@ public class JnEntityLoginSessionTokenAttempts implements CcpEntityConfigurator 
 		};
 		return result;
 	}
-	
-	
-	
-}
-
-enum ExtraFields1 implements CcpJsonFieldName {
-	_entities
 }
