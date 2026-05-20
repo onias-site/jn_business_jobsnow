@@ -8,12 +8,10 @@ import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityF
 import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityFactory;
 import com.ccp.especifications.db.utils.entity.decorators.interfaces.CcpEntityConfigurator;
 import com.ccp.especifications.db.utils.entity.fields.annotations.CcpEntityFieldPrimaryKey;
-import com.ccp.especifications.db.utils.entity.fields.annotations.CcpEntityFieldTransformer;
 import com.ccp.json.validations.fields.annotations.CcpJsonCopyFieldValidationsFrom;
 import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidatorRequired;
 import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeString;
 import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault;
-import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityTokenHash;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
 
 
@@ -25,13 +23,12 @@ public class JnEntityInstantMessengerBotLocked implements CcpEntityConfigurator 
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityInstantMessengerBotLocked.class).entityInstance;
 
 	public static enum Fields implements CcpJsonFieldName{
-		@CcpEntityFieldTransformer(JnJsonTransformersFieldsEntityTokenHash.class)
 		@CcpEntityFieldPrimaryKey
 		@CcpJsonFieldTypeString
-		token, 
+		botName, 
 		@CcpJsonFieldValidatorRequired
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
-		recipient, 
+		chatId, 
 		@CcpJsonFieldValidatorRequired
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		subjectType, 

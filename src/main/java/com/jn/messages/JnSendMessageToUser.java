@@ -83,7 +83,7 @@ public class JnSendMessageToUser {
 			return entityValues;
 		}
 		
-		int k = 0;
+		int k = 0; 
 		
 		for (CcpEntity messageEntity : this.messageEntities) {
 			

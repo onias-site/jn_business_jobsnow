@@ -26,7 +26,7 @@ public class JnBusinessSendUserToken extends JnBusinessSendMessage{
 				.getTransformedJson(JnJsonTransformersFieldsEntityDefault.token)
 				.duplicateValueFromField(JsonFieldNames.originalEmail, JnEntityLoginToken.Fields.email, 
 						JnEntityInstantMessengerParametersToSend.Fields.recipient)
-				.duplicateValueFromField(JsonFieldNames.originalToken, JnEntityInstantMessengerMessageSent.Fields.token)
+				.duplicateValueFromField(JsonFieldNames.originalToken, JnEntityInstantMessengerMessageSent.Fields.botName)
 				;
 		CcpJsonRepresentation apply = super.apply(transformedJson);
 		

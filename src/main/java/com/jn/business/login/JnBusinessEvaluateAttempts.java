@@ -16,7 +16,7 @@ public class JnBusinessEvaluateAttempts implements CcpBusiness{
 	}
 
 	private final CcpEntity entityToGetTheSecret;
-	
+	 
 	private final CcpEntity entityToGetTheAttempts;
 
 	private final CcpJsonFieldName userFieldName;
@@ -62,7 +62,7 @@ public class JnBusinessEvaluateAttempts implements CcpBusiness{
 	}
 
 	public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
-		
+		 
 		String secretFromDatabase = json.getValueFromPath("",CcpEntity.JsonFieldNames._entities, this.entityToGetTheSecret, this.databaseFieldName);
 		
 		String secretFomUser = json.getAsString(this.userFieldName);

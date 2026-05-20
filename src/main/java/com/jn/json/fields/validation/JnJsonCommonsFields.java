@@ -88,9 +88,6 @@ public enum JnJsonCommonsFields{
 	status,
 	
 	@CcpJsonFieldTypeString
-	recipient,
-	
-	@CcpJsonFieldTypeString
 	cause, 
 	
 	@CcpJsonFieldTypeString
