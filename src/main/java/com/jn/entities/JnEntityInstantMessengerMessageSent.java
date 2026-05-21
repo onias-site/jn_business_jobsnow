@@ -11,11 +11,10 @@ import com.ccp.especifications.db.utils.entity.decorators.enums.CcpEntityExpurga
 import com.ccp.especifications.db.utils.entity.decorators.interfaces.CcpEntityConfigurator;
 import com.ccp.especifications.db.utils.entity.fields.annotations.CcpEntityFieldPrimaryKey;
 import com.ccp.json.validations.fields.annotations.CcpJsonCopyFieldValidationsFrom;
-import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeNumberUnsigned;
-import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeString;
+import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidatorRequired;
 import com.jn.entities.decorators.JnDisposableEntity;
 import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault;
-import com.jn.json.fields.validation.JnJsonCommonsFields;
+import com.jn.json.fields.validation.JnJsonInstantMessengerFields;
 
 @CcpEntityCache(3600)
 @CcpEntityDisposable(expurgTime = CcpEntityExpurgableOptions.hourly, expurgableEntityFactory = JnDisposableEntity.class)
@@ -28,17 +27,24 @@ public class JnEntityInstantMessengerMessageSent implements CcpEntityConfigurato
 	
 	public static enum Fields implements CcpJsonFieldName{
 		@CcpEntityFieldPrimaryKey
-		@CcpJsonFieldTypeString
+		@CcpJsonCopyFieldValidationsFrom(JnJsonInstantMessengerFields.class)
 		botName, 
 		@CcpEntityFieldPrimaryKey
-		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
+		@CcpJsonCopyFieldValidationsFrom(JnJsonInstantMessengerFields.class)
 		chatId, 
 		@CcpEntityFieldPrimaryKey
-		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
-		subjectType, 
-		@CcpEntityFieldPrimaryKey
-		@CcpJsonFieldTypeNumberUnsigned
-		interval
+		@CcpJsonCopyFieldValidationsFrom(JnJsonInstantMessengerFields.class)
+		templateId, 
+		@CcpJsonFieldValidatorRequired
+		@CcpJsonCopyFieldValidationsFrom(JnJsonInstantMessengerFields.class)
+		instantMessageType,
+		@CcpJsonCopyFieldValidationsFrom(JnJsonInstantMessengerFields.class)
+		caption,
+		@CcpJsonCopyFieldValidationsFrom(JnJsonInstantMessengerFields.class)
+		contentType,
+		@CcpJsonCopyFieldValidationsFrom(JnJsonInstantMessengerFields.class)
+		fileName
+
 		;
 	}
 

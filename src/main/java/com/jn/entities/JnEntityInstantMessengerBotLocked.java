@@ -10,9 +10,8 @@ import com.ccp.especifications.db.utils.entity.decorators.interfaces.CcpEntityCo
 import com.ccp.especifications.db.utils.entity.fields.annotations.CcpEntityFieldPrimaryKey;
 import com.ccp.json.validations.fields.annotations.CcpJsonCopyFieldValidationsFrom;
 import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidatorRequired;
-import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeString;
 import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault;
-import com.jn.json.fields.validation.JnJsonCommonsFields;
+import com.jn.json.fields.validation.JnJsonInstantMessengerFields;
 
 
 @CcpEntityCache(3600)
@@ -24,13 +23,13 @@ public class JnEntityInstantMessengerBotLocked implements CcpEntityConfigurator 
 
 	public static enum Fields implements CcpJsonFieldName{
 		@CcpEntityFieldPrimaryKey
-		@CcpJsonFieldTypeString
+		@CcpJsonCopyFieldValidationsFrom(JnJsonInstantMessengerFields.class)
 		botName, 
-		@CcpJsonFieldValidatorRequired
-		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
+		@CcpEntityFieldPrimaryKey
+		@CcpJsonCopyFieldValidationsFrom(JnJsonInstantMessengerFields.class)
 		chatId, 
 		@CcpJsonFieldValidatorRequired
-		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
+		@CcpJsonCopyFieldValidationsFrom(JnJsonInstantMessengerFields.class)
 		subjectType, 
 		;
 	}

@@ -5,16 +5,13 @@ import com.ccp.dependency.injection.CcpDependencyInjection;
 import com.ccp.especifications.db.crud.CcpCrud;
 import com.ccp.especifications.db.crud.CcpSelectUnionAll;
 import com.ccp.especifications.email.CcpEmailSender;
-import com.ccp.business.CcpBusiness;
-import com.jn.business.http.JnBusinessHttpRequestType;
-import com.jn.business.http.JnBusinessSendHttpRequest;
+import com.ccp.especifications.http.CcpHttpApiExecutor;
 import com.jn.entities.JnEntityEmailMessageSent;
-import com.jn.entities.JnEntityEmailParametersToSend;
 import com.jn.entities.JnEntityEmailReportedAsSpam;
 import com.jn.utils.JnDeleteKeysFromCache;
 
 
-public class JnBusinessSendEmailMessage implements CcpBusiness{
+public class JnBusinessSendEmailMessage implements CcpHttpApiExecutor{
 	//TODO JSON VALIDATIONS	
 
 	public static final JnBusinessSendEmailMessage INSTANCE = new JnBusinessSendEmailMessage(); 
@@ -40,8 +37,7 @@ public class JnBusinessSendEmailMessage implements CcpBusiness{
 		if(emailReportedAsSpam) {
 			return json;
 		}
-		
-		JnBusinessSendHttpRequest.INSTANCE.execute(json, x -> emailSender.apply(x),JnBusinessHttpRequestType.email, JnEntityEmailParametersToSend.Fields.subjectType.name());
+		emailSender.apply(json);
 		JnEntityEmailMessageSent.ENTITY.save(json);
 		return json;
 	}

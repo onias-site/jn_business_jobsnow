@@ -2,6 +2,8 @@ package com.jn.entities;
 
 import java.util.List;
 
+import com.ccp.constantes.CcpOtherConstants;
+import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.decorators.CcpJsonRepresentation.CcpJsonFieldName;
 import com.ccp.especifications.db.bulk.CcpBulkItem;
 import com.ccp.especifications.db.utils.entity.CcpEntity;
@@ -18,6 +20,7 @@ import com.jn.business.messages.JnBusinessNotifyError;
 import com.jn.entities.decorators.JnVersionableEntity;
 import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
+import com.jn.json.fields.validation.JnJsonInstantMessengerFields;
 import com.jn.utils.JnLanguage;
 
 @CcpEntityCache(3600)
@@ -30,28 +33,24 @@ public class JnEntityInstantMessengerTemplateMessage  implements CcpEntityConfig
 
 	public static enum Fields implements CcpJsonFieldName{
 		@CcpEntityFieldPrimaryKey
-		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
+		@CcpJsonCopyFieldValidationsFrom(JnJsonInstantMessengerFields.class)
 		templateId,
 		@CcpEntityFieldPrimaryKey
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		language, 
-		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
-		subject, 
 		@CcpJsonFieldValidatorRequired
-		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
+		@CcpJsonCopyFieldValidationsFrom(JnJsonInstantMessengerFields.class)
 		message
 		;
 	}
 	public List<CcpBulkItem> getFirstRecordsToInsert() {
-		List<CcpBulkItem> createBulkItems = CcpEntityConfigurator.super.toCreateBulkItems(ENTITY, "{"
-				+ "	\"language\": \""
-				+ JnLanguage.portuguese.name()
-				+ "\","
-				+ "	\"templateId\": \""
-				+ JnBusinessNotifyError.class.getName()
-				+ "\","
-				+ "	\"message\": \"{type}\\n\\nError Description:\n {msg}\\n\\n{stackTrace}\\n\\nCaused by:\\n{cause}\""
-				+ "}");
+		
+		CcpJsonRepresentation json = CcpOtherConstants.EMPTY_JSON
+				.put(Fields.message, "{type}\\n\\nError Description:\n {msg}\\n\\n{stackTrace}\\n\\nCaused by:\\n{cause}")
+				.put(Fields.templateId, JnBusinessNotifyError.class.getName())
+				.put(Fields.language, JnLanguage.portuguese)
+		;
+		List<CcpBulkItem> createBulkItems = CcpEntityConfigurator.super.toCreateBulkItems(ENTITY, json);
 
 		return createBulkItems;
 	}

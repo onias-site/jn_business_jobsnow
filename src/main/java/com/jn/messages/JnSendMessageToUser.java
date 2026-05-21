@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Supplier;
 
+import com.ccp.business.CcpBusiness;
 import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.decorators.CcpJsonRepresentation.CcpJsonFieldName;
 import com.ccp.dependency.injection.CcpDependencyInjection;
@@ -12,7 +13,7 @@ import com.ccp.especifications.db.crud.CcpCrud;
 import com.ccp.especifications.db.crud.CcpSelectUnionAll;
 import com.ccp.especifications.db.utils.entity.CcpEntity;
 import com.ccp.especifications.http.CcpErrorHttp;
-import com.ccp.business.CcpBusiness;
+import com.jn.business.http.JnBusinessSendHttpRequest;
 import com.jn.business.messages.JnBusinessSendEmailMessage;
 import com.jn.business.messages.JnBusinessTryToSendInstantMessage;
 import com.jn.entities.JnEntityEmailParametersToSend;
@@ -37,7 +38,12 @@ public class JnSendMessageToUser {
 	}
 	
 	public JnAddDefaultStep addDefaultProcessToEmailSending() {
-		JnSendMessageToUser addOneStep = this.addOneStep(JnBusinessSendEmailMessage.INSTANCE, JnEntityEmailParametersToSend.ENTITY, JnEntityEmailTemplateMessage.ENTITY);
+		
+		JnBusinessSendHttpRequest httpRequester = new JnBusinessSendHttpRequest(JnBusinessSendEmailMessage.INSTANCE);
+		
+		JnSendMessageToUser addOneStep = this.addOneStep(
+				httpRequester, 
+				JnEntityEmailParametersToSend.ENTITY, JnEntityEmailTemplateMessage.ENTITY);
 		return new JnAddDefaultStep(addOneStep);
 	}
 

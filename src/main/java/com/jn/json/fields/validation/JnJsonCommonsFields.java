@@ -29,11 +29,12 @@ public enum JnJsonCommonsFields{
 	@CcpJsonFieldTypeNumberUnsigned
 	timestamp, 
 	
-	@CcpJsonFieldTypeString(exactLength = 23)//dd/MM/yyyy HH:mm:ss.SSS
+	@CcpJsonFieldTypeString(exactLength = 23)
 	date,
 	
 	@CcpJsonFieldTypeString(maxLength = 50)
 	entity, 
+	
 	@CcpJsonFieldTypeString
 	id,
 	
@@ -53,9 +54,6 @@ public enum JnJsonCommonsFields{
 	
 	@CcpJsonFieldTypeString(minLength = 5, maxLength = 500_000)
 	message, 
-	
-	@CcpJsonFieldTypeNumberUnsigned
-	chatId, 
 	
 	@CcpJsonFieldTypeString(maxLength = 30)
 	sender,
@@ -93,9 +91,6 @@ public enum JnJsonCommonsFields{
 	@CcpJsonFieldTypeString
 	stackTrace, 
 	
-	@CcpJsonFieldTypeString
-	type,
-	
 	@CcpJsonFieldTypeNumberUnsigned
 	attempts,
 	
@@ -113,5 +108,4 @@ public enum JnJsonCommonsFields{
 	
 	@CcpJsonFieldTypeNumberUnsigned(minValue = 200, maxValue = 599)
 	httpStatus,
-	
 }

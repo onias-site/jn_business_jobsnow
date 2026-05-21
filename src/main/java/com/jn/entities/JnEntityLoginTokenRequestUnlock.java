@@ -22,7 +22,6 @@ import com.ccp.especifications.db.utils.entity.decorators.interfaces.CcpEntityCo
 import com.ccp.especifications.db.utils.entity.fields.annotations.CcpEntityFieldPrimaryKey;
 import com.ccp.especifications.db.utils.entity.fields.annotations.CcpEntityFieldTransformer;
 import com.ccp.json.validations.fields.annotations.CcpJsonCopyFieldValidationsFrom;
-import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeNumberUnsigned;
 import com.jn.business.login.solve.token.JnBusinessResendLoginToken;
 import com.jn.business.login.solve.token.JnBusinessResetLoginToken;
 import com.jn.business.messages.JnMessages;
@@ -32,6 +31,7 @@ import com.jn.entities.decorators.JnDisposableEntity;
 import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault;
 import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDoNothing;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
+import com.jn.json.fields.validation.JnJsonInstantMessengerFields;
 import com.jn.utils.JnDeleteKeysFromCache;
 
 @CcpEntityAsyncWriter(JnAsyncWriterEntity.class)
@@ -63,7 +63,7 @@ public class JnEntityLoginTokenRequestUnlock implements CcpEntityConfigurator {
 		@CcpEntityFieldTransformer(JnJsonTransformersFieldsEntityDoNothing.class)
 		email,
 		
-		@CcpJsonFieldTypeNumberUnsigned
+		@CcpJsonCopyFieldValidationsFrom(JnJsonInstantMessengerFields.class)
 		chatId
 		;
 	}
