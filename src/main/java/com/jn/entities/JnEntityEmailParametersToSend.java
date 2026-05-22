@@ -44,7 +44,9 @@ public class JnEntityEmailParametersToSend implements CcpEntityConfigurator{
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		subjectType, 
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
-		moreParameters
+		moreParameters, 
+		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
+		contentType
 		;
 	}
 

@@ -10,9 +10,11 @@ import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityFactor
 import com.ccp.especifications.db.utils.entity.decorators.enums.CcpEntityExpurgableOptions;
 import com.ccp.especifications.db.utils.entity.decorators.interfaces.CcpEntityConfigurator;
 import com.ccp.especifications.db.utils.entity.fields.annotations.CcpEntityFieldPrimaryKey;
+import com.ccp.especifications.db.utils.entity.fields.annotations.CcpEntityFieldTransformer;
 import com.ccp.json.validations.fields.annotations.CcpJsonCopyFieldValidationsFrom;
 import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidatorRequired;
 import com.jn.entities.decorators.JnDisposableEntity;
+import com.jn.entities.fields.transformers.JnJsonTransformersFieldEntityMessageHash;
 import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault;
 import com.jn.json.fields.validation.JnJsonInstantMessengerFields;
 
@@ -43,7 +45,10 @@ public class JnEntityInstantMessengerMessageSent implements CcpEntityConfigurato
 		@CcpJsonCopyFieldValidationsFrom(JnJsonInstantMessengerFields.class)
 		contentType,
 		@CcpJsonCopyFieldValidationsFrom(JnJsonInstantMessengerFields.class)
-		fileName
+		fileName,
+		@CcpEntityFieldPrimaryKey
+		@CcpEntityFieldTransformer(JnJsonTransformersFieldEntityMessageHash.class)
+		message,
 
 		;
 	}

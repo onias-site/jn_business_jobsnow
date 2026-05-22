@@ -2,7 +2,6 @@ package com.jn.messages;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.function.Supplier;
 
 import com.ccp.business.CcpBusiness;
@@ -12,12 +11,15 @@ import com.ccp.dependency.injection.CcpDependencyInjection;
 import com.ccp.especifications.db.crud.CcpCrud;
 import com.ccp.especifications.db.crud.CcpSelectUnionAll;
 import com.ccp.especifications.db.utils.entity.CcpEntity;
-import com.ccp.especifications.http.CcpErrorHttp;
 import com.jn.business.http.JnBusinessSendHttpRequest;
 import com.jn.business.messages.JnBusinessSendEmailMessage;
-import com.jn.business.messages.JnBusinessTryToSendInstantMessage;
+import com.jn.business.messages.JnBusinessSendInstantMessage;
+import com.jn.entities.JnEntityEmailMessageSent;
 import com.jn.entities.JnEntityEmailParametersToSend;
+import com.jn.entities.JnEntityEmailReportedAsSpam;
 import com.jn.entities.JnEntityEmailTemplateMessage;
+import com.jn.entities.JnEntityInstantMessengerBotLocked;
+import com.jn.entities.JnEntityInstantMessengerMessageSent;
 import com.jn.entities.JnEntityInstantMessengerParametersToSend;
 import com.jn.entities.JnEntityInstantMessengerTemplateMessage;
 import com.jn.utils.JnDeleteKeysFromCache;
@@ -27,12 +29,16 @@ public class JnSendMessageToUser {
 		message, msg
 	}
 
-	private final List<CcpBusiness> process = new ArrayList<>();
+	private final List<CcpBusiness> messengers = new ArrayList<>();
+
+	private final List<CcpEntity> alreadySentEntities = new ArrayList<>();
 
 	private final List<CcpEntity> parameterEntities = new ArrayList<>() ;
 	
 	private final List<CcpEntity> messageEntities = new ArrayList<>();
-	
+
+	private final List<CcpEntity> blockEntities = new ArrayList<>();
+
 	public JnCreateStep createStep() {
 		return new JnCreateStep(this);
 	}
@@ -43,27 +49,42 @@ public class JnSendMessageToUser {
 		
 		JnSendMessageToUser addOneStep = this.addOneStep(
 				httpRequester, 
-				JnEntityEmailParametersToSend.ENTITY, JnEntityEmailTemplateMessage.ENTITY);
+				JnEntityEmailParametersToSend.ENTITY, 
+				JnEntityEmailTemplateMessage.ENTITY,
+				JnEntityEmailReportedAsSpam.ENTITY,
+				JnEntityEmailMessageSent.ENTITY
+				);
 		return new JnAddDefaultStep(addOneStep);
 	}
 
 	
 	public JnAddDefaultStep addDefaultStepToInstantMessageSending() {
-		JnSendMessageToUser addOneStep = this.addOneStep(JnBusinessTryToSendInstantMessage.INSTANCE, JnEntityInstantMessengerParametersToSend.ENTITY, JnEntityInstantMessengerTemplateMessage.ENTITY);
+		JnBusinessSendHttpRequest httpRequester = new JnBusinessSendHttpRequest(JnBusinessSendInstantMessage.INSTANCE);
+		JnSendMessageToUser addOneStep = this.addOneStep(
+				httpRequester, 
+				JnEntityInstantMessengerParametersToSend.ENTITY, 
+				JnEntityInstantMessengerTemplateMessage.ENTITY,
+				JnEntityInstantMessengerBotLocked.ENTITY,
+				JnEntityInstantMessengerMessageSent.ENTITY
+				);
 		return new JnAddDefaultStep(addOneStep);
 	}
 	
-	JnSendMessageToUser addOneStep(CcpBusiness process, CcpEntity parameterEntity, CcpEntity messageEntity) {
+	JnSendMessageToUser addOneStep(CcpBusiness messenger, CcpEntity parameterEntity, CcpEntity messageEntity, CcpEntity blockEntity, CcpEntity alreadySentEntity) {
 		
 		JnSendMessageToUser getMessage = new JnSendMessageToUser();
 		
+		getMessage.alreadySentEntities.addAll(this.alreadySentEntities);
 		getMessage.parameterEntities.addAll(this.parameterEntities);
 		getMessage.messageEntities.addAll(this.messageEntities);
-		getMessage.process.addAll(this.process);
+		getMessage.blockEntities.addAll(this.blockEntities);
+		getMessage.messengers.addAll(this.messengers);
 		
+		getMessage.alreadySentEntities.add(alreadySentEntity);
 		getMessage.parameterEntities.add(parameterEntity);
 		getMessage.messageEntities.add(messageEntity);
-		getMessage.process.add(process);
+		getMessage.blockEntities.add(blockEntity);
+		getMessage.messengers.add(messenger);
 		
 		return getMessage;
 	}
@@ -71,8 +92,10 @@ public class JnSendMessageToUser {
 	CcpJsonRepresentation executeAllSteps(String templateId, CcpEntity entityToSave, CcpJsonRepresentation entityValues, String languageToUseInErrorCases) {
 		
 		List<CcpEntity> allEntitiesToSearch = new ArrayList<>();
+		allEntitiesToSearch.addAll(this.alreadySentEntities);
 		allEntitiesToSearch.addAll(this.parameterEntities);
 		allEntitiesToSearch.addAll(this.messageEntities);
+		allEntitiesToSearch.addAll(this.blockEntities);
 		allEntitiesToSearch.add(entityToSave);
 		
 		CcpEntity[] entities = allEntitiesToSearch.toArray(new CcpEntity[allEntitiesToSearch.size()]);
@@ -89,37 +112,42 @@ public class JnSendMessageToUser {
 			return entityValues;
 		}
 		
-		int k = 0; 
-		
-		for (CcpEntity messageEntity : this.messageEntities) {
-			
-			CcpEntity parameterEntity = this.parameterEntities.get(k);
-			
-			Supplier<CcpJsonRepresentation> jsonSupplier = idToSearch.getJsonSupplier();
-			CcpJsonRepresentation parameterData = parameterEntity.getRecordFromUnionAll(unionAll, jsonSupplier);
-			CcpJsonRepresentation moreParameters = parameterData.getInnerJson(JnEntityEmailParametersToSend.Fields.moreParameters);
-			CcpJsonRepresentation allParameters = parameterData.removeFields(JnEntityEmailParametersToSend.Fields.moreParameters).mergeWithAnotherJson(moreParameters);
-			CcpJsonRepresentation messageData = messageEntity.getRecordFromUnionAll(unionAll, jsonSupplier);
-			
-			CcpJsonRepresentation allDataTogether = allParameters.mergeWithAnotherJson(entityValues).mergeWithAnotherJson(messageData);
-			
- 			Set<String> allFields = allDataTogether.fieldSet();
-			
-			CcpJsonRepresentation messageToSend = allDataTogether;
-			
-			for (String key : allFields) {
-				messageToSend = messageToSend.getDynamicVersion().putFilledTemplate(key, key);
-			}
-			CcpBusiness process = this.process.get(k);
-			try {
-				entityValues = entityValues.mergeWithAnotherJson(messageToSend);
-				process.apply(messageToSend);
-			} catch (CcpErrorHttp e) {
-			}
-			k++;
+		for(int index = 0; index < this.alreadySentEntities.size(); index++) {
+			CcpBusiness messenger = this.messengers.get(index);
+			CcpJsonRepresentation result = this.sendMessage(unionAll, idToSearch, index);
+			idToSearch = idToSearch.put(() -> messenger.getClass().getSimpleName(), result);
 		}
-		CcpJsonRepresentation renameField = entityValues.renameField(JsonFieldNames.msg, JsonFieldNames.message);
-		entityToSave.save(renameField);
+		entityToSave.save(idToSearch);
 		return entityValues;
+	}
+	
+	
+	private CcpJsonRepresentation sendMessage(CcpSelectUnionAll unionAll, CcpJsonRepresentation json, int index) {
+		CcpEntity alreadySentEntity = this.alreadySentEntities.get(index);
+		boolean alreadySent = alreadySentEntity.isPresentInThisUnionAll(unionAll, json);
+		if(alreadySent) {
+			return json;
+		}
+		CcpEntity blockEntity = this.blockEntities.get(index);
+		boolean blocked = blockEntity.isPresentInThisUnionAll(unionAll, json);
+		if(blocked) {
+			return json;
+		}
+		CcpEntity parameterEntity = this.parameterEntities.get(index);
+		CcpEntity messageEntity = this.messageEntities.get(index);
+		CcpBusiness messenger = this.messengers.get(index);
+		
+		Supplier<CcpJsonRepresentation> jsonSupplier = json.getJsonSupplier();
+		CcpJsonRepresentation parameterData = parameterEntity.getRecordFromUnionAll(unionAll, jsonSupplier);
+		CcpJsonRepresentation moreParameters = parameterData.getInnerJson(JnEntityEmailParametersToSend.Fields.moreParameters);
+		CcpJsonRepresentation removeFields = parameterData.removeFields(JnEntityEmailParametersToSend.Fields.moreParameters);
+		CcpJsonRepresentation messageData = messageEntity.getRecordFromUnionAll(unionAll, jsonSupplier);
+		CcpJsonRepresentation allParameters = removeFields.mergeWithAnotherJson(moreParameters);
+		CcpJsonRepresentation message = messageData.mergeWithAnotherJson(allParameters);
+		
+		CcpJsonRepresentation result = messenger.execute(message);
+		
+		return result;
+		
 	}
 }

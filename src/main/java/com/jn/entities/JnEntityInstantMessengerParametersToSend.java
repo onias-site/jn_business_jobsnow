@@ -68,7 +68,7 @@ public class JnEntityInstantMessengerParametersToSend implements CcpEntityConfig
 		.put(Fields.instantMessageType, JnBusinessSendInstantMessage.JnInstantMessageType.file)
 		.addToItem(Fields.moreParameters, MoreParametersFields.maxTriesToSendMessage, 10)
 		.addToItem(Fields.moreParameters, MoreParametersFields.sleepToSendMessage, 3000)
-		.put(Fields.fileName, "{" + CcpTemplateFunctions.currentTimeMillis + "}.txt")
+		.put(Fields.fileName, "{" + CcpTemplateFunctions.currentTimeMillis + "()}.txt")
 		.put(Fields.botName, JnBusinessSendInstantMessage.JnBotType.support)
 		.put(Fields.templateId, JnBusinessNotifyError.class.getName())
 		.put(Fields.contentType, CcpHttpContentType.TEXT_PLAIN)

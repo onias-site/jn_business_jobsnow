@@ -29,7 +29,9 @@ public class JnBusinessResendLoginToken implements CcpBusiness{
 	
 	public CcpJsonRepresentation apply(CcpJsonRepresentation json) { 
 		CcpJsonRepresentation put = json.put(JnEntityEmailMessageSent.Fields.subjectType, JnBusinessSendUserToken.class.getName());
-		CcpJsonRepresentation replaceDependenciesTemporally = CcpDependencyInjection.replaceDependenciesTemporally(put, JnBusinessSendUserToken.INSTANCE, CopyEmailInClipBoard.INSTANCE);
+		CcpJsonRepresentation replaceDependenciesTemporally = CcpDependencyInjection.replaceDependenciesTemporally(put, JnBusinessSendUserToken.INSTANCE
+//	FIXME			, CopyEmailInClipBoard.INSTANCE
+				);
 		return replaceDependenciesTemporally; 
 	}
 

@@ -61,12 +61,12 @@ public class JnSystemProperties {
 		return response;
 	}
 	
-	public String tokenEmailKey() {
+	public String tokenEmailValue() {
 		String response = this.systemProperties.getAsString(Fields.tokenEmailKey);
 		return response;
 	}
 	
-	public String urlEmailKey() {
+	public String urlEmailValue() {
 		String response = this.systemProperties.getAsString(Fields.urlEmailKey);
 		return response;
 	}

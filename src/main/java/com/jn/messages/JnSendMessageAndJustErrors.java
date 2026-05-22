@@ -8,7 +8,7 @@ import com.jn.entities.JnEntityJobsnowWarning;
 public class JnSendMessageAndJustErrors extends JnSendMessageToUser{
 
 	
-	public JnSendMessageToUser addOneStep(CcpBusiness step, CcpEntity parameterEntity, CcpEntity messageEntity) {
+	public JnSendMessageToUser addOneStep(CcpBusiness step, CcpEntity parameterEntity, CcpEntity messageEntity, CcpEntity blockEntity, CcpEntity alreadySentEntity) {
 		CcpBusiness process = values -> {
 			try {
 				CcpJsonRepresentation apply = step.apply(values);
@@ -20,7 +20,7 @@ public class JnSendMessageAndJustErrors extends JnSendMessageToUser{
 				return values;
 			}
 		};
-		JnSendMessageToUser addFlow = super.addOneStep(process, parameterEntity, messageEntity);
+		JnSendMessageToUser addFlow = super.addOneStep(process, parameterEntity, messageEntity, blockEntity, alreadySentEntity);
 		return addFlow;
 	}	
 }

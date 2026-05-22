@@ -108,4 +108,7 @@ public enum JnJsonCommonsFields{
 	
 	@CcpJsonFieldTypeNumberUnsigned(minValue = 200, maxValue = 599)
 	httpStatus,
+	//TODO FUNDIR COM O DO INSTANT MESSENGER
+	@CcpJsonFieldTypeString
+	contentType,
 }

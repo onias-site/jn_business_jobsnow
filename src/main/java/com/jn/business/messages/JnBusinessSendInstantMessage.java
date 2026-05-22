@@ -8,8 +8,6 @@ import com.ccp.decorators.CcpStringDecorator;
 import com.ccp.decorators.CcpTextDecorator;
 import com.ccp.decorators.CcpTimeDecorator;
 import com.ccp.dependency.injection.CcpDependencyInjection;
-import com.ccp.especifications.db.crud.CcpCrud;
-import com.ccp.especifications.db.crud.CcpSelectUnionAll;
 import com.ccp.especifications.db.utils.entity.fields.annotations.CcpEntityFieldPrimaryKey;
 import com.ccp.especifications.http.CcpHttpApiExecutor;
 import com.ccp.especifications.http.CcpHttpTooManyRequests;
@@ -21,7 +19,6 @@ import com.jn.entities.JnEntityInstantMessengerBotLocked;
 import com.jn.entities.JnEntityInstantMessengerMessageSent;
 import com.jn.exceptions.JnErrorUnableToSendInstantMessage;
 import com.jn.json.fields.validation.JnJsonInstantMessengerFields;
-import com.jn.utils.JnDeleteKeysFromCache;
 import com.jn.utils.JnSystemProperties;
 
 public class JnBusinessSendInstantMessage implements CcpHttpApiExecutor{
@@ -98,26 +95,8 @@ public class JnBusinessSendInstantMessage implements CcpHttpApiExecutor{
 		String botToken = this.systemProperties.getSystemInnerProperty(Fields.bots, botName);
 		
 		CcpJsonRepresentation jsonWithBotToken = json.put(JnMessageFileJsonValidator.botToken, botToken);
-		
-		CcpCrud crud = CcpDependencyInjection.getDependency(CcpCrud.class);
-		
-		CcpSelectUnionAll dataFromThisRecipient = crud.unionAll(jsonWithBotToken, 
-				JnDeleteKeysFromCache.INSTANCE, JnEntityInstantMessengerBotLocked.ENTITY, JnEntityInstantMessengerMessageSent.ENTITY);
-
 		String messageType = jsonWithBotToken.getAsString(JnJsonValidator.instantMessageType);
 		JnInstantMessageType instantMessenger = JnInstantMessageType.valueOf(messageType);
-
-		boolean thisRecipientRecentlyReceivedThisMessageFromThisBot =  JnEntityInstantMessengerMessageSent.ENTITY.isPresentInThisUnionAll(dataFromThisRecipient , jsonWithBotToken);
-
-		if(thisRecipientRecentlyReceivedThisMessageFromThisBot) {
-			return json;
-		}
-
-		boolean thisBotHasBeenBlocked = JnEntityInstantMessengerBotLocked.ENTITY.isPresentInThisUnionAll(dataFromThisRecipient, jsonWithBotToken);
-		
-		if(thisBotHasBeenBlocked) {
-			return jsonWithBotToken;
-		}
 		
 		try {
 			CcpJsonRepresentation instantMessengerData = instantMessenger.execute(jsonWithBotToken);
@@ -165,8 +144,9 @@ public class JnBusinessSendInstantMessage implements CcpHttpApiExecutor{
 				Long replyTo = json.getOrDefault(Fields.replyTo, () -> 0d).longValue();
 				CcpStringDecorator asStringDecorator = json.getAsStringDecorator(JnJsonValidator.botName);
 				CcpJsonFieldName jsonFieldName = asStringDecorator.jsonFieldName();
-				CcpJsonRepresentation sendTextMessage = instantMessenger.sendTextMessage(jsonFieldName, botToken, chatId, replyTo, message);
-				return sendTextMessage;
+				CcpJsonRepresentation result = instantMessenger.sendTextMessage(jsonFieldName, botToken, chatId, replyTo, message);
+				CcpJsonRepresentation jsonPiece = result.getJsonPiece(JnMessageTextJsonValidator.values());
+				return jsonPiece;
 			}
 
 
@@ -186,8 +166,9 @@ public class JnBusinessSendInstantMessage implements CcpHttpApiExecutor{
 				Byte[] bytes = new CcpStringDecorator(message).getBytes();
 				CcpStringDecorator asStringDecorator = json.getAsStringDecorator(JnJsonValidator.botName);
 				CcpJsonFieldName jsonFieldName = asStringDecorator.jsonFieldName();
-				CcpJsonRepresentation sendTextMessage = instantMessenger.sendFile(jsonFieldName, botToken, chatId, replyTo, fileName, caption, bytes);
-				return sendTextMessage;
+				CcpJsonRepresentation result = instantMessenger.sendFile(jsonFieldName, botToken, chatId, replyTo, fileName, caption, bytes);
+				CcpJsonRepresentation jsonPiece = result.getJsonPiece(JnMessageFileJsonValidator.values());
+				return jsonPiece;
 			}
 		}
 		;

@@ -16,7 +16,7 @@ import com.ccp.json.validations.fields.annotations.CcpJsonCopyFieldValidationsFr
 import com.jn.db.bulk.JnExecuteBulkOperation;
 import com.jn.entities.decorators.JnDisposableEntity;
 import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault;
-import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityTokenHash;
+import com.jn.entities.fields.transformers.JnJsonTransformersFieldEntityFieldCalculateHash.JnJsonTransformersFieldEntityTokenHash;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
 import com.jn.utils.JnDeleteKeysFromCache;
 
@@ -39,7 +39,7 @@ public class JnEntityLoginSessionValidation implements CcpEntityConfigurator {
 		
 		@CcpEntityFieldPrimaryKey
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
-		@CcpEntityFieldTransformer(JnJsonTransformersFieldsEntityTokenHash.class)
+		@CcpEntityFieldTransformer(JnJsonTransformersFieldEntityTokenHash.class)
 		token,
 		
 		@CcpEntityFieldPrimaryKey
