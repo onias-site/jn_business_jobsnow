@@ -84,7 +84,7 @@ public enum JnJsonTransformersFieldsEntityDefault implements CcpJsonTransformers
 	timestamp(true) {
 		public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
 			
-			boolean containsAllFields = json.getDynamicVersion().containsAllFields(CcpEntityField.TIMESTAMP.name());
+			boolean containsAllFields = json.containsAllFields(() -> CcpEntityField.TIMESTAMP.name());
 			
 			if(containsAllFields) {
 				return json;

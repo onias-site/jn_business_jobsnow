@@ -8,7 +8,6 @@ import java.util.stream.Collectors;
 import com.ccp.constantes.CcpOtherConstants;
 import com.ccp.decorators.CcpHashDecorator;
 import com.ccp.decorators.CcpJsonRepresentation;
-import com.ccp.decorators.CcpJsonRepresentation.CcpDynamicJsonRepresentation;
 import com.ccp.decorators.CcpStringDecorator;
 import com.ccp.dependency.injection.CcpDependencyInjection;
 import com.ccp.especifications.db.bulk.CcpBulkEntityOperationType;
@@ -63,13 +62,13 @@ public class JnDisposableEntity extends CcpDefaultEntityDelegator<CcpEntityDispo
 		
 		String timeStampFieldName = JnEntityDisposableRecord.Fields.timestamp.name();
 		
-		boolean recordNotFound = false == requiredEntityRow.getDynamicVersion().containsAllFields(timeStampFieldName);
-	
+		boolean recordNotFound = false == requiredEntityRow.containsAllFields(() -> timeStampFieldName);
+
 		if(recordNotFound) {
 			return false;
 		}
-		
-		Long timeStamp = requiredEntityRow.getDynamicVersion().getAsLongNumber(timeStampFieldName);
+
+		Long timeStamp = requiredEntityRow.getAsLongNumber(() -> timeStampFieldName);
 		
 		if(timeStamp > System.currentTimeMillis()) {
 			return true;
@@ -205,8 +204,7 @@ public class JnDisposableEntity extends CcpDefaultEntityDelegator<CcpEntityDispo
 		CcpDbRequester dependency = CcpDependencyInjection.getDependency(CcpDbRequester.class);
 		String fieldNameToEntity = dependency.getFieldNameToEntity();
 		
-		CcpDynamicJsonRepresentation dynamicVersion = parameterToSearch.getDynamicVersion();
-		String entityName = dynamicVersion.getAsString(fieldNameToEntity);
+		String entityName = parameterToSearch.getAsString(() -> fieldNameToEntity);
 		
 		CcpEntityMetaData entityDetails = this.getEntityMetaData();
 		boolean isAnotherEntity = false == entityName.equals(entityDetails.entityName);
@@ -217,7 +215,7 @@ public class JnDisposableEntity extends CcpDefaultEntityDelegator<CcpEntityDispo
 		
 		String fieldNameToId = dependency.getFieldNameToId();
 		String id = this.calculateId(json);
-		CcpJsonRepresentation put = dynamicVersion.put(fieldNameToId, id);
+		CcpJsonRepresentation put = parameterToSearch.put(() -> fieldNameToId, id); 
 		return put;
 	}
 	
