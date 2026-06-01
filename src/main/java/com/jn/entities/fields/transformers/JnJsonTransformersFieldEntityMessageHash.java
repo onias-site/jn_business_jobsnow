@@ -2,7 +2,7 @@ package com.jn.entities.fields.transformers;
 
 import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.especifications.db.utils.entity.fields.CcpJsonTransformersDefaultEntityField;
-import com.ccp.utils.CcpHashAlgorithm;
+import com.ccp.hash.CcpHashAlgorithm;
 import com.jn.entities.JnEntityInstantMessengerMessageSent;
 import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault.JsonFieldNames;
 

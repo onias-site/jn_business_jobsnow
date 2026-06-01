@@ -20,7 +20,7 @@ import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityD
 import com.ccp.especifications.db.utils.entity.decorators.engine.CcpDefaultEntityDelegator;
 import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityMetaData;
 import com.ccp.especifications.db.utils.entity.decorators.enums.CcpEntityExpurgableOptions;
-import com.ccp.utils.CcpHashAlgorithm;
+import com.ccp.hash.CcpHashAlgorithm;
 import com.jn.db.bulk.JnExecuteBulkOperation;
 import com.jn.entities.JnEntityDisposableRecord;
 import com.jn.entities.JnEntityDisposableRecord.Fields;
