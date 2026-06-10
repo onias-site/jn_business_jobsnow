@@ -37,7 +37,7 @@ public class JnBusinessSendEmailMessage implements CcpHttpApiExecutor{
 		String sender = json.getAsString(JnEntityEmailParametersToSend.Fields.sender);
 		String subject = json.getAsString(JnEntityEmailTemplateMessage.Fields.subject);
 		String message = json.getAsStringDecorator(JnEntityEmailTemplateMessage.Fields.message).text().resolveTemplate(json).content;
-		CcpHttpContentType contentType = json.getAsEnum(JnEntityEmailParametersToSend.Fields.contentType, CcpHttpContentType.class);
+		CcpHttpContentType contentType = json.getAsEnum(JnEntityEmailParametersToSend.Fields.contentType, CcpHttpContentType.class, CcpHttpContentType.TEXT_HTML);
 		String[] recipients = json.getAsStringArray(Fields.email, Fields.emails);
 		emailSender.sendSimpleTextEmailMessage(providerToken, providerUrl, templateId, sender, subject, message, contentType, recipients);
 		JnEntityEmailMessageSent.ENTITY.save(json);

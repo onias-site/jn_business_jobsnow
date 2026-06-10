@@ -356,4 +356,20 @@ public class JnDisposableEntity extends CcpDefaultEntityDelegator<CcpEntityDispo
 		return idToSearch;
 	}
 	
+	public CcpJsonRepresentation getRecordFromUnionAll(CcpSelectUnionAll unionAll, Supplier<CcpJsonRepresentation> jsonSupplier) {
+
+		CcpJsonRepresentation json = jsonSupplier.get();
+
+		CcpEntityMetaData entityDetails = this.getEntityMetaData();
+		
+		CcpJsonRepresentation handledJson = entityDetails.entity.getHandledJson(json);
+		
+		String id = this.calculateId(handledJson);
+		
+		CcpJsonRepresentation jsonValue = unionAll.getEntityRow(entityDetails.entityName, id);
+		
+		return jsonValue;
+	}
+
+	
 }

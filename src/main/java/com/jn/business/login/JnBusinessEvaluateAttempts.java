@@ -65,11 +65,19 @@ public class JnBusinessEvaluateAttempts implements CcpBusiness{
 		 
 		String secretFromDatabase = json.getValueFromPath("",CcpEntity.JsonFieldNames._entities, this.entityToGetTheSecret, this.databaseFieldName);
 		
-		String secretFomUser = json.getAsString(this.userFieldName);
+		if(secretFromDatabase.trim().isEmpty()) {
+			throw new RuntimeException();
+		}
+		
+		String secretFromUser = json.getAsString(this.userFieldName);
+
+		if(secretFromUser.trim().isEmpty()) {
+			throw new RuntimeException();
+		}
 		
 		CcpPasswordHandler dependency = CcpDependencyInjection.getDependency(CcpPasswordHandler.class);
 		
-		boolean correctSecret = dependency.matches(secretFomUser, secretFromDatabase);
+		boolean correctSecret = dependency.matches(secretFromUser, secretFromDatabase);
 		
 		CcpJsonRepresentation toReturn = json.removeFields(JsonFieldNames.entities);
 		

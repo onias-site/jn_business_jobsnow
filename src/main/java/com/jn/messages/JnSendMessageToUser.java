@@ -11,6 +11,7 @@ import com.ccp.dependency.injection.CcpDependencyInjection;
 import com.ccp.especifications.db.crud.CcpCrud;
 import com.ccp.especifications.db.crud.CcpSelectUnionAll;
 import com.ccp.especifications.db.utils.entity.CcpEntity;
+import com.ccp.especifications.db.utils.entity.fields.CcpErrorEntityPrimaryKeyIsMissing;
 import com.jn.business.http.JnBusinessSendHttpRequest;
 import com.jn.business.messages.JnBusinessSendEmailMessage;
 import com.jn.business.messages.JnBusinessSendInstantMessage;
@@ -124,14 +125,19 @@ public class JnSendMessageToUser {
 	
 	private CcpJsonRepresentation sendMessage(CcpSelectUnionAll unionAll, CcpJsonRepresentation json, int index) {
 		CcpEntity alreadySentEntity = this.alreadySentEntities.get(index);
-		boolean alreadySent = alreadySentEntity.isPresentInThisUnionAll(unionAll, json);
-		if(alreadySent) {
-			return json;
-		}
-		CcpEntity blockEntity = this.blockEntities.get(index);
-		boolean blocked = blockEntity.isPresentInThisUnionAll(unionAll, json);
-		if(blocked) {
-			return json;
+		try {
+			boolean alreadySent = alreadySentEntity.isPresentInThisUnionAll(unionAll, json);
+			if(alreadySent) {
+				return json;
+			}
+			CcpEntity blockEntity = this.blockEntities.get(index);
+			boolean blocked = blockEntity.isPresentInThisUnionAll(unionAll, json);
+			if(blocked) {
+				return json;
+			}
+			
+		} catch (CcpErrorEntityPrimaryKeyIsMissing e) {
+		
 		}
 		CcpEntity parameterEntity = this.parameterEntities.get(index);
 		CcpEntity messageEntity = this.messageEntities.get(index);
@@ -139,11 +145,16 @@ public class JnSendMessageToUser {
 		
 		Supplier<CcpJsonRepresentation> jsonSupplier = json.getJsonSupplier();
 		CcpJsonRepresentation parameterData = parameterEntity.getRecordFromUnionAll(unionAll, jsonSupplier);
+		boolean doesNotSendThisMessageType = parameterData.isEmpty();
+		if(doesNotSendThisMessageType) {
+			return json;
+		}
 		CcpJsonRepresentation moreParameters = parameterData.getInnerJson(JnEntityEmailParametersToSend.Fields.moreParameters);
 		CcpJsonRepresentation removeFields = parameterData.removeFields(JnEntityEmailParametersToSend.Fields.moreParameters);
 		CcpJsonRepresentation messageData = messageEntity.getRecordFromUnionAll(unionAll, jsonSupplier);
 		CcpJsonRepresentation allParameters = removeFields.mergeWithAnotherJson(moreParameters);
-		CcpJsonRepresentation message = messageData.mergeWithAnotherJson(allParameters);
+		CcpJsonRepresentation mergeWithAnotherJson = messageData.mergeWithAnotherJson(allParameters);
+		CcpJsonRepresentation message = mergeWithAnotherJson.mergeWithAnotherJson(json);
 		
 		CcpJsonRepresentation result = messenger.execute(message);
 		

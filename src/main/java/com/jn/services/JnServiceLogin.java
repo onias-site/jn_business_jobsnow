@@ -1,5 +1,7 @@
 package com.jn.services;
 
+import java.util.Set;
+
 import com.ccp.business.CcpBusiness;
 import com.ccp.constantes.CcpOtherConstants;
 import com.ccp.decorators.CcpJsonRepresentation;
@@ -183,13 +185,15 @@ public enum JnServiceLogin implements JnService {
 			JnFunctionMensageriaSender sendUserToken = new JnFunctionMensageriaSender(JnBusinessSendUserToken.INSTANCE);
 			
 			
+			String name = this.name();
+			Set<String> fieldSet = json.fieldSet();
 			CcpJsonRepresentation result = new CcpGetEntityId(put)
 			.toBeginProcedureAnd()
 				.ifThisIdIsPresentInEntity(JnEntityLoginToken.ENTITY.getTwinEntity()).returnStatus(JnProcessStatusCreateLoginToken.statusLockedToken).and()
 				.ifThisIdIsNotPresentInEntity(JnEntityLoginEmail.ENTITY).returnStatus(JnProcessStatusUpdatePassword.missingEmail).and()
 				.ifThisIdIsNotPresentInEntity(JnEntityLoginToken.ENTITY).executeAction(sendUserToken)
-				.andFinallyReturningTheseFields(json.fieldSet())
-			.endThisProcedureRetrievingTheResultingData(this.name(), CcpOtherConstants.DO_NOTHING, CcpOtherConstants.DO_NOTHING, JnDeleteKeysFromCache.INSTANCE);
+				.andFinallyReturningTheseFields(fieldSet)
+			.endThisProcedureRetrievingTheResultingData(name, CcpOtherConstants.DO_NOTHING, CcpOtherConstants.DO_NOTHING, JnDeleteKeysFromCache.INSTANCE);
 
 			return result;
 		}
@@ -221,6 +225,7 @@ public enum JnServiceLogin implements JnService {
 			CcpJsonRepresentation idToSearchDataAboutToken = JnEntityLoginToken.ENTITY.getIdToSearchDisposableRecord(json);
 			
 			CcpJsonRepresentation mergeWithAnotherJson = putAll.mergeWithAnotherJson(idToSearchDataAboutToken);
+			String name = this.name();
 			CcpJsonRepresentation result =  new CcpGetEntityId(mergeWithAnotherJson)
 			.toBeginProcedureAnd()
 			.loadThisIdFromEntity(JnEntityLoginStats.ENTITY).and()
@@ -238,7 +243,7 @@ public enum JnServiceLogin implements JnService {
 						JsonFieldNames.dateItWasSaved.name(),
 						JsonFieldNames.sessionToken.name()
 						)	
-			.endThisProcedureRetrievingTheResultingData(this.name(), CcpOtherConstants.DO_NOTHING, LoadDataAboutToken.INSTANCE, JnDeleteKeysFromCache.INSTANCE);
+			.endThisProcedureRetrievingTheResultingData(name, CcpOtherConstants.DO_NOTHING, LoadDataAboutToken.INSTANCE, JnDeleteKeysFromCache.INSTANCE);
 			
 			return result;
 		}
