@@ -3,6 +3,7 @@ package com.jn.utils;
 import java.util.Arrays;
 import java.util.List;
 
+import com.ccp.decorators.CcpFieldName;
 import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.decorators.CcpJsonRepresentation.CcpJsonFieldName;
 import com.ccp.decorators.CcpPropertiesDecorator;
@@ -103,14 +104,14 @@ public class JnSystemProperties {
 	
 	public CcpJsonRepresentation getSystemInnerJson(String... fields) {
 		CcpJsonFieldName[] fieldNames = Arrays.stream(fields)
-				.map(f -> (CcpJsonFieldName)(() -> f))
+				.map(f -> new CcpFieldName(f))
 				.toArray(CcpJsonFieldName[]::new);
 		CcpJsonRepresentation response = this.systemProperties.getInnerJsonFromPath(fieldNames);
 		return response;
 	}
 
 	public <T> T getSystemProperty(String field) {
-		T response = this.systemProperties.getAsObject(() -> field);
+		T response = this.systemProperties.getAsObject(new CcpFieldName(field));
 		return response;
 	}
 }

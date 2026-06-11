@@ -1,5 +1,6 @@
 package com.jn.entities;
 
+import com.ccp.decorators.CcpFieldName;
 import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.decorators.CcpJsonRepresentation.CcpJsonFieldName;
 import com.ccp.especifications.db.utils.entity.CcpEntity;
@@ -30,7 +31,7 @@ public class JnEntityHttpApiRetrySendRequest implements CcpEntityConfigurator {
 		
 		for(int k = 1; k <= limit; k++) {
 			
-			CcpJsonRepresentation put = json.put(() -> fieldName, k);
+			CcpJsonRepresentation put = json.put(new CcpFieldName(fieldName), k);
 			
 			boolean exists = ENTITY.exists(put);
 			

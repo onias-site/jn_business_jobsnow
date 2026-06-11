@@ -3,7 +3,6 @@ package com.jn.business.login;
 import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.decorators.CcpJsonRepresentation.CcpJsonFieldName;
 import com.jn.business.messages.JnBusinessSendMessage;
-import com.jn.entities.JnEntityInstantMessengerMessageSent;
 import com.jn.entities.JnEntityInstantMessengerParametersToSend;
 import com.jn.entities.JnEntityLoginToken;
 import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault;
@@ -26,7 +25,7 @@ public class JnBusinessSendUserToken extends JnBusinessSendMessage{
 				.getTransformedJson(JnJsonTransformersFieldsEntityDefault.token)
 				.duplicateValueFromField(JsonFieldNames.originalEmail, JnEntityLoginToken.Fields.email, 
 						JnEntityInstantMessengerParametersToSend.Fields.chatId)
-				.duplicateValueFromField(JsonFieldNames.originalToken, JnEntityInstantMessengerMessageSent.Fields.botName)
+				.duplicateValueFromField(JsonFieldNames.originalToken, JnJsonTransformersFieldsEntityDefault.token)
 				;
 		CcpJsonRepresentation apply = super.apply(transformedJson);
 		

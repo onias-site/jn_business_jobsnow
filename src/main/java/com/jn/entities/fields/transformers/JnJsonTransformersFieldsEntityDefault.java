@@ -2,6 +2,7 @@ package com.jn.entities.fields.transformers;
 
 
 import com.ccp.decorators.CcpEmailDecorator;
+import com.ccp.decorators.CcpFieldName;
 import com.ccp.decorators.CcpHashDecorator;
 import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.decorators.CcpJsonRepresentation.CcpJsonFieldName;
@@ -18,7 +19,7 @@ import com.jn.entities.JnEntityLoginPassword;
 import com.jn.entities.JnEntityLoginToken;
 import com.jn.exceptions.JnErrorIsNotAnEmail;
 
-public enum JnJsonTransformersFieldsEntityDefault implements CcpJsonTransformersDefaultEntityField {
+public enum JnJsonTransformersFieldsEntityDefault implements CcpJsonTransformersDefaultEntityField, CcpJsonFieldName {
 	email(true) {
 
 		public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
@@ -84,7 +85,7 @@ public enum JnJsonTransformersFieldsEntityDefault implements CcpJsonTransformers
 	timestamp(true) {
 		public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
 			
-			boolean containsAllFields = json.containsAllFields(() -> CcpEntityField.TIMESTAMP.name());
+			boolean containsAllFields = json.containsAllFields(new CcpFieldName(CcpEntityField.TIMESTAMP.name()));
 			
 			if(containsAllFields) {
 				return json;

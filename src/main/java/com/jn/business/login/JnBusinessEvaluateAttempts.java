@@ -101,8 +101,8 @@ public class JnBusinessEvaluateAttempts implements CcpBusiness{
 				.put(this.fieldEmailName, email)
 				;
 		this.entityToGetTheAttempts.save(put);
-		String[] returnedFields = new String[] {
-				this.fieldAttempsName.name()
+		CcpJsonFieldName[] returnedFields = new CcpJsonFieldName[] {
+				this.fieldAttempsName
 		};
 		throw new CcpErrorFlowDisturb(toReturn.put(this.fieldAttempsName, updatedAttempts), this.statusToReturnWhenWrongType, returnedFields);
 	}

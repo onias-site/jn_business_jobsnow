@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.function.Supplier;
 
 import com.ccp.business.CcpBusiness;
+import com.ccp.decorators.CcpFieldName;
 import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.decorators.CcpJsonRepresentation.CcpJsonFieldName;
 import com.ccp.dependency.injection.CcpDependencyInjection;
@@ -116,7 +117,7 @@ public class JnSendMessageToUser {
 		for(int index = 0; index < this.alreadySentEntities.size(); index++) {
 			CcpBusiness messenger = this.messengers.get(index);
 			CcpJsonRepresentation result = this.sendMessage(unionAll, idToSearch, index);
-			idToSearch = idToSearch.put(() -> messenger.getClass().getSimpleName(), result);
+			idToSearch = idToSearch.put(new CcpFieldName(messenger.getClass().getSimpleName()), result);
 		}
 		entityToSave.save(idToSearch);
 		return entityValues;
@@ -124,7 +125,9 @@ public class JnSendMessageToUser {
 	
 	
 	private CcpJsonRepresentation sendMessage(CcpSelectUnionAll unionAll, CcpJsonRepresentation json, int index) {
+		Supplier<CcpJsonRepresentation> jsonSupplier = json.getJsonSupplier();
 		CcpEntity alreadySentEntity = this.alreadySentEntities.get(index);
+		CcpJsonRepresentation parameterData;
 		try {
 			boolean alreadySent = alreadySentEntity.isPresentInThisUnionAll(unionAll, json);
 			if(alreadySent) {
@@ -136,19 +139,18 @@ public class JnSendMessageToUser {
 				return json;
 			}
 			
+			CcpEntity parameterEntity = this.parameterEntities.get(index);
+			
+			parameterData = parameterEntity.getRecordFromUnionAll(unionAll, jsonSupplier);
+			boolean doesNotSendThisMessageType = parameterData.isEmpty();
+			if(doesNotSendThisMessageType) {
+				return json;
+			}
 		} catch (CcpErrorEntityPrimaryKeyIsMissing e) {
-		
-		}
-		CcpEntity parameterEntity = this.parameterEntities.get(index);
-		CcpEntity messageEntity = this.messageEntities.get(index);
-		CcpBusiness messenger = this.messengers.get(index);
-		
-		Supplier<CcpJsonRepresentation> jsonSupplier = json.getJsonSupplier();
-		CcpJsonRepresentation parameterData = parameterEntity.getRecordFromUnionAll(unionAll, jsonSupplier);
-		boolean doesNotSendThisMessageType = parameterData.isEmpty();
-		if(doesNotSendThisMessageType) {
 			return json;
 		}
+		CcpEntity messageEntity = this.messageEntities.get(index);
+		CcpBusiness messenger = this.messengers.get(index);
 		CcpJsonRepresentation moreParameters = parameterData.getInnerJson(JnEntityEmailParametersToSend.Fields.moreParameters);
 		CcpJsonRepresentation removeFields = parameterData.removeFields(JnEntityEmailParametersToSend.Fields.moreParameters);
 		CcpJsonRepresentation messageData = messageEntity.getRecordFromUnionAll(unionAll, jsonSupplier);

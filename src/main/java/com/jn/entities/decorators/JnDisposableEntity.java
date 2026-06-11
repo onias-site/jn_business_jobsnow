@@ -6,6 +6,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import com.ccp.constantes.CcpOtherConstants;
+import com.ccp.decorators.CcpFieldName;
 import com.ccp.decorators.CcpHashDecorator;
 import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.decorators.CcpStringDecorator;
@@ -62,13 +63,13 @@ public class JnDisposableEntity extends CcpDefaultEntityDelegator<CcpEntityDispo
 		
 		String timeStampFieldName = JnEntityDisposableRecord.Fields.timestamp.name();
 		
-		boolean recordNotFound = false == requiredEntityRow.containsAllFields(() -> timeStampFieldName);
+		boolean recordNotFound = false == requiredEntityRow.containsAllFields(new CcpFieldName(timeStampFieldName));
 
 		if(recordNotFound) {
 			return false;
 		}
 
-		Long timeStamp = requiredEntityRow.getAsLongNumber(() -> timeStampFieldName);
+		Long timeStamp = requiredEntityRow.getAsLongNumber(new CcpFieldName(timeStampFieldName));
 		
 		if(timeStamp > System.currentTimeMillis()) {
 			return true;
@@ -204,7 +205,7 @@ public class JnDisposableEntity extends CcpDefaultEntityDelegator<CcpEntityDispo
 		CcpDbRequester dependency = CcpDependencyInjection.getDependency(CcpDbRequester.class);
 		String fieldNameToEntity = dependency.getFieldNameToEntity();
 		
-		String entityName = parameterToSearch.getAsString(() -> fieldNameToEntity);
+		String entityName = parameterToSearch.getAsString(new CcpFieldName(fieldNameToEntity));
 		
 		CcpEntityMetaData entityDetails = this.getEntityMetaData();
 		boolean isAnotherEntity = false == entityName.equals(entityDetails.entityName);
@@ -215,7 +216,7 @@ public class JnDisposableEntity extends CcpDefaultEntityDelegator<CcpEntityDispo
 		
 		String fieldNameToId = dependency.getFieldNameToId();
 		String id = this.calculateId(json);
-		CcpJsonRepresentation put = parameterToSearch.put(() -> fieldNameToId, id); 
+		CcpJsonRepresentation put = parameterToSearch.put(new CcpFieldName(fieldNameToId), id);
 		return put;
 	}
 	

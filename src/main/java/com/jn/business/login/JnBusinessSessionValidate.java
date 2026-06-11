@@ -1,6 +1,7 @@
 package com.jn.business.login;
 
 import com.ccp.business.CcpBusiness;
+import com.ccp.decorators.CcpFieldName;
 import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.decorators.CcpJsonRepresentation.CcpJsonFieldName;
 import com.ccp.especifications.db.crud.CcpGetEntityId;
@@ -51,8 +52,8 @@ public class JnBusinessSessionValidate implements CcpBusiness{
 		.toBeginProcedureAnd()
 		.loadThisIdFromEntity(JnEntityLoginSessionTokenAttempts.ENTITY).and()
 			.ifThisIdIsNotPresentInEntity(JnEntityLoginSessionValidation.ENTITY).returnStatus(JnProcessStatusExecuteLogin.invalidSession)
-			.andFinallyReturningTheseFields("x")
-		.endThisProcedure(this.getClass().getName(), incrementAttempts, resetAttempts, JnDeleteKeysFromCache.INSTANCE);
+			.andFinallyReturningTheseFields(new CcpFieldName("x"))
+		.endThisProcedure(this, incrementAttempts, resetAttempts, JnDeleteKeysFromCache.INSTANCE);
 		
 		
 		return json; 
