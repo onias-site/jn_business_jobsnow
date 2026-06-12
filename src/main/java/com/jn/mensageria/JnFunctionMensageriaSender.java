@@ -63,7 +63,7 @@ public class JnFunctionMensageriaSender implements CcpBusiness {
 		CcpJsonRepresentation put2 = messageDetails.put(CcpMensageriaReceiver.Fields.mensageriaReceiver, JnMensageriaReceiver.class.getName());
 		this.mensageriaSender.sendToMensageria(this.topic, this.jsonValidationClass, put2);
 
-		return messageDetails;
+		return messageDetails; 
 	}
 	
 	public String toString() {

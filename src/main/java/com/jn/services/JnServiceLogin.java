@@ -1,6 +1,6 @@
 package com.jn.services;
 
-import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.ccp.business.CcpBusiness;
 import com.ccp.constantes.CcpOtherConstants;
@@ -51,19 +51,18 @@ public enum JnServiceLogin implements JnService {
 		public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
 			CcpBusiness lockPassword = JnEntityLoginPassword.ENTITY.getEntityMetaData().getOperationCallback(CcpEntityOperationType.delete);
 			JnFunctionMensageriaSender executeLogin = new JnFunctionMensageriaSender(JnBusinessExecuteLogin.INSTANCE);
-			CcpBusiness evaluateTries =
-					new JnBusinessEvaluateAttempts(
-							JnEntityLoginPasswordAttempts.ENTITY, 
-							JnEntityLoginPassword.ENTITY,  
-							JnEntityLoginPassword.Fields.password, 
-							JnEntityLoginPassword.Fields.password, 
-							JnProcessStatusExecuteLogin.passwordLockedRecently,
-							JnProcessStatusExecuteLogin.wrongPassword, 
-							lockPassword, 
-							executeLogin, 
-							JnEntityLoginPasswordAttempts.Fields.attempts,
-							JnEntityLoginPassword.Fields.email
-							);
+			CcpBusiness evaluateTries = JnBusinessEvaluateAttempts.builder()
+					.entityToGetTheAttempts(JnEntityLoginPasswordAttempts.ENTITY)
+					.entityToGetTheSecret(JnEntityLoginPassword.ENTITY)
+					.databaseFieldName(JnEntityLoginPassword.Fields.password)
+					.userFieldName(JnEntityLoginPassword.Fields.password)
+					.statusWhenExceedAttempts(JnProcessStatusExecuteLogin.passwordLockedRecently)
+					.statusWhenWrongType(JnProcessStatusExecuteLogin.wrongPassword)
+					.lockUsing(lockPassword)
+					.onSuccess(executeLogin)
+					.attemptsFieldName(JnEntityLoginPasswordAttempts.Fields.attempts)
+					.emailFieldName(JnEntityLoginPassword.Fields.email)
+					.build(); 
 
 			
 			CcpJsonRepresentation idToSearchDataAboutToken = JnEntityLoginToken.ENTITY.getIdToSearchDisposableRecord(json);
@@ -185,7 +184,7 @@ public enum JnServiceLogin implements JnService {
 			JnFunctionMensageriaSender sendUserToken = new JnFunctionMensageriaSender(JnBusinessSendUserToken.INSTANCE);
 			
 			
-			Set<String> fieldSet = json.fieldSet();
+			var fieldSet = json.fieldSet().stream().map(x -> (CcpJsonFieldName)() -> x).collect(Collectors.toSet());
 			CcpJsonRepresentation result = new CcpGetEntityId(put)
 			.toBeginProcedureAnd()
 				.ifThisIdIsPresentInEntity(JnEntityLoginToken.ENTITY.getTwinEntity()).returnStatus(JnProcessStatusCreateLoginToken.statusLockedToken).and()
@@ -202,19 +201,18 @@ public enum JnServiceLogin implements JnService {
 		public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
 			CcpBusiness lockToken = JnEntityLoginToken.ENTITY.getEntityMetaData().getOperationCallback(CcpEntityOperationType.delete);
 			JnFunctionMensageriaSender updatePassword = new JnFunctionMensageriaSender(JnBusinessSavePassword.INSTANCE);
-			CcpBusiness evaluateAttempts =
-					new JnBusinessEvaluateAttempts(
-							JnEntityLoginTokenAttempts.ENTITY, 
-							JnEntityLoginToken.ENTITY, 
-							JnEntityLoginToken.Fields.token,
-							JnEntityLoginToken.Fields.token, 
-							JnProcessStatusUpdatePassword.tokenLockedRecently,
-							JnProcessStatusUpdatePassword.wrongToken, 
-							lockToken,
-							updatePassword,  
-							JnEntityLoginTokenAttempts.Fields.attempts,
-							JnEntityLoginToken.Fields.email
-							);
+			CcpBusiness evaluateAttempts = JnBusinessEvaluateAttempts.builder()
+					.entityToGetTheAttempts(JnEntityLoginTokenAttempts.ENTITY)
+					.entityToGetTheSecret(JnEntityLoginToken.ENTITY)
+					.databaseFieldName(JnEntityLoginToken.Fields.token)
+					.userFieldName(JnEntityLoginToken.Fields.token)
+					.statusWhenExceedAttempts(JnProcessStatusUpdatePassword.tokenLockedRecently)
+					.statusWhenWrongType(JnProcessStatusUpdatePassword.wrongToken)
+					.lockUsing(lockToken)
+					.onSuccess(updatePassword)
+					.attemptsFieldName(JnEntityLoginTokenAttempts.Fields.attempts)
+					.emailFieldName(JnEntityLoginToken.Fields.email)
+					.build();
 			CcpJsonRepresentation renameField = CcpOtherConstants.EMPTY_JSON
 					.getTransformedJson(JnJsonTransformersFieldsEntityDefault.tokenHash)
 					.renameField(JsonFieldNames.originalToken, JsonFieldNames.sessionToken)

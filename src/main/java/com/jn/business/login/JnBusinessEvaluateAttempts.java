@@ -35,30 +35,78 @@ public class JnBusinessEvaluateAttempts implements CcpBusiness{
 	
 	private final CcpJsonFieldName fieldEmailName;
 
-	public JnBusinessEvaluateAttempts(
-			CcpEntity entityToGetTheAttempts, 
-			CcpEntity entityToGetTheSecret, 
-			CcpJsonFieldName databaseFieldName, 
-			CcpJsonFieldName userFieldName, 
-			CcpProcessStatus statusToReturnWhenExceedAttempts, 
-			CcpProcessStatus statusToReturnWhenWrongType,
-			CcpBusiness topicToCreateTheLockWhenExceedTries,
-			CcpBusiness topicToRegisterSuccess,
-			CcpJsonFieldName fieldAttempsName,
-			CcpJsonFieldName fieldEmailName
-			) { 
+	private JnBusinessEvaluateAttempts(Builder b) {
+		this.entityToGetTheAttempts             = b.entityToGetTheAttempts;
+		this.entityToGetTheSecret               = b.entityToGetTheSecret;
+		this.databaseFieldName                  = b.databaseFieldName;
+		this.userFieldName                      = b.userFieldName;
+		this.statusToReturnWhenExceedAttempts   = b.statusToReturnWhenExceedAttempts;
+		this.statusToReturnWhenWrongType        = b.statusToReturnWhenWrongType;
+		this.topicToCreateTheLockWhenExceedTries = b.topicToCreateTheLockWhenExceedTries;
+		this.topicToRegisterSuccess             = b.topicToRegisterSuccess;
+		this.fieldAttempsName                   = b.fieldAttempsName;
+		this.fieldEmailName                     = b.fieldEmailName;
+	}
 
-		this.statusToReturnWhenExceedAttempts = statusToReturnWhenExceedAttempts;
-		this.statusToReturnWhenWrongType = statusToReturnWhenWrongType;
-		this.topicToRegisterSuccess = topicToRegisterSuccess;
-		this.entityToGetTheAttempts = entityToGetTheAttempts;
-		this.entityToGetTheSecret = entityToGetTheSecret;
-		this.databaseFieldName = databaseFieldName;
-		this.userFieldName = userFieldName;
-		this.topicToCreateTheLockWhenExceedTries = topicToCreateTheLockWhenExceedTries;
-		this.fieldAttempsName = fieldAttempsName;
-		this.fieldEmailName = fieldEmailName;
-				 
+	public static Builder builder() {
+		return new Builder();
+	}
+
+	public static class Builder {
+		private CcpEntity entityToGetTheAttempts;
+		private CcpEntity entityToGetTheSecret;
+		private CcpJsonFieldName databaseFieldName;
+		private CcpJsonFieldName userFieldName;
+		private CcpProcessStatus statusToReturnWhenExceedAttempts;
+		private CcpProcessStatus statusToReturnWhenWrongType;
+		private CcpBusiness topicToCreateTheLockWhenExceedTries;
+		private CcpBusiness topicToRegisterSuccess;
+		private CcpJsonFieldName fieldAttempsName;
+		private CcpJsonFieldName fieldEmailName; 
+
+		public Builder entityToGetTheAttempts(CcpEntity entity) {
+			this.entityToGetTheAttempts = entity;
+			return this;
+		}
+		public Builder entityToGetTheSecret(CcpEntity entity) {
+			this.entityToGetTheSecret = entity;
+			return this;
+		}
+		public Builder databaseFieldName(CcpJsonFieldName field) {
+			this.databaseFieldName = field;
+			return this;
+		}
+		public Builder userFieldName(CcpJsonFieldName field) {
+			this.userFieldName = field;
+			return this;
+		}
+		public Builder statusWhenExceedAttempts(CcpProcessStatus status) {
+			this.statusToReturnWhenExceedAttempts = status;
+			return this;
+		}
+		public Builder statusWhenWrongType(CcpProcessStatus status) {
+			this.statusToReturnWhenWrongType = status;
+			return this;
+		}
+		public Builder lockUsing(CcpBusiness business) {
+			this.topicToCreateTheLockWhenExceedTries = business;
+			return this;
+		}
+		public Builder onSuccess(CcpBusiness business) {
+			this.topicToRegisterSuccess = business;
+			return this;
+		}
+		public Builder attemptsFieldName(CcpJsonFieldName field) {
+			this.fieldAttempsName = field;
+			return this;
+		}
+		public Builder emailFieldName(CcpJsonFieldName field) {
+			this.fieldEmailName = field;
+			return this;
+		}
+		public JnBusinessEvaluateAttempts build() {
+			return new JnBusinessEvaluateAttempts(this);
+		}
 	}
 
 	public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
@@ -106,7 +154,11 @@ public class JnBusinessEvaluateAttempts implements CcpBusiness{
 		};
 		throw new CcpErrorFlowDisturb(toReturn.put(this.fieldAttempsName, updatedAttempts), this.statusToReturnWhenWrongType, returnedFields);
 	}
+	 
 	
+	public String toString() {
+		return "teste";
+	}
 	
 	
 }

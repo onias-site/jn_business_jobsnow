@@ -27,13 +27,13 @@ public class JnBulkHandlerRegisterLogin implements CcpHandleWithSearchResultsInT
 	private List<CcpBulkItem> getBulkItems(CcpJsonRepresentation json) {
 		CcpJsonRepresentation session = JnEntityLoginSessionConflict.ENTITY.getHandledJson(json);
 		var newSession = JnEntityLoginSessionConflict.ENTITY.toBulkItems(session, CcpBulkEntityOperationType.create);
-		CcpJsonRepresentation login = JnEntityLoginSessionValidation.ENTITY.getHandledJson(json);
+		CcpJsonRepresentation login = JnEntityLoginSessionValidation.ENTITY.getHandledJson(new CcpJsonRepresentation(json.content));
 		var newLogin = JnEntityLoginSessionValidation.ENTITY.toBulkItems(login, CcpBulkEntityOperationType.create);
 		var asList = new ArrayList<CcpBulkItem>();
 		asList.addAll(newSession);
 		asList.addAll(newLogin);
 		return asList;
-	}
+	} 
 
 	public List<CcpBulkItem> whenRecordWasNotFoundInTheEntitySearch(CcpJsonRepresentation json) {
 		List<CcpBulkItem> bulkItems = this.getBulkItems(json);

@@ -26,7 +26,7 @@ public class JnBusinessSavePassword implements CcpBusiness {
 	private JnBusinessSavePassword() {}
 
 	@SuppressWarnings("unchecked")
-	public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
+	public CcpJsonRepresentation apply(CcpJsonRepresentation json) { 
 
 		CcpEntityBulkHandlerTransferRecordToTwinEntity executeLogout = new CcpEntityBulkHandlerTransferRecordToTwinEntity(JnEntityLoginSessionValidation.ENTITY);
 		

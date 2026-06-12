@@ -111,7 +111,7 @@ public class JnSendMessageToUser {
 		boolean alreadySaved = entityToSave.isPresentInThisUnionAll(unionAll, idToSearch);
 		
 		if(alreadySaved) {
-			return entityValues;
+			return entityValues; 
 		}
 		
 		for(int index = 0; index < this.alreadySentEntities.size(); index++) {
