@@ -6,6 +6,12 @@ import com.ccp.especifications.db.utils.entity.CcpEntity;
 import com.jn.entities.JnEntityEmailTemplateMessage;
 import com.jn.messages.JnSendMessageToUser;
 
+/**
+ * Classe base para envio de mensagens que combina envio por email e por mensagem
+ * instantânea usando o builder fluent JnSendMessageToUser. O templateId é o nome
+ * da classe concreta que a estende; a entidade de bloqueio de reenvio é fornecida
+ * pelo construtor.
+ */
 public class JnBusinessSendMessage implements CcpBusiness{
 	
 	public final CcpEntity entity;
@@ -14,6 +20,11 @@ public class JnBusinessSendMessage implements CcpBusiness{
 		this.entity = entity;
 	}
 
+	/**
+	 * Cria um JnSendMessageToUser, configura os passos padrão de email e mensagem
+	 * instantânea, e aciona o envio com o templateId, entidade de bloqueio, valores
+	 * do JSON e idioma.
+	 */
 	public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
 
 		String supportLanguage = json.getAsString(JnEntityEmailTemplateMessage.Fields.language);

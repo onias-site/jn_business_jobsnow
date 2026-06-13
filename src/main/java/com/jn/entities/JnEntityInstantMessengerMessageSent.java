@@ -22,6 +22,11 @@ import com.jn.json.fields.validation.JnJsonInstantMessengerFields;
 @CcpEntityDisposable(expurgTime = CcpEntityExpurgableOptions.hourly, expurgableEntityFactory = JnDisposableEntity.class)
 @CcpEntityFieldsTransformer(classReferenceWithTheFields = JnJsonTransformersFieldsEntityDefault.class)
 @CcpEntityFieldsValidator(classReferenceWithTheFields = JnEntityInstantMessengerMessageSent.Fields.class)
+/**
+ * Registra mensagens instantâneas enviadas com sucesso. O campo {@code message} é armazenado como
+ * hash SHA-1 para funcionar como chave primária e evitar reenvio da mesma mensagem para o mesmo
+ * destinatário na mesma hora. Descartável por hora, cache de 1 hora.
+ */
 public class JnEntityInstantMessengerMessageSent implements CcpEntityConfigurator {
 	
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityInstantMessengerMessageSent.class).entityInstance;
@@ -31,7 +36,7 @@ public class JnEntityInstantMessengerMessageSent implements CcpEntityConfigurato
 		@CcpEntityFieldPrimaryKey
 		@CcpJsonCopyFieldValidationsFrom(JnJsonInstantMessengerFields.class)
 		botName, 
-		@CcpEntityFieldPrimaryKey
+		@CcpJsonFieldValidatorRequired
 		@CcpJsonCopyFieldValidationsFrom(JnJsonInstantMessengerFields.class)
 		chatId, 
 		@CcpEntityFieldPrimaryKey

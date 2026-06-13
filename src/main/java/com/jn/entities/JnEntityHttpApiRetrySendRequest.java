@@ -23,6 +23,11 @@ import com.jn.json.fields.validation.JnJsonCommonsFields;
 @CcpEntityFieldsTransformer(classReferenceWithTheFields = JnJsonTransformersFieldsEntityDefault.class)
 @CcpEntityFieldsValidator(classReferenceWithTheFields = JnEntityHttpApiRetrySendRequest.Fields.class)
 
+/**
+ * Controla o número de tentativas de reenvio de uma requisição HTTP que falhou com erro de servidor.
+ * Cada tentativa gera um registro com a mesma chave acrescida do número da tentativa (1, 2, 3...).
+ * Descartável por hora, cache de 1 hora.
+ */
 public class JnEntityHttpApiRetrySendRequest implements CcpEntityConfigurator {
 
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityHttpApiRetrySendRequest.class).entityInstance;

@@ -15,6 +15,10 @@ import com.jn.json.fields.validation.JnJsonCommonsFields;
 @CcpEntityCache(3600)
 @CcpEntityFieldsTransformer(classReferenceWithTheFields = JnJsonTransformersFieldsEntityDefault.class)
 @CcpEntityFieldsValidator(classReferenceWithTheFields = JnEntityLoginEmail.Fields.class)
+/**
+ * Representa o cadastro de email do usuário na plataforma. Confirma a existência do email como
+ * usuário registrado. Sem versionamento nem expiração — o email é permanente. Cache de 1 hora.
+ */
 public class JnEntityLoginEmail implements CcpEntityConfigurator {
 	
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityLoginEmail.class).entityInstance;

@@ -18,6 +18,11 @@ import com.jn.json.fields.validation.JnJsonCommonsFields;
 @CcpEntityFieldsTransformer(classReferenceWithTheFields = JnJsonTransformersFieldsEntityDefault.class)
 @CcpEntityFieldsValidator(classReferenceWithTheFields = JnEntityVersionable.Fields.class)
 
+/**
+ * Tabela de auditoria/histórico de versões. Registra cada operação (save, delete, etc.) realizada
+ * sobre entidades versionáveis, armazenando o estado anterior do JSON, a operação, data e hora.
+ * Somente leitura — gravada exclusivamente por {@code JnVersionableEntity}.
+ */
 public class JnEntityVersionable implements CcpEntityConfigurator {
 
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityVersionable.class).entityInstance;

@@ -25,6 +25,11 @@ import com.jn.utils.JnLanguage;
 @CcpEntityVersionable(JnVersionableEntity.class)
 @CcpEntityFieldsTransformer(classReferenceWithTheFields = JnJsonTransformersFieldsEntityDefault.class)
 @CcpEntityFieldsValidator(classReferenceWithTheFields = JnEntityEmailTemplateMessage.Fields.class)
+/**
+ * Armazena templates de email por idioma e {@code templateId}. O campo {@code message} suporta
+ * variáveis de template (ex: {@code {token}}, {@code {email}}) resolvidas em tempo de envio.
+ * Versionável, cache de 1 hora. Possui registros iniciais para token de login e notificação de erro.
+ */
 public class JnEntityEmailTemplateMessage  implements CcpEntityConfigurator{
 
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityEmailTemplateMessage.class).entityInstance;

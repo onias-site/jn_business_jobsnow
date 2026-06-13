@@ -29,6 +29,11 @@ import com.jn.utils.JnDeleteKeysFromCache;
 		)
 @CcpEntityFieldsTransformer(classReferenceWithTheFields = JnJsonTransformersFieldsEntityDefault.class)
 @CcpEntityFieldsValidator(classReferenceWithTheFields = JnEntityLoginSessionValidation.Fields.class)
+/**
+ * Representa uma sessão de login ativa. A chave composta inclui email, token (hash SHA-1), IP e
+ * userAgent — cada sessão é única por combinação de contexto. A twin {@code login_session_terminated}
+ * recebe a sessão ao fazer logout. Descartável por hora, cache de 1 hora.
+ */
 public class JnEntityLoginSessionValidation implements CcpEntityConfigurator {
 
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityLoginSessionValidation.class).entityInstance;

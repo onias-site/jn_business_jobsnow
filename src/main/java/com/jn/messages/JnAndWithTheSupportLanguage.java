@@ -2,6 +2,10 @@ package com.jn.messages;
 
 import com.ccp.decorators.CcpJsonRepresentation;
 
+/**
+ * Última etapa do builder fluent. Recebe o idioma de suporte e dispara a execução de todos os
+ * steps configurados via {@code sendAllMessages()}, que é o método terminal da cadeia fluent.
+ */
 public class JnAndWithTheSupportLanguage {
 
 	final JnAndWithTheJsonValues andWithJsonValues;

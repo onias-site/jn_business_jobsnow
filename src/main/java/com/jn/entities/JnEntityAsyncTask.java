@@ -17,6 +17,12 @@ import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault
 import com.jn.json.fields.validation.JnJsonCommonsFields;
 @CcpEntityFieldsTransformer(classReferenceWithTheFields = JnJsonTransformersFieldsEntityDefault.class)
 @CcpEntityFieldsValidator(classReferenceWithTheFields = JnEntityAsyncTask.Fields.class)
+/**
+ * Representa uma tarefa assíncrona disparada via mensageria. Registra o ciclo de vida
+ * da tarefa: início (started), fim (finished), tempo decorrido (enlapsedTime), dados,
+ * tópico, request original, id da mensagem no PubSub, se foi bem-sucedido e qual
+ * operação foi executada.
+ */
 public class JnEntityAsyncTask implements CcpEntityConfigurator {
 
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityAsyncTask.class).entityInstance;

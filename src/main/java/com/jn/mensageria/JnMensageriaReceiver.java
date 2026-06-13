@@ -11,6 +11,11 @@ import com.jn.db.bulk.JnExecuteBulkOperation;
 import com.jn.entities.JnEntityAsyncTask;
 import com.jn.utils.JnDeleteKeysFromCache;
 
+/**
+ * Receptor Singleton de mensagens do PubSub. Roteia cada mensagem recebida para o {@code CcpBusiness}
+ * correto com base no campo {@code operation} ou no nome do tópico. Registra o resultado da execução
+ * (sucesso ou erro) de volta em {@code JnEntityAsyncTask}, incluindo tempo decorrido e resposta.
+ */
 public class JnMensageriaReceiver extends CcpMensageriaReceiver{
 	
 	private JnMensageriaReceiver() {

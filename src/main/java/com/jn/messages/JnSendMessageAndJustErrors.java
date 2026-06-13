@@ -5,6 +5,11 @@ import com.ccp.especifications.db.utils.entity.CcpEntity;
 import com.ccp.business.CcpBusiness;
 import com.jn.entities.JnEntityJobsnowWarning;
 
+/**
+ * Variante do builder que captura exceções nos steps e as registra em {@code JnEntityJobsnowWarning}
+ * sem propagar a exceção. Usada quando o fluxo deve continuar mesmo que um canal de envio falhe,
+ * registrando o problema como warning em vez de erro crítico.
+ */
 public class JnSendMessageAndJustErrors extends JnSendMessageToUser{
 
 	

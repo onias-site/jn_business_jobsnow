@@ -2,6 +2,10 @@ package com.jn.messages;
 
 import com.ccp.especifications.db.utils.entity.CcpEntity;
 
+/**
+ * Etapa do builder fluent (parte do fluxo de step customizado) que recebe a entidade de template
+ * e finaliza a configuração de um step customizado, adicionando-o ao {@code JnSendMessageToUser}.
+ */
 public class JnAndWithTheTemplateEntity {
 	
 	final JnAndWithTheParametersEntity andWithParametersEntity;

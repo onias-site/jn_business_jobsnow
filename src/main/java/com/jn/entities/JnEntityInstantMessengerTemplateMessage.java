@@ -27,6 +27,11 @@ import com.jn.utils.JnLanguage;
 @CcpEntityVersionable(JnVersionableEntity.class)
 @CcpEntityFieldsTransformer(classReferenceWithTheFields = JnJsonTransformersFieldsEntityDefault.class)
 @CcpEntityFieldsValidator(classReferenceWithTheFields = JnEntityInstantMessengerTemplateMessage.Fields.class)
+/**
+ * Armazena templates de mensagens instantâneas por idioma e {@code templateId}. O campo
+ * {@code message} suporta variáveis de template. Versionável, cache de 1 hora. Possui registro
+ * inicial para o template de notificação de erro em português.
+ */
 public class JnEntityInstantMessengerTemplateMessage  implements CcpEntityConfigurator {
 
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityInstantMessengerTemplateMessage.class).entityInstance;

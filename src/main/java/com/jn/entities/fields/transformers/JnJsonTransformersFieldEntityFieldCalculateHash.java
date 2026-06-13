@@ -9,6 +9,12 @@ import com.ccp.hash.CcpHashAlgorithm;
 import com.jn.entities.JnEntityLoginSessionValidation;
 import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault.JsonFieldNames;
 
+/**
+ * Transformador de campo que calcula o hash SHA-1 de um campo e armazena tanto o valor original
+ * quanto o hash. Permite que o hash seja usado como chave primária enquanto o valor original fica
+ * disponível em outro campo. A subclasse {@code JnJsonTransformersFieldEntityTokenHash} especializa
+ * este comportamento para o campo {@code token} de {@code JnEntityLoginSessionValidation}.
+ */
 public class JnJsonTransformersFieldEntityFieldCalculateHash implements CcpJsonTransformersDefaultEntityField{
 
 	private final CcpJsonFieldName originalName;

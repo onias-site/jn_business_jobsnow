@@ -7,6 +7,11 @@ import com.jn.business.messages.JnBusinessNotifyError;
 import com.jn.business.messages.JnBusinessNotifySupport;
 import com.jn.entities.JnEntityJobsnowWarning;
 
+/**
+ * Variante do builder que captura exceções nos steps, registra o warning e tenta notificar o
+ * suporte via {@code JnBusinessNotifySupport}. Usada por {@code JnBusinessNotifyError} para evitar
+ * loops infinitos de erros ao notificar falhas de envio.
+ */
 public class JnSendMessageIgnoringProcessErrors extends JnSendMessageToUser{
 
 	

@@ -53,6 +53,11 @@ import com.jn.utils.JnDeleteKeysFromCache;
 		globalHandlers = {}
 		)
 
+/**
+ * Registra a solicitação de reenvio de token de login feita pelo usuário. Ao ser salvo,
+ * automaticamente reseta e reenvia o token antes da operação, e notifica o suporte depois.
+ * Escrita assíncrona via mensageria, descartável diariamente, cache de 1 hora.
+ */
 public class JnEntityLoginTokenRequestResend implements CcpEntityConfigurator {
 	
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityLoginTokenRequestResend.class).entityInstance;

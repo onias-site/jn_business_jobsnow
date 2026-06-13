@@ -19,6 +19,10 @@ import com.jn.json.fields.validation.JnJsonCommonsFields;
 @CcpEntityDisposable(expurgTime = CcpEntityExpurgableOptions.daily, expurgableEntityFactory = JnDisposableEntity.class)
 @CcpEntityFieldsTransformer(classReferenceWithTheFields = JnJsonTransformersFieldsEntityDefault.class)
 @CcpEntityFieldsValidator(classReferenceWithTheFields = JnEntityLoginPasswordAttempts.Fields.class)
+/**
+ * Contador diário de tentativas incorretas de senha por usuário. Expiração diária garante que o
+ * bloqueio por tentativas seja resetado automaticamente a cada dia. Cache de 24 horas.
+ */
 public class JnEntityLoginPasswordAttempts implements CcpEntityConfigurator {
 
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityLoginPasswordAttempts.class).entityInstance;

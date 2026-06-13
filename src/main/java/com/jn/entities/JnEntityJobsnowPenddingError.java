@@ -29,6 +29,11 @@ import com.jn.utils.JnDeleteKeysFromCache;
 @CcpEntityVersionable(JnVersionableEntity.class)
 @CcpEntityFieldsTransformer(classReferenceWithTheFields = JnJsonTransformersFieldsEntityDefault.class)
 @CcpEntityFieldsValidator(classReferenceWithTheFields = JnEntityJobsnowPenddingError.Fields.class)
+/**
+ * Registra erros pendentes de resolução pela equipe de suporte. Diferente de
+ * {@code JnEntityJobsnowError} (efêmero), este possui versionamento e entidade twin
+ * {@code jobsnow_solved_error}, permitindo rastrear o ciclo de vida do erro até sua resolução.
+ */
 public class JnEntityJobsnowPenddingError implements CcpEntityConfigurator {
 
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityJobsnowPenddingError.class).entityInstance;

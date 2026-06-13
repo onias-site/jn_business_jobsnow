@@ -21,6 +21,12 @@ import com.jn.exceptions.JnErrorUnableToSendInstantMessage;
 import com.jn.json.fields.validation.JnJsonInstantMessengerFields;
 import com.jn.utils.JnSystemProperties;
 
+/**
+ * Envia mensagens instantâneas via Telegram usando bots configurados. Suporta dois
+ * tipos de mensagem (text e file) definidos no enum interno JnInstantMessageType.
+ * Implementa retentativa em caso de CcpHttpTooManyRequests e trata o bloqueio do
+ * bot pelo usuário salvando em JnEntityInstantMessengerBotLocked.
+ */
 public class JnBusinessSendInstantMessage implements CcpHttpApiExecutor{
 	public static enum Fields implements CcpJsonFieldName{
 		maxTriesToSendMessage, 
@@ -84,15 +90,18 @@ public class JnBusinessSendInstantMessage implements CcpHttpApiExecutor{
 	}
 	
 	public static final JnBusinessSendInstantMessage INSTANCE = new JnBusinessSendInstantMessage();
-	private final JnSystemProperties systemProperties = new JnSystemProperties();
 	
 	private JnBusinessSendInstantMessage() {}
 	
+	/**
+	 * Obtém o token do bot via JnSystemProperties, determina o tipo de mensagem, tenta
+	 * enviar e trata exceções de rate-limit e bloqueio de bot.
+	 */
 	public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
-		
+
 		CcpJsonFieldName botName = json.getAsStringDecorator(JnJsonValidator.botName).jsonFieldName();
 		
-		String botToken = this.systemProperties.getSystemInnerProperty(Fields.bots, botName);
+		String botToken =  JnSystemProperties.INSTANCE.getSystemInnerProperty(Fields.bots, botName);
 		
 		CcpJsonRepresentation jsonWithBotToken = json.put(JnMessageFileJsonValidator.botToken, botToken);
 		String messageType = jsonWithBotToken.getAsString(JnJsonValidator.instantMessageType);

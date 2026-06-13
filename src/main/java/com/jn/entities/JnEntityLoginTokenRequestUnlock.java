@@ -53,6 +53,11 @@ import com.jn.utils.JnDeleteKeysFromCache;
 		globalHandlers = {}
 		)
 
+/**
+ * Registra a solicitação de desbloqueio de token de login feita pelo usuário. Comportamento
+ * idêntico a {@code JnEntityLoginTokenRequestResend}, mas notifica o suporte via
+ * {@code NotifySupportAboutPendingUnlockLoginToken}. Escrita assíncrona, descartável diariamente.
+ */
 public class JnEntityLoginTokenRequestUnlock implements CcpEntityConfigurator {
 	
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityLoginTokenRequestUnlock.class).entityInstance;

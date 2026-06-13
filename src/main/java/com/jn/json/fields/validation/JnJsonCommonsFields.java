@@ -5,6 +5,11 @@ import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeNestedJs
 import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeNumberUnsigned;
 import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeString;
 
+/**
+ * Centraliza as definições de validação dos campos JSON comuns a diversas entidades e serviços do
+ * JobsNow. Cada valor do enum carrega anotações de tipo ({@code @CcpJsonFieldTypeString}, etc.)
+ * referenciadas via {@code @CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)}.
+ */
 public enum JnJsonCommonsFields{
 	
 	@CcpJsonFieldTypeString

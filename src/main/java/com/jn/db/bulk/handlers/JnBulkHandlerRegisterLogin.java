@@ -11,6 +11,11 @@ import com.ccp.especifications.db.utils.entity.CcpEntity;
 import com.jn.entities.JnEntityLoginSessionConflict;
 import com.jn.entities.JnEntityLoginSessionValidation;
 
+/**
+ * Handler de bulk responsável por registrar o login do usuário. Independentemente de
+ * haver ou não conflito de sessão existente, cria itens bulk para salvar um novo registro
+ * em JnEntityLoginSessionConflict e em JnEntityLoginSessionValidation.
+ */
 public class JnBulkHandlerRegisterLogin implements CcpHandleWithSearchResultsInTheEntity<List<CcpBulkItem>>{
 
 	
@@ -18,6 +23,9 @@ public class JnBulkHandlerRegisterLogin implements CcpHandleWithSearchResultsInT
 	
 	public static final JnBulkHandlerRegisterLogin INSTANCE = new JnBulkHandlerRegisterLogin();
 	
+	/**
+	 * Retorna os bulk items para criação de sessão e conflito quando já havia um registro.
+	 */
 	public List<CcpBulkItem> whenRecordWasFoundInTheEntitySearch(CcpJsonRepresentation json, CcpJsonRepresentation recordFound) {
 
 		List<CcpBulkItem> bulkItems = this.getBulkItems(json);
@@ -35,11 +43,17 @@ public class JnBulkHandlerRegisterLogin implements CcpHandleWithSearchResultsInT
 		return asList;
 	} 
 
+	/**
+	 * Retorna os mesmos bulk items quando não havia registro anterior.
+	 */
 	public List<CcpBulkItem> whenRecordWasNotFoundInTheEntitySearch(CcpJsonRepresentation json) {
 		List<CcpBulkItem> bulkItems = this.getBulkItems(json);
 		return bulkItems;
 	}
 
+	/**
+	 * Retorna JnEntityLoginSessionConflict.ENTITY como entidade de pesquisa.
+	 */
 	public CcpEntity getEntityToSearch() {
 		return JnEntityLoginSessionConflict.ENTITY;
 	}

@@ -18,6 +18,11 @@ import com.jn.json.fields.validation.JnJsonCommonsFields;
 @CcpEntityCache(3600)
 @CcpEntityFieldsTransformer(classReferenceWithTheFields = JnJsonTransformersFieldsEntityDefault.class)
 @CcpEntityFieldsValidator(classReferenceWithTheFields = JnEntityLoginSessionTokenAttempts.Fields.class)
+/**
+ * Contador de tentativas de uso de token de sessão inválido. Quando o limite é atingido, aciona
+ * o bloqueio da senha do usuário. Possui métodos estáticos de fábrica para incrementar ou resetar
+ * o contador. Cache de 1 hora.
+ */
 public class JnEntityLoginSessionTokenAttempts implements CcpEntityConfigurator {
 
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityLoginSessionTokenAttempts.class).entityInstance;

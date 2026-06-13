@@ -10,6 +10,11 @@ import com.jn.entities.JnEntityLoginSessionConflict;
 import com.jn.entities.JnEntityLoginSessionValidation;
 import com.jn.utils.JnDeleteKeysFromCache;
 
+/**
+ * Executa o logout do usuário. Em operação bulk atômica: transfere a sessão ativa para
+ * a entidade twin login_session_terminated (invalidando a sessão) e remove qualquer
+ * registro de conflito de sessão.
+ */
 public class JnBusinessExecuteLogout implements CcpBusiness{
 	//TODO JSON VALIDATIONS	
 
@@ -17,9 +22,13 @@ public class JnBusinessExecuteLogout implements CcpBusiness{
 	
 	private JnBusinessExecuteLogout() {}
 	
+	/**
+	 * Realiza o logout via bulk, invalidando a sessão e limpando o cache.
+	 * Retorna JSON vazio.
+	 */
 	@SuppressWarnings("unchecked")
 	public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
-		
+
 		CcpEntityBulkHandlerTransferRecordToTwinEntity executeLogout = new CcpEntityBulkHandlerTransferRecordToTwinEntity(JnEntityLoginSessionValidation.ENTITY);
 		CcpBulkHandlerDelete deleteLoginSessionConflict = new CcpBulkHandlerDelete(JnEntityLoginSessionConflict.ENTITY);
 		JnExecuteBulkOperation.INSTANCE.

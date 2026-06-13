@@ -12,6 +12,12 @@ import com.jn.entities.JnEntityEmailTemplateMessage;
 import com.jn.utils.JnSystemProperties;
 
 
+/**
+ * Envia um email usando o provedor configurado via CcpEmailSender (ex: SendGrid).
+ * Extrai do JSON os parâmetros de envio (token, URL, templateId, remetente, assunto,
+ * corpo com resolução de template, tipo de conteúdo, destinatários) e registra o
+ * envio em JnEntityEmailMessageSent.
+ */
 public class JnBusinessSendEmailMessage implements CcpHttpApiExecutor{
 	//TODO JSON VALIDATIONS	
 	public static enum Fields implements CcpJsonFieldName{
@@ -25,14 +31,17 @@ public class JnBusinessSendEmailMessage implements CcpHttpApiExecutor{
 	
 	private JnBusinessSendEmailMessage() {	}
 
-	public CcpJsonRepresentation apply(CcpJsonRepresentation json) { 
-		
+	/**
+	 * Obtém os parâmetros de email do JSON e das propriedades do sistema, resolve o
+	 * template da mensagem, envia via CcpEmailSender e salva o registro de envio.
+	 */
+	public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
+
 		CcpEmailSender emailSender = CcpDependencyInjection.getDependency(CcpEmailSender.class);
 		
-		JnSystemProperties jsp = new JnSystemProperties();
 		
-		String providerToken = jsp.tokenEmailValue();
-		String providerUrl = jsp.urlEmailValue();
+		String providerUrl =  JnSystemProperties.INSTANCE.urlEmailValue();
+		String providerToken =  JnSystemProperties.INSTANCE.tokenEmailValue();
 		String templateId = json.getAsString(JnEntityEmailTemplateMessage.Fields.templateId);
 		String sender = json.getAsString(JnEntityEmailParametersToSend.Fields.sender);
 		String subject = json.getAsString(JnEntityEmailTemplateMessage.Fields.subject);

@@ -4,6 +4,10 @@ import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeNestedJs
 import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeNumberUnsigned;
 import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeString;
 
+/**
+ * Centraliza as definições de validação dos campos JSON específicos de mensagens instantâneas
+ * (Telegram). Referenciado via {@code @CcpJsonCopyFieldValidationsFrom(JnJsonInstantMessengerFields.class)}.
+ */
 public enum JnJsonInstantMessengerFields{
 	
 	@CcpJsonFieldTypeString

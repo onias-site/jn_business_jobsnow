@@ -16,6 +16,10 @@ import com.jn.json.fields.validation.JnJsonCommonsFields;
 @CcpEntityCache(3600)
 @CcpEntityFieldsTransformer(classReferenceWithTheFields = JnJsonTransformersFieldsEntityDefault.class)
 @CcpEntityFieldsValidator(classReferenceWithTheFields = JnEntityEmailReportedAsSpam.Fields.class)
+/**
+ * Registra emails reportados como spam pelos destinatários. O sistema de envio de mensagens consulta
+ * esta entidade para bloquear reenvios a destinatários que marcaram emails como spam. Cache de 1 hora.
+ */
 public class JnEntityEmailReportedAsSpam implements CcpEntityConfigurator {
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityEmailReportedAsSpam.class).entityInstance;
 	

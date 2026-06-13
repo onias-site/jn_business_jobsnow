@@ -2,6 +2,11 @@ package com.jn.status.login;
 
 import com.ccp.process.CcpProcessStatus;
 
+/**
+ * Statuses dos processos de desbloqueio e reenvio de token: {@code statusTokenNotLocked} (404),
+ * {@code statusAlreadyRequested} (409), {@code statusTokenAlredyResent} (429),
+ * {@code statusTokenAlredyUnlocked} (429).
+ */
 public enum JnProcessStatusUnlockLoginToken implements CcpProcessStatus{
 	statusTokenNotLocked(404),
 	statusAlreadyRequested(409),

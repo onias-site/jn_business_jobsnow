@@ -16,6 +16,12 @@ import com.jn.entities.JnEntityLoginPasswordAttempts;
 import com.jn.entities.JnEntityLoginSessionValidation;
 import com.jn.services.JnServiceLogin;
 import com.jn.utils.JnDeleteKeysFromCache;
+/**
+ * Salva (ou altera) a senha do usuário. Em operação bulk atômica: invalida a sessão
+ * atual, salva a nova senha, "desbloqueia" a senha transferindo para a entidade twin,
+ * remove as tentativas de senha falhas, registra novo login e resolve conflito de
+ * sessão se existir.
+ */
 public class JnBusinessSavePassword implements CcpBusiness {
 	enum JsonFieldNames implements CcpJsonFieldName{
 		sessionToken
@@ -25,8 +31,12 @@ public class JnBusinessSavePassword implements CcpBusiness {
 	
 	private JnBusinessSavePassword() {}
 
+	/**
+	 * Executa todas as operações de atualização de senha e sessão em lote.
+	 * Retorna JSON vazio.
+	 */
 	@SuppressWarnings("unchecked")
-	public CcpJsonRepresentation apply(CcpJsonRepresentation json) { 
+	public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
 
 		CcpEntityBulkHandlerTransferRecordToTwinEntity executeLogout = new CcpEntityBulkHandlerTransferRecordToTwinEntity(JnEntityLoginSessionValidation.ENTITY);
 		
@@ -51,6 +61,9 @@ public class JnBusinessSavePassword implements CcpBusiness {
 		return CcpOtherConstants.EMPTY_JSON;
 	}
 
+	/**
+	 * Retorna a classe de validação JSON definida em JnServiceLogin.SavePassword.
+	 */
 	public Class<?> getJsonValidationClass() {
 		return JnServiceLogin.SavePassword.getJsonValidationClass();
 	}

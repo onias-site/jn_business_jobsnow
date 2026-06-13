@@ -9,6 +9,11 @@ import com.ccp.especifications.db.bulk.CcpBulkItem;
 import com.ccp.especifications.db.bulk.CcpBulkOperationResult;
 import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityMetaData;
 import com.jn.entities.JnEntityRecordToReprocess;
+/**
+ * Função de mapeamento usada pelo JnExecuteBulkOperation para converter um resultado
+ * de operação bulk com erro em um registro de reprocessamento (JnEntityRecordToReprocess).
+ * Previne loops infinitos ao rejeitar itens que já pertencem à entidade de reprocessamento.
+ */
 class FunctionReprocessMapper implements Function<CcpBulkOperationResult, CcpJsonRepresentation>{
 	enum JsonFieldNames implements CcpJsonFieldName{
 		type
@@ -18,6 +23,12 @@ class FunctionReprocessMapper implements Function<CcpBulkOperationResult, CcpJso
 	
 	private FunctionReprocessMapper() {}
 
+	/**
+	 * Extrai detalhes do item bulk com erro, adiciona timestamp atual, renomeia o campo
+	 * type para errorType e monta o JSON no formato de JnEntityRecordToReprocess.
+	 * Lança RuntimeException se o item for da própria entidade de reprocessamento
+	 * (prevenção de loop).
+	 */
 	public CcpJsonRepresentation apply(CcpBulkOperationResult result) {
 		CcpBulkItem bulkItem = result.getBulkItem();
 		CcpEntityMetaData entityDetails = bulkItem.entity.getEntityMetaData();

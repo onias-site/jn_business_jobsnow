@@ -18,6 +18,11 @@ import com.jn.db.bulk.JnExecuteBulkOperation;
 import com.jn.entities.JnEntityVersionable;
 import com.jn.utils.JnDeleteKeysFromCache;
 
+/**
+ * Decorador que adiciona versionamento/auditoria a entidades marcadas com {@code @CcpEntityVersionable}.
+ * A cada operação bulk, gera automaticamente um registro de histórico em {@code JnEntityVersionable}
+ * com o estado anterior do JSON, a operação realizada, data e hora.
+ */
 public class JnVersionableEntity extends CcpDefaultEntityDelegator<CcpEntityVersionable>{
 	
 	public JnVersionableEntity(CcpEntity entity, Class<?> clazz) {

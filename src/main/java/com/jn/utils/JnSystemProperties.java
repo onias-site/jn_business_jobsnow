@@ -9,6 +9,12 @@ import com.ccp.decorators.CcpJsonRepresentation.CcpJsonFieldName;
 import com.ccp.decorators.CcpPropertiesDecorator;
 import com.ccp.decorators.CcpStringDecorator;
 
+/**
+ * Centraliza o acesso às propriedades do sistema lidas do {@code application_properties} (via
+ * variáveis de ambiente, classpath ou arquivo). Fornece métodos tipados para cada propriedade
+ * conhecida: URLs de APIs, tokens de autenticação, idioma de suporte, configurações de ambiente
+ * local, etc.
+ */
 public class JnSystemProperties {
 	
 	public static enum Fields implements CcpJsonFieldName{
@@ -35,7 +41,9 @@ public class JnSystemProperties {
 	
 	public final CcpJsonRepresentation systemProperties;
 	
-	public JnSystemProperties() {
+	public static final JnSystemProperties INSTANCE = new JnSystemProperties();
+	
+	private JnSystemProperties() {
 		CcpStringDecorator ccpStringDecorator = new CcpStringDecorator("application_properties");
 		CcpPropertiesDecorator propertiesFrom = ccpStringDecorator.propertiesFrom();
 		this.systemProperties = propertiesFrom.environmentVariablesOrClassLoaderOrFile();

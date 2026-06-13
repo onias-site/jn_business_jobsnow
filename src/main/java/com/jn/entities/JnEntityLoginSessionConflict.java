@@ -19,6 +19,10 @@ import com.jn.json.fields.validation.JnJsonCommonsFields;
 @CcpEntityDisposable(expurgTime = CcpEntityExpurgableOptions.hourly, expurgableEntityFactory = JnDisposableEntity.class)
 @CcpEntityFieldsTransformer(classReferenceWithTheFields = JnJsonTransformersFieldsEntityDefault.class)
 @CcpEntityFieldsValidator(classReferenceWithTheFields = JnEntityLoginSessionConflict.Fields.class)
+/**
+ * Registra conflito de sessão para um email: quando um usuário tenta logar enquanto já existe uma
+ * sessão ativa de outro dispositivo/IP. Descartável por hora, cache de 1 hora.
+ */
 public class JnEntityLoginSessionConflict implements CcpEntityConfigurator {
 
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityLoginSessionConflict.class).entityInstance;

@@ -10,6 +10,14 @@ import com.ccp.especifications.password.CcpPasswordHandler;
 import com.ccp.flow.CcpErrorFlowDisturb;
 import com.ccp.process.CcpProcessStatus;
 
+/**
+ * Avalia tentativas de autenticação (senha ou token) comparando o valor fornecido
+ * pelo usuário com o armazenado no banco, via CcpPasswordHandler.matches. Se correto,
+ * delega ao business de sucesso. Se incorreto, incrementa o contador de tentativas;
+ * ao atingir 3 tentativas erradas, aciona o business de bloqueio e lança
+ * CcpErrorFlowDisturb com o status de excesso de tentativas; antes disso, lança o
+ * status de "tipo errado" com o número de tentativas atual.
+ */
 public class JnBusinessEvaluateAttempts implements CcpBusiness{
 	enum JsonFieldNames implements CcpJsonFieldName{
 		entities
@@ -109,8 +117,12 @@ public class JnBusinessEvaluateAttempts implements CcpBusiness{
 		}
 	}
 
+	/**
+	 * Busca o segredo no banco, compara com o valor do usuário usando CcpPasswordHandler,
+	 * e controla o fluxo de sucesso/bloqueio/tentativas.
+	 */
 	public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
-		 
+
 		String secretFromDatabase = json.getValueFromPath("",CcpEntity.JsonFieldNames._entities, this.entityToGetTheSecret, this.databaseFieldName);
 		
 		if(secretFromDatabase.trim().isEmpty()) {

@@ -6,6 +6,11 @@ import com.ccp.especifications.db.utils.entity.CcpEntityOperationType;
 import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityDelegator;
 import com.jn.mensageria.JnFunctionMensageriaSender;
 
+/**
+ * Decorador que transforma operações síncronas de entidade em operações assíncronas via mensageria.
+ * Qualquer chamada de {@code save}, {@code delete}, {@code deleteAnyWhere}, {@code transferDataTo}
+ * ou {@code copyDataTo} é interceptada e enviada ao PubSub via {@code JnFunctionMensageriaSender}.
+ */
 public class JnAsyncWriterEntity extends CcpEntityDelegator  {
 
 	public JnAsyncWriterEntity(CcpEntity entity, Class<?> clazz) {

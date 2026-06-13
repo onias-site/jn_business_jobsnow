@@ -15,6 +15,10 @@ import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault
 @CcpEntityCache(3600)
 @CcpEntityFieldsTransformer(classReferenceWithTheFields = JnJsonTransformersFieldsEntityDefault.class)
 @CcpEntityFieldsValidator(classReferenceWithTheFields = JnEntitySystemMessage.Fields.class)
+/**
+ * Armazena mensagens do sistema exibidas na interface, indexadas por {@code systemMessageName} e
+ * {@code language}. Permite internacionalização de mensagens fixas da plataforma. Cache de 1 hora.
+ */
 public class JnEntitySystemMessage implements CcpEntityConfigurator {
 
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntitySystemMessage.class).entityInstance;

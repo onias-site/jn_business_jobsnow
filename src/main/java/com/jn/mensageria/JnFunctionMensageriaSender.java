@@ -23,6 +23,11 @@ import com.jn.db.bulk.JnExecuteBulkOperation;
 import com.jn.entities.JnEntityAsyncTask;
 import com.jn.utils.JnDeleteKeysFromCache;
 
+/**
+ * Responsável por enviar mensagens/tarefas para a fila de mensageria (PubSub). Cria um registro em
+ * {@code JnEntityAsyncTask} com os detalhes da mensagem antes de publicar. Suporta dois modos:
+ * envio de um {@code CcpBusiness} (tópico = nome da classe) ou envio de uma operação de entidade.
+ */
 public class JnFunctionMensageriaSender implements CcpBusiness {
 	
 	enum JsonFieldNames implements CcpJsonFieldName{

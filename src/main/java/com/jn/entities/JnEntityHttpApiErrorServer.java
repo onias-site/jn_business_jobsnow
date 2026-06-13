@@ -20,6 +20,11 @@ import com.jn.json.fields.validation.JnJsonCommonsFields;
 @CcpEntityDisposable(expurgTime = CcpEntityExpurgableOptions.hourly, expurgableEntityFactory = JnDisposableEntity.class)
 @CcpEntityFieldsTransformer(classReferenceWithTheFields = JnJsonTransformersFieldsEntityDefault.class)
 @CcpEntityFieldsValidator(classReferenceWithTheFields = JnEntityHttpApiErrorServer.Fields.class)
+/**
+ * Registra erros HTTP de servidor (5xx) ocorridos após esgotar todas as tentativas de retry ao
+ * chamar APIs externas. Estruturalmente idêntico a {@code JnEntityHttpApiErrorClient}, mas com
+ * {@code httpStatus}, {@code timestamp} e {@code date} obrigatórios. Descartável por hora.
+ */
 public class JnEntityHttpApiErrorServer implements CcpEntityConfigurator {
 	
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityHttpApiErrorServer.class).entityInstance;

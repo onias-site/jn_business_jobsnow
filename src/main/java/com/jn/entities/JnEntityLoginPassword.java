@@ -29,6 +29,11 @@ import com.jn.utils.JnDeleteKeysFromCache;
 @CcpEntityFieldsTransformer(classReferenceWithTheFields = JnJsonTransformersFieldsEntityDefault.class)
 @CcpEntityFieldsValidator(classReferenceWithTheFields = JnEntityLoginPassword.Fields.class)
 
+/**
+ * Armazena o hash BCrypt da senha do usuário. A entidade twin {@code login_password_locked}
+ * representa o estado de senha bloqueada após múltiplas tentativas incorretas. Versionável,
+ * cache de 1 hora.
+ */
 public class JnEntityLoginPassword implements CcpEntityConfigurator {
 	
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityLoginPassword.class).entityInstance;

@@ -22,6 +22,11 @@ import com.jn.json.fields.validation.JnJsonCommonsFields;
 @CcpEntityDisposable(expurgTime = CcpEntityExpurgableOptions.hourly, expurgableEntityFactory = JnDisposableEntity.class)
 @CcpEntityFieldsTransformer(classReferenceWithTheFields = JnJsonTransformersFieldsEntityDefault.class)
 @CcpEntityFieldsValidator(classReferenceWithTheFields = JnEntityJobsnowError.Fields.class)
+/**
+ * Registra erros ocorridos no sistema JobsNow. A chave composta por {@code stackTraceHash} e
+ * {@code type} evita registros duplicados do mesmo erro. Descartável por hora — erros frequentes
+ * não acumulam indefinidamente. Cache de 1 hora.
+ */
 public class JnEntityJobsnowError implements CcpEntityConfigurator {
 
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityJobsnowError.class).entityInstance;

@@ -19,6 +19,11 @@ import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeString;
 import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
 
+/**
+ * Registro de expiração (disposable) de outras entidades. Armazena uma cópia do JSON de uma entidade
+ * com timestamp de expiração. Usado por {@code JnDisposableEntity} para implementar TTL sem depender
+ * de recurso nativo do Elasticsearch. Somente leitura — nunca gravado diretamente.
+ */
 @CcpEntityOlyReadable
 @CcpEntityFieldsTransformer(classReferenceWithTheFields = JnJsonTransformersFieldsEntityDefault.class)
 @CcpEntityFieldsValidator(classReferenceWithTheFields = JnEntityDisposableRecord.Fields.class)

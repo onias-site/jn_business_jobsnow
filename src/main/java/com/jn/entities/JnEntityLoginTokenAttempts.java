@@ -16,6 +16,10 @@ import com.jn.json.fields.validation.JnJsonCommonsFields;
 @CcpEntityCache(3600)
 @CcpEntityFieldsTransformer(classReferenceWithTheFields = JnJsonTransformersFieldsEntityDefault.class)
 @CcpEntityFieldsValidator(classReferenceWithTheFields = JnEntityLoginTokenAttempts.Fields.class)
+/**
+ * Contador de tentativas de uso incorreto do token de login (durante o fluxo de definição de senha).
+ * Usado por {@code JnBusinessEvaluateAttempts} para controlar o bloqueio do token. Cache de 1 hora.
+ */
 public class JnEntityLoginTokenAttempts implements CcpEntityConfigurator {
 
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityLoginTokenAttempts.class).entityInstance;

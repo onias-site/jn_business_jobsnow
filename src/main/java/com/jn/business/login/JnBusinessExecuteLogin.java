@@ -14,6 +14,12 @@ import com.jn.entities.JnEntityLoginPasswordAttempts;
 import com.jn.entities.JnEntityLoginSessionValidation;
 import com.jn.utils.JnDeleteKeysFromCache;
 
+/**
+ * Executa o login do usuário após validação bem-sucedida da senha. Em operação bulk
+ * atômica: renomeia sessionToken para o campo token de sessão, invalida a senha atual
+ * (transferindo para entidade twin login_password_locked), apaga o registro de tentativas
+ * de senha, registra o login criando a sessão válida e o possível conflito de sessão.
+ */
 public class JnBusinessExecuteLogin implements CcpBusiness {
 	//TODO JSON VALIDATIONS	
 	enum JsonFieldNames implements CcpJsonFieldName{
@@ -24,6 +30,10 @@ public class JnBusinessExecuteLogin implements CcpBusiness {
 	
 	private JnBusinessExecuteLogin() {}
 	
+	/**
+	 * Orquestra a operação bulk de login (unlock de senha, remoção de tentativas,
+	 * registro de sessão) e retorna JSON vazio ao concluir.
+	 */
 	@SuppressWarnings("unchecked")
 	public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
 		CcpJsonRepresentation renameField = json.renameField(JsonFieldNames.sessionToken, JnEntityLoginSessionValidation.Fields.token);

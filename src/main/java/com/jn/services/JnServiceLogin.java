@@ -45,6 +45,14 @@ import com.jn.status.login.JnProcessStatusUnlockLoginToken;
 import com.jn.status.login.JnProcessStatusUpdatePassword;
 import com.jn.utils.JnDeleteKeysFromCache;
 
+/**
+ * Serviço central de autenticação do JobsNow. Orquestra todos os fluxos de login usando
+ * {@code CcpGetEntityId} para buscar dados em múltiplas entidades e aplicar regras de negócio
+ * de forma declarativa. Cada valor implementa um passo do ciclo de vida de autenticação:
+ * {@code ExecuteLogin}, {@code ValidateLogin}, {@code CreateLoginEmail}, {@code ExistsLoginEmail},
+ * {@code ExecuteLogout}, {@code SaveAnswers}, {@code CreateLoginToken}, {@code SavePassword},
+ * {@code ResendLoginToken}, {@code UnlockLoginToken}.
+ */
 public enum JnServiceLogin implements JnService {
 	
 	ExecuteLogin {

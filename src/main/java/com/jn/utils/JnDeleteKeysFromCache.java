@@ -10,6 +10,11 @@ import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.decorators.CcpJsonRepresentation.CcpJsonFieldName;
 import com.ccp.especifications.cache.CcpCacheDecorator;
 import com.ccp.business.CcpBusiness;
+/**
+ * Utilitário Singleton para exclusão de chaves do cache (GCP Memcache). Implementa tanto
+ * {@code CcpBusiness} (aceita JSON com lista de chaves) quanto {@code Consumer<String[]>}
+ * (aceita array de chaves), sendo usado como callback de limpeza de cache após operações bulk.
+ */
 public class JnDeleteKeysFromCache implements  CcpBusiness, Consumer<String[]> {
 	//TODO JSON VALIDATIONS	
 	enum JsonFieldNames implements CcpJsonFieldName{

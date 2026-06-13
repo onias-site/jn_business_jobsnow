@@ -19,6 +19,10 @@ import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault
 @CcpEntityCache(3600)
 @CcpEntityFieldsTransformer(classReferenceWithTheFields = JnJsonTransformersFieldsEntityDefault.class)
 @CcpEntityFieldsValidator(classReferenceWithTheFields = JnEntityLoginStats.Fields.class)
+/**
+ * Armazena estatísticas de login do usuário: balanço financeiro, último acesso, contagem de acessos,
+ * tickets abertos e fechados e contagem de transações de saldo. Cache de 1 hora.
+ */
 public class JnEntityLoginStats implements CcpEntityConfigurator {
 	
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityLoginStats.class).entityInstance;

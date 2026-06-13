@@ -19,6 +19,12 @@ import com.jn.entities.JnEntityLoginPassword;
 import com.jn.entities.JnEntityLoginToken;
 import com.jn.exceptions.JnErrorIsNotAnEmail;
 
+/**
+ * Conjunto de transformadores de campos padrão aplicados às entidades do JobsNow. Cada valor aplica
+ * uma transformação específica: {@code email} valida e calcula hash SHA-1; {@code password} aplica
+ * BCrypt; {@code token} gera token aleatório e aplica BCrypt; {@code timestamp} adiciona data/hora;
+ * {@code tokenHash} calcula hash SHA-1 do token de sessão.
+ */
 public enum JnJsonTransformersFieldsEntityDefault implements CcpJsonTransformersDefaultEntityField, CcpJsonFieldName {
 	email(true) {
 

@@ -19,11 +19,16 @@ import com.jn.utils.JnDeleteKeysFromCache;
 		twinEntityName = "contact_us_solved",
 		bulkExecutorClass = JnExecuteBulkOperation.class,
 		functionToDeleteKeysInTheCacheClass = JnDeleteKeysFromCache.class
-		
+
 		)
 @CcpEntityCache(3600)
 @CcpEntityFieldsTransformer(classReferenceWithTheFields = JnJsonTransformersFieldsEntityDefault.class)
 @CcpEntityFieldsValidator(classReferenceWithTheFields = JnEntityContactUs.Fields.class)
+/**
+ * Representa uma solicitação de contato recebida pelo formulário "Fale Conosco".
+ * Possui entidade twin contact_us_solved para quando o contato for resolvido.
+ * Cache de 1 hora.
+ */
 public class JnEntityContactUs implements CcpEntityConfigurator {
 
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityContactUs.class).entityInstance;

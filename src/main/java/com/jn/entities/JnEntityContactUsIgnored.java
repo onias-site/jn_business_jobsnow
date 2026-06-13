@@ -27,6 +27,10 @@ import com.jn.utils.JnDeleteKeysFromCache;
 		bulkExecutorClass = JnExecuteBulkOperation.class,
 		functionToDeleteKeysInTheCacheClass = JnDeleteKeysFromCache.class
 		)
+/**
+ * Registra contatos ignorados pelo suporte. Entidade descartável com expiração diária.
+ * Possui twin contact_us_reread para reaproveitamento posterior.
+ */
 public class JnEntityContactUsIgnored implements CcpEntityConfigurator {
 	
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityContactUsIgnored.class).entityInstance;

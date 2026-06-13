@@ -20,6 +20,10 @@ import com.jn.json.fields.validation.JnJsonCommonsFields;
 @CcpEntityVersionable(JnVersionableEntity.class)
 @CcpEntityFieldsTransformer(classReferenceWithTheFields = JnJsonTransformersFieldsEntityDefault.class)
 @CcpEntityFieldsValidator(classReferenceWithTheFields = JnEntityLoginAnswers.Fields.class)
+/**
+ * Armazena as respostas do questionário de cadastro do usuário: canal de chegada ({@code channel})
+ * e objetivo na plataforma ({@code goal}). Versionável, cache de 1 hora.
+ */
 public class JnEntityLoginAnswers implements CcpEntityConfigurator {
 
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityLoginAnswers.class).entityInstance;

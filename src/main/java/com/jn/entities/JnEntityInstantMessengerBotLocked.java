@@ -17,6 +17,11 @@ import com.jn.json.fields.validation.JnJsonInstantMessengerFields;
 @CcpEntityCache(3600)
 @CcpEntityFieldsTransformer(classReferenceWithTheFields = JnJsonTransformersFieldsEntityDefault.class)
 @CcpEntityFieldsValidator(classReferenceWithTheFields = JnEntityInstantMessengerBotLocked.Fields.class)
+/**
+ * Registra combinações de bot + usuário ({@code chatId}) em que o bot foi bloqueado pelo usuário.
+ * O sistema de envio de mensagens instantâneas consulta esta entidade para evitar novas tentativas
+ * para destinatários que bloquearam o bot. Cache de 1 hora.
+ */
 public class JnEntityInstantMessengerBotLocked implements CcpEntityConfigurator {
 	
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityInstantMessengerBotLocked.class).entityInstance;

@@ -19,12 +19,21 @@ import com.ccp.especifications.db.utils.entity.CcpEntity;
 import com.jn.entities.JnEntityRecordToReprocess;
 import com.jn.utils.JnDeleteKeysFromCache;
 
+/**
+ * Orquestra operações bulk no Elasticsearch do JobsNow. Sanitiza itens duplicados
+ * resolvendo conflitos por prioridade, executa o bulk via CcpBulkExecutor, processa
+ * os resultados de erro criando registros de reprocessamento recursivamente, e invalida
+ * as chaves de cache correspondentes aos itens processados com sucesso.
+ */
 public class JnExecuteBulkOperation implements CcpExecuteBulkOperation{
 
 	public static final JnExecuteBulkOperation INSTANCE = new JnExecuteBulkOperation();
 	
 	private JnExecuteBulkOperation() {}
 	
+	/**
+	 * Sanitiza os itens, executa o bulk e processa erros/cache.
+	 */
 	public JnExecuteBulkOperation executeBulk(Collection<CcpBulkItem> bulkItems,  Consumer<String[]> functionToDeleteKeysInTheCache) {
 		
 		HashSet<CcpBulkItem> items = this.sanitizeItems(bulkItems);
@@ -96,6 +105,10 @@ public class JnExecuteBulkOperation implements CcpExecuteBulkOperation{
 		return this;
 	}
 	
+	/**
+	 * Converte as entidades em CcpBulkItem a partir do JSON e da operação informada,
+	 * e delega para o método executeBulk(Collection, Consumer).
+	 */
 	public JnExecuteBulkOperation executeBulk(CcpJsonRepresentation json, CcpBulkEntityOperationType operation,  Consumer<String[]> functionToDeleteKeysInTheCache, CcpEntity...entities) {
 		
 		List<CcpBulkItem> items = new ArrayList<>();

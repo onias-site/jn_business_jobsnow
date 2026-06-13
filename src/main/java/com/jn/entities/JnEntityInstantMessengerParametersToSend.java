@@ -28,6 +28,11 @@ import com.jn.json.fields.validation.JnJsonInstantMessengerFields;
 @CcpEntityVersionable(JnVersionableEntity.class)
 @CcpEntityFieldsTransformer(classReferenceWithTheFields = JnJsonTransformersFieldsEntityDefault.class)
 @CcpEntityFieldsValidator(classReferenceWithTheFields = JnEntityInstantMessengerParametersToSend.Fields.class)
+/**
+ * Armazena parâmetros de configuração para envio de mensagens instantâneas: bot, templateId, chatId
+ * e número máximo de tentativas. Versionável, cache de 1 hora. Possui registro inicial configurando
+ * o bot de suporte para envio de notificações de erro como arquivo texto.
+ */
 public class JnEntityInstantMessengerParametersToSend implements CcpEntityConfigurator {
 	
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityInstantMessengerParametersToSend.class).entityInstance;

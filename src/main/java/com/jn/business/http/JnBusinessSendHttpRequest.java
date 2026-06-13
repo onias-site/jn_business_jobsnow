@@ -11,6 +11,14 @@ import com.jn.entities.JnEntityHttpApiErrorClient;
 import com.jn.entities.JnEntityHttpApiErrorServer;
 import com.jn.entities.JnEntityHttpApiRetrySendRequest;
 
+/**
+ * Executa chamadas HTTP encapsulando um CcpHttpApiExecutor e aplica política de
+ * retentativa automática para erros de servidor (5xx). Erros de cliente (4xx) são
+ * registrados em JnEntityHttpApiErrorClient e relançados imediatamente; erros de
+ * servidor disparam novas tentativas controladas, com sleep entre elas, até atingir
+ * o limite máximo, quando então o erro é registrado em JnEntityHttpApiErrorServer e
+ * relançado.
+ */
 public class JnBusinessSendHttpRequest implements CcpBusiness{
 	
 	private final CcpHttpApiExecutor processThatSendsHttpRequest;
@@ -20,6 +28,10 @@ public class JnBusinessSendHttpRequest implements CcpBusiness{
 		this.processThatSendsHttpRequest = processThatSendsHttpRequest;
 	}
 
+	/**
+	 * Executa a requisição HTTP. Captura CcpErrorHttpClient para salvar o detalhe
+	 * do erro e relançar; captura CcpErrorHttpServer para iniciar a lógica de retry.
+	 */
 	public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
 
 		try {

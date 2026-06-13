@@ -21,6 +21,12 @@ import com.jn.json.fields.validation.JnJsonCommonsFields;
 @CcpEntityDisposable(expurgTime = CcpEntityExpurgableOptions.hourly, expurgableEntityFactory = JnDisposableEntity.class)
 @CcpEntityFieldsTransformer(classReferenceWithTheFields = JnJsonTransformersFieldsEntityDefault.class)
 @CcpEntityFieldsValidator(classReferenceWithTheFields = JnEntityJobsnowWarning.Fields.class)
+/**
+ * Registra alertas (warnings) do sistema — situações não críticas que merecem atenção mas não
+ * interrompem o fluxo. Usado por {@code JnSendMessageAndJustErrors} e
+ * {@code JnSendMessageIgnoringProcessErrors} para registrar falhas no envio de mensagens sem
+ * propagar a exceção. Descartável por hora, cache de 1 hora.
+ */
 public class JnEntityJobsnowWarning implements CcpEntityConfigurator {
 
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityJobsnowWarning.class).entityInstance;

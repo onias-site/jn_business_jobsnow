@@ -2,6 +2,11 @@ package com.jn.services;
 
 import com.ccp.service.CcpService;
 
+/**
+ * Interface base para todos os serviços do JobsNow. Fornece método default que carrega
+ * automaticamente a classe de validação JSON a partir de uma classe interna do mesmo pacote com o
+ * nome do valor do enum (convenção: cada valor do enum tem uma classe interna homônima).
+ */
 public interface JnService extends CcpService {
 	default Class<?> getJsonValidationClass() {
 		Class<?> forName;

@@ -16,6 +16,12 @@ import com.jn.json.fields.validation.JnJsonCommonsFields;
 import com.jn.status.login.JnProcessStatusExecuteLogin;
 import com.jn.utils.JnDeleteKeysFromCache;
 
+/**
+ * Valida se a sessão do usuário está ativa, verificando a presença e validade do
+ * sessionToken. Controla tentativas de uso de token de sessão inválido: após 3
+ * tentativas inválidas, bloqueia a senha. Se o token de sessão for válido, zera o
+ * contador de tentativas.
+ */
 public class JnBusinessSessionValidate implements CcpBusiness{
 	
 	enum JsonFieldNames implements CcpJsonFieldName{
@@ -34,8 +40,13 @@ public class JnBusinessSessionValidate implements CcpBusiness{
 	
 	public static final JnBusinessSessionValidate INSTANCE = new JnBusinessSessionValidate();
 	
-	public CcpJsonRepresentation apply(CcpJsonRepresentation json) { 
-		
+	/**
+	 * Verifica a presença do sessionToken, duplica para o campo token de sessão,
+	 * configura callbacks de incremento/reset de tentativas e executa o fluxo de
+	 * validação de sessão.
+	 */
+	public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
+
 		CcpBusiness throwMissingSessionToken = JnProcessStatusExecuteLogin.missingSessionToken.flowDisturb();
 		
 		json.whenFieldsAreNotFound(throwMissingSessionToken, JsonFieldNames.sessionToken);
@@ -59,7 +70,10 @@ public class JnBusinessSessionValidate implements CcpBusiness{
 		return json; 
 	}
 
-	
+
+	/**
+	 * Retorna JsonFieldNames.class para validação de entrada.
+	 */
 	public Class<?> getJsonValidationClass() {
 		return JsonFieldNames.class;
 	}

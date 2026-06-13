@@ -27,6 +27,11 @@ import com.jn.utils.JnDeleteKeysFromCache;
 		)
 @CcpEntityFieldsTransformer(classReferenceWithTheFields = JnJsonTransformersFieldsEntityDefault.class)
 @CcpEntityFieldsValidator(classReferenceWithTheFields = JnEntityLoginToken.Fields.class)
+/**
+ * Armazena o token de acesso enviado por email ao usuário durante o onboarding ou recuperação de
+ * senha. Expiração mensal. A twin {@code login_token_locked} indica token bloqueado após excesso
+ * de tentativas. Cache de 24 horas.
+ */
 public class JnEntityLoginToken implements CcpEntityConfigurator {
 	
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityLoginToken.class).entityInstance;

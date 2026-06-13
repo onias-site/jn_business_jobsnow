@@ -26,6 +26,12 @@ import com.jn.json.fields.validation.JnJsonCommonsFields;
 @CcpEntityVersionable(JnVersionableEntity.class)
 @CcpEntityFieldsTransformer(classReferenceWithTheFields = JnJsonTransformersFieldsEntityDefault.class)
 @CcpEntityFieldsValidator(classReferenceWithTheFields = JnEntityEmailParametersToSend.Fields.class)
+/**
+ * Armazena parâmetros de configuração para envio de emails: remetente, templateId, tipo de assunto
+ * e parâmetros adicionais. Versionável, cache de 1 hora. Possui registros iniciais para os
+ * contextos de notificação de erro ({@code JnBusinessNotifyError}) e envio de token de login
+ * ({@code JnBusinessSendUserToken}).
+ */
 public class JnEntityEmailParametersToSend implements CcpEntityConfigurator{
 
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityEmailParametersToSend.class).entityInstance;

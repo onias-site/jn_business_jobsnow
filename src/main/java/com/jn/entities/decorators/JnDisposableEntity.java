@@ -27,6 +27,13 @@ import com.jn.entities.JnEntityDisposableRecord;
 import com.jn.entities.JnEntityDisposableRecord.Fields;
 import com.jn.utils.JnDeleteKeysFromCache;
 
+/**
+ * Decorador que implementa TTL (time-to-live) para entidades marcadas com {@code @CcpEntityDisposable}.
+ * Em vez de depender de TTL nativo do Elasticsearch, armazena uma cópia do JSON em
+ * {@code JnEntityDisposableRecord} com timestamp de expiração calculado conforme a opção de tempo
+ * configurada ({@code hourly}, {@code daily}, etc.). Sobrescreve os métodos de leitura para
+ * consultar o registro de expiração e validar se ainda está vigente.
+ */
 public class JnDisposableEntity extends CcpDefaultEntityDelegator<CcpEntityDisposable>{
 	
 	private final CcpEntityExpurgableOptions timeOption;
