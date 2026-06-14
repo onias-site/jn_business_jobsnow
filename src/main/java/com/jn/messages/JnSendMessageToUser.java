@@ -161,12 +161,17 @@ public class JnSendMessageToUser {
 
 					try {
 						boolean skip = entity.isPresentInThisUnionAll(unionAll, json);
-						boolean mustSkip = booleans[0];
-						return skip == mustSkip;
+						boolean decision = booleans[0];
+						boolean mustSkip = decision == skip;
+						if(mustSkip) {
+							return true;
+						}
 
 					} catch (CcpErrorEntityPrimaryKeyIsMissing e) {
 						boolean mustSkip = booleans[1];
-						return mustSkip;
+						if(mustSkip) {
+							return true;
+						}
 					}
 				}
 		
