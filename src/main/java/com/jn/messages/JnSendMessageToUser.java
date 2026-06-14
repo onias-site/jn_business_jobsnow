@@ -1,9 +1,10 @@
 package com.jn.messages;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import com.ccp.business.CcpBusiness;
@@ -141,28 +142,35 @@ public class JnSendMessageToUser {
 			Function<Integer, CcpEntity>... functions
 			
 			) {
+				Map<CcpEntity, boolean[]> decisions = new HashMap<CcpEntity, boolean[]>();
+				
+				CcpEntity alreadySentEntity = this.alreadySentEntities.get(index);
+				CcpEntity parameterEntity = this.parameterEntities.get(index);
+				CcpEntity messageEntity = this.messageEntities.get(index);
+				CcpEntity blockEntity = this.blockEntities.get(index);
+				
+				decisions.put(alreadySentEntity, new boolean[] {true, false});
+				decisions.put(parameterEntity, new boolean[] {false, false});
+				decisions.put(messageEntity, new boolean[] {false, false});
+				decisions.put(blockEntity, new boolean[] {true, true});
+		
 				for (Function<Integer, CcpEntity> function : functions) {
 
 					CcpEntity entity = function.apply(index);
+					boolean[] booleans = decisions.get(entity);
 
 					try {
 						boolean skip = entity.isPresentInThisUnionAll(unionAll, json);
-						if (skip) {
-							return true;
-						}
+						boolean mustSkip = booleans[0];
+						return skip == mustSkip;
 
 					} catch (CcpErrorEntityPrimaryKeyIsMissing e) {
-						CcpEntity blockEntity = this.blockEntities.get(index);
-						boolean mustNotSkip = entity == blockEntity;
-						if (mustNotSkip) {
-							return false;
-						}
-						return true;
+						boolean mustSkip = booleans[1];
+						return mustSkip;
 					}
 				}
 		
 		return false;
-
 	}
 	
 	@SuppressWarnings("unchecked")
