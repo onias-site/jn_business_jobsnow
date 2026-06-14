@@ -19,7 +19,7 @@ import com.jn.utils.JnSystemProperties;
  * envio em JnEntityEmailMessageSent.
  */
 public class JnBusinessSendEmailMessage implements CcpHttpApiExecutor{
-	//TODO JSON VALIDATIONS	
+		
 	public static enum Fields implements CcpJsonFieldName{
 		email,
 		emails

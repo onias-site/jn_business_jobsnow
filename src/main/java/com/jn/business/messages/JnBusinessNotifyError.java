@@ -12,7 +12,7 @@ import com.jn.messages.JnSendMessageIgnoringProcessErrors;
  * falhas no envio e as registra como warning).
  */
 public class JnBusinessNotifyError implements CcpBusiness{
-	//TODO JSON VALIDATIONS	
+		
 
 	public static final JnBusinessNotifyError INSTANCE = new JnBusinessNotifyError();
 	

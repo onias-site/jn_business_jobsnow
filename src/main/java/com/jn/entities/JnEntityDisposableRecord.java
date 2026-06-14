@@ -57,17 +57,6 @@ public class JnEntityDisposableRecord implements CcpEntityConfigurator {
 		;
 	}
 	
-	 public static CcpJsonRepresentation getDataWithTimeStamp(CcpEntity entity, CcpJsonRepresentation json) {
-		
-		CcpJsonRepresentation idToSearch = entity.getIdToSearchDisposableRecord(json);
-		
-		CcpJsonRepresentation oneById = ENTITY.getEntityMetaData().getOneByIdOrHandleItIfThisIdWasNotFound(idToSearch, CcpOtherConstants.RETURNS_EMPTY_JSON);
-		
-		CcpJsonRepresentation whenFieldsAreFound = oneById.whenAnyFieldsAreFound(x -> getDataWithTimeStamp(x), Fields.format);
-		
-		return whenFieldsAreFound;
-	}
-
 	public static CcpJsonRepresentation getDataWithTimeStamp(CcpJsonRepresentation oneById) {
 		CcpJsonRepresentation jsonPiece = oneById.getJsonPiece(Fields.json, Fields.timestamp, Fields.format);
 		Long timestamp = jsonPiece.getAsLongNumber(Fields.timestamp);

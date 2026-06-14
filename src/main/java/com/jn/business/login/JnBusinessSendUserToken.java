@@ -13,7 +13,7 @@ import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault
  * mensageiro instantâneo e o token para o campo botName.
  */
 public class JnBusinessSendUserToken extends JnBusinessSendMessage{
-	//TODO JSON VALIDATIONS	
+		
 	enum JsonFieldNames implements CcpJsonFieldName{
 		request, originalEmail, originalToken
 	}

@@ -11,7 +11,7 @@ import com.jn.messages.JnSendMessageToUser;
  * de bloqueio de reenvio e JnSendMessageToUser como remetente.
  */
 public class JnBusinessNotifyContactUs implements CcpBusiness{
-	//TODO JSON VALIDATIONS	
+		
 
 	public static final JnBusinessNotifyContactUs INSTANCE = new JnBusinessNotifyContactUs();
 	

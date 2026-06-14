@@ -1,8 +1,10 @@
 package com.jn.json.fields.validation;
 
+import com.ccp.especifications.http.CcpHttpContentType;
 import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeNestedJson;
 import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeNumberUnsigned;
 import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeString;
+import com.jn.business.messages.JnBusinessSendInstantMessage.JnInstantMessageType;
 
 /**
  * Centraliza as definições de validação dos campos JSON específicos de mensagens instantâneas
@@ -25,17 +27,14 @@ public enum JnJsonInstantMessengerFields{
 	@CcpJsonFieldTypeString
 	caption,
 
-	//TODO ALLOWEDVALUES
-	@CcpJsonFieldTypeString
+	@CcpJsonFieldTypeString(allowedValuesEnum = CcpHttpContentType.class)
 	contentType,
 	
 	@CcpJsonFieldTypeString
-	//TODO DEFAULT VALUE
+	//LATER DEFAULT VALUE
 	fileName,
 	
-	//TODO ALLOWEDVALUES
-	//TODO DEFAULT VALUE
-	@CcpJsonFieldTypeString
+	@CcpJsonFieldTypeString(allowedValuesEnum = JnInstantMessageType.class)
 	instantMessageType,
 
 	@CcpJsonFieldTypeString

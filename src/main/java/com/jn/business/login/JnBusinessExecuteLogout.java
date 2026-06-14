@@ -16,7 +16,7 @@ import com.jn.utils.JnDeleteKeysFromCache;
  * registro de conflito de sessão.
  */
 public class JnBusinessExecuteLogout implements CcpBusiness{
-	//TODO JSON VALIDATIONS	
+		
 
 	public static final JnBusinessExecuteLogout INSTANCE = new JnBusinessExecuteLogout();
 	

@@ -21,7 +21,7 @@ import com.jn.utils.JnDeleteKeysFromCache;
  * de senha, registra o login criando a sessão válida e o possível conflito de sessão.
  */
 public class JnBusinessExecuteLogin implements CcpBusiness {
-	//TODO JSON VALIDATIONS	
+		
 	enum JsonFieldNames implements CcpJsonFieldName{
 		sessionToken
 	}

@@ -16,7 +16,7 @@ import com.ccp.business.CcpBusiness;
  * (aceita array de chaves), sendo usado como callback de limpeza de cache após operações bulk.
  */
 public class JnDeleteKeysFromCache implements  CcpBusiness, Consumer<String[]> {
-	//TODO JSON VALIDATIONS	
+		
 	enum JsonFieldNames implements CcpJsonFieldName{
 		keysToDeleteInCache
 	}
