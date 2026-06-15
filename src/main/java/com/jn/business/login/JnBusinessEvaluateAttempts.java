@@ -9,6 +9,7 @@ import com.ccp.especifications.db.utils.entity.CcpEntity;
 import com.ccp.especifications.password.CcpPasswordHandler;
 import com.ccp.flow.CcpErrorFlowDisturb;
 import com.ccp.process.CcpProcessStatus;
+import com.jn.utils.JnSystemProperties;
 
 /**
  * Avalia tentativas de autenticação (senha ou token) comparando o valor fornecido
@@ -147,9 +148,10 @@ public class JnBusinessEvaluateAttempts implements CcpBusiness{
 		}
 
 		Double attemptsFromDatabase = json.getValueFromPath(0d, CcpEntity.JsonFieldNames._entities, this.entityToGetTheAttempts, this.fieldAttempsName);
-		//LATER PARAMETRIZAR O 3
+		
+		int maxAttempts = JnSystemProperties.INSTANCE.maxAttempts();
 		double updatedAttempts = attemptsFromDatabase + 1;
-		boolean exceededAttempts = updatedAttempts >= 3;
+		boolean exceededAttempts = updatedAttempts >= maxAttempts;
 		if(exceededAttempts) {
 			this.topicToCreateTheLockWhenExceedTries.apply(toReturn);
 			throw new CcpErrorFlowDisturb(toReturn, this.statusToReturnWhenExceedAttempts);

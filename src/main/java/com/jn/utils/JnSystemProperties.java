@@ -28,6 +28,7 @@ public class JnSystemProperties {
 				return "database.secret";
 			}
 		},
+		maxAttempts,
 		supportLanguage,
 		urlEmailKey,
 		urlInstantMessengerKey,
@@ -121,5 +122,11 @@ public class JnSystemProperties {
 	public <T> T getSystemProperty(String field) {
 		T response = this.systemProperties.getAsObject(new CcpFieldName(field));
 		return response;
+	}
+
+
+	public int maxAttempts() {
+		Integer asIntegerNumber = this.systemProperties.getOrDefault(Fields.maxAttempts, () -> 3);
+		return asIntegerNumber;
 	}
 }
