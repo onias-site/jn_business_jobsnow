@@ -10,6 +10,7 @@ import com.ccp.decorators.CcpJsonRepresentation.CcpJsonFieldName;
 import com.ccp.especifications.db.crud.CcpGetEntityId;
 import com.ccp.especifications.db.utils.entity.CcpEntity;
 import com.ccp.especifications.db.utils.entity.CcpEntityOperationType;
+import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityMetaData;
 import com.ccp.json.validations.fields.annotations.CcpJsonCopyFieldValidationsFrom;
 import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidatorRequired;
 import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeString;
@@ -259,7 +260,9 @@ public enum JnServiceLogin implements JnService {
 			
 			CcpEntity twinEntity = entity.getTwinEntity();
 			
-			CcpBusiness save = entity.getEntityMetaData().getOperationCallback(CcpEntityOperationType.save);
+			CcpEntityMetaData entityMetaData = entity.getEntityMetaData();
+			
+			CcpBusiness save = entityMetaData.getOperationCallback(CcpEntityOperationType.save);
 			
 			CcpGetEntityId ccpGetEntityId = super.getCcpGetEntityId(json, entity);
 
@@ -286,7 +289,9 @@ public enum JnServiceLogin implements JnService {
 			
 			CcpEntity twinEntity = entity.getTwinEntity();
 
-			CcpBusiness save = entity.getEntityMetaData().getOperationCallback(CcpEntityOperationType.save);
+			CcpEntityMetaData entityMetaData = entity.getEntityMetaData();
+			
+			CcpBusiness save = entityMetaData.getOperationCallback(CcpEntityOperationType.save);
 
 			CcpGetEntityId ccpGetEntityId = super.getCcpGetEntityId(json, entity);
 			
