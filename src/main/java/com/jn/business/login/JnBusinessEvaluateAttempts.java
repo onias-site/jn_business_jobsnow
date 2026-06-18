@@ -1,7 +1,7 @@
 package com.jn.business.login;
 
 import com.ccp.business.CcpBusiness;
-import com.ccp.constantes.CcpOtherConstants;
+import com.ccp.constants.CcpOtherConstants;
 import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.decorators.CcpJsonRepresentation.CcpJsonFieldName;
 import com.ccp.dependency.injection.CcpDependencyInjection;
@@ -168,11 +168,4 @@ public class JnBusinessEvaluateAttempts implements CcpBusiness{
 		};
 		throw new CcpErrorFlowDisturb(toReturn.put(this.fieldAttempsName, updatedAttempts), this.statusToReturnWhenWrongType, returnedFields);
 	}
-	 
-	
-	public String toString() {
-		return "teste";
-	}
-	
-	
 }

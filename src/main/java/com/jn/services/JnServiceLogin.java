@@ -3,7 +3,7 @@ package com.jn.services;
 import java.util.stream.Collectors;
 
 import com.ccp.business.CcpBusiness;
-import com.ccp.constantes.CcpOtherConstants;
+import com.ccp.constants.CcpOtherConstants;
 import com.ccp.decorators.CcpFieldName;
 import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.decorators.CcpJsonRepresentation.CcpJsonFieldName;
@@ -103,7 +103,7 @@ public enum JnServiceLogin implements JnService {
 						JsonFieldNames.expirationDate, 
 						JsonFieldNames.dateItWasSaved,
 						JsonFieldNames.sessionToken
-						)
+	 					)
 			.endThisProcedureRetrievingTheResultingData(this, CcpOtherConstants.DO_NOTHING, LoadDataAboutToken.INSTANCE, JnDeleteKeysFromCache.INSTANCE);
 			return findById; 
 		}
@@ -268,7 +268,8 @@ public enum JnServiceLogin implements JnService {
 
 			CcpJsonRepresentation result = ccpGetEntityId
 			.toBeginProcedureAnd()
-				.ifThisIdIsPresentInEntity(twinEntity).returnStatus(JnProcessStatusUnlockLoginToken.statusTokenAlredyResent).and()
+			.ifThisIdIsNotPresentInEntity(JnEntityLoginToken.ENTITY).returnStatus(JnProcessStatusUnlockLoginToken.statusTokenNotExists).and()
+			.ifThisIdIsPresentInEntity(twinEntity).returnStatus(JnProcessStatusUnlockLoginToken.statusTokenAlredyResent).and()
 				.ifThisIdIsPresentInEntity(entity).returnStatus(JnProcessStatusUnlockLoginToken.statusAlreadyRequested)
 				.andFinallyReturningTheseFields(
 						JsonFieldNames.expirationDate, 
@@ -419,6 +420,28 @@ class ExecuteLogin{
 	Object password;
 }
 class ExistsLoginEmail{
+	@CcpJsonFieldValidatorRequired
+	@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
+	Object userAgent;
+	@CcpJsonFieldValidatorRequired
+	@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
+	Object ip;
+	@CcpJsonFieldValidatorRequired
+	@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
+	Object email;
+}
+class UnlockLoginToken{
+	@CcpJsonFieldValidatorRequired
+	@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
+	Object userAgent;
+	@CcpJsonFieldValidatorRequired
+	@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
+	Object ip;
+	@CcpJsonFieldValidatorRequired
+	@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
+	Object email;
+}
+class ResendLoginToken{
 	@CcpJsonFieldValidatorRequired
 	@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 	Object userAgent;

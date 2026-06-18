@@ -1,4 +1,4 @@
-package com.jn.db.bulk.handlers;
+﻿package com.jn.db.bulk.handlers;
 
 import java.util.ArrayList;
 import java.util.List;

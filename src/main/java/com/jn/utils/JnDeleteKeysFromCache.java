@@ -5,11 +5,11 @@ import java.util.Collection;
 import java.util.List;
 import java.util.function.Consumer;
 
-import com.ccp.constantes.CcpOtherConstants;
 import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.decorators.CcpJsonRepresentation.CcpJsonFieldName;
 import com.ccp.especifications.cache.CcpCacheDecorator;
 import com.ccp.business.CcpBusiness;
+import com.ccp.constants.CcpOtherConstants;
 /**
  * Utilitário Singleton para exclusão de chaves do cache (GCP Memcache). Implementa tanto
  * {@code CcpBusiness} (aceita JSON com lista de chaves) quanto {@code Consumer<String[]>}

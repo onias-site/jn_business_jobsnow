@@ -4,7 +4,6 @@ import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.business.CcpBusiness;
 import com.jn.entities.JnEntityJobsnowError;
 import com.jn.messages.JnSendMessageToUser;
-import com.jn.messages.JnSendMessageIgnoringProcessErrors;
 
 /**
  * Notifica o suporte sobre um erro ocorrido no sistema. Utiliza JnBusinessNotifySupport
@@ -24,7 +23,7 @@ public class JnBusinessNotifyError implements CcpBusiness{
 	public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
 
 		String name = JnBusinessNotifyError.class.getName();
-		JnSendMessageToUser x = new JnSendMessageIgnoringProcessErrors();
+		JnSendMessageToUser x = new JnSendMessageToUser.JnSendMessageIgnoringProcessErrors();
 		JnBusinessNotifySupport.INSTANCE.apply(json, name, JnEntityJobsnowError.ENTITY, x);
 
 		return json;

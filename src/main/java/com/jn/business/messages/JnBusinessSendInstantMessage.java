@@ -1,7 +1,7 @@
 package com.jn.business.messages;
 
 import com.ccp.business.CcpBusiness;
-import com.ccp.constantes.CcpOtherConstants;
+import com.ccp.constants.CcpOtherConstants;
 import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.decorators.CcpJsonRepresentation.CcpJsonFieldName;
 import com.ccp.decorators.CcpStringDecorator;
@@ -17,7 +17,6 @@ import com.ccp.json.validations.fields.annotations.CcpJsonCopyFieldValidationsFr
 import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidatorRequired;
 import com.jn.entities.JnEntityInstantMessengerBotLocked;
 import com.jn.entities.JnEntityInstantMessengerMessageSent;
-import com.jn.exceptions.JnErrorUnableToSendInstantMessage;
 import com.jn.json.fields.validation.JnJsonInstantMessengerFields;
 import com.jn.utils.JnSystemProperties;
 
@@ -208,7 +207,14 @@ public class JnBusinessSendInstantMessage implements CcpHttpApiExecutor{
 		
 		
 		public abstract CcpJsonRepresentation sendMessage (CcpJsonRepresentation json, CcpJsonRepresentation message);
-		
+
+	}
+
+	@SuppressWarnings("serial")
+	public static class JnErrorUnableToSendInstantMessage extends RuntimeException {
+		private JnErrorUnableToSendInstantMessage(CcpJsonRepresentation json) {
+			super("This message couldn't be sent. Details: " + json);
+		}
 	}
 
 }

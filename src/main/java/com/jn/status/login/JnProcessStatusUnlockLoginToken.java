@@ -9,6 +9,7 @@ import com.ccp.process.CcpProcessStatus;
  */
 public enum JnProcessStatusUnlockLoginToken implements CcpProcessStatus{
 	statusTokenNotLocked(404),
+	statusTokenNotExists(404),
 	statusAlreadyRequested(409),
 	statusTokenAlredyResent(429), 
 	statusTokenAlredyUnlocked(429), 

@@ -2,7 +2,7 @@ package com.jn.business.http;
 
 import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.decorators.CcpTimeDecorator;
-import com.ccp.especifications.http.CcpErrorHttp;
+import com.ccp.especifications.http.CcpHttpRequester.CcpErrorHttp;
 import com.ccp.especifications.http.CcpErrorHttpClient;
 import com.ccp.especifications.http.CcpErrorHttpServer;
 import com.ccp.especifications.http.CcpHttpApiExecutor;

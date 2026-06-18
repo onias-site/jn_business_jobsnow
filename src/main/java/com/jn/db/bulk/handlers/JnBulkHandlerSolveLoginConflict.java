@@ -1,10 +1,9 @@
-package com.jn.db.bulk.handlers;
+﻿package com.jn.db.bulk.handlers;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import com.ccp.decorators.CcpJsonRepresentation;
-import com.ccp.decorators.CcpJsonRepresentation.CcpJsonFieldName;
 import com.ccp.especifications.db.bulk.CcpBulkItem;
 import com.ccp.especifications.db.bulk.CcpBulkEntityOperationType;
 import com.ccp.especifications.db.crud.CcpHandleWithSearchResultsInTheEntity;
@@ -16,10 +15,6 @@ import com.jn.entities.JnEntityLoginSessionConflict;
  * para o email, gera bulk item para deletá-lo; caso não exista, não faz nada.
  */
 public class JnBulkHandlerSolveLoginConflict implements CcpHandleWithSearchResultsInTheEntity<List<CcpBulkItem>>{
-	enum JsonFieldNames implements CcpJsonFieldName{
-		email
-	}
-
 	private JnBulkHandlerSolveLoginConflict() {}
 	
 	public static final JnBulkHandlerSolveLoginConflict INSTANCE = new JnBulkHandlerSolveLoginConflict();

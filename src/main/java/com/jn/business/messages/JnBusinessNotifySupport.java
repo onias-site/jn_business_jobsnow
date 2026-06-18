@@ -7,7 +7,7 @@ import com.jn.business.messages.JnBusinessSendInstantMessage.JnBotType;
 import com.jn.entities.JnEntityInstantMessengerMessageSent;
 import com.jn.entities.JnEntityJobsnowError;
 import com.jn.entities.JnEntityJobsnowPenddingError;
-import com.jn.exceptions.JnErrorSupportLanguageIsMissing;
+
 import com.jn.messages.JnSendMessageToUser;
 import com.jn.utils.JnSystemProperties;
 
@@ -63,4 +63,10 @@ public class JnBusinessNotifySupport {
 		return json;
 	}
 
+	@SuppressWarnings("serial")
+	public static class JnErrorSupportLanguageIsMissing extends RuntimeException {
+		private JnErrorSupportLanguageIsMissing() {
+			super("It is missing the configuration 'supportLanguage'");
+		}
+	}
 }
