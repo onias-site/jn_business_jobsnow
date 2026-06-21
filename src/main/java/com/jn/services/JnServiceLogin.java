@@ -268,6 +268,7 @@ public enum JnServiceLogin implements JnService {
 
 			CcpJsonRepresentation result = ccpGetEntityId
 			.toBeginProcedureAnd()
+			.loadThisIdFromEntity(JnEntityDisposableRecord.ENTITY).and()
 			.ifThisIdIsNotPresentInEntity(JnEntityLoginToken.ENTITY).returnStatus(JnProcessStatusUnlockLoginToken.statusTokenNotExists).and()
 			.ifThisIdIsPresentInEntity(twinEntity).returnStatus(JnProcessStatusUnlockLoginToken.statusTokenAlredyResent).and()
 				.ifThisIdIsPresentInEntity(entity).returnStatus(JnProcessStatusUnlockLoginToken.statusAlreadyRequested)
@@ -276,7 +277,7 @@ public enum JnServiceLogin implements JnService {
 						JsonFieldNames.dateItWasSaved,
 						JsonFieldNames.sessionToken
 						)
-			.endThisProcedureRetrievingTheResultingData(this, CcpOtherConstants.DO_NOTHING, save, JnDeleteKeysFromCache.INSTANCE);
+			.endThisProcedureRetrievingTheResultingData(this, LoadDataAboutToken.INSTANCE, save, JnDeleteKeysFromCache.INSTANCE);
 			
 			return result;
 		}
@@ -318,7 +319,7 @@ public enum JnServiceLogin implements JnService {
 		CcpJsonRepresentation mainDisposableToSearch = entity.getIdToSearchDisposableRecord(json);
 		CcpJsonRepresentation twinDisposableToSearch = twin.getIdToSearchDisposableRecord(json);
 		
-		CcpGetEntityId ccpGetEntityId = new CcpGetEntityId(json, mainDisposableToSearch, twinDisposableToSearch);
+		CcpGetEntityId ccpGetEntityId = new CcpGetEntityId(json, twinDisposableToSearch, mainDisposableToSearch);
 		return ccpGetEntityId;
 	}
 

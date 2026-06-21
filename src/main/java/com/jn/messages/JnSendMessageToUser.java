@@ -13,7 +13,7 @@ import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.decorators.CcpJsonRepresentation.CcpJsonFieldName;
 import com.ccp.dependency.injection.CcpDependencyInjection;
 import com.ccp.especifications.db.crud.CcpCrud;
-import com.ccp.especifications.db.crud.CcpGetEntityId.CcpSelectUnionAll;
+import com.ccp.especifications.db.crud.CcpSelectUnionAll;
 import com.ccp.especifications.db.utils.entity.CcpEntity;
 import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityMetaData.CcpErrorEntityPrimaryKeyIsMissing;
 import com.jn.business.http.JnBusinessSendHttpRequest;
