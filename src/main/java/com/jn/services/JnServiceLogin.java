@@ -202,7 +202,6 @@ public enum JnServiceLogin implements JnService {
 			
 			JnFunctionMensageriaSender sendUserToken = new JnFunctionMensageriaSender(JnBusinessSendUserToken.INSTANCE);
 			
-			Set<CcpJsonFieldName> fieldSet = json.fieldSet().stream().map(x -> new CcpFieldName(x)).collect(Collectors.toSet());
 			
 			CcpJsonRepresentation result = new CcpGetEntityId(parametersToSearchInAllEntities)
 			.toBeginProcedureAnd()
@@ -210,7 +209,16 @@ public enum JnServiceLogin implements JnService {
 				.ifThisIdIsPresentInEntity(JnEntityDisposableRecord.ENTITY).returnStatus(JnProcessStatusUpdatePassword.tokenAlreadySent).and()
 				.ifThisIdIsNotPresentInEntity(JnEntityLoginEmail.ENTITY).returnStatus(JnProcessStatusUpdatePassword.missingEmail).and()
 				.ifThisIdIsNotPresentInEntity(JnEntityLoginToken.ENTITY).executeAction(sendUserToken)
-				.andFinallyReturningTheseFields(fieldSet)
+				.andFinallyReturningTheseFields(
+						JnEntityLoginSessionValidation.Fields.userAgent,
+						JnEntityLoginPasswordAttempts.Fields.attempts,
+						JnEntityDisposableRecord.Fields.timestamp,
+						JnEntityLoginSessionValidation.Fields.ip,
+						JnEntityLoginToken.Fields.email,
+						JsonFieldNames.expirationDate, 
+						JsonFieldNames.dateItWasSaved,
+						JsonFieldNames.sessionToken
+						)
 			.endThisProcedureRetrievingTheResultingData(this, LoadDataAboutToken.INSTANCE, LoadDataAboutToken.INSTANCE, JnDeleteKeysFromCache.INSTANCE);
 
 			return result;
@@ -353,7 +361,7 @@ public enum JnServiceLogin implements JnService {
 		CcpJsonRepresentation parametersToSearchDataAboutToken = JnEntityLoginToken.ENTITY.getIdToSearchDisposableRecord(json);
 		CcpJsonRepresentation parametersToSearchDataAboutLockedToken = JnEntityLoginToken.ENTITY.getTwinEntity().getIdToSearchDisposableRecord(json);
 
-		CcpJsonRepresentation[] parametersToSearchInAllEntities = new CcpJsonRepresentation[] {parametersToSearchDataAboutToken, parametersToSearchDataAboutLockedToken, parametersToSearchInAllOtherEntities};
+		CcpJsonRepresentation[] parametersToSearchInAllEntities = new CcpJsonRepresentation[] {parametersToSearchInAllOtherEntities, parametersToSearchDataAboutToken, parametersToSearchDataAboutLockedToken};
 		return parametersToSearchInAllEntities;
 	}
 
@@ -391,12 +399,25 @@ class LoadDataAboutToken implements CcpBusiness{
 	
 	public static final LoadDataAboutToken INSTANCE = new LoadDataAboutToken();
 
-	public CcpJsonRepresentation apply(CcpJsonRepresentation jsn) {
-		CcpJsonRepresentation innerJsonFromPath = jsn.getInnerJsonFromPath(CcpEntity.JsonFieldNames._entities, JnEntityDisposableRecord.ENTITY);
-		CcpJsonRepresentation dataWithTimeStamp = JnEntityDisposableRecord.getDataWithTimeStamp(innerJsonFromPath);
-		CcpJsonRepresentation mergeWithAnotherJson = dataWithTimeStamp.mergeWithAnotherJson(jsn);
+	public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
+		CcpJsonRepresentation innerJsonFromPath = json.getInnerJsonFromPath(CcpEntity.JsonFieldNames._entities, JnEntityDisposableRecord.ENTITY);
+		CcpJsonRepresentation whenAnyFieldsAreFound = innerJsonFromPath.whenAnyFieldsAreFound(JsonTransformer.INSTANCE, JnEntityDisposableRecord.Fields.timestamp);
+		return whenAnyFieldsAreFound;
+		
+	}
+}
+class JsonTransformer implements CcpBusiness{
+	public static final JsonTransformer INSTANCE = new JsonTransformer();
+	
+	private JsonTransformer() {}
+
+	@Override
+	public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
+	CcpJsonRepresentation dataWithTimeStamp = JnEntityDisposableRecord.getDataWithTimeStamp(json);
+		CcpJsonRepresentation mergeWithAnotherJson = dataWithTimeStamp.mergeWithAnotherJson(json);
 		return mergeWithAnotherJson;
 	}
+	
 }
 
 class SavePassword{
