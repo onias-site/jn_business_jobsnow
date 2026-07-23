@@ -1,5 +1,6 @@
 package com.jn.services;
 
+import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.service.CcpService;
 
 /**
@@ -18,4 +19,9 @@ public interface JnService extends CcpService {
 		return forName;
 	}
 
+	default CcpJsonRepresentation execute(CcpJsonRepresentation json) {
+		CcpJsonRepresentation execute = CcpService.super.execute(json);
+		return execute;
+	}
+	
 }
