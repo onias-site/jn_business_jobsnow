@@ -33,6 +33,7 @@ import com.jn.entities.JnEntityLoginTokenRequestUnlock;
 import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
 import com.jn.mensageria.JnFunctionMensageriaSender;
+import com.jn.services.JnServiceLogin.JsonFieldNames;
 import com.jn.status.login.JnProcessStatusCreateLoginEmail;
 import com.jn.status.login.JnProcessStatusCreateLoginToken;
 import com.jn.status.login.JnProcessStatusExecuteLogin;
@@ -398,7 +399,9 @@ class LoadDataAboutToken implements CcpBusiness{
 	public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
 		CcpJsonRepresentation innerJsonFromPath = json.getInnerJsonFromPath(CcpEntity.JsonFieldNames._entities, JnEntityDisposableRecord.ENTITY);
 		CcpJsonRepresentation whenAnyFieldsAreFound = innerJsonFromPath.whenAnyFieldsAreFound(JsonTransformer.INSTANCE, JnEntityDisposableRecord.Fields.timestamp);
-		return whenAnyFieldsAreFound;
+		CcpJsonRepresentation jsonPiece = json.getJsonPiece(JnEntityLoginEmail.Fields.email, JsonFieldNames.sessionToken);
+		CcpJsonRepresentation mergedJson = whenAnyFieldsAreFound.mergeWithAnotherJson(jsonPiece);
+		return mergedJson;
 		
 	}
 }
