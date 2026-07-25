@@ -8,7 +8,6 @@ import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityF
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityFieldsValidator;
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityOlyReadable;
 import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityFactory;
-import com.ccp.especifications.db.utils.entity.decorators.enums.CcpEntityExpurgableOptions;
 import com.ccp.especifications.db.utils.entity.decorators.interfaces.CcpEntityConfigurator;
 import com.ccp.especifications.db.utils.entity.fields.annotations.CcpEntityFieldNotUpdatable;
 import com.ccp.especifications.db.utils.entity.fields.annotations.CcpEntityFieldPrimaryKey;
@@ -53,17 +52,21 @@ public class JnEntityDisposableRecord implements CcpEntityConfigurator {
 		@CcpEntityFieldPrimaryKey
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		id, 
+		@CcpEntityFieldNotUpdatable
+		@CcpJsonFieldValidatorRequired
+		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
+		trueTimestamp,
 		;
 	}
 	
 	public static CcpJsonRepresentation getDataWithTimeStamp(CcpJsonRepresentation oneById) {
-		CcpJsonRepresentation jsonPiece = oneById.getJsonPiece(Fields.json, Fields.timestamp, Fields.format);
+		CcpJsonRepresentation jsonPiece = oneById.getJsonPiece(Fields.json, Fields.timestamp, Fields.trueTimestamp);
+		Long trueTimestamp = jsonPiece.getAsLongNumber(Fields.trueTimestamp);
 		Long timestamp = jsonPiece.getAsLongNumber(Fields.timestamp);
-		String format = jsonPiece.getAsString(Fields.format);
-		String newFormat = "dd/MM/yyyy à HH:mm";
-		String dateItWasSaved = CcpEntityExpurgableOptions.getPastDate(format, newFormat, timestamp).replace("à", "às");
+		String newFormat = "dd/MM/yyyy - HH:mm";
+		String dateItWasSaved = new CcpTimeDecorator(trueTimestamp).getFormattedDateTime(newFormat);
 		CcpTimeDecorator ctd = new CcpTimeDecorator(timestamp);
-		String expirationDate = ctd.getFormattedDateTime(newFormat).replace("à", "às");
+		String expirationDate = ctd.getFormattedDateTime(newFormat);
 		
 		CcpJsonRepresentation innerJson = oneById.getInnerJson(Fields.json);
 		CcpJsonRepresentation removeFields = jsonPiece.removeFields(Fields.json, Fields.format);

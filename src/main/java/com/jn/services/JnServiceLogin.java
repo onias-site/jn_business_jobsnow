@@ -71,6 +71,7 @@ public enum JnServiceLogin implements JnService {
 				.ifThisIdIsPresentInEntity(JnEntityLoginPassword.ENTITY.getTwinEntity()).returnStatus(JnProcessStatusExecuteLogin.lockedPassword).and()
 				.ifThisIdIsPresentInEntity(JnEntityLoginSessionConflict.ENTITY).returnStatus(JnProcessStatusExecuteLogin.loginConflict).and()
 				.ifThisIdIsNotPresentInEntity(JnEntityLoginPassword.ENTITY).returnStatus(JnProcessStatusExecuteLogin.missingSavePassword).and()
+				.ifThisIdIsNotPresentInEntity(JnEntityLoginAnswers.ENTITY).returnStatus(JnProcessStatusCreateLoginEmail.missingSaveAnswers).and()
 				.ifThisIdIsPresentInEntity(JnEntityLoginPassword.ENTITY).executeAction(functionToEvaluatePasswordAttempts).andFinallyReturningTheseFields(
 						JnEntityLoginSessionValidation.Fields.userAgent,
 						JnEntityLoginPasswordAttempts.Fields.attempts,
@@ -106,7 +107,7 @@ public enum JnServiceLogin implements JnService {
 			
 			CcpJsonRepresentation duplicateValueFromField = json.duplicateValueFromField(JsonFieldNames.sessionToken, JnEntityLoginSessionValidation.Fields.token);
 			
-			CcpBusiness lockPassword = JnEntityLoginPassword.ENTITY.getTwinEntity().getEntityMetaData().getOperationCallback(CcpEntityOperationType.save);
+			CcpBusiness lockPassword = JnEntityLoginPassword.ENTITY.getEntityMetaData().getOperationCallback(CcpEntityOperationType.delete);
 			
 			CcpBusiness incrementAttempts = JnEntityLoginSessionTokenAttempts.incrementAttempts(3, lockPassword);
 			
@@ -235,6 +236,7 @@ public enum JnServiceLogin implements JnService {
 			.loadThisIdFromEntity(JnEntityDisposableRecord.ENTITY).and()
 				.loadThisIdFromEntity(JnEntityLoginTokenAttempts.ENTITY).and()
 				.ifThisIdIsPresentInEntity(JnEntityLoginToken.ENTITY.getTwinEntity()).returnStatus(JnProcessStatusUpdatePassword.lockedToken).and()
+				.ifThisIdIsNotPresentInEntity(JnEntityLoginAnswers.ENTITY).returnStatus(JnProcessStatusCreateLoginEmail.missingSaveAnswers).and()
 				.ifThisIdIsNotPresentInEntity(JnEntityLoginEmail.ENTITY).returnStatus(JnProcessStatusUpdatePassword.missingEmail).and()
 				.ifThisIdIsNotPresentInEntity(JnEntityLoginToken.ENTITY).returnStatus(JnProcessStatusUpdatePassword.missingToken).and()
 				.executeAction(functionToEvaluateTokenAttempts).andFinallyReturningTheseFields(

@@ -101,9 +101,11 @@ public class JnDisposableEntity extends CcpDefaultEntityDelegator<CcpEntityDispo
 		CcpJsonRepresentation onlyExistingFields = entityDetails.getOnlyExistingFields(json);
 		Long nextTimeStamp = this.timeOption.getNextTimeStamp(timestamp);
 		String nextDate = this.timeOption.getNextDate(timestamp);
+
 		CcpJsonRepresentation expurgable = expurgableId
 				.put(JnEntityDisposableRecord.Fields.format, this.timeOption.format)
 				.put(JnEntityDisposableRecord.Fields.timestamp, nextTimeStamp)
+				.put(JnEntityDisposableRecord.Fields.trueTimestamp, timestamp)
 				.put(JnEntityDisposableRecord.Fields.json,onlyExistingFields)
 				.put(JnEntityDisposableRecord.Fields.date, nextDate)
 				.put(JnEntityDisposableRecord.Fields.id, id)
