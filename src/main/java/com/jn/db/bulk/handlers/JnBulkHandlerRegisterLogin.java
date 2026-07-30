@@ -10,6 +10,8 @@ import com.ccp.especifications.db.crud.CcpHandleWithSearchResultsInTheEntity;
 import com.ccp.especifications.db.utils.entity.CcpEntity;
 import com.jn.entities.JnEntityLoginSessionConflict;
 import com.jn.entities.JnEntityLoginSessionValidation;
+import com.jn.entities.JnEntityLoginTokenRequestResend;
+import com.jn.entities.JnEntityLoginTokenRequestUnlock;
 
 /**
  * Handler de bulk responsável por registrar o login do usuário. Independentemente de
@@ -37,11 +39,24 @@ public class JnBulkHandlerRegisterLogin implements CcpHandleWithSearchResultsInT
 		var newSession = JnEntityLoginSessionConflict.ENTITY.toBulkItems(session, CcpBulkEntityOperationType.create);
 		CcpJsonRepresentation login = JnEntityLoginSessionValidation.ENTITY.getHandledJson(new CcpJsonRepresentation(json.content));
 		var newLogin = JnEntityLoginSessionValidation.ENTITY.toBulkItems(login, CcpBulkEntityOperationType.create);
+		
+		JnEntityLoginTokenRequestResend.ENTITY.getHandledJson(json);
 		var asList = new ArrayList<CcpBulkItem>();
 		asList.addAll(newSession);
 		asList.addAll(newLogin);
+		List<CcpBulkItem> otherBulkItems = this.getOtherBulkItems(json, CcpBulkEntityOperationType.delete, JnEntityLoginTokenRequestResend.ENTITY, JnEntityLoginTokenRequestUnlock.ENTITY);
+		asList.addAll(otherBulkItems);
 		return asList;
 	} 
+	
+	private List<CcpBulkItem> getOtherBulkItems(CcpJsonRepresentation json, CcpBulkEntityOperationType operation, CcpEntity... entities){
+		List<CcpBulkItem> response = new ArrayList<CcpBulkItem>();
+		for (CcpEntity entity : entities) {
+			List<CcpBulkItem> bulkItems = entity.toBulkItems(json, operation);
+			response.addAll(bulkItems);
+		}
+		return response;
+	}
 
 	/**
 	 * Retorna os mesmos bulk items quando não havia registro anterior.

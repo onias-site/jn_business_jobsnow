@@ -275,6 +275,7 @@ public enum JnServiceLogin implements JnService {
 				.andFinallyReturningTheseFields(
 						JsonFieldNames.expirationDate, 
 						JsonFieldNames.dateItWasSaved,
+						JsonFieldNames.timestamp,
 						JsonFieldNames.sessionToken
 						)
 			.endThisProcedureRetrievingTheResultingData(this, LoadDataAboutToken.INSTANCE, save, JnDeleteKeysFromCache.INSTANCE);
@@ -379,7 +380,8 @@ public enum JnServiceLogin implements JnService {
 		dateItWasSaved, 
 		expirationDate,
 		sessionToken,
-		inexistentField
+		inexistentField, 
+		timestamp
 	}
 }
 
