@@ -2,8 +2,8 @@ package com.jn.entities;
 
 import static com.ccp.especifications.db.utils.entity.decorators.enums.CcpEntityDecoratorOperationType.delete;
 import static com.ccp.especifications.db.utils.entity.decorators.enums.CcpEntityDecoratorOperationType.save;
-import static com.ccp.especifications.db.utils.entity.decorators.enums.CcpEntityOperationStepType.after;
-import static com.ccp.especifications.db.utils.entity.decorators.enums.CcpEntityOperationStepType.before;
+import static com.ccp.especifications.db.utils.entity.decorators.enums.CcpEntityOperationStepType.antes;
+import static com.ccp.especifications.db.utils.entity.decorators.enums.CcpEntityOperationStepType.depois;
 import static com.ccp.especifications.db.utils.entity.decorators.enums.CcpEntityType.mainEntity;
 
 import com.ccp.decorators.CcpJsonRepresentation.CcpJsonFieldName;
@@ -47,8 +47,8 @@ import com.jn.utils.JnDeleteKeysFromCache;
 @CcpEntityFieldsValidator(classReferenceWithTheFields = JnEntityLoginTokenRequestUnlock.Fields.class)
 @CcpEntityOperations(
 		operations = {
-				@CcpEntityOperation(when = before, operation = delete, from = mainEntity,  execute = {JnBusinessResetLoginToken.class, JnBusinessResendLoginToken.class}, operationHandlers = {}),
-				@CcpEntityOperation(when = after, operation = save, from = mainEntity,  execute = {JnMessages.NotifySupportAboutPendingUnlockLoginToken.class}, operationHandlers = {}),
+				@CcpEntityOperation(when = depois, operation = delete, from = mainEntity,  execute = {JnBusinessResetLoginToken.class, JnBusinessResendLoginToken.class}, operationHandlers = {}),
+				@CcpEntityOperation(when = antes, operation = save, from = mainEntity,  execute = {JnMessages.NotifySupportAboutPendingUnlockLoginToken.class}, operationHandlers = {}),
 		},
 		globalHandlers = {}
 		)

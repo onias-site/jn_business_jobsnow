@@ -1,4 +1,4 @@
-﻿package com.jn.messages;
+package com.jn.messages;
 
 import java.util.ArrayList;
 import java.util.HashMap;

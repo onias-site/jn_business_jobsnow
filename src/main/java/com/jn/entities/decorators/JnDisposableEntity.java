@@ -1,4 +1,4 @@
-﻿package com.jn.entities.decorators;
+package com.jn.entities.decorators;
 
 import java.util.ArrayList;
 import java.util.List;
