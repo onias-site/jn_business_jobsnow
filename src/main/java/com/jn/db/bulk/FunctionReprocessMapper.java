@@ -34,7 +34,7 @@ class FunctionReprocessMapper implements Function<CcpBulkOperationResult, CcpJso
 		CcpEntityMetaData entityDetails = bulkItem.entity.getEntityMetaData();
 		boolean itIsTryingToStartAnInfinitLoop = entityDetails.entityName.equals(JnEntityRecordToReprocess.ENTITY.getEntityMetaData().entityName);
 		if(itIsTryingToStartAnInfinitLoop) {
-			throw new RuntimeException();
+			throw new JnErrorReprocessInfiniteLoopPrevented();
 		}
 		long currentTimeMillis = System.currentTimeMillis();
 		CcpJsonRepresentation put = CcpOtherConstants.EMPTY_JSON.put(JnEntityRecordToReprocess.Fields.timestamp, currentTimeMillis);
@@ -45,8 +45,9 @@ class FunctionReprocessMapper implements Function<CcpBulkOperationResult, CcpJso
 		CcpJsonRepresentation jsonPiece = renameKey.put(JnEntityRecordToReprocess.Fields.id, bulkItem.id).put(JnEntityRecordToReprocess.Fields.entity, entityDetails.entityName)
 		.getJsonPiece(JnEntityRecordToReprocess.Fields.values());
 		return jsonPiece;
-	} 
-	
-	
-	
+	}
+
+	@SuppressWarnings("serial")
+	private static class JnErrorReprocessInfiniteLoopPrevented extends RuntimeException {
+	}
 }

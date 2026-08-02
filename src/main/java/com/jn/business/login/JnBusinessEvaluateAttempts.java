@@ -125,15 +125,15 @@ public class JnBusinessEvaluateAttempts implements CcpBusiness{
 	public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
 
 		String secretFromDatabase = json.getValueFromPath("",CcpEntity.JsonFieldNames._entities, this.entityToGetTheSecret, this.databaseFieldName);
-		
+
 		if(secretFromDatabase.trim().isEmpty()) {
-			throw new RuntimeException();
+			throw new JnErrorSecretFromDatabaseIsEmpty();
 		}
-		
+
 		String secretFromUser = json.getAsString(this.userFieldName);
 
 		if(secretFromUser.trim().isEmpty()) {
-			throw new RuntimeException();
+			throw new JnErrorSecretFromUserIsEmpty();
 		}
 		
 		CcpPasswordHandler dependency = CcpDependencyInjection.getDependency(CcpPasswordHandler.class);
@@ -167,5 +167,13 @@ public class JnBusinessEvaluateAttempts implements CcpBusiness{
 				this.fieldAttempsName
 		};
 		throw new CcpErrorFlowDisturb(toReturn.put(this.fieldAttempsName, updatedAttempts), this.statusToReturnWhenWrongType, returnedFields);
+	}
+
+	@SuppressWarnings("serial")
+	private static class JnErrorSecretFromDatabaseIsEmpty extends RuntimeException {
+	}
+
+	@SuppressWarnings("serial")
+	private static class JnErrorSecretFromUserIsEmpty extends RuntimeException {
 	}
 }

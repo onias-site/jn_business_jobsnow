@@ -15,7 +15,7 @@ public interface JnService extends CcpService {
 		try {
 			forName = Class.forName(this.getClass().getPackageName() + "." + this.name());
 		} catch (ClassNotFoundException e) {
-			throw new RuntimeException(e);
+			throw new JnErrorServiceValidationClassNotFound(e);
 		}
 		return forName;
 	}
@@ -25,4 +25,11 @@ public interface JnService extends CcpService {
 		return execute;
 	}
 	
+
+	@SuppressWarnings("serial")
+	public static class JnErrorServiceValidationClassNotFound extends RuntimeException {
+		private JnErrorServiceValidationClassNotFound(Throwable cause) {
+			super(cause);
+		}
+	}
 }
