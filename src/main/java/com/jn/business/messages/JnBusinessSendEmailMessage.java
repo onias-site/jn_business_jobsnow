@@ -39,7 +39,6 @@ public class JnBusinessSendEmailMessage implements CcpHttpApiExecutor{
 
 		CcpEmailSender emailSender = CcpDependencyInjection.getDependency(CcpEmailSender.class);
 		
-		
 		String providerUrl =  JnSystemProperties.INSTANCE.urlEmailValue();
 		String providerToken =  JnSystemProperties.INSTANCE.tokenEmailValue();
 		String templateId = json.getAsString(JnEntityEmailTemplateMessage.Fields.templateId);
