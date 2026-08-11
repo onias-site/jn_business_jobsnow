@@ -33,7 +33,7 @@ public class JnEntityInstantMessengerMessageSent implements CcpEntityConfigurato
 
 	
 	public static enum Fields implements CcpJsonFieldName{
-		@CcpEntityFieldPrimaryKey
+		@CcpJsonFieldValidatorRequired
 		@CcpJsonCopyFieldValidationsFrom(JnJsonInstantMessengerFields.class)
 		botName, 
 		@CcpJsonFieldValidatorRequired
@@ -51,7 +51,7 @@ public class JnEntityInstantMessengerMessageSent implements CcpEntityConfigurato
 		contentType,
 		@CcpJsonCopyFieldValidationsFrom(JnJsonInstantMessengerFields.class)
 		fileName,
-		@CcpEntityFieldPrimaryKey
+		@CcpJsonFieldValidatorRequired
 		@CcpEntityFieldTransformer(JnJsonTransformersFieldEntityMessageHash.class)
 		message,
 

@@ -2,8 +2,8 @@ package com.jn.entities;
 
 import static com.ccp.especifications.db.utils.entity.decorators.enums.CcpEntityDecoratorOperationType.delete;
 import static com.ccp.especifications.db.utils.entity.decorators.enums.CcpEntityDecoratorOperationType.save;
-import static com.ccp.especifications.db.utils.entity.decorators.enums.CcpEntityOperationStepType.antes;
-import static com.ccp.especifications.db.utils.entity.decorators.enums.CcpEntityOperationStepType.depois;
+import static com.ccp.especifications.db.utils.entity.decorators.enums.CcpEntityOperationStepType._before;
+import static com.ccp.especifications.db.utils.entity.decorators.enums.CcpEntityOperationStepType._after;
 import static com.ccp.especifications.db.utils.entity.decorators.enums.CcpEntityType.mainEntity;
 
 import com.ccp.decorators.CcpJsonRepresentation.CcpJsonFieldName;
@@ -47,15 +47,15 @@ import com.jn.utils.JnDeleteKeysFromCache;
 @CcpEntityFieldsValidator(classReferenceWithTheFields = JnEntityLoginTokenRequestResend.Fields.class)
 @CcpEntityOperations(
 		operations = {
-				@CcpEntityOperation(when = depois, operation = delete, from = mainEntity,  execute = {JnBusinessResetLoginToken.class, JnBusinessResendLoginToken.class}, operationHandlers = {}),
-				@CcpEntityOperation(when = antes, operation = save, from = mainEntity,  execute = {JnMessages.NotifySupportAboutPendingResendLoginToken.class}, operationHandlers = {}),
+				@CcpEntityOperation(when = _after, operation = delete, from = mainEntity,  execute = {JnBusinessResetLoginToken.class, JnBusinessResendLoginToken.class}, operationHandlers = {}),
+				@CcpEntityOperation(when =_after, operation = save, from = mainEntity,  execute = {JnMessages.NotifySupportAboutPendingResendLoginToken.class}, operationHandlers = {}),
 		},
 		globalHandlers = {}
 		)
 
 /**
  * Registra a solicitação de reenvio de token de login feita pelo usuário. Ao ser salvo,
- * automaticamente reseta e reenvia o token antes da operação, e notifica o suporte depois.
+ * automaticamente reseta e reenvia o token new CcpFieldName(x) da operação, e notifica o suporte _after.
  * Escrita assíncrona via mensageria, descartável diariamente, cache de 1 hora.
  */
 public class JnEntityLoginTokenRequestResend implements CcpEntityConfigurator {
