@@ -28,6 +28,7 @@ public class JnJsonTransformersFieldEntityFieldCalculateHash implements CcpJsonT
 			super(JsonFieldNames.originalToken, JnEntityLoginSessionValidation.Fields.token, JsonFieldNames.tokenHash);
 		}
 	}
+	
 	private JnJsonTransformersFieldEntityFieldCalculateHash(CcpJsonFieldName originalName, CcpJsonFieldName fieldName, CcpJsonFieldName name) {
 		this.originalName = originalName;
 		this.fieldName = fieldName;

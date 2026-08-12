@@ -2,7 +2,6 @@ package com.jn.entities;
 
 import static com.ccp.especifications.db.utils.entity.decorators.enums.CcpEntityDecoratorOperationType.delete;
 import static com.ccp.especifications.db.utils.entity.decorators.enums.CcpEntityDecoratorOperationType.save;
-import static com.ccp.especifications.db.utils.entity.decorators.enums.CcpEntityOperationStepType._before;
 import static com.ccp.especifications.db.utils.entity.decorators.enums.CcpEntityOperationStepType._after;
 import static com.ccp.especifications.db.utils.entity.decorators.enums.CcpEntityType.mainEntity;
 
@@ -22,12 +21,14 @@ import com.ccp.especifications.db.utils.entity.decorators.interfaces.CcpEntityCo
 import com.ccp.especifications.db.utils.entity.fields.annotations.CcpEntityFieldPrimaryKey;
 import com.ccp.especifications.db.utils.entity.fields.annotations.CcpEntityFieldTransformer;
 import com.ccp.json.validations.fields.annotations.CcpJsonCopyFieldValidationsFrom;
+import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeString;
 import com.jn.business.login.solve.token.JnBusinessResendLoginToken;
 import com.jn.business.login.solve.token.JnBusinessResetLoginToken;
 import com.jn.business.messages.JnMessages;
 import com.jn.db.bulk.JnExecuteBulkOperation;
 import com.jn.entities.decorators.JnAsyncWriterEntity;
 import com.jn.entities.decorators.JnDisposableEntity;
+import com.jn.entities.fields.transformers.JnJsonTransformerPutRandomToken.JnJsonTransformersFieldEntityPasswordRandom;
 import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault;
 import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDoNothing;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
@@ -53,6 +54,7 @@ import com.jn.utils.JnDeleteKeysFromCache;
 		globalHandlers = {}
 		)
 
+
 /**
  * Registra a solicitação de desbloqueio de token de login feita pelo usuário. Comportamento
  * idêntico a {@code JnEntityLoginTokenRequestResend}, mas notifica o suporte via
@@ -69,7 +71,11 @@ public class JnEntityLoginTokenRequestUnlock implements CcpEntityConfigurator {
 		email,
 		
 		@CcpJsonCopyFieldValidationsFrom(JnJsonInstantMessengerFields.class)
-		chatId
+		chatId, 
+		
+		@CcpJsonFieldTypeString(exactLength = 8)
+		@CcpEntityFieldTransformer(JnJsonTransformersFieldEntityPasswordRandom.class)
+		password
 		;
 	}
 }

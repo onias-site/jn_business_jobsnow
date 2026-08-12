@@ -2,6 +2,7 @@ package com.jn.business.messages;
 
 import com.ccp.business.CcpBusiness;
 import com.ccp.decorators.CcpJsonRepresentation;
+import com.ccp.decorators.CcpJsonRepresentation.CcpJsonFieldName;
 import com.ccp.especifications.db.utils.entity.CcpEntity;
 import com.jn.entities.JnEntityEmailTemplateMessage;
 import com.jn.messages.JnSendMessageToUser;
@@ -13,7 +14,9 @@ import com.jn.messages.JnSendMessageToUser;
  * pelo construtor.
  */
 public class JnBusinessSendMessage implements CcpBusiness{
-	
+	private static enum Fields implements CcpJsonFieldName{
+		subjectType
+	}
 	public final CcpEntity entity;
 	
 	protected JnBusinessSendMessage(CcpEntity entity) {
@@ -40,12 +43,13 @@ public class JnBusinessSendMessage implements CcpBusiness{
 		.soWithAllAddedProcessAnd()
 		.withTheTemplateEntity(topic)
 		.andWithTheEntityToBlockMessageResend(this.entity)
-		.andWithTheMessageValuesFromJson(json)
+		.andWithTheMessageValuesFromJson(json.put(Fields.subjectType, topic))
 		.andWithTheSupportLanguage(supportLanguage)
 		.sendAllMessages()
 		;
 
-		return result;
+		CcpJsonRepresentation put = result.put(Fields.subjectType, topic);
+		return put;
 	}
 
 }

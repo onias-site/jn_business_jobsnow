@@ -371,13 +371,14 @@ public class JnSendMessageToUser {
 		}
 
 		public CcpJsonRepresentation sendAllMessages() {
-			return this.andWithJsonValues.andWithEntityToSave.withTemplateId.soExecuteAllAddedSteps.getMessage
+			CcpJsonRepresentation executeAllSteps = this.andWithJsonValues.andWithEntityToSave.withTemplateId.soExecuteAllAddedSteps.getMessage
 					.executeAllSteps(
 							this.andWithJsonValues.andWithEntityToSave.withTemplateId.templateId,
 							this.andWithJsonValues.andWithEntityToSave.entityToSave,
 							this.andWithJsonValues.jsonValues,
 							this.supportLanguage
 					);
+			return executeAllSteps;
 		}
 	}
 

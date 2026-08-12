@@ -1,6 +1,7 @@
 package com.jn.entities.fields.transformers;
 
 
+import com.ccp.constants.CcpOtherConstants;
 import com.ccp.decorators.CcpEmailDecorator;
 import com.ccp.decorators.CcpFieldName;
 import com.ccp.decorators.CcpHashDecorator;
@@ -65,10 +66,8 @@ public enum JnJsonTransformersFieldsEntityDefault implements CcpJsonTransformers
 			CcpJsonRepresentation put = json.put(JnEntityLoginPassword.Fields.password, passwordHash)
 					.put(JsonFieldNames.passwordAlreadyCalculated, true)
 					;
-			
 			return put;
 		}
-
 	},
 	token(false) {
 		public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
@@ -136,9 +135,7 @@ public enum JnJsonTransformersFieldsEntityDefault implements CcpJsonTransformers
 	
 	
 	public static String getOriginalToken() {
-		CcpStringDecorator csd = new CcpStringDecorator("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789");
-		CcpTextDecorator text = csd.text();
-		CcpTextDecorator generateToken = text.generateToken(8);
+		CcpTextDecorator generateToken = CcpOtherConstants.LETTERS_AND_NUMBERS.text().generateToken(8);
 		String originalToken = generateToken.content;
 		return originalToken;
 	}

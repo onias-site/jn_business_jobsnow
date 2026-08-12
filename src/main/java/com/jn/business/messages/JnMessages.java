@@ -1,7 +1,6 @@
 package com.jn.business.messages;
 
-import com.jn.entities.JnEntityLoginTokenRequestResend;
-import com.jn.entities.JnEntityLoginTokenRequestUnlock;
+import com.jn.entities.JnEntityContactUs;
 
 /**
  * Agrupa templates de notificação ao suporte para situações específicas de solicitação
@@ -16,7 +15,7 @@ public class JnMessages {
 	 */
 	public static class NotifySupportAboutPendingResendLoginToken extends JnBusinessSendMessage{
 		protected NotifySupportAboutPendingResendLoginToken() {
-			super(JnEntityLoginTokenRequestResend.ENTITY);
+			super(JnEntityContactUs.ENTITY);
 		}
 	}
 	//FIXME FALTANDO TEMPLATE
@@ -26,7 +25,7 @@ public class JnMessages {
 	 */
 	public static class NotifySupportAboutPendingUnlockLoginToken extends JnBusinessSendMessage{
 		protected NotifySupportAboutPendingUnlockLoginToken() {
-			super(JnEntityLoginTokenRequestUnlock.ENTITY);
+			super(JnEntityContactUs.ENTITY);
 		}
 	}
 
