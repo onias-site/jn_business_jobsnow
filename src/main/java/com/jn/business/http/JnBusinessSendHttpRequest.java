@@ -21,7 +21,7 @@ import com.jn.entities.JnEntityHttpApiRetrySendRequest;
  */
 public class JnBusinessSendHttpRequest implements CcpBusiness{
 	
-	private final CcpHttpApiExecutor processThatSendsHttpRequest;
+	public final CcpHttpApiExecutor processThatSendsHttpRequest;
 	
 
 	public JnBusinessSendHttpRequest(CcpHttpApiExecutor processThatSendsHttpRequest) {

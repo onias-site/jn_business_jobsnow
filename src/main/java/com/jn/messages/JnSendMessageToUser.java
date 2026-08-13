@@ -1,10 +1,8 @@
 package com.jn.messages;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 import com.ccp.business.CcpBusiness;
@@ -16,6 +14,7 @@ import com.ccp.especifications.db.crud.CcpCrud;
 import com.ccp.especifications.db.crud.CcpSelectUnionAll;
 import com.ccp.especifications.db.utils.entity.CcpEntity;
 import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityMetaData.CcpErrorEntityPrimaryKeyIsMissing;
+import com.ccp.especifications.http.CcpHttpApiExecutor;
 import com.jn.business.http.JnBusinessSendHttpRequest;
 import com.jn.business.messages.JnBusinessNotifyError;
 import com.jn.business.messages.JnBusinessNotifySupport;
@@ -38,7 +37,7 @@ public class JnSendMessageToUser {
 		message, msg
 	}
 
-	private final List<CcpBusiness> messengers = new ArrayList<>();
+	private final List<JnBusinessSendHttpRequest> messengers = new ArrayList<>();
 
 	private final List<CcpEntity> alreadySentEntities = new ArrayList<>();
 
@@ -76,7 +75,7 @@ public class JnSendMessageToUser {
 		return new JnAddDefaultStep(addOneStep);
 	}
 
-	JnSendMessageToUser addOneStep(CcpBusiness messenger, CcpEntity parameterEntity, CcpEntity messageEntity, CcpEntity blockEntity, CcpEntity alreadySentEntity) {
+	JnSendMessageToUser addOneStep(JnBusinessSendHttpRequest messenger, CcpEntity parameterEntity, CcpEntity messageEntity, CcpEntity blockEntity, CcpEntity alreadySentEntity) {
 		JnSendMessageToUser getMessage = new JnSendMessageToUser();
 		getMessage.alreadySentEntities.addAll(this.alreadySentEntities);
 		getMessage.parameterEntities.addAll(this.parameterEntities);
@@ -91,6 +90,66 @@ public class JnSendMessageToUser {
 		return getMessage;
 	}
 
+	static enum MustNotSendMessage{
+
+		alreadySentEntities(true,  false),
+		parameterEntities(false, false),
+		messageEntities(false, false),
+		blockEntities(true,  true),
+		;
+		final boolean whenPresentInUnionAll;
+		final boolean whenPrimaryKeyIsMissing;
+		
+		
+		private MustNotSendMessage(boolean whenPresentInThisUnionAll, boolean whenPrimaryKeyIsMissing) {
+			this.whenPresentInUnionAll = whenPresentInThisUnionAll;
+			this.whenPrimaryKeyIsMissing = whenPrimaryKeyIsMissing;
+		}
+		
+		@SuppressWarnings("unchecked")
+		private List<CcpEntity> getEntities(JnSendMessageToUser obj){
+			try {
+				Field declaredField = JnSendMessageToUser.class.getDeclaredField(this.name());
+				declaredField.setAccessible(true);
+				return (List<CcpEntity>)declaredField.get(obj);
+				
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			}
+		}
+		
+		private boolean mustNotSendMessage(JnSendMessageToUser obj, CcpSelectUnionAll unionAll, CcpJsonRepresentation json, Integer index) {
+			
+			List<CcpEntity> entities = this.getEntities(obj);
+			
+			CcpEntity entity   = entities.get(index);
+			
+			try {
+				boolean isPresentInThisUnionAll  = entity.isPresentInThisUnionAll(unionAll, json);
+				boolean mustNotSendMessage = this.whenPresentInUnionAll == isPresentInThisUnionAll;
+				if (mustNotSendMessage) {
+					return true;
+				}
+			} catch (CcpErrorEntityPrimaryKeyIsMissing e) {
+				if (this.whenPrimaryKeyIsMissing) {
+					return true;
+				}
+			}
+			return false;
+		}
+	
+		public static boolean isItTruth(JnSendMessageToUser obj, CcpSelectUnionAll unionAll, CcpJsonRepresentation json, Integer index) {
+			MustNotSendMessage[] values = MustNotSendMessage.values();
+			for (MustNotSendMessage item : values) {
+				boolean mustNotSendMessage = item.mustNotSendMessage(obj, unionAll, json, index);
+				if(mustNotSendMessage) {
+					return true;
+				}
+			}
+			return false;
+		}
+	}
+	
 	CcpJsonRepresentation executeAllSteps(String templateId, CcpEntity entityToSave, CcpJsonRepresentation entityValues, String languageToUseInErrorCases) {
 		List<CcpEntity> allEntitiesToSearch = new ArrayList<>();
 		allEntitiesToSearch.addAll(this.alreadySentEntities);
@@ -112,9 +171,16 @@ public class JnSendMessageToUser {
 		}
 
 		for (int index = 0; index < this.alreadySentEntities.size(); index++) {
-			CcpBusiness messenger = this.messengers.get(index);
+			
+			boolean mustNotSendMessage = MustNotSendMessage.isItTruth(this, unionAll, idToSearch , index);
+			
+			if (mustNotSendMessage) {
+				continue;
+			}
+
+			JnBusinessSendHttpRequest messenger = this.messengers.get(index);
 			CcpJsonRepresentation result = this.sendMessage(unionAll, idToSearch, index);
-			Class<? extends CcpBusiness> class1 = messenger.getClass();
+			Class<? extends CcpBusiness> class1 = messenger.processThatSendsHttpRequest.getClass();
 			String simpleName = class1.getSimpleName();
 			idToSearch = idToSearch.put(new CcpFieldName(simpleName), result);
 		}
@@ -122,60 +188,7 @@ public class JnSendMessageToUser {
 		return entityValues;
 	}
 
-	@SuppressWarnings("unchecked")
-	private boolean mustSkip(
-			CcpSelectUnionAll unionAll,
-			CcpJsonRepresentation json,
-			Integer index,
-			Function<Integer, CcpEntity>... functions
-	) {
-		Map<CcpEntity, boolean[]> decisions = new HashMap<>();
-
-		CcpEntity alreadySentEntity = this.alreadySentEntities.get(index);
-		CcpEntity parameterEntity   = this.parameterEntities.get(index);
-		CcpEntity messageEntity     = this.messageEntities.get(index);
-		CcpEntity blockEntity       = this.blockEntities.get(index);
-
-		decisions.put(alreadySentEntity, new boolean[]{true,  false});
-		decisions.put(parameterEntity,   new boolean[]{false, false});
-		decisions.put(messageEntity,     new boolean[]{false, false});
-		decisions.put(blockEntity,       new boolean[]{true,  true });
-
-		for (Function<Integer, CcpEntity> function : functions) {
-			CcpEntity entity   = function.apply(index);
-			boolean[] booleans = decisions.get(entity);
-			try {
-				boolean skip     = entity.isPresentInThisUnionAll(unionAll, json);
-				boolean decision = booleans[0];
-				boolean mustSkip = decision == skip;
-				if (mustSkip) {
-					return true;
-				}
-			} catch (CcpErrorEntityPrimaryKeyIsMissing e) {
-				boolean mustSkip = booleans[1];
-				if (mustSkip) {
-					return true;
-				}
-			}
-		}
-		return false;
-	}
-
-	@SuppressWarnings("unchecked")
 	private CcpJsonRepresentation sendMessage(CcpSelectUnionAll unionAll, CcpJsonRepresentation json, int index) {
-		boolean mustSkip = this.mustSkip(
-				unionAll,
-				json,
-				index,
-				idx -> this.alreadySentEntities.get(idx),
-				idx -> this.parameterEntities.get(idx),
-				idx -> this.messageEntities.get(idx),
-				idx -> this.blockEntities.get(idx)
-		);
-
-		if (mustSkip) {
-			return json;
-		}
 
 		Supplier<CcpJsonRepresentation> jsonSupplier = json.getJsonSupplier();
 		CcpEntity messageEntity   = this.messageEntities.get(index);
@@ -233,7 +246,7 @@ public class JnSendMessageToUser {
 			this.getMessage = getMessage;
 		}
 
-		public JnWithTheProcess withTheProcess(CcpBusiness process) {
+		public JnWithTheProcess withTheProcess(JnBusinessSendHttpRequest process) {
 			return new JnWithTheProcess(this, process);
 		}
 	}
@@ -242,9 +255,9 @@ public class JnSendMessageToUser {
 
 		final JnCreateStep createStep;
 
-		final CcpBusiness process;
+		final JnBusinessSendHttpRequest process;
 
-		public JnWithTheProcess(JnCreateStep createStep, CcpBusiness process) {
+		public JnWithTheProcess(JnCreateStep createStep, JnBusinessSendHttpRequest process) {
 			this.createStep = createStep;
 			this.process    = process;
 		}
@@ -385,7 +398,7 @@ public class JnSendMessageToUser {
 	public static class JnSendMessageAndJustErrors extends JnSendMessageToUser {
 
 		public JnSendMessageToUser addOneStep(CcpBusiness step, CcpEntity parameterEntity, CcpEntity messageEntity, CcpEntity blockEntity, CcpEntity alreadySentEntity) {
-			CcpBusiness process = values -> {
+			CcpHttpApiExecutor process = values -> {
 				try {
 					return step.apply(values);
 				} catch (Exception e) {
@@ -395,14 +408,16 @@ public class JnSendMessageToUser {
 					return values;
 				}
 			};
-			return super.addOneStep(process, parameterEntity, messageEntity, blockEntity, alreadySentEntity);
+			
+			JnBusinessSendHttpRequest sendHttpRequest = new JnBusinessSendHttpRequest(process);
+			return super.addOneStep(sendHttpRequest, parameterEntity, messageEntity, blockEntity, alreadySentEntity);
 		}
 	}
 
 	public static class JnSendMessageIgnoringProcessErrors extends JnSendMessageToUser {
 
 		public JnSendMessageToUser addOneStep(CcpBusiness step, CcpEntity parameterEntity, CcpEntity messageEntity, CcpEntity blockEntity, CcpEntity alreadySentEntity) {
-			CcpBusiness lenientProcess = values -> {
+			CcpHttpApiExecutor lenientProcess = values -> {
 				try {
 					return step.apply(values);
 				} catch (Exception e) {
@@ -413,7 +428,8 @@ public class JnSendMessageToUser {
 					return values;
 				}
 			};
-			return super.addOneStep(lenientProcess, parameterEntity, messageEntity, blockEntity, alreadySentEntity);
+			JnBusinessSendHttpRequest sendHttpRequest = new JnBusinessSendHttpRequest(lenientProcess);
+			return super.addOneStep(sendHttpRequest, parameterEntity, messageEntity, blockEntity, alreadySentEntity);
 		}
 	}
 }
