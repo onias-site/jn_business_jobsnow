@@ -48,7 +48,7 @@ public class JnEntityLoginSessionTokenAttempts implements CcpEntityConfigurator 
 			boolean excedeedAttempts = updatedAttempts >= maxAttempts;
 			
 			if(excedeedAttempts) {
-				whenExceedAttempts.apply(json);
+				whenExceedAttempts.execute(json);
 				return json;
 			}
 			

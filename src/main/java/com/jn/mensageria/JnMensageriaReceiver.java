@@ -51,7 +51,7 @@ public class JnMensageriaReceiver extends CcpMensageriaReceiver{
 			) {
 		try {
 			CcpBusiness process = this.getProcess(processName, json);
-			CcpJsonRepresentation response = process.apply(json);
+			CcpJsonRepresentation response = process.execute(json);
 			JnMensageriaReceiver saveResult = this.saveResult(entity, json, response);
 			return saveResult;
 		} catch (Throwable e) {

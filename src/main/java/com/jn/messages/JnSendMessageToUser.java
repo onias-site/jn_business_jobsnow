@@ -191,27 +191,31 @@ public class JnSendMessageToUser {
 	private CcpJsonRepresentation sendMessage(CcpSelectUnionAll unionAll, CcpJsonRepresentation json, int index) {
 
 		Supplier<CcpJsonRepresentation> jsonSupplier = json.getJsonSupplier();
-		CcpEntity messageEntity   = this.messageEntities.get(index);
-		CcpBusiness messenger     = this.messengers.get(index);
-		CcpEntity parameterEntity = this.parameterEntities.get(index);
-		CcpJsonRepresentation parameterData = parameterEntity.getRecordFromUnionAll(unionAll, jsonSupplier);
+		
+		CcpBusiness messenger                        = this.messengers.get(index);
+		CcpEntity messageEntity                      = this.messageEntities.get(index);
+		CcpEntity parameterEntity                    = this.parameterEntities.get(index);
 
-		boolean doesNotSendThisMessageType = parameterData.isEmpty();
+		CcpJsonRepresentation messageData  = messageEntity.getRecordFromUnionAll(unionAll, jsonSupplier);
+		
+		boolean doesNotSendThisMessageType = messageData.isEmpty();
+		
 		if (doesNotSendThisMessageType) {
 			return json;
 		}
 
-		CcpJsonRepresentation moreParameters    = parameterData.getInnerJson(JnEntityEmailParametersToSend.Fields.moreParameters);
-		CcpJsonRepresentation removeFields      = parameterData.removeFields(JnEntityEmailParametersToSend.Fields.moreParameters);
-		CcpJsonRepresentation messageData       = messageEntity.getRecordFromUnionAll(unionAll, jsonSupplier);
-		CcpJsonRepresentation allParameters     = removeFields.mergeWithAnotherJson(moreParameters);
+		CcpJsonRepresentation parameterData        = parameterEntity.getRecordFromUnionAll(unionAll, jsonSupplier);
+		CcpJsonRepresentation moreParameters       = parameterData.getInnerJson(JnEntityEmailParametersToSend.Fields.moreParameters);
+		CcpJsonRepresentation removeFields         = parameterData.removeFields(JnEntityEmailParametersToSend.Fields.moreParameters);
+		CcpJsonRepresentation allParameters        = removeFields.mergeWithAnotherJson(moreParameters);
 		CcpJsonRepresentation mergeWithAnotherJson = messageData.mergeWithAnotherJson(allParameters);
-		CcpJsonRepresentation message           = mergeWithAnotherJson.mergeWithAnotherJson(json);
-
-		CcpJsonRepresentation result = messenger.execute(message);
+		CcpJsonRepresentation message              = mergeWithAnotherJson.mergeWithAnotherJson(json);
+		CcpJsonRepresentation result               = messenger.execute(message);
 
 		CcpEntity alreadySentEntity = this.alreadySentEntities.get(index);
+		
 		alreadySentEntity.save(result);
+		
 		return result;
 	}
 
@@ -400,7 +404,7 @@ public class JnSendMessageToUser {
 		public JnSendMessageToUser addOneStep(CcpBusiness step, CcpEntity parameterEntity, CcpEntity messageEntity, CcpEntity blockEntity, CcpEntity alreadySentEntity) {
 			CcpHttpApiExecutor process = values -> {
 				try {
-					return step.apply(values);
+					return step.execute(values);
 				} catch (Exception e) {
 					CcpJsonRepresentation errorDetails = new CcpJsonRepresentation(e);
 					JnEntityJobsnowWarning.ENTITY.save(errorDetails);
@@ -419,7 +423,7 @@ public class JnSendMessageToUser {
 		public JnSendMessageToUser addOneStep(CcpBusiness step, CcpEntity parameterEntity, CcpEntity messageEntity, CcpEntity blockEntity, CcpEntity alreadySentEntity) {
 			CcpHttpApiExecutor lenientProcess = values -> {
 				try {
-					return step.apply(values);
+					return step.execute(values);
 				} catch (Exception e) {
 					CcpJsonRepresentation errorDetails = new CcpJsonRepresentation(e);
 					String name = JnBusinessNotifyError.class.getName();

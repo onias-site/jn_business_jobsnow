@@ -54,7 +54,7 @@ public class JnFunctionMensageriaSender implements CcpBusiness {
 
 	public Map<String, Object> apply(Map<String, Object> map) {
 		CcpJsonRepresentation json = new CcpJsonRepresentation(map);
-		CcpJsonRepresentation response = this.apply(json);
+		CcpJsonRepresentation response = this.execute(json);
 		return response.content;
 	} 
 	

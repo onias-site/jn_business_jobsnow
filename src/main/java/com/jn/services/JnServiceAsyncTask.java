@@ -22,7 +22,8 @@ public enum JnServiceAsyncTask implements JnService {
 	public static enum JsonFieldNames implements CcpJsonFieldName{
 		asyncTaskId
 	}
-	enum GetAsyncTaskStatusById{
-		
-	}
+}
+
+enum GetAsyncTaskStatusById implements CcpJsonFieldName{
+
 }

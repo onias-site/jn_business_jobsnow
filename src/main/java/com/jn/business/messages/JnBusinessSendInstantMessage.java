@@ -134,7 +134,7 @@ public class JnBusinessSendInstantMessage implements CcpHttpApiExecutor{
 		
 		new CcpTimeDecorator().sleep(sleepToSendMessage);
 		CcpJsonRepresentation put = json.put(Fields.triesToSendMessage, triesToSendMessage + 1);
-		CcpJsonRepresentation apply = this.apply(put);
+		CcpJsonRepresentation apply = this.execute(put);
 		return apply;
 	}
 

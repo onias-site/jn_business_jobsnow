@@ -28,13 +28,16 @@ public enum JnServiceContactUs implements JnService {
 	enum JsonFieldNames implements CcpJsonFieldName{
 		activePosition
 	}
-	enum SaveContactUs{
-		
-	}
-	enum ListContactUsByUser{
-		
-	}
-	enum GetContactUsKpis{
-		
-	}
+}
+
+enum SaveContactUs implements CcpJsonFieldName{
+
+}
+
+enum ListContactUsByUser implements CcpJsonFieldName{
+
+}
+
+enum GetContactUsKpis implements CcpJsonFieldName{
+
 }

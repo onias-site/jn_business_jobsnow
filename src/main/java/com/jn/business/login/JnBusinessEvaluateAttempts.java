@@ -143,7 +143,7 @@ public class JnBusinessEvaluateAttempts implements CcpBusiness{
 		CcpJsonRepresentation toReturn = json.removeFields(JsonFieldNames.entities);
 		
 		if(correctSecret) {
-			this.topicToRegisterSuccess.apply(toReturn); 
+			this.topicToRegisterSuccess.execute(toReturn); 
 			return toReturn;
 		}
 
@@ -153,7 +153,7 @@ public class JnBusinessEvaluateAttempts implements CcpBusiness{
 		double updatedAttempts = attemptsFromDatabase + 1;
 		boolean exceededAttempts = updatedAttempts >= maxAttempts;
 		if(exceededAttempts) {
-			this.topicToCreateTheLockWhenExceedTries.apply(toReturn);
+			this.topicToCreateTheLockWhenExceedTries.execute(toReturn);
 			throw new CcpErrorFlowDisturb(toReturn, this.statusToReturnWhenExceedAttempts);
 		}
 		

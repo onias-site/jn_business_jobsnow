@@ -1,6 +1,10 @@
 package com.jn.business.messages;
 
+import com.ccp.json.validations.fields.annotations.CcpJsonCopyFieldValidationsFrom;
+import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidatorRequired;
+import com.jn.entities.JnEntityLoginTokenRequestUnlock;
 import com.jn.entities.JnEntityUserRequest;
+import com.jn.json.fields.validation.JnJsonCommonsFields;
 
 /**
  * Agrupa templates de notificação ao suporte para situações específicas de solicitação
@@ -8,7 +12,6 @@ import com.jn.entities.JnEntityUserRequest;
  * de bloqueio de reenvio correspondente.
  */
 public class JnMessages {
-	//FIXME FALTANDO TEMPLATE
 	/**
 	 * Notifica o suporte sobre uma solicitação pendente de reenvio de token de login.
 	 * Usa JnEntityLoginTokenRequestResend.ENTITY como entidade de bloqueio.
@@ -18,7 +21,6 @@ public class JnMessages {
 			super(JnEntityUserRequest.ENTITY);
 		}
 	}
-	//FIXME FALTANDO TEMPLATE
 	/**
 	 * Notifica o suporte sobre uma solicitação pendente de desbloqueio de token de login.
 	 * Usa JnEntityLoginTokenRequestUnlock.ENTITY como entidade de bloqueio.
@@ -26,6 +28,22 @@ public class JnMessages {
 	public static class NotifySupportAboutPendingUnlockLoginToken extends JnBusinessSendMessage{
 		protected NotifySupportAboutPendingUnlockLoginToken() {
 			super(JnEntityUserRequest.ENTITY);
+		}
+
+		public Class<?> getJsonValidationClass() {
+			return Fields.class;
+		}
+
+		private static enum Fields{
+			@CcpJsonCopyFieldValidationsFrom(JnEntityLoginTokenRequestUnlock.Fields.class)
+			@CcpJsonFieldValidatorRequired
+			password,
+			@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
+			@CcpJsonFieldValidatorRequired
+			token,
+			@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
+			@CcpJsonFieldValidatorRequired
+			email,
 		}
 	}
 

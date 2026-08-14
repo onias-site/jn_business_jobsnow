@@ -37,7 +37,7 @@ public class JnBusinessNotifyError implements CcpBusiness{
 
 		CcpJsonRepresentation json = new CcpJsonRepresentation(e);
 		
-		CcpJsonRepresentation execute = this.apply(json);
+		CcpJsonRepresentation execute = this.execute(json);
 		return execute;
 	}
 

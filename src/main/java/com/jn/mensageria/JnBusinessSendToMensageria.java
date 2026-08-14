@@ -13,7 +13,7 @@ public interface JnBusinessSendToMensageria extends CcpBusiness{
 	
 	default CcpJsonRepresentation sendToMensageria(CcpJsonRepresentation json) {
 		JnFunctionMensageriaSender jms = new JnFunctionMensageriaSender(this);
-		CcpJsonRepresentation apply = jms.apply(json);
+		CcpJsonRepresentation apply = jms.execute(json);
 		return apply;
 	}
 

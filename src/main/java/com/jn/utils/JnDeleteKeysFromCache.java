@@ -39,7 +39,7 @@ public class JnDeleteKeysFromCache implements  CcpBusiness, Consumer<String[]> {
 	public void accept(String[] keysToDeleteInCache) {
 		List<String> asList = Arrays.asList(keysToDeleteInCache);
 		CcpJsonRepresentation json = CcpOtherConstants.EMPTY_JSON.put(JsonFieldNames.keysToDeleteInCache, asList);
-		this.apply(json);
+		this.execute(json);
 		
 	}
 
