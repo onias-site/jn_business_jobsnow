@@ -1,6 +1,7 @@
 package com.jn.json.fields.validation;
 
 import com.ccp.decorators.CcpEmailDecorator;
+import com.ccp.decorators.CcpJsonRepresentation.CcpJsonFieldName;
 import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeNestedJson;
 import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeNumberUnsigned;
 import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeString;
@@ -10,7 +11,7 @@ import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeString;
  * JobsNow. Cada valor do enum carrega anotações de tipo ({@code @CcpJsonFieldTypeString}, etc.)
  * referenciadas via {@code @CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)}.
  */
-public enum JnJsonCommonsFields{
+public enum JnJsonCommonsFields implements CcpJsonFieldName{
 	
 	@CcpJsonFieldTypeString
 	request, 

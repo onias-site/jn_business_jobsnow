@@ -16,7 +16,7 @@ import com.ccp.especifications.db.utils.entity.decorators.interfaces.CcpEntityCo
 import com.ccp.especifications.db.utils.entity.fields.annotations.CcpEntityFieldPrimaryKey;
 import com.ccp.json.validations.fields.annotations.CcpJsonCopyFieldValidationsFrom;
 import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidatorRequired;
-import com.jn.business.messages.JnBusinessNotifyError;
+import com.jn.business.messages.JnMessages.JnBusinessNotifyError;
 import com.jn.business.messages.JnMessages.NotifySupportAboutPendingResendLoginToken;
 import com.jn.business.messages.JnMessages.NotifySupportAboutPendingUnlockLoginToken;
 import com.jn.entities.decorators.JnVersionableEntity;

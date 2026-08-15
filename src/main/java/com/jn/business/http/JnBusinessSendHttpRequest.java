@@ -6,6 +6,9 @@ import com.ccp.especifications.http.CcpHttpRequester.CcpErrorHttp;
 import com.ccp.especifications.http.CcpErrorHttpClient;
 import com.ccp.especifications.http.CcpErrorHttpServer;
 import com.ccp.especifications.http.CcpHttpApiExecutor;
+
+import java.util.function.Function;
+
 import com.ccp.business.CcpBusiness;
 import com.jn.entities.JnEntityHttpApiErrorClient;
 import com.jn.entities.JnEntityHttpApiErrorServer;
@@ -21,11 +24,12 @@ import com.jn.entities.JnEntityHttpApiRetrySendRequest;
  */
 public class JnBusinessSendHttpRequest implements CcpBusiness{
 	
+	public final Function<Throwable, CcpJsonRepresentation> exceptionHandler;
 	public final CcpHttpApiExecutor processThatSendsHttpRequest;
-	
 
-	public JnBusinessSendHttpRequest(CcpHttpApiExecutor processThatSendsHttpRequest) {
+	public JnBusinessSendHttpRequest(CcpHttpApiExecutor processThatSendsHttpRequest, Function<Throwable, CcpJsonRepresentation> exceptionHandler) {
 		this.processThatSendsHttpRequest = processThatSendsHttpRequest;
+		this.exceptionHandler = exceptionHandler;
 	}
 
 	/**
@@ -49,6 +53,9 @@ public class JnBusinessSendHttpRequest implements CcpBusiness{
 			httpErrorDetails = httpErrorDetails.put(JnEntityHttpApiErrorClient.Fields.request, request);
 			JnEntityHttpApiErrorClient.ENTITY.save(httpErrorDetails);
 			throw e;
+		}catch(Throwable e) {
+			CcpJsonRepresentation apply = this.exceptionHandler.apply(e);
+			return apply;
 		}
 	}
 	

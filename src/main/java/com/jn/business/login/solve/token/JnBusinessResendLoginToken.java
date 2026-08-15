@@ -7,7 +7,7 @@ import com.ccp.dependency.injection.CcpDependencyInjection;
 import com.ccp.json.validations.fields.annotations.CcpJsonCopyFieldValidationsFrom;
 import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidatorRequired;
 import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeString;
-import com.jn.business.login.JnBusinessSendUserToken;
+import com.jn.business.messages.JnMessages.JnBusinessSendUserToken;
 import com.jn.entities.JnEntityEmailMessageSent;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
 

@@ -17,9 +17,11 @@ public class JnBusinessSendMessage implements CcpBusiness{
 	private static enum Fields implements CcpJsonFieldName{
 		subjectType
 	}
+	public final JnMessageSenderExceptionHandler exceptionHandler; 
 	public final CcpEntity entity;
 	
-	protected JnBusinessSendMessage(CcpEntity entity) {
+	protected JnBusinessSendMessage(CcpEntity entity, JnMessageSenderExceptionHandler exceptionHandler) {
+		this.exceptionHandler = exceptionHandler;
 		this.entity = entity;
 	}
 
@@ -37,9 +39,9 @@ public class JnBusinessSendMessage implements CcpBusiness{
 		JnSendMessageToUser sender = new JnSendMessageToUser();
 
 		CcpJsonRepresentation result = sender
-		.addDefaultProcessToEmailSending()
+		.addDefaultProcessToEmailSending(this.exceptionHandler)
 		.and()
-		.addDefaultStepToInstantMessageSending()
+		.addDefaultStepToInstantMessageSending(this.exceptionHandler)
 		.soWithAllAddedProcessAnd()
 		.withTheTemplateEntity(topic)
 		.andWithTheEntityToBlockMessageResend(this.entity)

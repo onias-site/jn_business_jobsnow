@@ -1,9 +1,7 @@
 package com.jn.business.messages;
 
-import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.business.CcpBusiness;
-import com.jn.entities.JnEntityContactUs;
-import com.jn.messages.JnSendMessageToUser;
+import com.ccp.decorators.CcpJsonRepresentation;
 
 /**
  * Notifica o suporte sobre um novo contato recebido (formulário "Fale Conosco").
@@ -12,20 +10,12 @@ import com.jn.messages.JnSendMessageToUser;
  */
 public class JnBusinessNotifyContactUs implements CcpBusiness{
 		
-
 	public static final JnBusinessNotifyContactUs INSTANCE = new JnBusinessNotifyContactUs();
 	
 	private JnBusinessNotifyContactUs() {}
 	
-	/**
-	 * Delega para JnBusinessNotifySupport.apply(...) passando a entidade de contato
-	 * como base e retorna o JSON original.
-	 */
 	public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
 
-		JnSendMessageToUser x = new JnSendMessageToUser();
-		JnBusinessNotifySupport.INSTANCE.apply(json, JnBusinessNotifyContactUs.class.getName(), JnEntityContactUs.ENTITY, x);
-		
 		return json;
 	}
 }

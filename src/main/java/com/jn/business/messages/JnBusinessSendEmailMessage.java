@@ -9,6 +9,7 @@ import com.ccp.especifications.http.CcpHttpContentType;
 import com.jn.entities.JnEntityEmailMessageSent;
 import com.jn.entities.JnEntityEmailParametersToSend;
 import com.jn.entities.JnEntityEmailTemplateMessage;
+import com.jn.json.fields.validation.JnJsonCommonsFields;
 import com.jn.utils.JnSystemProperties;
 
 
@@ -46,7 +47,7 @@ public class JnBusinessSendEmailMessage implements CcpHttpApiExecutor{
 		String subject = json.getAsString(JnEntityEmailTemplateMessage.Fields.subject);
 		String message = json.getAsStringDecorator(JnEntityEmailTemplateMessage.Fields.message).text().resolveTemplate(json).content;
 		CcpHttpContentType contentType = json.getAsEnum(JnEntityEmailParametersToSend.Fields.contentType, CcpHttpContentType.class, CcpHttpContentType.TEXT_HTML);
-		String[] recipients = json.getAsStringArray(Fields.email, Fields.emails);
+		String[] recipients = json.getAsStringArray(JnJsonCommonsFields.email, Fields.emails);
 		emailSender.sendSimpleTextEmailMessage(providerToken, providerUrl, templateId, sender, subject, message, contentType, recipients);
 		JnEntityEmailMessageSent.ENTITY.save(json);
 		return json;

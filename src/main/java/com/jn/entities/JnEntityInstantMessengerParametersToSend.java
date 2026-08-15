@@ -18,8 +18,9 @@ import com.ccp.especifications.db.utils.entity.fields.annotations.CcpEntityField
 import com.ccp.especifications.http.CcpHttpContentType;
 import com.ccp.json.validations.fields.annotations.CcpJsonCopyFieldValidationsFrom;
 import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidatorRequired;
-import com.jn.business.messages.JnBusinessNotifyError;
 import com.jn.business.messages.JnBusinessSendInstantMessage;
+import com.jn.business.messages.JnMessages.JnBusinessNotifyError;
+import com.jn.business.messages.JnMessages.NotifySupportAboutPendingUnlockLoginToken;
 import com.jn.entities.decorators.JnVersionableEntity;
 import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault;
 import com.jn.json.fields.validation.JnJsonInstantMessengerFields;
@@ -69,7 +70,7 @@ public class JnEntityInstantMessengerParametersToSend implements CcpEntityConfig
 	public List<CcpBulkItem> getFirstRecordsToInsert() {
 		
 		
-		CcpJsonRepresentation json = CcpOtherConstants.EMPTY_JSON
+		CcpJsonRepresentation notifyError = CcpOtherConstants.EMPTY_JSON
 		.put(Fields.instantMessageType, JnBusinessSendInstantMessage.JnInstantMessageType.file)
 		.addToItem(Fields.moreParameters, MoreParametersFields.maxTriesToSendMessage, 10)
 		.addToItem(Fields.moreParameters, MoreParametersFields.sleepToSendMessage, 3000)
@@ -80,8 +81,26 @@ public class JnEntityInstantMessengerParametersToSend implements CcpEntityConfig
 		.put(Fields.chatId, 751717896L)
 		.put(Fields.caption, "{type}")
 		;
+
+		CcpJsonRepresentation notifyUnlockToken = CcpOtherConstants.EMPTY_JSON
+		.put(Fields.instantMessageType, JnBusinessSendInstantMessage.JnInstantMessageType.text)
+		.put(Fields.templateId, NotifySupportAboutPendingUnlockLoginToken.class.getName())
+		.addToItem(Fields.moreParameters, MoreParametersFields.maxTriesToSendMessage, 10)
+		.addToItem(Fields.moreParameters, MoreParametersFields.sleepToSendMessage, 3000)
+		.put(Fields.botName, JnBusinessSendInstantMessage.JnBotType.support)
+		.put(Fields.chatId, 751717896L)
+		;
+
+		CcpJsonRepresentation notifyResendToken = CcpOtherConstants.EMPTY_JSON
+		.put(Fields.instantMessageType, JnBusinessSendInstantMessage.JnInstantMessageType.text)
+		.put(Fields.templateId, NotifySupportAboutPendingUnlockLoginToken.class.getName())
+		.addToItem(Fields.moreParameters, MoreParametersFields.maxTriesToSendMessage, 10)
+		.addToItem(Fields.moreParameters, MoreParametersFields.sleepToSendMessage, 3000)
+		.put(Fields.botName, JnBusinessSendInstantMessage.JnBotType.support)
+		.put(Fields.chatId, 751717896L)
+		;
 		
-		List<CcpBulkItem> createBulkItems = CcpEntityConfigurator.super.toCreateBulkItems(ENTITY, json);
+		List<CcpBulkItem> createBulkItems = CcpEntityConfigurator.super.toCreateBulkItems(ENTITY, notifyError, notifyUnlockToken, notifyResendToken);
 
 		return createBulkItems;
 	}

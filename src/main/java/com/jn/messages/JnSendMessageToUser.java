@@ -14,12 +14,10 @@ import com.ccp.especifications.db.crud.CcpCrud;
 import com.ccp.especifications.db.crud.CcpSelectUnionAll;
 import com.ccp.especifications.db.utils.entity.CcpEntity;
 import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityMetaData.CcpErrorEntityPrimaryKeyIsMissing;
-import com.ccp.especifications.http.CcpHttpApiExecutor;
 import com.jn.business.http.JnBusinessSendHttpRequest;
-import com.jn.business.messages.JnBusinessNotifyError;
-import com.jn.business.messages.JnBusinessNotifySupport;
 import com.jn.business.messages.JnBusinessSendEmailMessage;
 import com.jn.business.messages.JnBusinessSendInstantMessage;
+import com.jn.business.messages.JnMessageSenderExceptionHandler;
 import com.jn.entities.JnEntityEmailMessageSent;
 import com.jn.entities.JnEntityEmailParametersToSend;
 import com.jn.entities.JnEntityEmailReportedAsSpam;
@@ -28,13 +26,12 @@ import com.jn.entities.JnEntityInstantMessengerBotLocked;
 import com.jn.entities.JnEntityInstantMessengerMessageSent;
 import com.jn.entities.JnEntityInstantMessengerParametersToSend;
 import com.jn.entities.JnEntityInstantMessengerTemplateMessage;
-import com.jn.entities.JnEntityJobsnowWarning;
 import com.jn.utils.JnDeleteKeysFromCache;
 
 public class JnSendMessageToUser {
 
 	enum JsonFieldNames implements CcpJsonFieldName {
-		message, msg
+		message
 	}
 
 	private final List<JnBusinessSendHttpRequest> messengers = new ArrayList<>();
@@ -51,8 +48,8 @@ public class JnSendMessageToUser {
 		return new JnCreateStep(this);
 	}
 
-	public JnAddDefaultStep addDefaultProcessToEmailSending() {
-		JnBusinessSendHttpRequest httpRequester = new JnBusinessSendHttpRequest(JnBusinessSendEmailMessage.INSTANCE);
+	public JnAddDefaultStep addDefaultProcessToEmailSending(JnMessageSenderExceptionHandler exceptionHandler) {
+		JnBusinessSendHttpRequest httpRequester = new JnBusinessSendHttpRequest(JnBusinessSendEmailMessage.INSTANCE, exceptionHandler);
 		JnSendMessageToUser addOneStep = this.addOneStep(
 				httpRequester,
 				JnEntityEmailParametersToSend.ENTITY,
@@ -63,8 +60,8 @@ public class JnSendMessageToUser {
 		return new JnAddDefaultStep(addOneStep);
 	}
 
-	public JnAddDefaultStep addDefaultStepToInstantMessageSending() {
-		JnBusinessSendHttpRequest httpRequester = new JnBusinessSendHttpRequest(JnBusinessSendInstantMessage.INSTANCE);
+	public JnAddDefaultStep addDefaultStepToInstantMessageSending(JnMessageSenderExceptionHandler exceptionHandler) {
+		JnBusinessSendHttpRequest httpRequester = new JnBusinessSendHttpRequest(JnBusinessSendInstantMessage.INSTANCE, exceptionHandler);
 		JnSendMessageToUser addOneStep = this.addOneStep(
 				httpRequester,
 				JnEntityInstantMessengerParametersToSend.ENTITY,
@@ -159,10 +156,13 @@ public class JnSendMessageToUser {
 		allEntitiesToSearch.add(entityToSave);
 
 		CcpEntity[] entities = allEntitiesToSearch.toArray(new CcpEntity[allEntitiesToSearch.size()]);
+		
 		CcpJsonRepresentation idToSearch = entityValues
 				.put(JnEntityEmailTemplateMessage.Fields.language, languageToUseInErrorCases)
 				.put(JnEntityEmailTemplateMessage.Fields.templateId, templateId);
+		
 		CcpCrud crud = CcpDependencyInjection.getDependency(CcpCrud.class);
+		
 		CcpSelectUnionAll unionAll = crud.unionAll(idToSearch, JnDeleteKeysFromCache.INSTANCE, entities);
 
 		boolean alreadySaved = entityToSave.isPresentInThisUnionAll(unionAll, idToSearch);
@@ -399,41 +399,4 @@ public class JnSendMessageToUser {
 		}
 	}
 
-	public static class JnSendMessageAndJustErrors extends JnSendMessageToUser {
-
-		public JnSendMessageToUser addOneStep(CcpBusiness step, CcpEntity parameterEntity, CcpEntity messageEntity, CcpEntity blockEntity, CcpEntity alreadySentEntity) {
-			CcpHttpApiExecutor process = values -> {
-				try {
-					return step.execute(values);
-				} catch (Exception e) {
-					CcpJsonRepresentation errorDetails = new CcpJsonRepresentation(e);
-					JnEntityJobsnowWarning.ENTITY.save(errorDetails);
-					e.printStackTrace();
-					return values;
-				}
-			};
-			
-			JnBusinessSendHttpRequest sendHttpRequest = new JnBusinessSendHttpRequest(process);
-			return super.addOneStep(sendHttpRequest, parameterEntity, messageEntity, blockEntity, alreadySentEntity);
-		}
-	}
-
-	public static class JnSendMessageIgnoringProcessErrors extends JnSendMessageToUser {
-
-		public JnSendMessageToUser addOneStep(CcpBusiness step, CcpEntity parameterEntity, CcpEntity messageEntity, CcpEntity blockEntity, CcpEntity alreadySentEntity) {
-			CcpHttpApiExecutor lenientProcess = values -> {
-				try {
-					return step.execute(values);
-				} catch (Exception e) {
-					CcpJsonRepresentation errorDetails = new CcpJsonRepresentation(e);
-					String name = JnBusinessNotifyError.class.getName();
-					JnSendMessageToUser x = new JnSendMessageAndJustErrors();
-					JnBusinessNotifySupport.INSTANCE.apply(errorDetails, name, JnEntityJobsnowWarning.ENTITY, x);
-					return values;
-				}
-			};
-			JnBusinessSendHttpRequest sendHttpRequest = new JnBusinessSendHttpRequest(lenientProcess);
-			return super.addOneStep(sendHttpRequest, parameterEntity, messageEntity, blockEntity, alreadySentEntity);
-		}
-	}
 }
