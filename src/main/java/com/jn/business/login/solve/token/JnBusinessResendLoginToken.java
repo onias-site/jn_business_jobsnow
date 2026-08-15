@@ -8,7 +8,6 @@ import com.ccp.json.validations.fields.annotations.CcpJsonCopyFieldValidationsFr
 import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidatorRequired;
 import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeString;
 import com.jn.business.messages.JnMessages.JnBusinessSendUserToken;
-import com.jn.entities.JnEntityEmailMessageSent;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
 
 /**
@@ -37,7 +36,7 @@ public class JnBusinessResendLoginToken implements CcpBusiness{
 	 * substitui dependências temporariamente e executa o reenvio.
 	 */
 	public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
-		CcpJsonRepresentation put = json.put(JnEntityEmailMessageSent.Fields.subjectType, JnBusinessSendUserToken.class.getName());
+		CcpJsonRepresentation put = json.put(JnJsonCommonsFields.subjectType, JnBusinessSendUserToken.class.getName());
 		CcpJsonRepresentation replaceDependenciesTemporally = CcpDependencyInjection.replaceDependenciesTemporally(put, JnBusinessSendUserToken.INSTANCE
 //	FIXME			, CopyEmailInClipBoard.INSTANCE
 				);

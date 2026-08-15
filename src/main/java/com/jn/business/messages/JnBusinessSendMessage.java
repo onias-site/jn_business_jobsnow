@@ -2,9 +2,8 @@ package com.jn.business.messages;
 
 import com.ccp.business.CcpBusiness;
 import com.ccp.decorators.CcpJsonRepresentation;
-import com.ccp.decorators.CcpJsonRepresentation.CcpJsonFieldName;
 import com.ccp.especifications.db.utils.entity.CcpEntity;
-import com.jn.entities.JnEntityEmailTemplateMessage;
+import com.jn.json.fields.validation.JnJsonCommonsFields;
 import com.jn.messages.JnSendMessageToUser;
 
 /**
@@ -14,9 +13,7 @@ import com.jn.messages.JnSendMessageToUser;
  * pelo construtor.
  */
 public class JnBusinessSendMessage implements CcpBusiness{
-	private static enum Fields implements CcpJsonFieldName{
-		subjectType
-	}
+	
 	public final JnMessageSenderExceptionHandler exceptionHandler; 
 	public final CcpEntity entity;
 	
@@ -32,7 +29,7 @@ public class JnBusinessSendMessage implements CcpBusiness{
 	 */
 	public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
 
-		String supportLanguage = json.getAsString(JnEntityEmailTemplateMessage.Fields.language);
+		String supportLanguage = json.getAsString(JnJsonCommonsFields.language);
 	
 		String topic = this.getClass().getName();
 		
@@ -45,12 +42,12 @@ public class JnBusinessSendMessage implements CcpBusiness{
 		.soWithAllAddedProcessAnd()
 		.withTheTemplateEntity(topic)
 		.andWithTheEntityToBlockMessageResend(this.entity)
-		.andWithTheMessageValuesFromJson(json.put(Fields.subjectType, topic))
+		.andWithTheMessageValuesFromJson(json.put(JnJsonCommonsFields.subjectType, topic))
 		.andWithTheSupportLanguage(supportLanguage)
 		.sendAllMessages()
 		;
 
-		CcpJsonRepresentation put = result.put(Fields.subjectType, topic);
+		CcpJsonRepresentation put = result.put(JnJsonCommonsFields.subjectType, topic);
 		return put;
 	}
 

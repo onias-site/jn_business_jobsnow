@@ -5,7 +5,7 @@ import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.decorators.CcpJsonRepresentation.CcpJsonFieldName;
 import com.ccp.decorators.CcpTextDecorator;
 import com.ccp.especifications.db.utils.entity.fields.CcpJsonTransformersDefaultEntityField;
-import com.jn.entities.JnEntityLoginTokenRequestUnlock;
+import com.jn.json.fields.validation.JnJsonCommonsFields;
 
 public class JnJsonTransformerPutRandomToken  implements CcpJsonTransformersDefaultEntityField {
 	
@@ -33,7 +33,7 @@ public class JnJsonTransformerPutRandomToken  implements CcpJsonTransformersDefa
 	public static class JnJsonTransformersFieldEntityPasswordRandom extends JnJsonTransformerPutRandomToken {
 
 		public JnJsonTransformersFieldEntityPasswordRandom() {
-			super(JnEntityLoginTokenRequestUnlock.Fields.password);
+			super(JnJsonCommonsFields.password);
 		}
 		
 	}

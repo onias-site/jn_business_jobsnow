@@ -6,7 +6,6 @@ import com.ccp.especifications.db.utils.entity.CcpEntity;
 import com.ccp.json.validations.fields.annotations.CcpJsonCopyFieldValidationsFrom;
 import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidatorRequired;
 import com.jn.business.messages.JnBusinessSendInstantMessage.JnBotType;
-import com.jn.entities.JnEntityEmailTemplateMessage;
 import com.jn.entities.JnEntityInstantMessengerParametersToSend;
 import com.jn.entities.JnEntityJobsnowError;
 import com.jn.entities.JnEntityJobsnowPenddingError;
@@ -25,7 +24,6 @@ import com.jn.utils.JnSystemProperties;
  */
 public class JnMessages {
 	
-	
 	private static class SupportInstantMessengerNotification extends JnBusinessSendMessage{
 
 		protected SupportInstantMessengerNotification(CcpEntity entity, JnMessageSenderExceptionHandler exceptionHandler) {
@@ -38,7 +36,7 @@ public class JnMessages {
 		private static enum Fields{
 			@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 			@CcpJsonFieldValidatorRequired
-			email,
+			email
 		}
 		
 			
@@ -50,8 +48,8 @@ public class JnMessages {
 			
 			CcpJsonRepresentation put = json
 					.put(JnEntityInstantMessengerParametersToSend.Fields.botName, JnBotType.support)
-					.put(JnEntityInstantMessengerParametersToSend.Fields.templateId, templateId)
-					.put(JnEntityEmailTemplateMessage.Fields.language, supportLanguage)
+					.put(JnJsonCommonsFields.templateId, templateId)
+					.put(JnJsonCommonsFields.language, supportLanguage)
 					;
 			
 			CcpJsonRepresentation apply = super.apply(put);
@@ -91,10 +89,9 @@ public class JnMessages {
 			token,
 			@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 			@CcpJsonFieldValidatorRequired
-			email,
+			email
 		}
 	}
-
 	
 	
 	/**
@@ -142,8 +139,7 @@ public class JnMessages {
 	 */
 	public static class JnBusinessSendUserToken extends JnBusinessSendMessage{
 			
-		enum JsonFieldNames implements CcpJsonFieldName{
-			request, originalEmail, originalToken
+		enum JsonFieldNames implements CcpJsonFieldName{ originalEmail, originalToken
 		}
 		
 		public static final JnBusinessSendUserToken INSTANCE = new JnBusinessSendUserToken();
@@ -158,10 +154,10 @@ public class JnMessages {
 		 */
 		public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
 
-			CcpJsonRepresentation request = json.getInnerJson(JsonFieldNames.request);
+			CcpJsonRepresentation request = json.getInnerJson(JnJsonCommonsFields.request);
 			CcpJsonRepresentation transformedJson = request.mergeWithAnotherJson(json)
 					.getTransformedJson(JnJsonTransformersFieldsEntityDefault.token)
-					.duplicateValueFromField(JsonFieldNames.originalEmail, JnEntityLoginToken.Fields.email, 
+					.duplicateValueFromField(JsonFieldNames.originalEmail, JnJsonCommonsFields.email, 
 							JnEntityInstantMessengerParametersToSend.Fields.chatId)
 					.duplicateValueFromField(JsonFieldNames.originalToken, JnJsonTransformersFieldsEntityDefault.token)
 					;

@@ -7,11 +7,8 @@ import com.ccp.especifications.email.CcpEmailSender;
 import com.ccp.especifications.http.CcpHttpApiExecutor;
 import com.ccp.especifications.http.CcpHttpContentType;
 import com.jn.entities.JnEntityEmailMessageSent;
-import com.jn.entities.JnEntityEmailParametersToSend;
-import com.jn.entities.JnEntityEmailTemplateMessage;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
 import com.jn.utils.JnSystemProperties;
-
 
 /**
  * Envia um email usando o provedor configurado via CcpEmailSender (ex: SendGrid).
@@ -22,7 +19,6 @@ import com.jn.utils.JnSystemProperties;
 public class JnBusinessSendEmailMessage implements CcpHttpApiExecutor{
 		
 	public static enum Fields implements CcpJsonFieldName{
-		email,
 		emails
 		;
 	} 
@@ -42,11 +38,11 @@ public class JnBusinessSendEmailMessage implements CcpHttpApiExecutor{
 		
 		String providerUrl =  JnSystemProperties.INSTANCE.urlEmailValue();
 		String providerToken =  JnSystemProperties.INSTANCE.tokenEmailValue();
-		String templateId = json.getAsString(JnEntityEmailTemplateMessage.Fields.templateId);
-		String sender = json.getAsString(JnEntityEmailParametersToSend.Fields.sender);
-		String subject = json.getAsString(JnEntityEmailTemplateMessage.Fields.subject);
-		String message = json.getAsStringDecorator(JnEntityEmailTemplateMessage.Fields.message).text().resolveTemplate(json).content;
-		CcpHttpContentType contentType = json.getAsEnum(JnEntityEmailParametersToSend.Fields.contentType, CcpHttpContentType.class, CcpHttpContentType.TEXT_HTML);
+		String templateId = json.getAsString(JnJsonCommonsFields.templateId);
+		String sender = json.getAsString(JnJsonCommonsFields.sender);
+		String subject = json.getAsString(JnJsonCommonsFields.subject);
+		String message = json.getAsStringDecorator(JnJsonCommonsFields.message).text().resolveTemplate(json).content;
+		CcpHttpContentType contentType = json.getAsEnum(JnJsonCommonsFields.contentType, CcpHttpContentType.class, CcpHttpContentType.TEXT_HTML);
 		String[] recipients = json.getAsStringArray(JnJsonCommonsFields.email, Fields.emails);
 		emailSender.sendSimpleTextEmailMessage(providerToken, providerUrl, templateId, sender, subject, message, contentType, recipients);
 		JnEntityEmailMessageSent.ENTITY.save(json);

@@ -19,6 +19,7 @@ import com.jn.entities.JnEntityInstantMessengerBotLocked;
 import com.jn.entities.JnEntityInstantMessengerMessageSent;
 import com.jn.json.fields.validation.JnJsonInstantMessengerFields;
 import com.jn.utils.JnSystemProperties;
+import com.jn.json.fields.validation.JnJsonCommonsFields;
 
 /**
  * Envia mensagens instantâneas via Telegram usando bots configurados. Suporta dois
@@ -146,7 +147,7 @@ public class JnBusinessSendInstantMessage implements CcpHttpApiExecutor{
 		text(JnMessageTextJsonValidator.class) {
 			public CcpJsonRepresentation sendMessage(CcpJsonRepresentation json, CcpJsonRepresentation orElseThrow) {
 				CcpInstantMessenger instantMessenger = CcpDependencyInjection.getDependency(CcpInstantMessenger.class);
-				String message = super.getMessage(json, orElseThrow, JnMessageTextJsonValidator.message);
+				String message = super.getMessage(json, orElseThrow, JnJsonCommonsFields.message);
 				String botToken = json.getAsString(JnMessageTextJsonValidator.botToken) ;
 				Long chatId = json.getAsLongNumber(JnJsonValidator.chatId);
 				Long replyTo = json.getOrDefault(Fields.replyTo, () -> 0d).longValue();
@@ -167,7 +168,7 @@ public class JnBusinessSendInstantMessage implements CcpHttpApiExecutor{
 				Long chatId = json.getAsLongNumber(JnJsonValidator.chatId);
 				Long replyTo = json.getOrDefault(Fields.replyTo, () -> 0d).longValue();
 				
-				String message = super.getMessage(json, orElseThrow, JnMessageTextJsonValidator.message);
+				String message = super.getMessage(json, orElseThrow, JnJsonCommonsFields.message);
 				String caption = super.getMessage(json, orElseThrow, JnMessageFileJsonValidator.caption);
 				String fileName = super.getMessage(json, orElseThrow, JnMessageFileJsonValidator.fileName);
 
@@ -195,12 +196,12 @@ public class JnBusinessSendInstantMessage implements CcpHttpApiExecutor{
 			return message.content;
 		}
 		public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
-			CcpJsonRepresentation message = json.getJsonPiece(JnMessageFileJsonValidator.fileName, JnMessageFileJsonValidator.caption, JnMessageTextJsonValidator.message, Fields.replyTo, JnJsonValidator.chatId);
+			CcpJsonRepresentation message = json.getJsonPiece(JnMessageFileJsonValidator.fileName, JnMessageFileJsonValidator.caption, JnJsonCommonsFields.message, Fields.replyTo, JnJsonValidator.chatId);
 			CcpJsonRepresentation sendMessage = this.sendMessage(json, message);
 			return sendMessage;
 		}
 		public CcpJsonRepresentation sendMessage(CcpJsonRepresentation json, String message) {
-			CcpJsonRepresentation put = CcpOtherConstants.EMPTY_JSON.put(JnMessageTextJsonValidator.message, message);
+			CcpJsonRepresentation put = CcpOtherConstants.EMPTY_JSON.put(JnJsonCommonsFields.message, message);
 			CcpJsonRepresentation sendMessage = this.sendMessage(json, put);
 			return sendMessage;
 		}

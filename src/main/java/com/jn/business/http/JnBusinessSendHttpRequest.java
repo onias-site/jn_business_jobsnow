@@ -6,13 +6,12 @@ import com.ccp.especifications.http.CcpHttpRequester.CcpErrorHttp;
 import com.ccp.especifications.http.CcpErrorHttpClient;
 import com.ccp.especifications.http.CcpErrorHttpServer;
 import com.ccp.especifications.http.CcpHttpApiExecutor;
-
 import java.util.function.Function;
-
 import com.ccp.business.CcpBusiness;
 import com.jn.entities.JnEntityHttpApiErrorClient;
 import com.jn.entities.JnEntityHttpApiErrorServer;
 import com.jn.entities.JnEntityHttpApiRetrySendRequest;
+import com.jn.json.fields.validation.JnJsonCommonsFields;
 
 /**
  * Executa chamadas HTTP encapsulando um CcpHttpApiExecutor e aplica política de
@@ -43,14 +42,14 @@ public class JnBusinessSendHttpRequest implements CcpBusiness{
 			return apply;
 		}catch (CcpErrorHttpServer e) {
 			String details = e.entity.asUgglyJson();
-			CcpJsonRepresentation httpErrorDetails = e.entity.mergeWithAnotherJson(json).put(JnEntityHttpApiErrorClient.Fields.details, details);
+			CcpJsonRepresentation httpErrorDetails = e.entity.mergeWithAnotherJson(json).put(JnJsonCommonsFields.details, details);
 			CcpJsonRepresentation retryToSendIntantMessage = this.retryToSendIntantMessage(e, json, httpErrorDetails);
 			return retryToSendIntantMessage;
 		}catch (CcpErrorHttpClient e) {
 			String details = e.entity.asUgglyJson();
-			CcpJsonRepresentation httpErrorDetails = e.entity.mergeWithAnotherJson(json).put(JnEntityHttpApiErrorClient.Fields.details, details);
-			String request = httpErrorDetails.getAsString(JnEntityHttpApiErrorClient.Fields.request);
-			httpErrorDetails = httpErrorDetails.put(JnEntityHttpApiErrorClient.Fields.request, request);
+			CcpJsonRepresentation httpErrorDetails = e.entity.mergeWithAnotherJson(json).put(JnJsonCommonsFields.details, details);
+			String request = httpErrorDetails.getAsString(JnJsonCommonsFields.request);
+			httpErrorDetails = httpErrorDetails.put(JnJsonCommonsFields.request, request);
 			JnEntityHttpApiErrorClient.ENTITY.save(httpErrorDetails);
 			throw e;
 		}catch(Throwable e) {
@@ -61,7 +60,7 @@ public class JnBusinessSendHttpRequest implements CcpBusiness{
 	
 	private CcpJsonRepresentation retryToSendIntantMessage(CcpErrorHttp e, CcpJsonRepresentation json, CcpJsonRepresentation httpErrorDetails) {
 		Integer maxTries = this.processThatSendsHttpRequest.getMaxTries();
-		boolean exceededTries = JnEntityHttpApiRetrySendRequest.exceededTries(httpErrorDetails, JnEntityHttpApiRetrySendRequest.Fields.attempts.name(), maxTries);
+		boolean exceededTries = JnEntityHttpApiRetrySendRequest.exceededTries(httpErrorDetails, JnJsonCommonsFields.attempts.name(), maxTries);
 		
 		if(exceededTries) {
 			JnEntityHttpApiErrorServer.ENTITY.save(httpErrorDetails);

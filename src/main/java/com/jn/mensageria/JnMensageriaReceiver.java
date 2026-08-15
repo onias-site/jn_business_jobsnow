@@ -1,7 +1,6 @@
 package com.jn.mensageria;
 
 import java.util.function.Consumer;
-
 import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.especifications.db.bulk.CcpExecuteBulkOperation;
 import com.ccp.especifications.db.utils.entity.CcpEntity;
@@ -10,6 +9,7 @@ import com.ccp.especifications.mensageria.receiver.CcpMensageriaReceiver;
 import com.jn.db.bulk.JnExecuteBulkOperation;
 import com.jn.entities.JnEntityAsyncTask;
 import com.jn.utils.JnDeleteKeysFromCache;
+import com.jn.json.fields.validation.JnJsonCommonsFields;
 
 /**
  * Receptor Singleton de mensagens do PubSub. Roteia cada mensagem recebida para o {@code CcpBusiness}
@@ -19,7 +19,7 @@ import com.jn.utils.JnDeleteKeysFromCache;
 public class JnMensageriaReceiver extends CcpMensageriaReceiver{
 	
 	private JnMensageriaReceiver() {
-		super(JnEntityAsyncTask.Fields.operation.name());
+		super(JnJsonCommonsFields.operation.name());
 	}
 	
 	public static final JnMensageriaReceiver INSTANCE = new JnMensageriaReceiver();
@@ -67,7 +67,7 @@ public class JnMensageriaReceiver extends CcpMensageriaReceiver{
 		Long enlapsedTime = finished - started;
 		CcpJsonRepresentation processResult = messageDetails
 				.put(JnEntityAsyncTask.Fields.enlapsedTime, enlapsedTime)
-				.put(JnEntityAsyncTask.Fields.response, response)
+				.put(JnJsonCommonsFields.response, response)
 				.put(JnEntityAsyncTask.Fields.finished, finished)
 				.put(JnEntityAsyncTask.Fields.success, success);
 		entity.save(processResult);

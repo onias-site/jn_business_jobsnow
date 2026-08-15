@@ -1,7 +1,6 @@
 package com.jn.entities;
 
 import java.util.List;
-
 import com.ccp.decorators.CcpJsonRepresentation.CcpJsonFieldName;
 import com.ccp.especifications.db.bulk.CcpBulkItem;
 import com.ccp.especifications.db.utils.entity.CcpEntity;

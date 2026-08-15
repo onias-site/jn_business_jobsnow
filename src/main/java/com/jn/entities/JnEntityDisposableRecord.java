@@ -60,16 +60,16 @@ public class JnEntityDisposableRecord implements CcpEntityConfigurator {
 	}
 	
 	public static CcpJsonRepresentation getDataWithTimeStamp(CcpJsonRepresentation oneById) {
-		CcpJsonRepresentation jsonPiece = oneById.getJsonPiece(Fields.json, Fields.timestamp, Fields.trueTimestamp);
+		CcpJsonRepresentation jsonPiece = oneById.getJsonPiece(JnJsonCommonsFields.json, JnJsonCommonsFields.timestamp, Fields.trueTimestamp);
 		Long trueTimestamp = jsonPiece.getAsLongNumber(Fields.trueTimestamp);
-		Long timestamp = jsonPiece.getAsLongNumber(Fields.timestamp);
+		Long timestamp = jsonPiece.getAsLongNumber(JnJsonCommonsFields.timestamp);
 		String newFormat = "dd/MM/yyyy - HH:mm";
 		String dateItWasSaved = new CcpTimeDecorator(trueTimestamp).getFormattedDateTime(newFormat);
 		CcpTimeDecorator ctd = new CcpTimeDecorator(timestamp);
 		String expirationDate = ctd.getFormattedDateTime(newFormat);
 		
-		CcpJsonRepresentation innerJson = oneById.getInnerJson(Fields.json);
-		CcpJsonRepresentation removeFields = jsonPiece.removeFields(Fields.json, Fields.format);
+		CcpJsonRepresentation innerJson = oneById.getInnerJson(JnJsonCommonsFields.json);
+		CcpJsonRepresentation removeFields = jsonPiece.removeFields(JnJsonCommonsFields.json, Fields.format);
 		CcpJsonRepresentation renameField = removeFields.put(ExtraFields.expirationDate, expirationDate);
 		CcpJsonRepresentation mergeWithAnotherJson = innerJson.mergeWithAnotherJson(renameField);
 		CcpJsonRepresentation put = mergeWithAnotherJson.put(ExtraFields.dateItWasSaved, dateItWasSaved);

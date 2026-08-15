@@ -8,7 +8,6 @@ import java.util.function.Supplier;
 import com.ccp.business.CcpBusiness;
 import com.ccp.decorators.CcpFieldName;
 import com.ccp.decorators.CcpJsonRepresentation;
-import com.ccp.decorators.CcpJsonRepresentation.CcpJsonFieldName;
 import com.ccp.dependency.injection.CcpDependencyInjection;
 import com.ccp.especifications.db.crud.CcpCrud;
 import com.ccp.especifications.db.crud.CcpSelectUnionAll;
@@ -26,13 +25,11 @@ import com.jn.entities.JnEntityInstantMessengerBotLocked;
 import com.jn.entities.JnEntityInstantMessengerMessageSent;
 import com.jn.entities.JnEntityInstantMessengerParametersToSend;
 import com.jn.entities.JnEntityInstantMessengerTemplateMessage;
+import com.jn.json.fields.validation.JnJsonCommonsFields;
 import com.jn.utils.JnDeleteKeysFromCache;
 
 public class JnSendMessageToUser {
-
-	enum JsonFieldNames implements CcpJsonFieldName {
-		message
-	}
+	
 
 	private final List<JnBusinessSendHttpRequest> messengers = new ArrayList<>();
 
@@ -92,7 +89,7 @@ public class JnSendMessageToUser {
 		alreadySentEntities(true,  false),
 		parameterEntities(false, false),
 		messageEntities(false, false),
-		blockEntities(true,  true),
+		blockEntities(true,  true)
 		;
 		final boolean whenPresentInUnionAll;
 		final boolean whenPrimaryKeyIsMissing;
@@ -158,8 +155,8 @@ public class JnSendMessageToUser {
 		CcpEntity[] entities = allEntitiesToSearch.toArray(new CcpEntity[allEntitiesToSearch.size()]);
 		
 		CcpJsonRepresentation idToSearch = entityValues
-				.put(JnEntityEmailTemplateMessage.Fields.language, languageToUseInErrorCases)
-				.put(JnEntityEmailTemplateMessage.Fields.templateId, templateId);
+				.put(JnJsonCommonsFields.language, languageToUseInErrorCases)
+				.put(JnJsonCommonsFields.templateId, templateId);
 		
 		CcpCrud crud = CcpDependencyInjection.getDependency(CcpCrud.class);
 		
@@ -205,8 +202,8 @@ public class JnSendMessageToUser {
 		}
 
 		CcpJsonRepresentation parameterData        = parameterEntity.getRecordFromUnionAll(unionAll, jsonSupplier);
-		CcpJsonRepresentation moreParameters       = parameterData.getInnerJson(JnEntityEmailParametersToSend.Fields.moreParameters);
-		CcpJsonRepresentation removeFields         = parameterData.removeFields(JnEntityEmailParametersToSend.Fields.moreParameters);
+		CcpJsonRepresentation moreParameters       = parameterData.getInnerJson(JnJsonCommonsFields.moreParameters);
+		CcpJsonRepresentation removeFields         = parameterData.removeFields(JnJsonCommonsFields.moreParameters);
 		CcpJsonRepresentation allParameters        = removeFields.mergeWithAnotherJson(moreParameters);
 		CcpJsonRepresentation mergeWithAnotherJson = messageData.mergeWithAnotherJson(allParameters);
 		CcpJsonRepresentation message              = mergeWithAnotherJson.mergeWithAnotherJson(json);

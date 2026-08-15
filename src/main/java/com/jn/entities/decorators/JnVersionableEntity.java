@@ -3,7 +3,6 @@ package com.jn.entities.decorators;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
-
 import com.ccp.business.CcpBusiness;
 import com.ccp.constants.CcpOtherConstants;
 import com.ccp.decorators.CcpJsonRepresentation;
@@ -17,6 +16,7 @@ import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityMetaDa
 import com.jn.db.bulk.JnExecuteBulkOperation;
 import com.jn.entities.JnEntityVersionable;
 import com.jn.utils.JnDeleteKeysFromCache;
+import com.jn.json.fields.validation.JnJsonCommonsFields;
 
 /**
  * Decorador que adiciona versionamento/auditoria a entidades marcadas com {@code @CcpEntityVersionable}.
@@ -60,12 +60,12 @@ public class JnVersionableEntity extends CcpDefaultEntityDelegator<CcpEntityVers
 		
 		CcpJsonRepresentation audit = 
 				CcpOtherConstants.EMPTY_JSON
-				.put(JnEntityVersionable.Fields.id, id)
-				.put(JnEntityVersionable.Fields.json, "" + oneById)
-				.put(JnEntityVersionable.Fields.operation, operation)
-				.put(JnEntityVersionable.Fields.date, formattedDateTime)
-				.put(JnEntityVersionable.Fields.entity, entityDetails.entityName)
-				.put(JnEntityVersionable.Fields.timestamp, System.currentTimeMillis())
+				.put(JnJsonCommonsFields.id, id)
+				.put(JnJsonCommonsFields.json, "" + oneById)
+				.put(JnJsonCommonsFields.operation, operation)
+				.put(JnJsonCommonsFields.date, formattedDateTime)
+				.put(JnJsonCommonsFields.entity, entityDetails.entityName)
+				.put(JnJsonCommonsFields.timestamp, System.currentTimeMillis())
 		;
 		return audit;
 	}

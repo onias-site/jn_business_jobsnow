@@ -42,7 +42,7 @@ public class JnEntityLoginSessionTokenAttempts implements CcpEntityConfigurator 
 		CcpBusiness result = json -> {
 			
 			CcpJsonRepresentation record = json.getInnerJsonFromPath(CcpEntity.JsonFieldNames._entities, ENTITY);
-			Double attempts = record.getOrDefault(Fields.attempts, () -> 0d);
+			Double attempts = record.getOrDefault(JnJsonCommonsFields.attempts, () -> 0d);
 			Double updatedAttempts = attempts + 1;
 			
 			boolean excedeedAttempts = updatedAttempts >= maxAttempts;
@@ -52,8 +52,8 @@ public class JnEntityLoginSessionTokenAttempts implements CcpEntityConfigurator 
 				return json;
 			}
 			
-			CcpJsonRepresentation jsonPiece = json.getJsonPiece(Fields.email);
-			CcpJsonRepresentation mergeWithAnotherJson = record.put(Fields.attempts, updatedAttempts.intValue()).mergeWithAnotherJson(jsonPiece);
+			CcpJsonRepresentation jsonPiece = json.getJsonPiece(JnJsonCommonsFields.email);
+			CcpJsonRepresentation mergeWithAnotherJson = record.put(JnJsonCommonsFields.attempts, updatedAttempts.intValue()).mergeWithAnotherJson(jsonPiece);
 			ENTITY.save(mergeWithAnotherJson);
 			return json;
 		};

@@ -17,7 +17,6 @@ import com.jn.business.login.JnBusinessExecuteLogout;
 import com.jn.business.login.JnBusinessSavePassword;
 import com.jn.business.messages.JnMessages.JnBusinessSendUserToken;
 import com.jn.entities.JnEntityDisposableRecord;
-import com.jn.entities.JnEntityEmailMessageSent;
 import com.jn.entities.JnEntityLoginAnswers;
 import com.jn.entities.JnEntityLoginEmail;
 import com.jn.entities.JnEntityLoginPassword;
@@ -73,11 +72,11 @@ public enum JnServiceLogin implements JnService {
 				.ifThisIdIsNotPresentInEntity(JnEntityLoginPassword.ENTITY).returnStatus(JnProcessStatusExecuteLogin.missingSavePassword).and()
 				.ifThisIdIsNotPresentInEntity(JnEntityLoginAnswers.ENTITY).returnStatus(JnProcessStatusCreateLoginEmail.missingSaveAnswers).and()
 				.ifThisIdIsPresentInEntity(JnEntityLoginPassword.ENTITY).executeAction(functionToEvaluatePasswordAttempts).andFinallyReturningTheseFields(
-						JnEntityLoginSessionValidation.Fields.userAgent,
-						JnEntityLoginPasswordAttempts.Fields.attempts,
-						JnEntityDisposableRecord.Fields.timestamp,
-						JnEntityLoginSessionValidation.Fields.ip,
-						JnEntityLoginToken.Fields.email,
+						JnJsonCommonsFields.userAgent,
+						JnJsonCommonsFields.attempts,
+						JnJsonCommonsFields.timestamp,
+						JnJsonCommonsFields.ip,
+						JnJsonCommonsFields.email,
 						JsonFieldNames.expirationDate, 
 						JsonFieldNames.dateItWasSaved,
 						JsonFieldNames.sessionToken
@@ -194,7 +193,7 @@ public enum JnServiceLogin implements JnService {
 	CreateLoginToken {
 		public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
 			
-			CcpJsonRepresentation jsonWithSubjectType = json.put(JnEntityEmailMessageSent.Fields.subjectType, JnBusinessSendUserToken.class.getName());
+			CcpJsonRepresentation jsonWithSubjectType = json.put(JnJsonCommonsFields.subjectType, JnBusinessSendUserToken.class.getName());
 			
 			CcpJsonRepresentation[] parametersToSearchInAllEntities = this.createParametersToSearchInAllEntities(jsonWithSubjectType);
 			
@@ -208,11 +207,11 @@ public enum JnServiceLogin implements JnService {
 				.ifThisIdIsNotPresentInEntity(JnEntityLoginEmail.ENTITY).returnStatus(JnProcessStatusUpdatePassword.missingEmail).and()
 				.ifThisIdIsNotPresentInEntity(JnEntityLoginToken.ENTITY).executeAction(sendUserToken)
 				.andFinallyReturningTheseFields(
-						JnEntityLoginSessionValidation.Fields.userAgent,
-						JnEntityLoginPasswordAttempts.Fields.attempts,
-						JnEntityDisposableRecord.Fields.timestamp,
-						JnEntityLoginSessionValidation.Fields.ip,
-						JnEntityLoginToken.Fields.email,
+						JnJsonCommonsFields.userAgent,
+						JnJsonCommonsFields.attempts,
+						JnJsonCommonsFields.timestamp,
+						JnJsonCommonsFields.ip,
+						JnJsonCommonsFields.email,
 						JsonFieldNames.expirationDate, 
 						JsonFieldNames.dateItWasSaved,
 						JsonFieldNames.sessionToken
@@ -240,10 +239,10 @@ public enum JnServiceLogin implements JnService {
 				.ifThisIdIsNotPresentInEntity(JnEntityLoginEmail.ENTITY).returnStatus(JnProcessStatusUpdatePassword.missingEmail).and()
 				.ifThisIdIsNotPresentInEntity(JnEntityLoginToken.ENTITY).returnStatus(JnProcessStatusUpdatePassword.missingToken).and()
 				.executeAction(functionToEvaluateTokenAttempts).andFinallyReturningTheseFields(
-						JnEntityLoginSessionValidation.Fields.userAgent,
-						JnEntityDisposableRecord.Fields.timestamp,
-						JnEntityLoginSessionValidation.Fields.ip,
-						JnEntityLoginToken.Fields.email,
+						JnJsonCommonsFields.userAgent,
+						JnJsonCommonsFields.timestamp,
+						JnJsonCommonsFields.ip,
+						JnJsonCommonsFields.email,
 						JsonFieldNames.expirationDate, 
 						JsonFieldNames.dateItWasSaved,
 						JsonFieldNames.sessionToken
@@ -275,7 +274,7 @@ public enum JnServiceLogin implements JnService {
 				.andFinallyReturningTheseFields(
 						JsonFieldNames.expirationDate, 
 						JsonFieldNames.dateItWasSaved,
-						JsonFieldNames.timestamp,
+						JnJsonCommonsFields.timestamp,
 						JsonFieldNames.sessionToken
 						)
 			.endThisProcedureRetrievingTheResultingData(this, LoadDataAboutToken.INSTANCE, save, JnDeleteKeysFromCache.INSTANCE);
@@ -312,7 +311,7 @@ public enum JnServiceLogin implements JnService {
 			
 			return result;
 		}
-	},
+	}
 	;
 	protected CcpBusiness createFunctionToEvaluatePasswordAttempts() {
 		CcpBusiness lockPassword = JnEntityLoginPassword.ENTITY.getEntityMetaData().getOperationCallback(CcpEntityOperationType.delete);
@@ -320,14 +319,14 @@ public enum JnServiceLogin implements JnService {
 		CcpBusiness functionToEvaluatePasswordAttempts = JnBusinessEvaluateAttempts.builder()
 				.entityToGetTheAttempts(JnEntityLoginPasswordAttempts.ENTITY)
 				.entityToGetTheSecret(JnEntityLoginPassword.ENTITY)
-				.databaseFieldName(JnEntityLoginPassword.Fields.password)
-				.userFieldName(JnEntityLoginPassword.Fields.password)
+				.databaseFieldName(JnJsonCommonsFields.password)
+				.userFieldName(JnJsonCommonsFields.password)
 				.statusWhenExceedAttempts(JnProcessStatusExecuteLogin.passwordLockedRecently)
 				.statusWhenWrongType(JnProcessStatusExecuteLogin.wrongPassword)
 				.lockUsing(lockPassword)
 				.onSuccess(executeLogin)
-				.attemptsFieldName(JnEntityLoginPasswordAttempts.Fields.attempts)
-				.emailFieldName(JnEntityLoginPassword.Fields.email)
+				.attemptsFieldName(JnJsonCommonsFields.attempts)
+				.emailFieldName(JnJsonCommonsFields.email)
 				.build();
 		return functionToEvaluatePasswordAttempts;
 	}
@@ -345,8 +344,8 @@ public enum JnServiceLogin implements JnService {
 				.statusWhenWrongType(JnProcessStatusUpdatePassword.wrongToken)
 				.lockUsing(lockToken)
 				.onSuccess(updatePassword)
-				.attemptsFieldName(JnEntityLoginTokenAttempts.Fields.attempts)
-				.emailFieldName(JnEntityLoginToken.Fields.email)
+				.attemptsFieldName(JnJsonCommonsFields.attempts)
+				.emailFieldName(JnJsonCommonsFields.email)
 				.build();
 		return evaluateTokenAttempts;
 	}
@@ -380,9 +379,7 @@ public enum JnServiceLogin implements JnService {
 		dateItWasSaved, 
 		expirationDate,
 		sessionToken,
-		inexistentField, 
-		timestamp
-	}
+		inexistentField}
 }
 
 enum ValidateLogin implements CcpJsonFieldName{
@@ -392,7 +389,7 @@ enum ValidateLogin implements CcpJsonFieldName{
 
 	@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 	@CcpJsonFieldValidatorRequired
-	email,
+	email
 }
 
 
@@ -402,8 +399,8 @@ class LoadDataAboutToken implements CcpBusiness{
 
 	public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
 		CcpJsonRepresentation innerJsonFromPath = json.getInnerJsonFromPath(CcpEntity.JsonFieldNames._entities, JnEntityDisposableRecord.ENTITY);
-		CcpJsonRepresentation whenAnyFieldsAreFound = innerJsonFromPath.whenAnyFieldsAreFound(JsonTransformer.INSTANCE, JnEntityDisposableRecord.Fields.timestamp);
-		CcpJsonRepresentation jsonPiece = json.getJsonPiece(JnEntityLoginEmail.Fields.email, JsonFieldNames.sessionToken);
+		CcpJsonRepresentation whenAnyFieldsAreFound = innerJsonFromPath.whenAnyFieldsAreFound(JsonTransformer.INSTANCE, JnJsonCommonsFields.timestamp);
+		CcpJsonRepresentation jsonPiece = json.getJsonPiece(JnJsonCommonsFields.email, JsonFieldNames.sessionToken);
 		CcpJsonRepresentation mergedJson = whenAnyFieldsAreFound.mergeWithAnotherJson(jsonPiece);
 		return mergedJson;
 		

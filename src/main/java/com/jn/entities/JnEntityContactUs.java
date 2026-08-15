@@ -15,6 +15,7 @@ import com.jn.db.bulk.JnExecuteBulkOperation;
 import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
 import com.jn.utils.JnDeleteKeysFromCache;
+
 @CcpEntityTwin(
 		twinEntityName = "contact_us_solved",
 		bulkExecutorClass = JnExecuteBulkOperation.class,

@@ -4,11 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-
 import com.ccp.business.CcpBusiness;
 import com.ccp.constants.CcpOtherConstants;
 import com.ccp.decorators.CcpJsonRepresentation;
-import com.ccp.decorators.CcpJsonRepresentation.CcpJsonFieldName;
 import com.ccp.decorators.CcpTimeDecorator;
 import com.ccp.dependency.injection.CcpDependencyInjection;
 import com.ccp.especifications.db.bulk.CcpBulkEntityOperationType;
@@ -22,6 +20,7 @@ import com.ccp.especifications.mensageria.sender.CcpMensageriaSender;
 import com.jn.db.bulk.JnExecuteBulkOperation;
 import com.jn.entities.JnEntityAsyncTask;
 import com.jn.utils.JnDeleteKeysFromCache;
+import com.jn.json.fields.validation.JnJsonCommonsFields;
 
 /**
  * Responsável por enviar mensagens/tarefas para a fila de mensageria (PubSub). Cria um registro em
@@ -29,9 +28,6 @@ import com.jn.utils.JnDeleteKeysFromCache;
  * envio de um {@code CcpBusiness} (tópico = nome da classe) ou envio de uma operação de entidade.
  */
 public class JnFunctionMensageriaSender implements CcpBusiness {
-	
-	enum JsonFieldNames implements CcpJsonFieldName{
-	}
 	
 	private final CcpMensageriaSender mensageriaSender = CcpDependencyInjection.getDependency(CcpMensageriaSender.class);
 	
@@ -83,8 +79,8 @@ public class JnFunctionMensageriaSender implements CcpBusiness {
 				.put(JnEntityAsyncTask.Fields.started, System.currentTimeMillis())
 				.put(JnEntityAsyncTask.Fields.data, formattedCurrentDateTime)
 				.put(JnEntityAsyncTask.Fields.messageId, UUID.randomUUID())
-				.put(JnEntityAsyncTask.Fields.request, json.asPrettyJson())
-				.put(JnEntityAsyncTask.Fields.operation, this.operation)
+				.put(JnJsonCommonsFields.request, json.asPrettyJson())
+				.put(JnJsonCommonsFields.operation, this.operation)
 				.put(JnEntityAsyncTask.Fields.topic, this.topic)
 				.mergeWithAnotherJson(json)
 				;

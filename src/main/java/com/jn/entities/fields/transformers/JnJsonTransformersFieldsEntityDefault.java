@@ -16,9 +16,9 @@ import com.ccp.especifications.db.utils.entity.fields.CcpEntityField;
 import com.ccp.especifications.db.utils.entity.fields.CcpJsonTransformersDefaultEntityField;
 import com.ccp.especifications.password.CcpPasswordHandler;
 import com.ccp.hash.CcpHashAlgorithm;
-import com.jn.entities.JnEntityLoginPassword;
 import com.jn.entities.JnEntityLoginToken;
 import com.jn.exceptions.JnErrorIsNotAnEmail;
+import com.jn.json.fields.validation.JnJsonCommonsFields;
 
 /**
  * Conjunto de transformadores de campos padrão aplicados às entidades do JobsNow. Cada valor aplica
@@ -30,8 +30,8 @@ public enum JnJsonTransformersFieldsEntityDefault implements CcpJsonTransformers
 	email(true) {
 
 		public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
-			JsonFieldNames oldField = JsonFieldNames.email;
-			JsonFieldNames newField = JsonFieldNames.originalEmail;
+			CcpJsonFieldName oldField = JnJsonCommonsFields.email;
+			CcpJsonFieldName newField = JsonFieldNames.originalEmail;
 			String value = json.getAsString(oldField);
 			CcpEmailDecorator email = new CcpStringDecorator(value).email();
 			
@@ -57,13 +57,13 @@ public enum JnJsonTransformersFieldsEntityDefault implements CcpJsonTransformers
 				return json;
 			}
 			
-			String token = json.getAsString(JnEntityLoginPassword.Fields.password);
+			String token = json.getAsString(JnJsonCommonsFields.password);
 			
 			CcpPasswordHandler dependency = CcpDependencyInjection.getDependency(CcpPasswordHandler.class);
 			
 			String passwordHash = dependency.getHash(token); 
 			
-			CcpJsonRepresentation put = json.put(JnEntityLoginPassword.Fields.password, passwordHash)
+			CcpJsonRepresentation put = json.put(JnJsonCommonsFields.password, passwordHash)
 					.put(JsonFieldNames.passwordAlreadyCalculated, true)
 					;
 			return put;
@@ -124,7 +124,6 @@ public enum JnJsonTransformersFieldsEntityDefault implements CcpJsonTransformers
 			return put;
 		}}
 	;
-
 	
 	
 	private JnJsonTransformersFieldsEntityDefault(boolean canBePrimaryKey) {
@@ -140,7 +139,7 @@ public enum JnJsonTransformersFieldsEntityDefault implements CcpJsonTransformers
 		return originalToken;
 	}
 	public static enum JsonFieldNames implements CcpJsonFieldName{
-		originalEmail, originalToken, email, token, passwordAlreadyCalculated, tokenHash, originalMessage, messageHash
+		originalEmail, originalToken, token, passwordAlreadyCalculated, tokenHash, originalMessage, messageHash
 	}
 	public boolean canBePrimaryKey() {
 		return canBePrimaryKey;

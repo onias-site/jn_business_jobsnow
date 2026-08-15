@@ -1,7 +1,6 @@
 package com.jn.db.bulk;
 
 import java.util.function.Function;
-
 import com.ccp.constants.CcpOtherConstants;
 import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.decorators.CcpJsonRepresentation.CcpJsonFieldName;
@@ -9,6 +8,8 @@ import com.ccp.especifications.db.bulk.CcpBulkItem;
 import com.ccp.especifications.db.bulk.CcpBulkOperationResult;
 import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityMetaData;
 import com.jn.entities.JnEntityRecordToReprocess;
+import com.jn.json.fields.validation.JnJsonCommonsFields;
+
 /**
  * Função de mapeamento usada pelo JnExecuteBulkOperation para converter um resultado
  * de operação bulk com erro em um registro de reprocessamento (JnEntityRecordToReprocess).
@@ -37,12 +38,12 @@ class FunctionReprocessMapper implements Function<CcpBulkOperationResult, CcpJso
 			throw new JnErrorReprocessInfiniteLoopPrevented();
 		}
 		long currentTimeMillis = System.currentTimeMillis();
-		CcpJsonRepresentation put = CcpOtherConstants.EMPTY_JSON.put(JnEntityRecordToReprocess.Fields.timestamp, currentTimeMillis);
+		CcpJsonRepresentation put = CcpOtherConstants.EMPTY_JSON.put(JnJsonCommonsFields.timestamp, currentTimeMillis);
 		CcpJsonRepresentation putAll = put.mergeWithAnotherJson(bulkItem.json);
 		CcpJsonRepresentation errorDetails = result.getErrorDetails();
 		CcpJsonRepresentation putAll2 = putAll.mergeWithAnotherJson(errorDetails);
 		CcpJsonRepresentation renameKey = putAll2.renameField(JsonFieldNames.type, JnEntityRecordToReprocess.Fields.errorType);
-		CcpJsonRepresentation jsonPiece = renameKey.put(JnEntityRecordToReprocess.Fields.id, bulkItem.id).put(JnEntityRecordToReprocess.Fields.entity, entityDetails.entityName)
+		CcpJsonRepresentation jsonPiece = renameKey.put(JnJsonCommonsFields.id, bulkItem.id).put(JnJsonCommonsFields.entity, entityDetails.entityName)
 		.getJsonPiece(JnEntityRecordToReprocess.Fields.values());
 		return jsonPiece;
 	}
