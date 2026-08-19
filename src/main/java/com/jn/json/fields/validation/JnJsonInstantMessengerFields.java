@@ -2,7 +2,7 @@ package com.jn.json.fields.validation;
 
 import com.ccp.especifications.http.CcpHttpContentType;
 import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeNestedJson;
-import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeNumberUnsigned;
+import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeNumber;
 import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeString;
 import com.jn.business.messages.JnBusinessSendInstantMessage.JnInstantMessageType;
 
@@ -15,7 +15,7 @@ public enum JnJsonInstantMessengerFields{
 	@CcpJsonFieldTypeString
 	message, 
 	
-	@CcpJsonFieldTypeNumberUnsigned
+	@CcpJsonFieldTypeNumber
 	chatId, 
 	
 	@CcpJsonFieldTypeNestedJson

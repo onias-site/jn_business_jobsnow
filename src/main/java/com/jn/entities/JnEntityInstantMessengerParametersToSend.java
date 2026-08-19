@@ -19,6 +19,7 @@ import com.ccp.json.validations.fields.annotations.CcpJsonCopyFieldValidationsFr
 import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidatorRequired;
 import com.jn.business.messages.JnBusinessSendInstantMessage;
 import com.jn.business.messages.JnMessages.JnBusinessNotifyError;
+import com.jn.business.messages.JnMessages.NotifySupportAboutPendingResendLoginToken;
 import com.jn.business.messages.JnMessages.NotifySupportAboutPendingUnlockLoginToken;
 import com.jn.entities.decorators.JnVersionableEntity;
 import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault;
@@ -93,7 +94,7 @@ public class JnEntityInstantMessengerParametersToSend implements CcpEntityConfig
 
 		CcpJsonRepresentation notifyResendToken = CcpOtherConstants.EMPTY_JSON
 		.put(Fields.instantMessageType, JnBusinessSendInstantMessage.JnInstantMessageType.text)
-		.put(JnJsonCommonsFields.templateId, NotifySupportAboutPendingUnlockLoginToken.class.getName())
+		.put(JnJsonCommonsFields.templateId, NotifySupportAboutPendingResendLoginToken.class.getName())
 		.addToItem(JnJsonCommonsFields.moreParameters, MoreParametersFields.maxTriesToSendMessage, 10)
 		.addToItem(JnJsonCommonsFields.moreParameters, MoreParametersFields.sleepToSendMessage, 3000)
 		.put(Fields.botName, JnBusinessSendInstantMessage.JnBotType.support)

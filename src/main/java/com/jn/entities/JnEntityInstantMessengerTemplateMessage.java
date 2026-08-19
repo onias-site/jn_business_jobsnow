@@ -58,13 +58,13 @@ public class JnEntityInstantMessengerTemplateMessage  implements CcpEntityConfig
 		;
 
 		CcpJsonRepresentation notifyUnlockToken = CcpOtherConstants.EMPTY_JSON
-				.put(JnJsonCommonsFields.message, "Ao endereço {email}, envie a seguinte mensagem:\n\n\nVocê solicitou o desbloqueio de seu token para (re)cadastro / desbloqueio de senha. Atendendo ao seu pedido então, a senha para o desbloqueio do seu token é {password}, o token que você deve informar no campo de token é {token}")
+				.put(JnJsonCommonsFields.message, "Ao endereço {email}, envie a seguinte mensagem:\n\n\nVocê solicitou o desbloqueio de seu token para (re) cadastro / desbloqueio de senha. Atendendo ao seu pedido, a senha é {password}, esta senha deve ser informada para desbloqueio de seu token. O token que você deve informar no campo de token é {token}")
 				.put(JnJsonCommonsFields.templateId, NotifySupportAboutPendingUnlockLoginToken.class.getName())
 				.put(JnJsonCommonsFields.language, JnLanguage.portuguese)
 		;
 
 		CcpJsonRepresentation notifyResendToken = CcpOtherConstants.EMPTY_JSON
-				.put(JnJsonCommonsFields.message, "Ao endereço {email}, envie a seguinte mensagem:\n\n\nVocê solicitou o reenvio de seu token para (re)cadastro / desbloqueio de senha. Atendendo ao seu pedido então, o token que você deve informar no campo de token é {token}")
+				.put(JnJsonCommonsFields.message, "Ao endereço {email}, envie a seguinte mensagem:\n\n\nVocê solicitou o reenvio de seu token para (re) cadastro / desbloqueio de senha. Atendendo ao seu pedido, o token que você deve informar no campo de token é {token}")
 				.put(JnJsonCommonsFields.templateId, NotifySupportAboutPendingResendLoginToken.class.getName())
 				.put(JnJsonCommonsFields.language, JnLanguage.portuguese)
 		;

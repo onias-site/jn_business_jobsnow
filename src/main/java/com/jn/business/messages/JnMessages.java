@@ -29,16 +29,6 @@ public class JnMessages {
 		protected SupportInstantMessengerNotification(CcpEntity entity, JnMessageSenderExceptionHandler exceptionHandler) {
 			super(entity, exceptionHandler);
 		}
-		public Class<?> getJsonValidationClass() {
-			return Fields.class;
-		}
-
-		private static enum Fields{
-			@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
-			@CcpJsonFieldValidatorRequired
-			email
-		}
-		
 			
 		public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
 
@@ -87,9 +77,6 @@ public class JnMessages {
 			@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 			@CcpJsonFieldValidatorRequired
 			token,
-			@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
-			@CcpJsonFieldValidatorRequired
-			email
 		}
 	}
 	

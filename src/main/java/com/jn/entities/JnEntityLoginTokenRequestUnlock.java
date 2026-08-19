@@ -4,6 +4,7 @@ import static com.ccp.especifications.db.utils.entity.decorators.enums.CcpEntity
 import static com.ccp.especifications.db.utils.entity.decorators.enums.CcpEntityDecoratorOperationType.save;
 import static com.ccp.especifications.db.utils.entity.decorators.enums.CcpEntityOperationStepType._after;
 import static com.ccp.especifications.db.utils.entity.decorators.enums.CcpEntityType.mainEntity;
+
 import com.ccp.decorators.CcpJsonRepresentation.CcpJsonFieldName;
 import com.ccp.especifications.db.utils.entity.CcpEntity;
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityAsyncWriter;
@@ -21,9 +22,9 @@ import com.ccp.especifications.db.utils.entity.fields.annotations.CcpEntityField
 import com.ccp.especifications.db.utils.entity.fields.annotations.CcpEntityFieldTransformer;
 import com.ccp.json.validations.fields.annotations.CcpJsonCopyFieldValidationsFrom;
 import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeString;
-import com.jn.business.login.solve.token.JnBusinessResendLoginToken;
 import com.jn.business.login.solve.token.JnBusinessResetLoginToken;
 import com.jn.business.messages.JnMessages;
+import com.jn.business.messages.JnMessages.JnBusinessSendUserToken;
 import com.jn.db.bulk.JnExecuteBulkOperation;
 import com.jn.entities.decorators.JnAsyncWriterEntity;
 import com.jn.entities.decorators.JnDisposableEntity;
@@ -47,7 +48,7 @@ import com.jn.utils.JnDeleteKeysFromCache;
 @CcpEntityFieldsValidator(classReferenceWithTheFields = JnEntityLoginTokenRequestUnlock.Fields.class)
 @CcpEntityOperations(
 		operations = {
-				@CcpEntityOperation(when = _after, operation = delete, from = mainEntity,  execute = {JnBusinessResetLoginToken.class, JnBusinessResendLoginToken.class}, operationHandlers = {}),
+				@CcpEntityOperation(when = _after, operation = delete, from = mainEntity,  execute = {JnBusinessResetLoginToken.class, JnBusinessSendUserToken.class}, operationHandlers = {}),
 				@CcpEntityOperation(when = _after, operation = save, from = mainEntity,  execute = {JnMessages.NotifySupportAboutPendingUnlockLoginToken.class}, operationHandlers = {}),
 		},
 		globalHandlers = {}

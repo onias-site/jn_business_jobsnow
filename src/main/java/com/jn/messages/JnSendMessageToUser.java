@@ -86,18 +86,16 @@ public class JnSendMessageToUser {
 
 	static enum MustNotSendMessage{
 
-		alreadySentEntities(true,  false),
-		parameterEntities(false, false),
-		messageEntities(false, false),
-		blockEntities(true,  true)
+		alreadySentEntities(true),
+		parameterEntities(false),
+		messageEntities(false),
+		blockEntities(true)
 		;
 		final boolean whenPresentInUnionAll;
-		final boolean whenPrimaryKeyIsMissing;
 		
 		
-		private MustNotSendMessage(boolean whenPresentInThisUnionAll, boolean whenPrimaryKeyIsMissing) {
+		private MustNotSendMessage(boolean whenPresentInThisUnionAll) {
 			this.whenPresentInUnionAll = whenPresentInThisUnionAll;
-			this.whenPrimaryKeyIsMissing = whenPrimaryKeyIsMissing;
 		}
 		
 		@SuppressWarnings("unchecked")
@@ -116,20 +114,15 @@ public class JnSendMessageToUser {
 			
 			List<CcpEntity> entities = this.getEntities(obj);
 			
-			CcpEntity entity   = entities.get(index);
+			CcpEntity entity = entities.get(index);
 			
 			try {
 				boolean isPresentInThisUnionAll  = entity.isPresentInThisUnionAll(unionAll, json);
 				boolean mustNotSendMessage = this.whenPresentInUnionAll == isPresentInThisUnionAll;
-				if (mustNotSendMessage) {
-					return true;
-				}
+				return mustNotSendMessage;
 			} catch (CcpErrorEntityPrimaryKeyIsMissing e) {
-				if (this.whenPrimaryKeyIsMissing) {
-					return true;
-				}
+				return false;
 			}
-			return false;
 		}
 	
 		public static boolean isItTruth(JnSendMessageToUser obj, CcpSelectUnionAll unionAll, CcpJsonRepresentation json, Integer index) {
@@ -166,7 +159,7 @@ public class JnSendMessageToUser {
 		if (alreadySaved) {
 			return entityValues;
 		}
-
+		boolean messageSent = false;
 		for (int index = 0; index < this.alreadySentEntities.size(); index++) {
 			
 			boolean mustNotSendMessage = MustNotSendMessage.isItTruth(this, unionAll, idToSearch , index);
@@ -180,8 +173,13 @@ public class JnSendMessageToUser {
 			Class<? extends CcpBusiness> class1 = messenger.processThatSendsHttpRequest.getClass();
 			String simpleName = class1.getSimpleName();
 			idToSearch = idToSearch.put(new CcpFieldName(simpleName), result);
+			messageSent = true;
 		}
-		entityToSave.save(idToSearch);
+		
+		if(messageSent) {
+			entityToSave.save(idToSearch);
+		}
+
 		return entityValues;
 	}
 
