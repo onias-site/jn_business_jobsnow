@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+
 import com.ccp.business.CcpBusiness;
 import com.ccp.constants.CcpOtherConstants;
 import com.ccp.decorators.CcpJsonRepresentation;
@@ -19,8 +20,8 @@ import com.ccp.especifications.mensageria.receiver.CcpMensageriaReceiver;
 import com.ccp.especifications.mensageria.sender.CcpMensageriaSender;
 import com.jn.db.bulk.JnExecuteBulkOperation;
 import com.jn.entities.JnEntityAsyncTask;
-import com.jn.utils.JnDeleteKeysFromCache;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
+import com.jn.utils.JnDeleteKeysFromCache;
 
 /**
  * Responsável por enviar mensagens/tarefas para a fila de mensageria (PubSub). Cria um registro em
@@ -29,22 +30,26 @@ import com.jn.json.fields.validation.JnJsonCommonsFields;
  */
 public class JnFunctionMensageriaSender implements CcpBusiness {
 	
+	
 	private final CcpMensageriaSender mensageriaSender = CcpDependencyInjection.getDependency(CcpMensageriaSender.class);
 	
 	private final Class<?> jsonValidationClass;
+	private final String entityName;
 	private final String operation;
 	private final String topic;
 	
 	public JnFunctionMensageriaSender(CcpBusiness topic) {
 		this.jsonValidationClass = topic.getJsonValidationClass();
 		this.topic = topic.getClass().getName();
+		this.entityName = "";
 		this.operation = "";
 	}
 
 	public JnFunctionMensageriaSender(CcpEntity entity, CcpEntityOperationType operation) {
 		this.jsonValidationClass = operation.getJsonValidationClass(entity);
-		CcpEntityMetaData entityDetails = entity.getEntityMetaData();
-		this.topic = entityDetails.configurationClass.getName();
+		CcpEntityMetaData entityMetadata = entity.getEntityMetaData();
+		this.topic = entityMetadata.configurationClass.getName();
+		this.entityName = entityMetadata.entityName;
 		this.operation = operation.name();
 	}
 
@@ -61,7 +66,12 @@ public class JnFunctionMensageriaSender implements CcpBusiness {
 		CcpJsonRepresentation messageDetails = this.getMessageDetails(put); 
 		
 		JnEntityAsyncTask.ENTITY.save(messageDetails);
-		CcpJsonRepresentation put2 = messageDetails.put(CcpMensageriaReceiver.Fields.mensageriaReceiver, JnMensageriaReceiver.class.getName());
+		
+		String receiverName = JnMensageriaReceiver.class.getName();
+		CcpJsonRepresentation put2 = messageDetails
+				.put(CcpMensageriaReceiver.JsonFieldNames.mensageriaReceiver, receiverName)
+				.put(CcpMensageriaReceiver.JsonFieldNames.entityName, this.entityName)
+				;
 		this.mensageriaSender.sendToMensageria(this.topic, this.jsonValidationClass, put2);
 
 		return messageDetails; 
