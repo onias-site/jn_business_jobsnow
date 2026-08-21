@@ -39,7 +39,7 @@ public class JnBusinessExecuteLogout implements CcpBusiness{
 				, deleteLoginSessionConflict
 				);
 		
-		return CcpOtherConstants.EMPTY_JSON;
+		return json;
 	}
 
 }

@@ -29,7 +29,7 @@ public class JnMessages {
 		protected SupportInstantMessengerNotification(CcpEntity entity, JnMessageSenderExceptionHandler exceptionHandler) {
 			super(entity, exceptionHandler);
 		}
-			
+			 
 		public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
 
 			String supportLanguage =  JnSystemProperties.INSTANCE.supportLanguage();
@@ -150,7 +150,7 @@ public class JnMessages {
 					;
 			CcpJsonRepresentation apply = super.apply(transformedJson);
 			
-			return apply;
+			return apply; 
 		}
 
 	}

@@ -44,7 +44,7 @@ public class JnBusinessSendMessage implements CcpBusiness{
 		.andWithTheEntityToBlockMessageResend(this.entity)
 		.andWithTheMessageValuesFromJson(json.put(JnJsonCommonsFields.subjectType, topic))
 		.andWithTheSupportLanguage(supportLanguage)
-		.sendAllMessages()
+		.sendAllMessages() 
 		;
 
 		CcpJsonRepresentation put = result.put(JnJsonCommonsFields.subjectType, topic);

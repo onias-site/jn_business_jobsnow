@@ -30,7 +30,7 @@ public class JnExecuteBulkOperation implements CcpExecuteBulkOperation{
 	public static final JnExecuteBulkOperation INSTANCE = new JnExecuteBulkOperation();
 	
 	private JnExecuteBulkOperation() {}
-	
+	 
 	/**
 	 * Sanitiza os itens, executa o bulk e processa erros/cache.
 	 */
@@ -38,8 +38,8 @@ public class JnExecuteBulkOperation implements CcpExecuteBulkOperation{
 		
 		HashSet<CcpBulkItem> items = this.sanitizeItems(bulkItems);
 		
-		boolean emptyItems = items.isEmpty();
-		
+		boolean emptyItems = items.isEmpty(); 
+		 
 		if(emptyItems) {
 			return this;
 		}

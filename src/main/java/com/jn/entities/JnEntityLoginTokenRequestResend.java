@@ -20,6 +20,7 @@ import com.ccp.especifications.db.utils.entity.decorators.interfaces.CcpEntityCo
 import com.ccp.especifications.db.utils.entity.fields.annotations.CcpEntityFieldPrimaryKey;
 import com.ccp.especifications.db.utils.entity.fields.annotations.CcpEntityFieldTransformer;
 import com.ccp.json.validations.fields.annotations.CcpJsonCopyFieldValidationsFrom;
+import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeString;
 import com.jn.business.login.solve.token.JnBusinessResetLoginToken;
 import com.jn.business.messages.JnMessages.JnBusinessSendUserToken;
 import com.jn.db.bulk.JnExecuteBulkOperation;
@@ -57,11 +58,12 @@ import com.jn.utils.JnDeleteKeysFromCache;
 public class JnEntityLoginTokenRequestResend implements CcpEntityConfigurator {
 	
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityLoginTokenRequestResend.class).entityInstance;
-	 
+	//FIXME sempre está copiando o  JnJsonCommonsFields
 	public static enum Fields implements CcpJsonFieldName{
 		@CcpEntityFieldPrimaryKey
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		@CcpEntityFieldTransformer(JnJsonTransformersFieldsEntityDoNothing.class)
+		@CcpJsonFieldTypeString
 		email, 
 
 		@CcpJsonCopyFieldValidationsFrom(JnJsonInstantMessengerFields.class)

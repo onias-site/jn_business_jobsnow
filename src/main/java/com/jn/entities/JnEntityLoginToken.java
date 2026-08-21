@@ -37,7 +37,7 @@ public class JnEntityLoginToken implements CcpEntityConfigurator {
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityLoginToken.class).entityInstance;
 
 	public static enum Fields implements CcpJsonFieldName{
-		@CcpEntityFieldPrimaryKey
+		@CcpEntityFieldPrimaryKey 
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		email,  
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
