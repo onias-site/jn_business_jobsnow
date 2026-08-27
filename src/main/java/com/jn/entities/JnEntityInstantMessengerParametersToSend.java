@@ -20,7 +20,9 @@ import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidatorRequired
 import com.jn.business.messages.JnBusinessSendInstantMessage;
 import com.jn.business.messages.JnMessages.JnBusinessNotifyError;
 import com.jn.business.messages.JnMessages.NotifySupportAboutPendingResendLoginToken;
-import com.jn.business.messages.JnMessages.NotifySupportAboutPendingUnlockLoginToken;
+import com.jn.business.messages.JnMessages.NotifySupportAboutSolvedLockedLoginToken;
+import com.jn.business.messages.JnMessages.NotifySupportAboutSolvedResendLoginToken;
+import com.jn.business.messages.JnMessages.NotifySupportAboutPendingLockedLoginToken;
 import com.jn.entities.decorators.JnVersionableEntity;
 import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault;
 import com.jn.json.fields.validation.JnJsonInstantMessengerFields;
@@ -83,16 +85,16 @@ public class JnEntityInstantMessengerParametersToSend implements CcpEntityConfig
 		.put(Fields.caption, "{type}")
 		;
 
-		CcpJsonRepresentation notifyUnlockToken = CcpOtherConstants.EMPTY_JSON
+		CcpJsonRepresentation notifySupportAboutPendingLockedToken = CcpOtherConstants.EMPTY_JSON
 		.put(Fields.instantMessageType, JnBusinessSendInstantMessage.JnInstantMessageType.text)
-		.put(JnJsonCommonsFields.templateId, NotifySupportAboutPendingUnlockLoginToken.class.getName())
+		.put(JnJsonCommonsFields.templateId, NotifySupportAboutPendingLockedLoginToken.class.getName())
 		.addToItem(JnJsonCommonsFields.moreParameters, MoreParametersFields.maxTriesToSendMessage, 10)
 		.addToItem(JnJsonCommonsFields.moreParameters, MoreParametersFields.sleepToSendMessage, 3000)
 		.put(Fields.botName, JnBusinessSendInstantMessage.JnBotType.support)
 		.put(Fields.chatId, 751717896L)
 		;
 
-		CcpJsonRepresentation notifyResendToken = CcpOtherConstants.EMPTY_JSON
+		CcpJsonRepresentation notifySupportAboutPendingResendToken = CcpOtherConstants.EMPTY_JSON
 		.put(Fields.instantMessageType, JnBusinessSendInstantMessage.JnInstantMessageType.text)
 		.put(JnJsonCommonsFields.templateId, NotifySupportAboutPendingResendLoginToken.class.getName())
 		.addToItem(JnJsonCommonsFields.moreParameters, MoreParametersFields.maxTriesToSendMessage, 10)
@@ -100,8 +102,33 @@ public class JnEntityInstantMessengerParametersToSend implements CcpEntityConfig
 		.put(Fields.botName, JnBusinessSendInstantMessage.JnBotType.support)
 		.put(Fields.chatId, 751717896L)
 		;
+
+		CcpJsonRepresentation notifySupportAboutSolvedLockedToken = CcpOtherConstants.EMPTY_JSON
+		.put(Fields.instantMessageType, JnBusinessSendInstantMessage.JnInstantMessageType.text)
+		.put(JnJsonCommonsFields.templateId, NotifySupportAboutSolvedLockedLoginToken.class.getName())
+		.addToItem(JnJsonCommonsFields.moreParameters, MoreParametersFields.maxTriesToSendMessage, 10)
+		.addToItem(JnJsonCommonsFields.moreParameters, MoreParametersFields.sleepToSendMessage, 3000)
+		.put(Fields.botName, JnBusinessSendInstantMessage.JnBotType.support)
+		.put(Fields.chatId, 751717896L)
+		;
+
+		CcpJsonRepresentation notifySupportAboutSolvedResendToken = CcpOtherConstants.EMPTY_JSON
+		.put(Fields.instantMessageType, JnBusinessSendInstantMessage.JnInstantMessageType.text)
+		.put(JnJsonCommonsFields.templateId, NotifySupportAboutSolvedResendLoginToken.class.getName())
+		.addToItem(JnJsonCommonsFields.moreParameters, MoreParametersFields.maxTriesToSendMessage, 10)
+		.addToItem(JnJsonCommonsFields.moreParameters, MoreParametersFields.sleepToSendMessage, 3000)
+		.put(Fields.botName, JnBusinessSendInstantMessage.JnBotType.support)
+		.put(Fields.chatId, 751717896L)
+		;
 		
-		List<CcpBulkItem> createBulkItems = CcpEntityConfigurator.super.toCreateBulkItems(ENTITY, notifyError, notifyUnlockToken, notifyResendToken);
+		List<CcpBulkItem> createBulkItems = CcpEntityConfigurator.super.toCreateBulkItems(
+				ENTITY
+				, notifyError
+				, notifySupportAboutSolvedLockedToken
+				, notifySupportAboutSolvedResendToken
+				, notifySupportAboutPendingLockedToken
+				, notifySupportAboutPendingResendToken
+				);
 
 		return createBulkItems;
 	}

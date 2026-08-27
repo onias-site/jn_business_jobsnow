@@ -17,7 +17,9 @@ import com.ccp.json.validations.fields.annotations.CcpJsonCopyFieldValidationsFr
 import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidatorRequired;
 import com.jn.business.messages.JnMessages.JnBusinessNotifyError;
 import com.jn.business.messages.JnMessages.NotifySupportAboutPendingResendLoginToken;
-import com.jn.business.messages.JnMessages.NotifySupportAboutPendingUnlockLoginToken;
+import com.jn.business.messages.JnMessages.NotifySupportAboutSolvedLockedLoginToken;
+import com.jn.business.messages.JnMessages.NotifySupportAboutSolvedResendLoginToken;
+import com.jn.business.messages.JnMessages.NotifySupportAboutPendingLockedLoginToken;
 import com.jn.entities.decorators.JnVersionableEntity;
 import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
@@ -57,19 +59,38 @@ public class JnEntityInstantMessengerTemplateMessage  implements CcpEntityConfig
 				.put(JnJsonCommonsFields.language, JnLanguage.portuguese)
 		;
 
-		CcpJsonRepresentation notifyUnlockToken = CcpOtherConstants.EMPTY_JSON
+		CcpJsonRepresentation notifyAboutSolvedLockedToken = CcpOtherConstants.EMPTY_JSON
 				.put(JnJsonCommonsFields.message, "Ao endereço {email}, envie a seguinte mensagem:\n\n\nVocê solicitou o desbloqueio de seu token para (re) cadastro / desbloqueio de senha. Atendendo ao seu pedido, a senha é {password}, esta senha deve ser informada para desbloqueio de seu token. O token que você deve informar no campo de token é {token}")
-				.put(JnJsonCommonsFields.templateId, NotifySupportAboutPendingUnlockLoginToken.class.getName())
+				.put(JnJsonCommonsFields.templateId, NotifySupportAboutSolvedLockedLoginToken.class.getName())
 				.put(JnJsonCommonsFields.language, JnLanguage.portuguese)
 		;
 
-		CcpJsonRepresentation notifyResendToken = CcpOtherConstants.EMPTY_JSON
+		CcpJsonRepresentation notifyAboutSolvedResendToken = CcpOtherConstants.EMPTY_JSON
 				.put(JnJsonCommonsFields.message, "Ao endereço {email}, envie a seguinte mensagem:\n\n\nVocê solicitou o reenvio de seu token para (re) cadastro / desbloqueio de senha. Atendendo ao seu pedido, o token que você deve informar no campo de token é {token}")
+				.put(JnJsonCommonsFields.templateId, NotifySupportAboutSolvedResendLoginToken.class.getName())
+				.put(JnJsonCommonsFields.language, JnLanguage.portuguese)
+		;
+
+		CcpJsonRepresentation notifyAboutPendingLockedToken = CcpOtherConstants.EMPTY_JSON
+				.put(JnJsonCommonsFields.message, "O e-mail {email} solicitou desblooqueio de seu token")
+				.put(JnJsonCommonsFields.templateId, NotifySupportAboutPendingLockedLoginToken.class.getName())
+				.put(JnJsonCommonsFields.language, JnLanguage.portuguese)
+		;
+
+		CcpJsonRepresentation notifyAboutPendingResendToken = CcpOtherConstants.EMPTY_JSON
+				.put(JnJsonCommonsFields.message, "O e-mail {email} solicitou reenvio de seu token")
 				.put(JnJsonCommonsFields.templateId, NotifySupportAboutPendingResendLoginToken.class.getName())
 				.put(JnJsonCommonsFields.language, JnLanguage.portuguese)
 		;
 		
-		List<CcpBulkItem> createBulkItems = CcpEntityConfigurator.super.toCreateBulkItems(ENTITY, notifyError, notifyUnlockToken, notifyResendToken);
+		List<CcpBulkItem> createBulkItems = CcpEntityConfigurator.super.toCreateBulkItems(
+				ENTITY
+				, notifyError
+				, notifyAboutSolvedLockedToken
+				, notifyAboutSolvedResendToken
+				, notifyAboutPendingResendToken
+				, notifyAboutPendingLockedToken
+				);
 
 		return createBulkItems;
 	}

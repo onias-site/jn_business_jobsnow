@@ -12,6 +12,7 @@ import com.ccp.dependency.injection.CcpDependencyInjection;
 import com.ccp.especifications.db.crud.CcpCrud;
 import com.ccp.especifications.db.crud.CcpSelectUnionAll;
 import com.ccp.especifications.db.utils.entity.CcpEntity;
+import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityMetaData;
 import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityMetaData.CcpErrorEntityPrimaryKeyIsMissing;
 import com.jn.business.http.JnBusinessSendHttpRequest;
 import com.jn.business.messages.JnBusinessSendEmailMessage;
@@ -25,6 +26,7 @@ import com.jn.entities.JnEntityInstantMessengerBotLocked;
 import com.jn.entities.JnEntityInstantMessengerMessageSent;
 import com.jn.entities.JnEntityInstantMessengerParametersToSend;
 import com.jn.entities.JnEntityInstantMessengerTemplateMessage;
+import com.jn.entities.JnEntityMessageDidNotSent;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
 import com.jn.utils.JnDeleteKeysFromCache;
 
@@ -99,7 +101,7 @@ public class JnSendMessageToUser {
 		}
 		
 		@SuppressWarnings("unchecked")
-		private List<CcpEntity> getEntities(JnSendMessageToUser obj){
+		protected List<CcpEntity> getEntities(JnSendMessageToUser obj){
 			try {
 				Field declaredField = JnSendMessageToUser.class.getDeclaredField(this.name());
 				declaredField.setAccessible(true);
@@ -125,24 +127,46 @@ public class JnSendMessageToUser {
 			}
 		}
 	
-		public static boolean isItTruth(JnSendMessageToUser obj, CcpSelectUnionAll unionAll, CcpJsonRepresentation json, Integer index) {
+		public static void validate(JnSendMessageToUser obj, CcpSelectUnionAll unionAll, CcpJsonRepresentation json, Integer index) {
 			MustNotSendMessage[] values = MustNotSendMessage.values();
 			for (MustNotSendMessage item : values) {
-				boolean mustNotSendMessage = item.mustNotSendMessage(obj, unionAll, json, index);
-				if(mustNotSendMessage) {
-					return true;
+				boolean mustSendMessage = false == item.mustNotSendMessage(obj, unionAll, json, index);
+				if(mustSendMessage) {
+					continue;
 				}
+				throw new CcpMessageDidNotSend(obj, item, json, index);
 			}
-			return false;
+		}
+	}
+	
+	
+	@SuppressWarnings("serial")
+	private static class CcpMessageDidNotSend extends RuntimeException{
+		
+		public final CcpJsonRepresentation jsonToSave;
+		
+		public CcpMessageDidNotSend(JnSendMessageToUser obj, MustNotSendMessage reason, CcpJsonRepresentation json, Integer index) {
+			List<CcpEntity> entities = reason.getEntities(obj);
+			CcpEntity entity = entities.get(index);
+			CcpEntityMetaData entityMetaData = entity.getEntityMetaData();
+			String reasonType = reason.name();
+			
+			this.jsonToSave = json
+					.put(JnEntityMessageDidNotSent.Fields.reasonType,  entityMetaData.entityName)
+					.put(JnEntityMessageDidNotSent.Fields.reasonDescription,  reasonType)
+									;
 		}
 	}
 	
 	CcpJsonRepresentation executeAllSteps(String templateId, CcpEntity entityToSave, CcpJsonRepresentation entityValues, String languageToUseInErrorCases) {
+		
 		List<CcpEntity> allEntitiesToSearch = new ArrayList<>();
+		
 		allEntitiesToSearch.addAll(this.alreadySentEntities);
 		allEntitiesToSearch.addAll(this.parameterEntities);
 		allEntitiesToSearch.addAll(this.messageEntities);
 		allEntitiesToSearch.addAll(this.blockEntities);
+		
 		allEntitiesToSearch.add(entityToSave);
 
 		CcpEntity[] entities = allEntitiesToSearch.toArray(new CcpEntity[allEntitiesToSearch.size()]);
@@ -159,15 +183,16 @@ public class JnSendMessageToUser {
 		if (alreadySaved) {
 			return entityValues;
 		}
+		
 		boolean messageSent = false;
 		for (int index = 0; index < this.alreadySentEntities.size(); index++) {
-			
-			boolean mustNotSendMessage = MustNotSendMessage.isItTruth(this, unionAll, idToSearch , index);
-			
-			if (mustNotSendMessage) {
+			try {
+				MustNotSendMessage.validate(this, unionAll, idToSearch , index);
+			} catch (CcpMessageDidNotSend e) {
+				JnEntityMessageDidNotSent.ENTITY.save(e.jsonToSave);
 				continue;
 			}
-
+			
 			JnBusinessSendHttpRequest messenger = this.messengers.get(index);
 			CcpJsonRepresentation result = this.sendMessage(unionAll, idToSearch, index);
 			Class<? extends CcpBusiness> class1 = messenger.processThatSendsHttpRequest.getClass();

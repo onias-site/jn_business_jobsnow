@@ -15,8 +15,10 @@ import com.jn.business.login.JnBusinessEvaluateAttempts;
 import com.jn.business.login.JnBusinessExecuteLogin;
 import com.jn.business.login.JnBusinessExecuteLogout;
 import com.jn.business.login.JnBusinessSavePassword;
+import com.jn.business.messages.JnMessages;
 import com.jn.business.messages.JnMessages.JnBusinessSendUserToken;
 import com.jn.entities.JnEntityDisposableRecord;
+import com.jn.entities.JnEntityEmailReportedAsSpam;
 import com.jn.entities.JnEntityLoginAnswers;
 import com.jn.entities.JnEntityLoginEmail;
 import com.jn.entities.JnEntityLoginPassword;
@@ -29,6 +31,7 @@ import com.jn.entities.JnEntityLoginToken;
 import com.jn.entities.JnEntityLoginTokenAttempts;
 import com.jn.entities.JnEntityLoginTokenRequestResend;
 import com.jn.entities.JnEntityLoginTokenRequestUnlock;
+import com.jn.entities.JnEntityMessageDidNotSent;
 import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
 import com.jn.mensageria.JnFunctionMensageriaSender;
@@ -203,6 +206,7 @@ public enum JnServiceLogin implements JnService {
 			CcpJsonRepresentation result = new CcpGetEntityId(parametersToSearchInAllEntities)
 			.toBeginProcedureAnd()
 				.ifThisIdIsPresentInEntity(JnEntityLoginToken.ENTITY.getTwinEntity()).returnStatus(JnProcessStatusCreateLoginToken.statusLockedToken).and()
+				.ifThisIdIsPresentInEntity(JnEntityMessageDidNotSent.ENTITY).returnStatus(JnProcessStatusCreateLoginToken.statusCanNotSendThisMessage).and()
 				.ifThisIdIsPresentInEntity(JnEntityDisposableRecord.ENTITY).returnStatus(JnProcessStatusUpdatePassword.tokenAlreadySent).and()
 				.ifThisIdIsNotPresentInEntity(JnEntityLoginEmail.ENTITY).returnStatus(JnProcessStatusUpdatePassword.missingEmail).and()
 				.ifThisIdIsNotPresentInEntity(JnEntityLoginToken.ENTITY).executeAction(sendUserToken)
@@ -356,7 +360,17 @@ public enum JnServiceLogin implements JnService {
 				.renameField(JsonFieldNames.originalToken, JsonFieldNames.sessionToken)
 				.removeFields(JnEntityLoginSessionValidation.Fields.token)
 				;
-		CcpJsonRepresentation parametersToSearchInAllOtherEntities = json.mergeWithAnotherJson(generatedSessionToken);
+		
+		CcpEntityMetaData entityMetaData = JnEntityEmailReportedAsSpam.ENTITY.getEntityMetaData();
+		
+		String subjectType = JnMessages.JnBusinessSendUserToken.class.getName();
+		
+		CcpJsonRepresentation parametersToSearchInMessageNotSend = generatedSessionToken
+				.put(JnEntityMessageDidNotSent.Fields.reasonType, entityMetaData.entityName)
+				.put(JnEntityMessageDidNotSent.Fields.subjectType, subjectType)
+				;
+		
+		CcpJsonRepresentation parametersToSearchInAllOtherEntities = json.mergeWithAnotherJson(parametersToSearchInMessageNotSend);
 		CcpJsonRepresentation parametersToSearchDataAboutToken = JnEntityLoginToken.ENTITY.getIdToSearchDisposableRecord(json);
 		CcpJsonRepresentation parametersToSearchDataAboutLockedToken = JnEntityLoginToken.ENTITY.getTwinEntity().getIdToSearchDisposableRecord(json);
 

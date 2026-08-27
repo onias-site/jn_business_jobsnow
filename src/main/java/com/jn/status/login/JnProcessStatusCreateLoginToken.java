@@ -9,12 +9,13 @@ import com.ccp.process.CcpProcessStatus;
  * {@code statusAlreadySentToken} (429).
  */
 public enum JnProcessStatusCreateLoginToken implements CcpProcessStatus{
+	statusCanNotSendThisMessage(422),
+	statusAlreadySentToken(429),
 	statusInvalidEmail(400),
-	statusLockedToken(403),
 	statusMissingEmail(404),
 	missingSaveAnswers(201),
+	statusLockedToken(403),
 	expectedStatus(200),
-	statusAlreadySentToken(429)
 	;
 
 	public final int status;

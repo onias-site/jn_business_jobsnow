@@ -48,8 +48,8 @@ import com.jn.utils.JnDeleteKeysFromCache;
 @CcpEntityFieldsValidator(classReferenceWithTheFields = JnEntityLoginTokenRequestUnlock.Fields.class)
 @CcpEntityOperations(
 		operations = {
-				@CcpEntityOperation(when = _after, operation = delete, from = mainEntity,  execute = {JnBusinessResetLoginToken.class, JnBusinessSendUserToken.class}, operationHandlers = {}),
-				@CcpEntityOperation(when = _after, operation = save, from = mainEntity,  execute = {JnMessages.NotifySupportAboutPendingUnlockLoginToken.class}, operationHandlers = {}),
+				@CcpEntityOperation(when = _after, operation = delete, from = mainEntity,  execute = {JnBusinessResetLoginToken.class, JnBusinessSendUserToken.class, JnMessages.NotifySupportAboutSolvedLockedLoginToken.class}, operationHandlers = {}),
+				@CcpEntityOperation(when = _after, operation = save, from = mainEntity,  execute = {JnMessages.NotifySupportAboutPendingLockedLoginToken.class}, operationHandlers = {}),
 		},
 		globalHandlers = {}
 		)

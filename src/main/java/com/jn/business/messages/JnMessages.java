@@ -61,8 +61,8 @@ public class JnMessages {
 	 * Notifica o suporte sobre uma solicitação pendente de desbloqueio de token de login.
 	 * Usa JnEntityLoginTokenRequestUnlock.ENTITY como entidade de bloqueio.
 	 */
-	public static class NotifySupportAboutPendingUnlockLoginToken extends SupportInstantMessengerNotification{
-		protected NotifySupportAboutPendingUnlockLoginToken() {
+	public static class NotifySupportAboutPendingLockedLoginToken extends SupportInstantMessengerNotification{
+		protected NotifySupportAboutPendingLockedLoginToken() {
 			super(JnEntityUserRequest.ENTITY, JnMessageSenderExceptionHandler.THROWS);
 		}
 
@@ -152,7 +152,19 @@ public class JnMessages {
 			
 			return apply; 
 		}
+	}
 
+	
+	public static class NotifySupportAboutSolvedResendLoginToken extends SupportInstantMessengerNotification{
+		protected NotifySupportAboutSolvedResendLoginToken() {
+			super(JnEntityUserRequest.ENTITY, JnMessageSenderExceptionHandler.THROWS);
+		}
+	}
+
+	public static class NotifySupportAboutSolvedLockedLoginToken extends SupportInstantMessengerNotification{
+		protected NotifySupportAboutSolvedLockedLoginToken() {
+			super(JnEntityUserRequest.ENTITY, JnMessageSenderExceptionHandler.THROWS);
+		}
 	}
 
 }
