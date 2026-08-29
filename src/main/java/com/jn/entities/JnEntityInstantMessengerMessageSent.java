@@ -9,7 +9,6 @@ import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityF
 import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityFactory;
 import com.ccp.especifications.db.utils.entity.decorators.enums.CcpEntityExpurgableOptions;
 import com.ccp.especifications.db.utils.entity.decorators.interfaces.CcpEntityConfigurator;
-import com.ccp.especifications.db.utils.entity.fields.annotations.CcpEntityFieldPrimaryKey;
 import com.ccp.especifications.db.utils.entity.fields.annotations.CcpEntityFieldTransformer;
 import com.ccp.json.validations.fields.annotations.CcpJsonCopyFieldValidationsFrom;
 import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidatorRequired;
@@ -39,9 +38,6 @@ public class JnEntityInstantMessengerMessageSent implements CcpEntityConfigurato
 		@CcpJsonFieldValidatorRequired
 		@CcpJsonCopyFieldValidationsFrom(JnJsonInstantMessengerFields.class)
 		chatId, 
-		@CcpEntityFieldPrimaryKey
-		@CcpJsonCopyFieldValidationsFrom(JnJsonInstantMessengerFields.class)
-		templateId, 
 		@CcpJsonFieldValidatorRequired
 		@CcpJsonCopyFieldValidationsFrom(JnJsonInstantMessengerFields.class)
 		instantMessageType,

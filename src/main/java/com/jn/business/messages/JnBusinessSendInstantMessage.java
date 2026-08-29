@@ -61,9 +61,6 @@ public class JnBusinessSendInstantMessage implements CcpHttpApiExecutor{
 		@CcpJsonFieldValidatorRequired
 		@CcpJsonCopyFieldValidationsFrom(JnJsonInstantMessengerFields.class)
 		instantMessageType, 
-		@CcpJsonFieldValidatorRequired
-		@CcpJsonCopyFieldValidationsFrom(JnJsonInstantMessengerFields.class)
-		templateId,
 	}
 	
 	public static enum JnMessageFileJsonValidator implements CcpJsonFieldName{
@@ -150,7 +147,7 @@ public class JnBusinessSendInstantMessage implements CcpHttpApiExecutor{
 				String message = super.getMessage(json, orElseThrow, JnJsonCommonsFields.message);
 				String botToken = json.getAsString(JnMessageTextJsonValidator.botToken) ;
 				Long chatId = json.getAsLongNumber(JnJsonValidator.chatId);
-				Long replyTo = json.getOrDefault(Fields.replyTo, () -> 0d).longValue();
+				Long replyTo = json.getOrDefault(Fields.replyTo, () -> 0L).longValue();
 				CcpStringDecorator asStringDecorator = json.getAsStringDecorator(JnJsonValidator.botName);
 				CcpJsonFieldName jsonFieldName = asStringDecorator.jsonFieldName();
 				CcpJsonRepresentation result = instantMessenger.sendTextMessage(jsonFieldName, botToken, chatId, replyTo, message);
