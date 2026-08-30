@@ -41,6 +41,9 @@ public enum JnJsonInstantMessengerFields{
 	commandName,
 
 	@CcpJsonFieldTypeString
+	botName,
+
+	@CcpJsonFieldTypeString
 	stepName,
 	
 	@CcpJsonFieldTypeString

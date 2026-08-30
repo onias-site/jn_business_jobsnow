@@ -1,7 +1,6 @@
 package com.jn.business.messages;
 
 import com.ccp.business.CcpBusiness;
-import com.ccp.constants.CcpOtherConstants;
 import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.decorators.CcpJsonRepresentation.CcpJsonFieldName;
 import com.ccp.decorators.CcpStringDecorator;
@@ -145,7 +144,7 @@ public class JnBusinessSendInstantMessage implements CcpHttpApiExecutor{
 			public CcpJsonRepresentation sendMessage(CcpJsonRepresentation json, CcpJsonRepresentation orElseThrow) {
 				CcpInstantMessenger instantMessenger = CcpDependencyInjection.getDependency(CcpInstantMessenger.class);
 				String message = super.getMessage(json, orElseThrow, JnJsonCommonsFields.message);
-				String botToken = json.getAsString(JnMessageTextJsonValidator.botToken) ;
+				String botToken = json.getAsString(JnMessageTextJsonValidator.botToken);
 				Long chatId = json.getAsLongNumber(JnJsonValidator.chatId);
 				Long replyTo = json.getOrDefault(Fields.replyTo, () -> 0L).longValue();
 				CcpStringDecorator asStringDecorator = json.getAsStringDecorator(JnJsonValidator.botName);
@@ -197,13 +196,7 @@ public class JnBusinessSendInstantMessage implements CcpHttpApiExecutor{
 			CcpJsonRepresentation sendMessage = this.sendMessage(json, message);
 			return sendMessage;
 		}
-		public CcpJsonRepresentation sendMessage(CcpJsonRepresentation json, String message) {
-			CcpJsonRepresentation put = CcpOtherConstants.EMPTY_JSON.put(JnJsonCommonsFields.message, message);
-			CcpJsonRepresentation sendMessage = this.sendMessage(json, put);
-			return sendMessage;
-		}
-		
-		
+
 		public abstract CcpJsonRepresentation sendMessage (CcpJsonRepresentation json, CcpJsonRepresentation message);
 
 	}

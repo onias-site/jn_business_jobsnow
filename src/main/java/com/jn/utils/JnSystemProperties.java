@@ -56,11 +56,7 @@ public class JnSystemProperties {
 		List<String> response = this.systemProperties.getAsStringList(Fields.systems);
 		return response;
 	}
-	public List<String> languages(){
-		List<String> response = this.systemProperties.getAsStringList(Fields.languages);
-		return response;
-	}
-	
+
 	public boolean localEnvironment() {
 		boolean localEnvironment = this.systemProperties.getAsBoolean(Fields.localEnvironment);
 		return localEnvironment;
