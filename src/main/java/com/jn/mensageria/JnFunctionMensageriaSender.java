@@ -40,7 +40,8 @@ public class JnFunctionMensageriaSender implements CcpBusiness {
 	
 	public JnFunctionMensageriaSender(CcpBusiness topic) {
 		this.jsonValidationClass = topic.getJsonValidationClass();
-		this.topic = topic.getClass().getName();
+		var topicClass = topic.getClass();
+		this.topic = topicClass.getName();
 		this.entityName = "";
 		this.operation = "";
 	}
@@ -68,8 +69,9 @@ public class JnFunctionMensageriaSender implements CcpBusiness {
 		JnEntityAsyncTask.ENTITY.save(messageDetails);
 		
 		String receiverName = JnMensageriaReceiver.class.getName();
-		CcpJsonRepresentation put2 = messageDetails
-				.put(CcpMensageriaReceiver.JsonFieldNames.mensageriaReceiver, receiverName)
+		CcpJsonRepresentation put3 = messageDetails
+				.put(CcpMensageriaReceiver.JsonFieldNames.mensageriaReceiver, receiverName);
+				CcpJsonRepresentation put2 = put3
 				.put(CcpMensageriaReceiver.JsonFieldNames.entityName, this.entityName)
 				;
 		this.mensageriaSender.sendToMensageria(this.topic, this.jsonValidationClass, put2);
@@ -78,20 +80,31 @@ public class JnFunctionMensageriaSender implements CcpBusiness {
 	}
 	
 	public String toString() {
-		return this.topic.getClass().getName();
+		var topicClass2 = this.topic.getClass();
+		var topicClass2Name = topicClass2.getName();
+		return topicClass2Name;
 	}
 	
 	private CcpJsonRepresentation getMessageDetails(CcpJsonRepresentation json) {
 		CcpTimeDecorator ccpTimeDecorator = new CcpTimeDecorator();
 		String formattedCurrentDateTime = ccpTimeDecorator.getFormattedDateTime(CcpEntityExpurgableOptions.second.format);
-		
-		CcpJsonRepresentation messageDetails = CcpOtherConstants.EMPTY_JSON
-				.put(JnEntityAsyncTask.Fields.started, System.currentTimeMillis())
-				.put(JnEntityAsyncTask.Fields.data, formattedCurrentDateTime)
-				.put(JnEntityAsyncTask.Fields.messageId, UUID.randomUUID())
-				.put(JnJsonCommonsFields.request, json.asPrettyJson())
-				.put(JnJsonCommonsFields.operation, this.operation)
-				.put(JnEntityAsyncTask.Fields.topic, this.topic)
+		long currentTimeMillis = System.currentTimeMillis();
+		CcpJsonRepresentation put4 = CcpOtherConstants.EMPTY_JSON
+				.put(JnEntityAsyncTask.Fields.started, currentTimeMillis);
+				CcpJsonRepresentation put5 = put4
+				.put(JnEntityAsyncTask.Fields.data, formattedCurrentDateTime);
+				UUID randomUUID = UUID.randomUUID();
+				CcpJsonRepresentation put6 = put5
+				.put(JnEntityAsyncTask.Fields.messageId, randomUUID);
+				String asPrettyJson = json.asPrettyJson();
+				CcpJsonRepresentation put7 = put6
+				.put(JnJsonCommonsFields.request, asPrettyJson);
+				CcpJsonRepresentation put8 = put7
+				.put(JnJsonCommonsFields.operation, this.operation);
+				CcpJsonRepresentation put9 = put8
+				.put(JnEntityAsyncTask.Fields.topic, this.topic);
+
+				CcpJsonRepresentation messageDetails = put9
 				.mergeWithAnotherJson(json)
 				;
 		return messageDetails;
@@ -113,8 +126,9 @@ public class JnFunctionMensageriaSender implements CcpBusiness {
 		
 		for (CcpJsonRepresentation json : messages) {
 			CcpJsonRepresentation messageDetails = this.getMessageDetails(json);
-			
-			boolean canNotSave = false == this.canSave(messageDetails);
+			boolean canSave2 = this.canSave(messageDetails);
+
+			boolean canNotSave = false == canSave2;
 			if(canNotSave) {
 				continue;
 			}

@@ -1,7 +1,7 @@
 package com.jn.business.login;
 
 import com.ccp.decorators.CcpJsonRepresentation;
-import com.ccp.decorators.CcpJsonRepresentation.CcpJsonFieldName;
+import com.ccp.decorators.CcpJsonFieldName;
 import com.ccp.especifications.db.bulk.handlers.CcpBulkHandlerDelete;
 import com.ccp.especifications.db.bulk.handlers.CcpBulkHandlerSave;
 import com.ccp.especifications.db.bulk.handlers.CcpEntityBulkHandlerTransferRecordToTwinEntity;
@@ -65,7 +65,8 @@ public class JnBusinessSavePassword implements CcpBusiness {
 	 * Retorna a classe de validação JSON definida em JnServiceLogin.SavePassword.
 	 */
 	public Class<?> getJsonValidationClass() {
-		return JnServiceLogin.SavePassword.getJsonValidationClass();
+		var jsonValidationClass = JnServiceLogin.SavePassword.getJsonValidationClass();
+		return jsonValidationClass;
 	}
 	
 }

@@ -1,6 +1,5 @@
 package com.jn.messages;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
@@ -13,7 +12,6 @@ import com.ccp.especifications.db.crud.CcpCrud;
 import com.ccp.especifications.db.crud.CcpSelectUnionAll;
 import com.ccp.especifications.db.utils.entity.CcpEntity;
 import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityMetaData;
-import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityMetaData.CcpErrorEntityPrimaryKeyIsMissing;
 import com.jn.business.http.JnBusinessSendHttpRequest;
 import com.jn.business.messages.JnBusinessSendEmailMessage;
 import com.jn.business.messages.JnBusinessSendInstantMessage;
@@ -44,7 +42,8 @@ public class JnSendMessageToUser {
 	private final List<CcpEntity> blockEntities = new ArrayList<>();
 
 	public JnCreateStep createStep() {
-		return new JnCreateStep(this);
+		JnCreateStep jnCreateStep = new JnCreateStep(this);
+		return jnCreateStep;
 	}
 
 	public JnAddDefaultStep addDefaultProcessToEmailSending(JnMessageSenderExceptionHandler exceptionHandler) {
@@ -56,7 +55,8 @@ public class JnSendMessageToUser {
 				JnEntityEmailReportedAsSpam.ENTITY,
 				JnEntityEmailMessageSent.ENTITY
 		);
-		return new JnAddDefaultStep(addOneStep);
+		JnAddDefaultStep jnAddDefaultStep = new JnAddDefaultStep(addOneStep);
+		return jnAddDefaultStep;
 	}
 
 	public JnAddDefaultStep addDefaultStepToInstantMessageSending(JnMessageSenderExceptionHandler exceptionHandler) {
@@ -68,7 +68,8 @@ public class JnSendMessageToUser {
 				JnEntityInstantMessengerBotLocked.ENTITY,
 				JnEntityInstantMessengerMessageSent.ENTITY
 		);
-		return new JnAddDefaultStep(addOneStep);
+		JnAddDefaultStep jnAddDefaultStep2 = new JnAddDefaultStep(addOneStep);
+		return jnAddDefaultStep2;
 	}
 
 	JnSendMessageToUser addOneStep(JnBusinessSendHttpRequest messenger, CcpEntity parameterEntity, CcpEntity messageEntity, CcpEntity blockEntity, CcpEntity alreadySentEntity) {
@@ -86,62 +87,11 @@ public class JnSendMessageToUser {
 		return getMessage;
 	}
 
-	static enum MustNotSendMessage{
 
-		alreadySentEntities(true),
-		parameterEntities(false),
-		messageEntities(false),
-		blockEntities(true)
-		;
-		final boolean whenPresentInUnionAll;
-		
-		
-		private MustNotSendMessage(boolean whenPresentInThisUnionAll) {
-			this.whenPresentInUnionAll = whenPresentInThisUnionAll;
-		}
-		
-		@SuppressWarnings("unchecked")
-		protected List<CcpEntity> getEntities(JnSendMessageToUser obj){
-			try {
-				Field declaredField = JnSendMessageToUser.class.getDeclaredField(this.name());
-				declaredField.setAccessible(true);
-				return (List<CcpEntity>)declaredField.get(obj);
-				
-			} catch (Exception e) {
-				throw new RuntimeException(e);
-			}
-		}
-		
-		private boolean mustNotSendMessage(JnSendMessageToUser obj, CcpSelectUnionAll unionAll, CcpJsonRepresentation json, Integer index) {
-			
-			List<CcpEntity> entities = this.getEntities(obj);
-			
-			CcpEntity entity = entities.get(index);
-			
-			try {
-				boolean isPresentInThisUnionAll  = entity.isPresentInThisUnionAll(unionAll, json);
-				boolean mustNotSendMessage = this.whenPresentInUnionAll == isPresentInThisUnionAll;
-				return mustNotSendMessage;
-			} catch (CcpErrorEntityPrimaryKeyIsMissing e) {
-				return false;
-			}
-		}
-	
-		public static void validate(JnSendMessageToUser obj, CcpSelectUnionAll unionAll, CcpJsonRepresentation json, Integer index) {
-			MustNotSendMessage[] values = MustNotSendMessage.values();
-			for (MustNotSendMessage item : values) {
-				boolean mustSendMessage = false == item.mustNotSendMessage(obj, unionAll, json, index);
-				if(mustSendMessage) {
-					continue;
-				}
-				throw new CcpMessageDidNotSend(obj, item, json, index);
-			}
-		}
-	}
 	
 	
 	@SuppressWarnings("serial")
-	private static class CcpMessageDidNotSend extends RuntimeException{
+	static class CcpMessageDidNotSend extends RuntimeException{
 		
 		public final CcpJsonRepresentation jsonToSave;
 		
@@ -150,9 +100,10 @@ public class JnSendMessageToUser {
 			CcpEntity entity = entities.get(index);
 			CcpEntityMetaData entityMetaData = entity.getEntityMetaData();
 			String reasonType = reason.name();
-			
-			this.jsonToSave = json
-					.put(JnEntityMessageDidNotSent.Fields.reasonType,  entityMetaData.entityName)
+			CcpJsonRepresentation put = json
+					.put(JnEntityMessageDidNotSent.Fields.reasonType,  entityMetaData.entityName);
+
+					this.jsonToSave = put
 					.put(JnEntityMessageDidNotSent.Fields.reasonDescription,  reasonType)
 									;
 		}
@@ -168,11 +119,13 @@ public class JnSendMessageToUser {
 		allEntitiesToSearch.addAll(this.blockEntities);
 		
 		allEntitiesToSearch.add(entityToSave);
+		int allEntitiesToSearchSize = allEntitiesToSearch.size();
 
-		CcpEntity[] entities = allEntitiesToSearch.toArray(new CcpEntity[allEntitiesToSearch.size()]);
-		
-		CcpJsonRepresentation idToSearch = entityValues
-				.put(JnJsonCommonsFields.language, languageToUseInErrorCases)
+		CcpEntity[] entities = allEntitiesToSearch.toArray(new CcpEntity[allEntitiesToSearchSize]);
+		CcpJsonRepresentation put2 = entityValues
+				.put(JnJsonCommonsFields.language, languageToUseInErrorCases);
+
+				CcpJsonRepresentation idToSearch = put2
 				.put(JnJsonCommonsFields.templateId, templateId);
 		
 		CcpCrud crud = CcpDependencyInjection.getDependency(CcpCrud.class);
@@ -197,7 +150,8 @@ public class JnSendMessageToUser {
 			CcpJsonRepresentation result = this.sendMessage(unionAll, idToSearch, index);
 			Class<? extends CcpBusiness> class1 = messenger.processThatSendsHttpRequest.getClass();
 			String simpleName = class1.getSimpleName();
-			idToSearch = idToSearch.put(new CcpFieldName(simpleName), result);
+			CcpFieldName ccpFieldName = new CcpFieldName(simpleName);
+			idToSearch = idToSearch.put(ccpFieldName, result);
 			messageSent = true;
 		}
 		
@@ -241,182 +195,24 @@ public class JnSendMessageToUser {
 
 	// ─── Fluent-API step classes ──────────────────────────────────────────────
 
-	public static class JnAddDefaultStep {
 
-		final JnSendMessageToUser getMessage;
 
-		JnAddDefaultStep(JnSendMessageToUser getMessage) {
-			this.getMessage = getMessage;
-		}
 
-		public JnCreateStep andCreateAnotherStep() {
-			return new JnCreateStep(this.getMessage);
-		}
 
-		public JnSoWithAllAddedStepsAnd soWithAllAddedProcessAnd() {
-			return new JnSoWithAllAddedStepsAnd(this.getMessage);
-		}
 
-		public JnSendMessageToUser and() {
-			return this.getMessage;
-		}
-	}
 
-	public static class JnCreateStep {
 
-		final JnSendMessageToUser getMessage;
 
-		JnCreateStep(JnSendMessageToUser getMessage) {
-			this.getMessage = getMessage;
-		}
 
-		public JnWithTheProcess withTheProcess(JnBusinessSendHttpRequest process) {
-			return new JnWithTheProcess(this, process);
-		}
-	}
 
-	public static class JnWithTheProcess {
 
-		final JnCreateStep createStep;
 
-		final JnBusinessSendHttpRequest process;
 
-		public JnWithTheProcess(JnCreateStep createStep, JnBusinessSendHttpRequest process) {
-			this.createStep = createStep;
-			this.process    = process;
-		}
 
-		public JnAndWithTheParametersEntity andWithTheParametersEntity(CcpEntity parametersEntity) {
-			return new JnAndWithTheParametersEntity(this, parametersEntity);
-		}
-	}
 
-	public static class JnAndWithTheParametersEntity {
 
-		final JnWithTheProcess withProcess;
 
-		final CcpEntity parametersEntity;
 
-		JnAndWithTheParametersEntity(JnWithTheProcess withProcess, CcpEntity parametersEntity) {
-			this.withProcess       = withProcess;
-			this.parametersEntity  = parametersEntity;
-		}
 
-		public JnAndWithTheTemplateEntity andWithTheTemplateEntity(CcpEntity templateEntity) {
-			return new JnAndWithTheTemplateEntity(this, templateEntity);
-		}
-	}
-
-	public static class JnAndWithTheTemplateEntity {
-
-		final JnAndWithTheParametersEntity andWithParametersEntity;
-
-		final CcpEntity templateEntity;
-
-		JnAndWithTheTemplateEntity(JnAndWithTheParametersEntity andWithParametersEntity, CcpEntity templateEntity) {
-			this.andWithParametersEntity = andWithParametersEntity;
-			this.templateEntity          = templateEntity;
-		}
-
-		public JnCreateStep andCreateAnotherStep(CcpEntity blockEntity, CcpEntity alreadySentEntity) {
-			this.addStep(blockEntity, alreadySentEntity);
-			return new JnCreateStep(this.andWithParametersEntity.withProcess.createStep.getMessage);
-		}
-
-		private JnAndWithTheTemplateEntity addStep(CcpEntity blockEntity, CcpEntity alreadySentEntity) {
-			this.andWithParametersEntity.withProcess.createStep.getMessage
-					.addOneStep(this.andWithParametersEntity.withProcess.process, this.andWithParametersEntity.parametersEntity, this.templateEntity, blockEntity, alreadySentEntity);
-			return this;
-		}
-
-		public JnSoWithAllAddedStepsAnd soWithAllAddedStepsAnd(CcpEntity blockEntity, CcpEntity alreadySentEntity) {
-			this.addStep(blockEntity, alreadySentEntity);
-			return new JnSoWithAllAddedStepsAnd(this.andWithParametersEntity.withProcess.createStep.getMessage);
-		}
-	}
-
-	public static class JnSoWithAllAddedStepsAnd {
-
-		final JnSendMessageToUser getMessage;
-
-		JnSoWithAllAddedStepsAnd(JnSendMessageToUser getMessage) {
-			this.getMessage = getMessage;
-		}
-
-		public JnWithTheTemplateId withTheTemplateEntity(String templateId) {
-			return new JnWithTheTemplateId(this, templateId);
-		}
-	}
-
-	public static class JnWithTheTemplateId {
-
-		final JnSoWithAllAddedStepsAnd soExecuteAllAddedSteps;
-
-		final String templateId;
-
-		JnWithTheTemplateId(JnSoWithAllAddedStepsAnd soExecuteAllAddedSteps, String templateId) {
-			this.soExecuteAllAddedSteps = soExecuteAllAddedSteps;
-			this.templateId             = templateId;
-		}
-
-		public JnAndWithTheEntityToBlockMessageResend andWithTheEntityToBlockMessageResend(CcpEntity entityToSave) {
-			return new JnAndWithTheEntityToBlockMessageResend(this, entityToSave);
-		}
-	}
-
-	public static class JnAndWithTheEntityToBlockMessageResend {
-
-		final JnWithTheTemplateId withTemplateId;
-
-		final CcpEntity entityToSave;
-
-		JnAndWithTheEntityToBlockMessageResend(JnWithTheTemplateId withTemplateId, CcpEntity entityToSave) {
-			this.withTemplateId = withTemplateId;
-			this.entityToSave   = entityToSave;
-		}
-
-		public JnAndWithTheJsonValues andWithTheMessageValuesFromJson(CcpJsonRepresentation jsonValues) {
-			return new JnAndWithTheJsonValues(this, jsonValues);
-		}
-	}
-
-	public static class JnAndWithTheJsonValues {
-
-		final JnAndWithTheEntityToBlockMessageResend andWithEntityToSave;
-
-		final CcpJsonRepresentation jsonValues;
-
-		JnAndWithTheJsonValues(JnAndWithTheEntityToBlockMessageResend andWithEntityToSave, CcpJsonRepresentation jsonValues) {
-			this.andWithEntityToSave = andWithEntityToSave;
-			this.jsonValues          = jsonValues;
-		}
-
-		public JnAndWithTheSupportLanguage andWithTheSupportLanguage(String supportLanguage) {
-			return new JnAndWithTheSupportLanguage(this, supportLanguage);
-		}
-	}
-
-	public static class JnAndWithTheSupportLanguage {
-
-		final JnAndWithTheJsonValues andWithJsonValues;
-
-		final String supportLanguage;
-
-		JnAndWithTheSupportLanguage(JnAndWithTheJsonValues andWithJsonValues, String supportLanguage) {
-			this.andWithJsonValues = andWithJsonValues;
-			this.supportLanguage   = supportLanguage;
-		}
-
-		public CcpJsonRepresentation sendAllMessages() {
-			CcpJsonRepresentation executeAllSteps = this.andWithJsonValues.andWithEntityToSave.withTemplateId.soExecuteAllAddedSteps.getMessage
-					.executeAllSteps(
-							this.andWithJsonValues.andWithEntityToSave.withTemplateId.templateId,
-							this.andWithJsonValues.andWithEntityToSave.entityToSave,
-							this.andWithJsonValues.jsonValues,
-							this.supportLanguage
-					);
-			return executeAllSteps;
-		} 
-	}
 
 }

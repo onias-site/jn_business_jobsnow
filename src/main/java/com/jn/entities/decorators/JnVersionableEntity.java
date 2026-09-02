@@ -53,19 +53,28 @@ public class JnVersionableEntity extends CcpDefaultEntityDelegator<CcpEntityVers
 		CcpJsonRepresentation oneById = entityDetails.getOneByIdOrHandleItIfThisIdWasNotFound(json, ifNotFound);
 		
 		Supplier<CcpJsonRepresentation> jsonSupplier = oneById.getJsonSupplier();
-		
-		String id = entityDetails.getPrimaryKeyValues(jsonSupplier).asUgglyJson();
-		
-		String formattedDateTime = new CcpTimeDecorator().getFormattedDateTime("dd/MM/yyyy HH:mm:ss.SSS");
-		
+		CcpJsonRepresentation primaryKeyValues = entityDetails.getPrimaryKeyValues(jsonSupplier);
+
+		String id = primaryKeyValues.asUgglyJson();
+		CcpTimeDecorator ccpTimeDecorator = new CcpTimeDecorator();
+
+		String formattedDateTime = ccpTimeDecorator.getFormattedDateTime("dd/MM/yyyy HH:mm:ss.SSS");
+		CcpJsonRepresentation put = CcpOtherConstants.EMPTY_JSON
+				.put(JnJsonCommonsFields.id, id);
+				String valorMais = "" + oneById;
+				CcpJsonRepresentation put2 = put
+				.put(JnJsonCommonsFields.json, valorMais);
+				CcpJsonRepresentation put3 = put2
+				.put(JnJsonCommonsFields.operation, operation);
+				CcpJsonRepresentation put4 = put3
+				.put(JnJsonCommonsFields.date, formattedDateTime);
+				CcpJsonRepresentation put5 = put4
+				.put(JnJsonCommonsFields.entity, entityDetails.entityName);
+				long currentTimeMillis = System.currentTimeMillis();
+
 		CcpJsonRepresentation audit = 
-				CcpOtherConstants.EMPTY_JSON
-				.put(JnJsonCommonsFields.id, id)
-				.put(JnJsonCommonsFields.json, "" + oneById)
-				.put(JnJsonCommonsFields.operation, operation)
-				.put(JnJsonCommonsFields.date, formattedDateTime)
-				.put(JnJsonCommonsFields.entity, entityDetails.entityName)
-				.put(JnJsonCommonsFields.timestamp, System.currentTimeMillis())
+				put5
+				.put(JnJsonCommonsFields.timestamp, currentTimeMillis)
 		;
 		return audit;
 	}

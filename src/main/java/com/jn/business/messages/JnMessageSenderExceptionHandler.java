@@ -3,17 +3,17 @@ package com.jn.business.messages;
 import java.util.function.Function;
 
 import com.ccp.decorators.CcpJsonRepresentation;
-import com.jn.business.messages.JnMessages.JnBusinessNotifyWarning;
 import com.jn.entities.JnEntityJobsnowWarning;
 
 public enum JnMessageSenderExceptionHandler implements Function<Throwable, CcpJsonRepresentation> {
 	THROWS{
 
 		public CcpJsonRepresentation apply(Throwable e) {
-			throw new RuntimeException(e);
+			JnErrorMessageSenderFailed jnErrorMessageSenderFailed = new JnErrorMessageSenderFailed(e);
+			throw jnErrorMessageSenderFailed;
 		}
-		
-	}, 
+
+	},
 	LENIENT{
 
 		public CcpJsonRepresentation apply(Throwable e) {
@@ -33,9 +33,23 @@ public enum JnMessageSenderExceptionHandler implements Function<Throwable, CcpJs
 			//ATTENTION: ANTES ELE RETORNAVA O JSON DO BUSINESS
 			return errorDetails;
 		}
-		
+
 	}
-	
+
 	;
-	
+
+	/**
+	 * Exceção lançada pela política {@code THROWS} para propagar ao chamador a falha ocorrida no envio da mensagem.
+	 */
+	@SuppressWarnings("serial")
+	public static class JnErrorMessageSenderFailed extends RuntimeException {
+		/**
+		 * Encadeia a exceção original ocorrida durante o envio da mensagem.
+		 * @param cause a exceção original
+		 */
+		private JnErrorMessageSenderFailed(Throwable cause) {
+			super("It was not possible to send the message", cause);
+		}
+	}
+
 }

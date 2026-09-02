@@ -40,7 +40,8 @@ public enum JnProcessStatusExecuteLogin implements CcpProcessStatus{
 	public CcpBusiness flowDisturb() {
 		
 		CcpBusiness result = json -> {
-			throw new CcpErrorFlowDisturb(json, this);
+			CcpErrorFlowDisturb ccpErrorFlowDisturb = new CcpErrorFlowDisturb(json, this);
+			throw ccpErrorFlowDisturb;
 		};
 		
 		return result;

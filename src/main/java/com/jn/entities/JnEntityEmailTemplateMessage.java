@@ -1,7 +1,7 @@
 package com.jn.entities;
 
 import java.util.List;
-import com.ccp.decorators.CcpJsonRepresentation.CcpJsonFieldName;
+import com.ccp.decorators.CcpJsonFieldName;
 import com.ccp.especifications.db.bulk.CcpBulkItem;
 import com.ccp.especifications.db.utils.entity.CcpEntity;
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityCache;
@@ -13,8 +13,8 @@ import com.ccp.especifications.db.utils.entity.decorators.interfaces.CcpEntityCo
 import com.ccp.especifications.db.utils.entity.fields.annotations.CcpEntityFieldPrimaryKey;
 import com.ccp.json.validations.fields.annotations.CcpJsonCopyFieldValidationsFrom;
 import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidatorRequired;
-import com.jn.business.messages.JnMessages.JnBusinessNotifyError;
-import com.jn.business.messages.JnMessages.JnBusinessSendUserToken;
+import com.jn.business.messages.JnBusinessNotifyError;
+import com.jn.business.messages.JnBusinessSendUserToken;
 import com.jn.entities.decorators.JnVersionableEntity;
 import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
@@ -50,24 +50,46 @@ public class JnEntityEmailTemplateMessage  implements CcpEntityConfigurator{
 	}
 
 	public List<CcpBulkItem> getFirstRecordsToInsert() {
-		List<CcpBulkItem> createBulkItems = CcpEntityConfigurator.super.toCreateBulkItems(ENTITY, 
-				"{"
-				+ "	\"language\": \"" + JnLanguage.portuguese.name()
-				+ "\","
-				+ "	\"templateId\": \"" + JnBusinessSendUserToken.class.getName()
-				+ "\","
-				+ "	\"subject\": \"Envio de token para acesso ao sistema JobsNow\","
-				+ "	\"message\": \"<html><head><style>p,h4{ font-family: 'Trebuchet MS', Arial, Helvetica, sans-serif;}#customers {  font-family: 'Trebuchet MS', Arial, Helvetica, sans-serif;  border-collapse: collapse;  width: 100%;}#customers td, #customers th {  border: 1px solid #ddd;  padding: 8px;}#customers tr:nth-child(even){background-color: #f2f2f2;}#customers tr:hover {background-color: #ddd;}#customers th {  padding-top: 12px;  padding-bottom: 12px;  text-align: left;  background-color: #7FBCEC;  color: white;}</style></head><body><div><p>Saudações, caso você não me conheça ou não se lembre de mim, sou o <a href='{linkedinAddress}' target = '_blank'>{linkedinName}</a></p><p>Estou estou enviando um token para acesso ao sistema <a href='{accessLink}' target = '_blank'>JobsNow</a> esse token é {token} para você poder configurar seu usuário</p><p>Você pode receber vagas (condizentes com o teu perfil profissional cadastrado no site do JobsNow) ou currículos (de acordo com as vagas que você cadastrar) como notificação no seu celular <b>INSTANTÂNEAMENTE</b> se seguir os seguintes passos: </p><p>A) Instalar o telegram no seu celular </p><p>B) Procurar  na mensagem fixada <a href='{telegramGroupLink}' target = '_blank'>deste grupo de vagas</a> do telegram <a href = '{botAddress}' target = '_blank'> a este bot aqui</a> </p><p>C) Informar o e-mail  {email} para este bot</p><p>D) Depois de informar seu e-mail a este bot, informe o token {token} </p></div></body></html>\""
-				+ "}",
-				"{"
-				+ "	\"language\": \""
-				+ JnLanguage.portuguese.name()
-				+ "\","
-				+ "	\"templateId\": \"" + JnBusinessNotifyError.class.getName()
-				+ "\","
-				+ "	\"subject\": \"[ERROR] {type}\","
-				+ "	\"message\": \"{type}<br/><br/><br/>Error Description:&nbsp;&nbsp;&nbsp;{msg}<br/><br/>{stackTrace}<br/><br/>Caused by:<br/>{cause}\""
-				+ "}"
+		String valorMais = "{"
+				+ "	\"language\": \"";
+				String portugueseName = JnLanguage.portuguese.name();
+				String valorMaisMais = valorMais + portugueseName;
+				String valorMaisMaisMais = valorMaisMais
+				+ "\",";
+				String valorMaisMaisMaisMais = valorMaisMaisMais
+				+ "	\"templateId\": \"";
+				String name = JnBusinessSendUserToken.class.getName();
+				String valorMaisMaisMaisMaisMais = valorMaisMaisMaisMais + name;
+				String valorMaisMaisMaisMaisMaisMais = valorMaisMaisMaisMaisMais
+				+ "\",";
+				String valorMaisMaisMaisMaisMaisMaisMais = valorMaisMaisMaisMaisMaisMais
+				+ "	\"subject\": \"Envio de token para acesso ao sistema JobsNow\",";
+				String valorMaisMaisMaisMaisMaisMaisMaisMais = valorMaisMaisMaisMaisMaisMaisMais
+				+ "	\"message\": \"<html><head><style>p,h4{ font-family: 'Trebuchet MS', Arial, Helvetica, sans-serif;}#customers {  font-family: 'Trebuchet MS', Arial, Helvetica, sans-serif;  border-collapse: collapse;  width: 100%;}#customers td, #customers th {  border: 1px solid #ddd;  padding: 8px;}#customers tr:nth-child(even){background-color: #f2f2f2;}#customers tr:hover {background-color: #ddd;}#customers th {  padding-top: 12px;  padding-bottom: 12px;  text-align: left;  background-color: #7FBCEC;  color: white;}</style></head><body><div><p>Saudações, caso você não me conheça ou não se lembre de mim, sou o <a href='{linkedinAddress}' target = '_blank'>{linkedinName}</a></p><p>Estou estou enviando um token para acesso ao sistema <a href='{accessLink}' target = '_blank'>JobsNow</a> esse token é {token} para você poder configurar seu usuário</p><p>Você pode receber vagas (condizentes com o teu perfil profissional cadastrado no site do JobsNow) ou currículos (de acordo com as vagas que você cadastrar) como notificação no seu celular <b>INSTANTÂNEAMENTE</b> se seguir os seguintes passos: </p><p>A) Instalar o telegram no seu celular </p><p>B) Procurar  na mensagem fixada <a href='{telegramGroupLink}' target = '_blank'>deste grupo de vagas</a> do telegram <a href = '{botAddress}' target = '_blank'> a este bot aqui</a> </p><p>C) Informar o e-mail  {email} para este bot</p><p>D) Depois de informar seu e-mail a este bot, informe o token {token} </p></div></body></html>\"";
+				String valorMaisMaisMaisMaisMaisMaisMaisMaisMais = valorMaisMaisMaisMaisMaisMaisMaisMais
+				+ "}";
+				String valorMais2 = "{"
+				+ "	\"language\": \"";
+				String portugueseName2 = JnLanguage.portuguese.name();
+				String valorMais2Mais = valorMais2
+				+ portugueseName2;
+				String valorMais2MaisMais = valorMais2Mais
+				+ "\",";
+				String valorMais2MaisMaisMais = valorMais2MaisMais
+				+ "	\"templateId\": \"";
+				String name2 = JnBusinessNotifyError.class.getName();
+				String valorMais2MaisMaisMaisMais = valorMais2MaisMaisMais + name2;
+				String valorMais2MaisMaisMaisMaisMais = valorMais2MaisMaisMaisMais
+				+ "\",";
+				String valorMais2MaisMaisMaisMaisMaisMais = valorMais2MaisMaisMaisMaisMais
+				+ "	\"subject\": \"[ERROR] {type}\",";
+				String valorMais2MaisMaisMaisMaisMaisMaisMais = valorMais2MaisMaisMaisMaisMaisMais
+				+ "	\"message\": \"{type}<br/><br/><br/>Error Description:&nbsp;&nbsp;&nbsp;{msg}<br/><br/>{stackTrace}<br/><br/>Caused by:<br/>{cause}\"";
+				String valorMais2MaisMaisMaisMaisMaisMaisMaisMais = valorMais2MaisMaisMaisMaisMaisMaisMais
+				+ "}";
+				List<CcpBulkItem> createBulkItems = CcpEntityConfigurator.super.toCreateBulkItems(ENTITY, 
+				valorMaisMaisMaisMaisMaisMaisMaisMaisMais,
+				valorMais2MaisMaisMaisMaisMaisMaisMaisMais
 				
 				);
 

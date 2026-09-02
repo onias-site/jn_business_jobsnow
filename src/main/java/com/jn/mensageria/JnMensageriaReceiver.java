@@ -65,10 +65,13 @@ public class JnMensageriaReceiver extends CcpMensageriaReceiver{
 		CcpJsonRepresentation oneById = entity.getOneById(messageDetails);
 		Long started = oneById.getAsLongNumber(JnEntityAsyncTask.Fields.started);
 		Long enlapsedTime = finished - started;
-		CcpJsonRepresentation processResult = messageDetails
-				.put(JnEntityAsyncTask.Fields.enlapsedTime, enlapsedTime)
-				.put(JnJsonCommonsFields.response, response)
-				.put(JnEntityAsyncTask.Fields.finished, finished)
+		CcpJsonRepresentation put = messageDetails
+				.put(JnEntityAsyncTask.Fields.enlapsedTime, enlapsedTime);
+				CcpJsonRepresentation put2 = put
+				.put(JnJsonCommonsFields.response, response);
+				CcpJsonRepresentation put3 = put2
+				.put(JnEntityAsyncTask.Fields.finished, finished);
+				CcpJsonRepresentation processResult = put3
 				.put(JnEntityAsyncTask.Fields.success, success);
 		entity.save(processResult);
 		return this;

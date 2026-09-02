@@ -1,7 +1,7 @@
 package com.jn.services;
 
 import com.ccp.decorators.CcpJsonRepresentation;
-import com.ccp.decorators.CcpJsonRepresentation.CcpJsonFieldName;
+import com.ccp.decorators.CcpJsonFieldName;
 
 /**
  * Serviço de operações sobre tarefas assíncronas. Contém o valor {@code GetAsyncTaskStatusById}

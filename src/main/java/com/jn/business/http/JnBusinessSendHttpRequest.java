@@ -2,7 +2,7 @@ package com.jn.business.http;
 
 import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.decorators.CcpTimeDecorator;
-import com.ccp.especifications.http.CcpHttpRequester.CcpErrorHttp;
+import com.ccp.especifications.http.CcpErrorHttp;
 import com.ccp.especifications.http.CcpErrorHttpClient;
 import com.ccp.especifications.http.CcpErrorHttpServer;
 import com.ccp.especifications.http.CcpHttpApiExecutor;
@@ -42,12 +42,14 @@ public class JnBusinessSendHttpRequest implements CcpBusiness{
 			return apply;
 		}catch (CcpErrorHttpServer e) {
 			String details = e.entity.asUgglyJson();
-			CcpJsonRepresentation httpErrorDetails = e.entity.mergeWithAnotherJson(json).put(JnJsonCommonsFields.details, details);
+			CcpJsonRepresentation mergeWithAnotherJson = e.entity.mergeWithAnotherJson(json);
+			CcpJsonRepresentation httpErrorDetails = mergeWithAnotherJson.put(JnJsonCommonsFields.details, details);
 			CcpJsonRepresentation retryToSendIntantMessage = this.retryToSendIntantMessage(e, json, httpErrorDetails);
 			return retryToSendIntantMessage;
 		}catch (CcpErrorHttpClient e) {
 			String details = e.entity.asUgglyJson();
-			CcpJsonRepresentation httpErrorDetails = e.entity.mergeWithAnotherJson(json).put(JnJsonCommonsFields.details, details);
+			CcpJsonRepresentation mergeWithAnotherJson2 = e.entity.mergeWithAnotherJson(json);
+			CcpJsonRepresentation httpErrorDetails = mergeWithAnotherJson2.put(JnJsonCommonsFields.details, details);
 			String request = httpErrorDetails.getAsString(JnJsonCommonsFields.request);
 			httpErrorDetails = httpErrorDetails.put(JnJsonCommonsFields.request, request);
 			JnEntityHttpApiErrorClient.ENTITY.save(httpErrorDetails);
@@ -60,7 +62,8 @@ public class JnBusinessSendHttpRequest implements CcpBusiness{
 	
 	private CcpJsonRepresentation retryToSendIntantMessage(CcpErrorHttp e, CcpJsonRepresentation json, CcpJsonRepresentation httpErrorDetails) {
 		Integer maxTries = this.processThatSendsHttpRequest.getMaxTries();
-		boolean exceededTries = JnEntityHttpApiRetrySendRequest.exceededTries(httpErrorDetails, JnJsonCommonsFields.attempts.name(), maxTries);
+		String attemptsName = JnJsonCommonsFields.attempts.name();
+		boolean exceededTries = JnEntityHttpApiRetrySendRequest.exceededTries(httpErrorDetails, attemptsName, maxTries);
 		
 		if(exceededTries) {
 			JnEntityHttpApiErrorServer.ENTITY.save(httpErrorDetails);
@@ -68,7 +71,8 @@ public class JnBusinessSendHttpRequest implements CcpBusiness{
 		}
 		
 		Integer sleep = this.processThatSendsHttpRequest.getSleepTimeToRetry();
-		new CcpTimeDecorator().sleep(sleep);
+		CcpTimeDecorator ccpTimeDecorator = new CcpTimeDecorator();
+		ccpTimeDecorator.sleep(sleep);
 		CcpJsonRepresentation execute = this.execute(json);
 		return execute;
 	}

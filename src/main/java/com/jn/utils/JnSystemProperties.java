@@ -5,7 +5,7 @@ import java.util.List;
 
 import com.ccp.decorators.CcpFieldName;
 import com.ccp.decorators.CcpJsonRepresentation;
-import com.ccp.decorators.CcpJsonRepresentation.CcpJsonFieldName;
+import com.ccp.decorators.CcpJsonFieldName;
 import com.ccp.decorators.CcpPropertiesDecorator;
 import com.ccp.decorators.CcpStringDecorator;
 
@@ -17,28 +17,7 @@ import com.ccp.decorators.CcpStringDecorator;
  */
 public class JnSystemProperties {
 	
-	public static enum Fields implements CcpJsonFieldName{
-		databaseAddress{
-			public String getValue() {
-				return "database.address";
-			}
-		},
-		databaseSecret{
-			public String getValue() {
-				return "database.secret";
-			}
-		},
-		maxAttempts,
-		supportLanguage,
-		urlEmailKey,
-		urlInstantMessengerKey,
-		tokenEmailKey,
-		tokenInstantMessengerKey,
-		localEnvironment,
-		languages,
-		systems
-		
-	}
+
 	
 	public final CcpJsonRepresentation systemProperties;
 	
@@ -116,7 +95,8 @@ public class JnSystemProperties {
 	}
 
 	public <T> T getSystemProperty(String field) {
-		T response = this.systemProperties.getAsObject(new CcpFieldName(field));
+		CcpFieldName ccpFieldName = new CcpFieldName(field);
+		T response = this.systemProperties.getAsObject(ccpFieldName);
 		return response;
 	}
 

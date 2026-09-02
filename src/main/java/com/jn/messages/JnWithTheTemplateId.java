@@ -1,0 +1,20 @@
+package com.jn.messages;
+
+import com.ccp.especifications.db.utils.entity.CcpEntity;
+
+public class JnWithTheTemplateId {
+
+	final JnSoWithAllAddedStepsAnd soExecuteAllAddedSteps;
+
+	final String templateId;
+
+	JnWithTheTemplateId(JnSoWithAllAddedStepsAnd soExecuteAllAddedSteps, String templateId) {
+		this.soExecuteAllAddedSteps = soExecuteAllAddedSteps;
+		this.templateId             = templateId;
+	}
+
+	public JnAndWithTheEntityToBlockMessageResend andWithTheEntityToBlockMessageResend(CcpEntity entityToSave) {
+		JnAndWithTheEntityToBlockMessageResend jnAndWithTheEntityToBlockMessageResend = new JnAndWithTheEntityToBlockMessageResend(this, entityToSave);
+		return jnAndWithTheEntityToBlockMessageResend;
+	}
+}

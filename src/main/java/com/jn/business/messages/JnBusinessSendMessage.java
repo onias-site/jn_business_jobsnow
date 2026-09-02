@@ -5,6 +5,7 @@ import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.especifications.db.utils.entity.CcpEntity;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
 import com.jn.messages.JnSendMessageToUser;
+import com.jn.messages.JnAddDefaultStep;
 
 /**
  * Classe base para envio de mensagens que combina envio por email e por mensagem
@@ -30,20 +31,30 @@ public class JnBusinessSendMessage implements CcpBusiness{
 	public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
 
 		String supportLanguage = json.getAsString(JnJsonCommonsFields.language);
-	
-		String topic = this.getClass().getName();
+		var clazz = this.getClass();
+
+		String topic = clazz.getName();
 		
 		JnSendMessageToUser sender = new JnSendMessageToUser();
+		JnAddDefaultStep addDefaultProcessToEmailSending = sender
+		.addDefaultProcessToEmailSending(this.exceptionHandler);
+		var and = addDefaultProcessToEmailSending
+		.and();
+		var addDefaultStepToInstantMessageSending = and
+		.addDefaultStepToInstantMessageSending(this.exceptionHandler);
+		var soWithAllAddedProcessAnd = addDefaultStepToInstantMessageSending
+		.soWithAllAddedProcessAnd();
+		var withTheTemplateEntity = soWithAllAddedProcessAnd
+		.withTheTemplateEntity(topic);
+		var andWithTheEntityToBlockMessageResend = withTheTemplateEntity
+		.andWithTheEntityToBlockMessageResend(this.entity);
+		CcpJsonRepresentation put2 = json.put(JnJsonCommonsFields.subjectType, topic);
+		var andWithTheMessageValuesFromJson = andWithTheEntityToBlockMessageResend
+		.andWithTheMessageValuesFromJson(put2);
+		var andWithTheSupportLanguage = andWithTheMessageValuesFromJson
+		.andWithTheSupportLanguage(supportLanguage);
 
-		CcpJsonRepresentation result = sender
-		.addDefaultProcessToEmailSending(this.exceptionHandler)
-		.and()
-		.addDefaultStepToInstantMessageSending(this.exceptionHandler)
-		.soWithAllAddedProcessAnd()
-		.withTheTemplateEntity(topic)
-		.andWithTheEntityToBlockMessageResend(this.entity)
-		.andWithTheMessageValuesFromJson(json.put(JnJsonCommonsFields.subjectType, topic))
-		.andWithTheSupportLanguage(supportLanguage)
+		CcpJsonRepresentation result = andWithTheSupportLanguage
 		.sendAllMessages() 
 		;
 

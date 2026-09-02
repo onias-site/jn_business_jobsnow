@@ -1,7 +1,7 @@
 package com.jn.entities;
 
 import java.util.List;
-import com.ccp.decorators.CcpJsonRepresentation.CcpJsonFieldName;
+import com.ccp.decorators.CcpJsonFieldName;
 import com.ccp.especifications.db.bulk.CcpBulkItem;
 import com.ccp.especifications.db.utils.entity.CcpEntity;
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityCache;
@@ -14,8 +14,8 @@ import com.ccp.especifications.db.utils.entity.fields.annotations.CcpEntityField
 import com.ccp.especifications.db.utils.entity.fields.annotations.CcpEntityFieldTransformer;
 import com.ccp.json.validations.fields.annotations.CcpJsonCopyFieldValidationsFrom;
 import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidatorRequired;
-import com.jn.business.messages.JnMessages.JnBusinessNotifyError;
-import com.jn.business.messages.JnMessages.JnBusinessSendUserToken;
+import com.jn.business.messages.JnBusinessNotifyError;
+import com.jn.business.messages.JnBusinessSendUserToken;
 import com.jn.entities.decorators.JnVersionableEntity;
 import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault;
 import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDoNothing;
@@ -56,25 +56,52 @@ public class JnEntityEmailParametersToSend implements CcpEntityConfigurator{
 	}
 
 	public List<CcpBulkItem> getFirstRecordsToInsert() {
-		List<CcpBulkItem> createBulkItems = CcpEntityConfigurator.super.toCreateBulkItems(ENTITY, 
-				"{" + "	\"email\": \"devs.jobsnow@gmail.com\"," + "	\"sender\": \"devs.jobsnow@gmail.com\","
-						+ "	\"subjectType\": \""
-						+ JnBusinessNotifyError.class.getName()		
-						+ "\"," + "	\"templateId\": \""
-						+ JnBusinessNotifyError.class.getName()		
-						+ "\"" + "}"
-						,"{\"sender\": \"devs.jobsnow@gmail.com\"," + "	\"subjectType\": \""
-						+ JnBusinessSendUserToken.class.getName()
-						+ "\","
-						+ "	\"templateId\": \""
-						+ JnBusinessSendUserToken.class.getName()
-						+ "\"," + "	\"moreParameters\": {"
-						+ "		\"linkedinAddress\": \"https://www.linkedin.com/in/onias85/\","
-						+ "		\"linkedinName\": \"Onias\","
-						+ "		\"accessLink\": \"https://ccpjobsnow.com/#/tokenToSetPassword?email={email}&msgType=info&msgValue=newUser&token={token}\","
-						+ "		\"telegramGroupLink\": \"https://t.me/joinchat/q_PRgF_18n00NjEx\","
-						+ "		\"botAddress\": \"https://t.me/JnSuporteBot\"" + "	}" + "}"
-
+		String valorMais = "{" + "	\"email\": \"devs.jobsnow@gmail.com\",";
+		String valorMaisMais = valorMais + "	\"sender\": \"devs.jobsnow@gmail.com\",";
+		String valorMaisMaisMais = valorMaisMais
+						+ "	\"subjectType\": \"";
+						String name = JnBusinessNotifyError.class.getName();
+						String valorMaisMaisMaisMais = valorMaisMaisMais
+						+ name;
+						String valorMaisMaisMaisMaisMais = valorMaisMaisMaisMais		
+						+ "\",";
+						String valorMaisMaisMaisMaisMaisMais = valorMaisMaisMaisMaisMais + "	\"templateId\": \"";
+						String name2 = JnBusinessNotifyError.class.getName();
+						String valorMaisMaisMaisMaisMaisMaisMais = valorMaisMaisMaisMaisMaisMais
+						+ name2;
+						String valorMaisMaisMaisMaisMaisMaisMaisMais = valorMaisMaisMaisMaisMaisMaisMais		
+						+ "\"";
+						String valorMaisMaisMaisMaisMaisMaisMaisMaisMais = valorMaisMaisMaisMaisMaisMaisMaisMais + "}";
+						String valorMais2 = "{\"sender\": \"devs.jobsnow@gmail.com\"," + "	\"subjectType\": \"";
+						String name3 = JnBusinessSendUserToken.class.getName();
+						String valorMais2Mais = valorMais2
+						+ name3;
+						String valorMais2MaisMais = valorMais2Mais
+						+ "\",";
+						String valorMais2MaisMaisMais = valorMais2MaisMais
+						+ "	\"templateId\": \"";
+						String name4 = JnBusinessSendUserToken.class.getName();
+						String valorMais2MaisMaisMaisMais = valorMais2MaisMaisMais
+						+ name4;
+						String valorMais2MaisMaisMaisMaisMais = valorMais2MaisMaisMaisMais
+						+ "\",";
+						String valorMais2MaisMaisMaisMaisMaisMais = valorMais2MaisMaisMaisMaisMais + "	\"moreParameters\": {";
+						String valorMais2MaisMaisMaisMaisMaisMaisMais = valorMais2MaisMaisMaisMaisMaisMais
+						+ "		\"linkedinAddress\": \"https://www.linkedin.com/in/onias85/\",";
+						String valorMais2MaisMaisMaisMaisMaisMaisMaisMais = valorMais2MaisMaisMaisMaisMaisMaisMais
+						+ "		\"linkedinName\": \"Onias\",";
+						String valorMais2MaisMaisMaisMaisMaisMaisMaisMaisMais = valorMais2MaisMaisMaisMaisMaisMaisMaisMais
+						+ "		\"accessLink\": \"https://ccpjobsnow.com/#/tokenToSetPassword?email={email}&msgType=info&msgValue=newUser&token={token}\",";
+						String valorMais2MaisMaisMaisMaisMaisMaisMaisMaisMaisMais = valorMais2MaisMaisMaisMaisMaisMaisMaisMaisMais
+						+ "		\"telegramGroupLink\": \"https://t.me/joinchat/q_PRgF_18n00NjEx\",";
+						String valorMais2MaisMaisMaisMaisMaisMaisMaisMaisMaisMaisMais = valorMais2MaisMaisMaisMaisMaisMaisMaisMaisMaisMais
+						+ "		\"botAddress\": \"https://t.me/JnSuporteBot\"";
+						String valorMais2MaisMaisMaisMaisMaisMaisMaisMaisMaisMaisMaisMais = valorMais2MaisMaisMaisMaisMaisMaisMaisMaisMaisMaisMais + "	}";
+						String valorMais2MaisMaisMaisMaisMaisMaisMaisMaisMaisMaisMaisMaisMais = valorMais2MaisMaisMaisMaisMaisMaisMaisMaisMaisMaisMaisMais + "}";
+						List<CcpBulkItem> createBulkItems = CcpEntityConfigurator.super.toCreateBulkItems(ENTITY, 
+						valorMaisMaisMaisMaisMaisMaisMaisMaisMais
+						,
+						valorMais2MaisMaisMaisMaisMaisMaisMaisMaisMaisMaisMaisMaisMais
 				
 				)
 				;

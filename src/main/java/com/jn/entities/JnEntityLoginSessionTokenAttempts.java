@@ -2,7 +2,7 @@ package com.jn.entities;
 
 import com.ccp.business.CcpBusiness;
 import com.ccp.decorators.CcpJsonRepresentation;
-import com.ccp.decorators.CcpJsonRepresentation.CcpJsonFieldName;
+import com.ccp.decorators.CcpJsonFieldName;
 import com.ccp.especifications.db.utils.entity.CcpEntity;
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityCache;
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityFieldsTransformer;
@@ -53,7 +53,9 @@ public class JnEntityLoginSessionTokenAttempts implements CcpEntityConfigurator 
 			}
 			
 			CcpJsonRepresentation jsonPiece = json.getJsonPiece(JnJsonCommonsFields.email);
-			CcpJsonRepresentation mergeWithAnotherJson = record.put(JnJsonCommonsFields.attempts, updatedAttempts.intValue()).mergeWithAnotherJson(jsonPiece);
+			int intValue = updatedAttempts.intValue();
+			CcpJsonRepresentation put = record.put(JnJsonCommonsFields.attempts, intValue);
+			CcpJsonRepresentation mergeWithAnotherJson = put.mergeWithAnotherJson(jsonPiece);
 			ENTITY.save(mergeWithAnotherJson);
 			return json;
 		};

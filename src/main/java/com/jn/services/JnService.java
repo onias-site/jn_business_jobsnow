@@ -19,9 +19,15 @@ public interface JnService extends CcpService {
 		
 		Class<?> forName;
 		try {
-			forName = Class.forName(this.getClass().getPackageName() + "." + this.name());
+			var clazz = this.getClass();
+			var packageName = clazz.getPackageName();
+			var packageNameMais = packageName + ".";
+			String name = this.name();
+			var packageNameMaisMais = packageNameMais + name;
+			forName = Class.forName(packageNameMaisMais);
 		} catch (ClassNotFoundException e) {
-			throw new JnErrorServiceValidationClassNotFound(e);
+			JnErrorServiceValidationClassNotFound jnErrorServiceValidationClassNotFound = new JnErrorServiceValidationClassNotFound(e);
+			throw jnErrorServiceValidationClassNotFound;
 		}
 		return forName;
 	}
@@ -32,10 +38,4 @@ public interface JnService extends CcpService {
 	}
 	
 
-	@SuppressWarnings("serial")
-	public static class JnErrorServiceValidationClassNotFound extends RuntimeException {
-		private JnErrorServiceValidationClassNotFound(Throwable cause) {
-			super(cause);
-		}
-	}
 }

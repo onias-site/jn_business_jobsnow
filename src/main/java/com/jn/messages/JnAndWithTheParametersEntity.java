@@ -1,0 +1,20 @@
+package com.jn.messages;
+
+import com.ccp.especifications.db.utils.entity.CcpEntity;
+
+public class JnAndWithTheParametersEntity {
+
+	final JnWithTheProcess withProcess;
+
+	final CcpEntity parametersEntity;
+
+	JnAndWithTheParametersEntity(JnWithTheProcess withProcess, CcpEntity parametersEntity) {
+		this.withProcess       = withProcess;
+		this.parametersEntity  = parametersEntity;
+	}
+
+	public JnAndWithTheTemplateEntity andWithTheTemplateEntity(CcpEntity templateEntity) {
+		JnAndWithTheTemplateEntity jnAndWithTheTemplateEntity = new JnAndWithTheTemplateEntity(this, templateEntity);
+		return jnAndWithTheTemplateEntity;
+	}
+}

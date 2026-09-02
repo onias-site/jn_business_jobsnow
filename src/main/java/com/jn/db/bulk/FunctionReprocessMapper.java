@@ -3,7 +3,7 @@ package com.jn.db.bulk;
 import java.util.function.Function;
 import com.ccp.constants.CcpOtherConstants;
 import com.ccp.decorators.CcpJsonRepresentation;
-import com.ccp.decorators.CcpJsonRepresentation.CcpJsonFieldName;
+import com.ccp.decorators.CcpJsonFieldName;
 import com.ccp.especifications.db.bulk.CcpBulkItem;
 import com.ccp.especifications.db.bulk.CcpBulkOperationResult;
 import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityMetaData;
@@ -33,9 +33,11 @@ class FunctionReprocessMapper implements Function<CcpBulkOperationResult, CcpJso
 	public CcpJsonRepresentation apply(CcpBulkOperationResult result) {
 		CcpBulkItem bulkItem = result.getBulkItem();
 		CcpEntityMetaData entityDetails = bulkItem.entity.getEntityMetaData();
-		boolean itIsTryingToStartAnInfinitLoop = entityDetails.entityName.equals(JnEntityRecordToReprocess.ENTITY.getEntityMetaData().entityName);
+		CcpEntityMetaData entityMetaData = JnEntityRecordToReprocess.ENTITY.getEntityMetaData();
+		boolean itIsTryingToStartAnInfinitLoop = entityDetails.entityName.equals(entityMetaData.entityName);
 		if(itIsTryingToStartAnInfinitLoop) {
-			throw new JnErrorReprocessInfiniteLoopPrevented();
+			JnErrorReprocessInfiniteLoopPrevented jnErrorReprocessInfiniteLoopPrevented = new JnErrorReprocessInfiniteLoopPrevented();
+			throw jnErrorReprocessInfiniteLoopPrevented;
 		}
 		long currentTimeMillis = System.currentTimeMillis();
 		CcpJsonRepresentation put = CcpOtherConstants.EMPTY_JSON.put(JnJsonCommonsFields.timestamp, currentTimeMillis);
@@ -43,8 +45,11 @@ class FunctionReprocessMapper implements Function<CcpBulkOperationResult, CcpJso
 		CcpJsonRepresentation errorDetails = result.getErrorDetails();
 		CcpJsonRepresentation putAll2 = putAll.mergeWithAnotherJson(errorDetails);
 		CcpJsonRepresentation renameKey = putAll2.renameField(JsonFieldNames.type, JnEntityRecordToReprocess.Fields.errorType);
-		CcpJsonRepresentation jsonPiece = renameKey.put(JnJsonCommonsFields.id, bulkItem.id).put(JnJsonCommonsFields.entity, entityDetails.entityName)
-		.getJsonPiece(JnEntityRecordToReprocess.Fields.values());
+		CcpJsonRepresentation put2 = renameKey.put(JnJsonCommonsFields.id, bulkItem.id);
+		CcpJsonRepresentation put3 = put2.put(JnJsonCommonsFields.entity, entityDetails.entityName);
+		var fieldsValues = JnEntityRecordToReprocess.Fields.values();
+		CcpJsonRepresentation jsonPiece = put3
+		.getJsonPiece(fieldsValues);
 		return jsonPiece;
 	}
 

@@ -24,7 +24,7 @@ public enum JnProcessStatusCreateLoginEmail implements CcpProcessStatus{
 	
 	
 	private JnProcessStatusCreateLoginEmail(int status) {
-		this.status = status;
+		this.status = status; 
 	}
 
 	public int asNumber() {

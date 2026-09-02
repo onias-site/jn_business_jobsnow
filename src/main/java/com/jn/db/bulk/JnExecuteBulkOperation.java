@@ -18,6 +18,7 @@ import com.ccp.especifications.db.bulk.CcpExecuteBulkOperation;
 import com.ccp.especifications.db.utils.entity.CcpEntity;
 import com.jn.entities.JnEntityRecordToReprocess;
 import com.jn.utils.JnDeleteKeysFromCache;
+import java.util.stream.Stream;
 
 /**
  * Orquestra operações bulk no Elasticsearch do JobsNow. Sanitiza itens duplicados
@@ -57,12 +58,14 @@ public class JnExecuteBulkOperation implements CcpExecuteBulkOperation{
 		HashSet<CcpBulkItem> items = new HashSet<>();
 		
 		for (CcpBulkItem newerItem : bulkItems) {
-			
-			if(newerItem.operation.priority <= 0) {
+			boolean priorityMenorOuIgual = newerItem.operation.priority <= 0;
+		
+			if(priorityMenorOuIgual) {
 				continue;
 			}
-			
-			boolean isNewItem = false == items.contains(newerItem);
+			boolean contains = items.contains(newerItem);
+
+			boolean isNewItem = false == contains;
 			
 			if(isNewItem) {
 				items.add(newerItem);
@@ -72,8 +75,9 @@ public class JnExecuteBulkOperation implements CcpExecuteBulkOperation{
 			ArrayList<CcpBulkItem> list = new ArrayList<>(items);
 			int indexOf = list.indexOf(newerItem);
 			CcpBulkItem olderItem = list.get(indexOf);
-			
-			boolean doesNotOverride = (olderItem.operation.priority - newerItem.operation.priority) > 0;
+			int priorityMenos = olderItem.operation.priority - newerItem.operation.priority;
+
+			boolean doesNotOverride = (priorityMenos) > 0;
 			
 			if(doesNotOverride) {
 				continue;
@@ -87,19 +91,27 @@ public class JnExecuteBulkOperation implements CcpExecuteBulkOperation{
 	private JnExecuteBulkOperation commitAndSaveErrorsAndDeleteRecordsFromCache(CcpBulkExecutor dbBulkExecutor, Consumer<String[]> functionToDeleteKeysInTheCache) {
 
 		List<CcpBulkOperationResult> allResults = dbBulkExecutor.getBulkOperationResult();
-		List<CcpBulkOperationResult> errors = allResults.stream().filter(x -> x.hasError()).collect(Collectors.toList());
-		List<CcpBulkItem> collect = errors.stream().map(x -> x.getReprocess(FunctionReprocessMapper.INSTANCE, JnEntityRecordToReprocess.ENTITY)).collect(Collectors.toList());
+		Stream<CcpBulkOperationResult> stream = allResults.stream();
+		var filter = stream.filter(x -> x.hasError());
+		List<CcpBulkOperationResult> errors = filter.collect(Collectors.toList());
+		Stream<CcpBulkOperationResult> stream2 = errors.stream();
+		var stream2Map = stream2.map(x -> x.getReprocess(FunctionReprocessMapper.INSTANCE, JnEntityRecordToReprocess.ENTITY));
+		List<CcpBulkItem> collect = stream2Map.collect(Collectors.toList());
 		this.executeBulk(collect, functionToDeleteKeysInTheCache);
 		JnExecuteBulkOperation deleteKeysFromCache = this.deleteKeysFromCache(allResults);
 		return deleteKeysFromCache; 
 	}
 
 	private JnExecuteBulkOperation deleteKeysFromCache(List<CcpBulkOperationResult> allResults) {
-		Set<String> keysToDeleteInCache = new ArrayList<>(allResults).stream()
-		.filter(x -> false == x.hasError())
-		.map(x -> x.getCacheKey())
+		var stream3 = new ArrayList<>(allResults).stream();
+		var filter2 = stream3
+		.filter(x -> false == x.hasError());
+		var filter2Map = filter2
+		.map(x -> x.getCacheKey());
+		Set<String> keysToDeleteInCache = filter2Map
 		.collect(Collectors.toSet());
-		String[] array = keysToDeleteInCache.toArray(new String[keysToDeleteInCache.size()]);
+		int keysToDeleteInCacheSize = keysToDeleteInCache.size();
+		String[] array = keysToDeleteInCache.toArray(new String[keysToDeleteInCacheSize]);
 		
 		JnDeleteKeysFromCache.INSTANCE.accept(array);
 		return this;

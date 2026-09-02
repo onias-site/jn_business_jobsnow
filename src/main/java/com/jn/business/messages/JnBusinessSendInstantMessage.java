@@ -1,24 +1,20 @@
 package com.jn.business.messages;
 
-import com.ccp.business.CcpBusiness;
 import com.ccp.decorators.CcpJsonRepresentation;
-import com.ccp.decorators.CcpJsonRepresentation.CcpJsonFieldName;
-import com.ccp.decorators.CcpStringDecorator;
-import com.ccp.decorators.CcpTextDecorator;
+import com.ccp.decorators.CcpJsonFieldName;
 import com.ccp.decorators.CcpTimeDecorator;
-import com.ccp.dependency.injection.CcpDependencyInjection;
 import com.ccp.especifications.db.utils.entity.fields.annotations.CcpEntityFieldPrimaryKey;
 import com.ccp.especifications.http.CcpHttpApiExecutor;
 import com.ccp.especifications.http.CcpHttpTooManyRequests;
 import com.ccp.especifications.instant.messenger.CcpErrorInstantMessageThisBotWasBlockedByThisUser;
-import com.ccp.especifications.instant.messenger.CcpInstantMessenger;
 import com.ccp.json.validations.fields.annotations.CcpJsonCopyFieldValidationsFrom;
 import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidatorRequired;
 import com.jn.entities.JnEntityInstantMessengerBotLocked;
 import com.jn.entities.JnEntityInstantMessengerMessageSent;
 import com.jn.json.fields.validation.JnJsonInstantMessengerFields;
+
 import com.jn.utils.JnSystemProperties;
-import com.jn.json.fields.validation.JnJsonCommonsFields;
+import com.ccp.decorators.CcpStringDecorator;
 
 /**
  * Envia mensagens instantâneas via Telegram usando bots configurados. Suporta dois
@@ -94,13 +90,14 @@ public class JnBusinessSendInstantMessage implements CcpHttpApiExecutor{
 	 * enviar e trata exceções de rate-limit e bloqueio de bot.
 	 */
 	public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
+		CcpStringDecorator asStringDecorator = json.getAsStringDecorator(JnJsonInstantMessengerFields.botName);
 
-		CcpJsonFieldName botName = json.getAsStringDecorator(JnJsonValidator.botName).jsonFieldName();
+		CcpJsonFieldName botName = asStringDecorator.jsonFieldName();
 		
 		String botToken =  JnSystemProperties.INSTANCE.getSystemInnerProperty(Fields.bots, botName);
 		
-		CcpJsonRepresentation jsonWithBotToken = json.put(JnMessageFileJsonValidator.botToken, botToken);
-		String messageType = jsonWithBotToken.getAsString(JnJsonValidator.instantMessageType);
+		CcpJsonRepresentation jsonWithBotToken = json.put(JnJsonInstantMessengerFields.botToken, botToken);
+		String messageType = jsonWithBotToken.getAsString(JnJsonInstantMessengerFields.instantMessageType);
 		JnInstantMessageType instantMessenger = JnInstantMessageType.valueOf(messageType);
 		
 		try {
@@ -122,84 +119,29 @@ public class JnBusinessSendInstantMessage implements CcpHttpApiExecutor{
 		
 		Integer maxTriesToSendMessage = this.getMaxTries();
 		Integer triesToSendMessage = json.getOrDefault(Fields.triesToSendMessage, () -> 1);
-		
-		if(triesToSendMessage >= maxTriesToSendMessage) {
-			throw new JnErrorUnableToSendInstantMessage(json);
+		boolean triesToSendMessageMaiorOuIgual = triesToSendMessage >= maxTriesToSendMessage;
+
+		if(triesToSendMessageMaiorOuIgual) {
+			JnErrorUnableToSendInstantMessage jnErrorUnableToSendInstantMessage = new JnErrorUnableToSendInstantMessage(json);
+			throw jnErrorUnableToSendInstantMessage;
 		}
 		
 		Integer sleepToSendMessage = this.getSleepTimeToRetry();
-		
-		new CcpTimeDecorator().sleep(sleepToSendMessage);
-		CcpJsonRepresentation put = json.put(Fields.triesToSendMessage, triesToSendMessage + 1);
+		CcpTimeDecorator ccpTimeDecorator = new CcpTimeDecorator();
+
+		ccpTimeDecorator.sleep(sleepToSendMessage);
+		int triesToSendMessageMais = triesToSendMessage + 1;
+		CcpJsonRepresentation put = json.put(Fields.triesToSendMessage, triesToSendMessageMais);
 		CcpJsonRepresentation apply = this.execute(put);
 		return apply;
 	}
 
 	private CcpJsonRepresentation saveBlockedBot(CcpJsonRepresentation putAll, String token) {
-		JnEntityInstantMessengerBotLocked.ENTITY.save(putAll.put(JnEntityInstantMessengerBotLocked.Fields.botName, token));
+		CcpJsonRepresentation put2 = putAll.put(JnJsonInstantMessengerFields.botName, token);
+		JnEntityInstantMessengerBotLocked.ENTITY.save(put2);
 		return putAll;
 	}
-	public static enum JnInstantMessageType implements CcpBusiness{
-		text(JnMessageTextJsonValidator.class) {
-			public CcpJsonRepresentation sendMessage(CcpJsonRepresentation json, CcpJsonRepresentation orElseThrow) {
-				CcpInstantMessenger instantMessenger = CcpDependencyInjection.getDependency(CcpInstantMessenger.class);
-				String message = super.getMessage(json, orElseThrow, JnJsonCommonsFields.message);
-				String botToken = json.getAsString(JnMessageTextJsonValidator.botToken);
-				Long chatId = json.getAsLongNumber(JnJsonValidator.chatId);
-				Long replyTo = json.getOrDefault(Fields.replyTo, () -> 0L).longValue();
-				CcpStringDecorator asStringDecorator = json.getAsStringDecorator(JnJsonValidator.botName);
-				CcpJsonFieldName jsonFieldName = asStringDecorator.jsonFieldName();
-				CcpJsonRepresentation result = instantMessenger.sendTextMessage(jsonFieldName, botToken, chatId, replyTo, message);
-				CcpJsonRepresentation mergeWithAnotherJson = json.mergeWithAnotherJson(result);
-				return mergeWithAnotherJson;
-			}
 
-
-		},
-		file(JnMessageFileJsonValidator.class) {
-			public CcpJsonRepresentation sendMessage(CcpJsonRepresentation json, CcpJsonRepresentation orElseThrow) {
-				CcpInstantMessenger instantMessenger = CcpDependencyInjection.getDependency(CcpInstantMessenger.class);
-				
-				String botToken = json.getAsString(JnMessageTextJsonValidator.botToken) ;
-				Long chatId = json.getAsLongNumber(JnJsonValidator.chatId);
-				Long replyTo = json.getOrDefault(Fields.replyTo, () -> 0d).longValue();
-				
-				String message = super.getMessage(json, orElseThrow, JnJsonCommonsFields.message);
-				String caption = super.getMessage(json, orElseThrow, JnMessageFileJsonValidator.caption);
-				String fileName = super.getMessage(json, orElseThrow, JnMessageFileJsonValidator.fileName);
-
-				Byte[] bytes = new CcpStringDecorator(message).getBytes();
-				CcpStringDecorator asStringDecorator = json.getAsStringDecorator(JnJsonValidator.botName);
-				CcpJsonFieldName jsonFieldName = asStringDecorator.jsonFieldName();
-				CcpJsonRepresentation result = instantMessenger.sendFile(jsonFieldName, botToken, chatId, replyTo, fileName, caption, bytes);
-				CcpJsonRepresentation mergeWithAnotherJson = json.mergeWithAnotherJson(result);
-				return mergeWithAnotherJson;
-			}
-		}
-		;
-		private final Class<?> jsonValidationClass;
-		
-		public Class<?> getJsonValidationClass() {
-			return this.jsonValidationClass;
-		}
-		
-		private JnInstantMessageType(Class<?> jsonValidationClass) {
-			this.jsonValidationClass = jsonValidationClass;
-		}
-		protected String getMessage(CcpJsonRepresentation json, CcpJsonRepresentation orElseThrow, CcpJsonFieldName field) {
-			CcpTextDecorator text = orElseThrow.getAsTextDecorator(field);
-			CcpTextDecorator message = text.resolveTemplate(json);
-			return message.content;
-		}
-		public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
-			CcpJsonRepresentation message = json.getJsonPiece(JnMessageFileJsonValidator.fileName, JnMessageFileJsonValidator.caption, JnJsonCommonsFields.message, Fields.replyTo, JnJsonValidator.chatId);
-			CcpJsonRepresentation sendMessage = this.sendMessage(json, message);
-			return sendMessage;
-		}
-
-		public abstract CcpJsonRepresentation sendMessage (CcpJsonRepresentation json, CcpJsonRepresentation message);
-
-	}
 
 	@SuppressWarnings("serial")
 	public static class JnErrorUnableToSendInstantMessage extends RuntimeException {

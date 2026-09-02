@@ -3,8 +3,8 @@ package com.jn.entities;
 import java.util.List;
 import com.ccp.constants.CcpOtherConstants;
 import com.ccp.decorators.CcpJsonRepresentation;
-import com.ccp.decorators.CcpJsonRepresentation.CcpJsonFieldName;
-import com.ccp.decorators.CcpTextDecorator.CcpTemplateFunctions;
+import com.ccp.decorators.CcpJsonFieldName;
+import com.ccp.decorators.CcpTemplateFunctions;
 import com.ccp.especifications.db.bulk.CcpBulkItem;
 import com.ccp.especifications.db.utils.entity.CcpEntity;
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityCache;
@@ -18,15 +18,17 @@ import com.ccp.especifications.http.CcpHttpContentType;
 import com.ccp.json.validations.fields.annotations.CcpJsonCopyFieldValidationsFrom;
 import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidatorRequired;
 import com.jn.business.messages.JnBusinessSendInstantMessage;
-import com.jn.business.messages.JnMessages.JnBusinessNotifyError;
-import com.jn.business.messages.JnMessages.NotifySupportAboutPendingResendLoginToken;
-import com.jn.business.messages.JnMessages.NotifySupportAboutSolvedLockedLoginToken;
-import com.jn.business.messages.JnMessages.NotifySupportAboutSolvedResendLoginToken;
-import com.jn.business.messages.JnMessages.NotifySupportAboutPendingLockedLoginToken;
+import com.jn.business.messages.JnBusinessNotifyError;
+import com.jn.business.messages.NotifySupportAboutPendingResendLoginToken;
+import com.jn.business.messages.NotifySupportAboutSolvedLockedLoginToken;
+import com.jn.business.messages.NotifySupportAboutSolvedResendLoginToken;
+import com.jn.business.messages.NotifySupportAboutPendingLockedLoginToken;
 import com.jn.entities.decorators.JnVersionableEntity;
 import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault;
 import com.jn.json.fields.validation.JnJsonInstantMessengerFields;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
+
+import com.jn.business.messages.JnInstantMessageType;
 
 @CcpEntityCache(3600)
 @CcpEntityVersionable(JnVersionableEntity.class)
@@ -71,54 +73,89 @@ public class JnEntityInstantMessengerParametersToSend implements CcpEntityConfig
 		;
 	}
 	public List<CcpBulkItem> getFirstRecordsToInsert() {
+		CcpJsonRepresentation put = CcpOtherConstants.EMPTY_JSON
+		.put(JnJsonInstantMessengerFields.instantMessageType, JnInstantMessageType.file);
+		CcpJsonRepresentation addToItem = put
+		.addToItem(JnJsonCommonsFields.moreParameters, MoreParametersFields.maxTriesToSendMessage, 10);
+		CcpJsonRepresentation addToItem2 = addToItem
+		.addToItem(JnJsonCommonsFields.moreParameters, MoreParametersFields.sleepToSendMessage, 3000);
+		String valorMais = "{" + CcpTemplateFunctions.currentTimeMillis;
+		String valorMaisMais = valorMais + "()}.txt";
+		CcpJsonRepresentation put2 = addToItem2
+		.put(JnJsonInstantMessengerFields.fileName, valorMaisMais);
+		CcpJsonRepresentation put3 = put2
+		.put(JnJsonInstantMessengerFields.botName, JnBusinessSendInstantMessage.JnBotType.support);
+		String name = JnBusinessNotifyError.class.getName();
+		CcpJsonRepresentation put4 = put3
+		.put(JnJsonCommonsFields.templateId, name);
+		CcpJsonRepresentation put5 = put4
+		.put(JnJsonCommonsFields.contentType, CcpHttpContentType.TEXT_PLAIN);
+		CcpJsonRepresentation put6 = put5
+		.put(JnJsonInstantMessengerFields.chatId, 751717896L);
+
 		
-		
-		CcpJsonRepresentation notifyError = CcpOtherConstants.EMPTY_JSON
-		.put(Fields.instantMessageType, JnBusinessSendInstantMessage.JnInstantMessageType.file)
-		.addToItem(JnJsonCommonsFields.moreParameters, MoreParametersFields.maxTriesToSendMessage, 10)
-		.addToItem(JnJsonCommonsFields.moreParameters, MoreParametersFields.sleepToSendMessage, 3000)
-		.put(Fields.fileName, "{" + CcpTemplateFunctions.currentTimeMillis + "()}.txt")
-		.put(Fields.botName, JnBusinessSendInstantMessage.JnBotType.support)
-		.put(JnJsonCommonsFields.templateId, JnBusinessNotifyError.class.getName())
-		.put(JnJsonCommonsFields.contentType, CcpHttpContentType.TEXT_PLAIN)
-		.put(Fields.chatId, 751717896L)
-		.put(Fields.caption, "{type}")
+		CcpJsonRepresentation notifyError = put6
+		.put(JnJsonInstantMessengerFields.caption, "{type}")
 		;
+		CcpJsonRepresentation put7 = CcpOtherConstants.EMPTY_JSON
+		.put(JnJsonInstantMessengerFields.instantMessageType, JnInstantMessageType.text);
+		String name2 = NotifySupportAboutPendingLockedLoginToken.class.getName();
+		CcpJsonRepresentation put8 = put7
+		.put(JnJsonCommonsFields.templateId, name2);
+		CcpJsonRepresentation addToItem3 = put8
+		.addToItem(JnJsonCommonsFields.moreParameters, MoreParametersFields.maxTriesToSendMessage, 10);
+		CcpJsonRepresentation addToItem4 = addToItem3
+		.addToItem(JnJsonCommonsFields.moreParameters, MoreParametersFields.sleepToSendMessage, 3000);
+		CcpJsonRepresentation put9 = addToItem4
+		.put(JnJsonInstantMessengerFields.botName, JnBusinessSendInstantMessage.JnBotType.support);
 
-		CcpJsonRepresentation notifySupportAboutPendingLockedToken = CcpOtherConstants.EMPTY_JSON
-		.put(Fields.instantMessageType, JnBusinessSendInstantMessage.JnInstantMessageType.text)
-		.put(JnJsonCommonsFields.templateId, NotifySupportAboutPendingLockedLoginToken.class.getName())
-		.addToItem(JnJsonCommonsFields.moreParameters, MoreParametersFields.maxTriesToSendMessage, 10)
-		.addToItem(JnJsonCommonsFields.moreParameters, MoreParametersFields.sleepToSendMessage, 3000)
-		.put(Fields.botName, JnBusinessSendInstantMessage.JnBotType.support)
-		.put(Fields.chatId, 751717896L)
+		CcpJsonRepresentation notifySupportAboutPendingLockedToken = put9
+		.put(JnJsonInstantMessengerFields.chatId, 751717896L)
 		;
+		CcpJsonRepresentation put10 = CcpOtherConstants.EMPTY_JSON
+		.put(JnJsonInstantMessengerFields.instantMessageType, JnInstantMessageType.text);
+		String name3 = NotifySupportAboutPendingResendLoginToken.class.getName();
+		CcpJsonRepresentation put11 = put10
+		.put(JnJsonCommonsFields.templateId, name3);
+		CcpJsonRepresentation addToItem5 = put11
+		.addToItem(JnJsonCommonsFields.moreParameters, MoreParametersFields.maxTriesToSendMessage, 10);
+		CcpJsonRepresentation addToItem6 = addToItem5
+		.addToItem(JnJsonCommonsFields.moreParameters, MoreParametersFields.sleepToSendMessage, 3000);
+		CcpJsonRepresentation put12 = addToItem6
+		.put(JnJsonInstantMessengerFields.botName, JnBusinessSendInstantMessage.JnBotType.support);
 
-		CcpJsonRepresentation notifySupportAboutPendingResendToken = CcpOtherConstants.EMPTY_JSON
-		.put(Fields.instantMessageType, JnBusinessSendInstantMessage.JnInstantMessageType.text)
-		.put(JnJsonCommonsFields.templateId, NotifySupportAboutPendingResendLoginToken.class.getName())
-		.addToItem(JnJsonCommonsFields.moreParameters, MoreParametersFields.maxTriesToSendMessage, 10)
-		.addToItem(JnJsonCommonsFields.moreParameters, MoreParametersFields.sleepToSendMessage, 3000)
-		.put(Fields.botName, JnBusinessSendInstantMessage.JnBotType.support)
-		.put(Fields.chatId, 751717896L)
+		CcpJsonRepresentation notifySupportAboutPendingResendToken = put12
+		.put(JnJsonInstantMessengerFields.chatId, 751717896L)
 		;
+		CcpJsonRepresentation put13 = CcpOtherConstants.EMPTY_JSON
+		.put(JnJsonInstantMessengerFields.instantMessageType, JnInstantMessageType.text);
+		String name4 = NotifySupportAboutSolvedLockedLoginToken.class.getName();
+		CcpJsonRepresentation put14 = put13
+		.put(JnJsonCommonsFields.templateId, name4);
+		CcpJsonRepresentation addToItem7 = put14
+		.addToItem(JnJsonCommonsFields.moreParameters, MoreParametersFields.maxTriesToSendMessage, 10);
+		CcpJsonRepresentation addToItem8 = addToItem7
+		.addToItem(JnJsonCommonsFields.moreParameters, MoreParametersFields.sleepToSendMessage, 3000);
+		CcpJsonRepresentation put15 = addToItem8
+		.put(JnJsonInstantMessengerFields.botName, JnBusinessSendInstantMessage.JnBotType.support);
 
-		CcpJsonRepresentation notifySupportAboutSolvedLockedToken = CcpOtherConstants.EMPTY_JSON
-		.put(Fields.instantMessageType, JnBusinessSendInstantMessage.JnInstantMessageType.text)
-		.put(JnJsonCommonsFields.templateId, NotifySupportAboutSolvedLockedLoginToken.class.getName())
-		.addToItem(JnJsonCommonsFields.moreParameters, MoreParametersFields.maxTriesToSendMessage, 10)
-		.addToItem(JnJsonCommonsFields.moreParameters, MoreParametersFields.sleepToSendMessage, 3000)
-		.put(Fields.botName, JnBusinessSendInstantMessage.JnBotType.support)
-		.put(Fields.chatId, 751717896L)
+		CcpJsonRepresentation notifySupportAboutSolvedLockedToken = put15
+		.put(JnJsonInstantMessengerFields.chatId, 751717896L)
 		;
+		CcpJsonRepresentation put16 = CcpOtherConstants.EMPTY_JSON
+		.put(JnJsonInstantMessengerFields.instantMessageType, JnInstantMessageType.text);
+		String name5 = NotifySupportAboutSolvedResendLoginToken.class.getName();
+		CcpJsonRepresentation put17 = put16
+		.put(JnJsonCommonsFields.templateId, name5);
+		CcpJsonRepresentation addToItem9 = put17
+		.addToItem(JnJsonCommonsFields.moreParameters, MoreParametersFields.maxTriesToSendMessage, 10);
+		CcpJsonRepresentation addToItem10 = addToItem9
+		.addToItem(JnJsonCommonsFields.moreParameters, MoreParametersFields.sleepToSendMessage, 3000);
+		CcpJsonRepresentation put18 = addToItem10
+		.put(JnJsonInstantMessengerFields.botName, JnBusinessSendInstantMessage.JnBotType.support);
 
-		CcpJsonRepresentation notifySupportAboutSolvedResendToken = CcpOtherConstants.EMPTY_JSON
-		.put(Fields.instantMessageType, JnBusinessSendInstantMessage.JnInstantMessageType.text)
-		.put(JnJsonCommonsFields.templateId, NotifySupportAboutSolvedResendLoginToken.class.getName())
-		.addToItem(JnJsonCommonsFields.moreParameters, MoreParametersFields.maxTriesToSendMessage, 10)
-		.addToItem(JnJsonCommonsFields.moreParameters, MoreParametersFields.sleepToSendMessage, 3000)
-		.put(Fields.botName, JnBusinessSendInstantMessage.JnBotType.support)
-		.put(Fields.chatId, 751717896L)
+		CcpJsonRepresentation notifySupportAboutSolvedResendToken = put18
+		.put(JnJsonInstantMessengerFields.chatId, 751717896L)
 		;
 		
 		List<CcpBulkItem> createBulkItems = CcpEntityConfigurator.super.toCreateBulkItems(

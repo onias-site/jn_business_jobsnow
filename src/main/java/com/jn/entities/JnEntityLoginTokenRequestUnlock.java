@@ -5,7 +5,7 @@ import static com.ccp.especifications.db.utils.entity.decorators.enums.CcpEntity
 import static com.ccp.especifications.db.utils.entity.decorators.enums.CcpEntityOperationStepType._after;
 import static com.ccp.especifications.db.utils.entity.decorators.enums.CcpEntityType.mainEntity;
 
-import com.ccp.decorators.CcpJsonRepresentation.CcpJsonFieldName;
+import com.ccp.decorators.CcpJsonFieldName;
 import com.ccp.especifications.db.utils.entity.CcpEntity;
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityAsyncWriter;
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityCache;
@@ -23,17 +23,18 @@ import com.ccp.especifications.db.utils.entity.fields.annotations.CcpEntityField
 import com.ccp.json.validations.fields.annotations.CcpJsonCopyFieldValidationsFrom;
 import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeString;
 import com.jn.business.login.solve.token.JnBusinessResetLoginToken;
-import com.jn.business.messages.JnMessages;
-import com.jn.business.messages.JnMessages.JnBusinessSendUserToken;
+import com.jn.business.messages.JnBusinessSendUserToken;
 import com.jn.db.bulk.JnExecuteBulkOperation;
 import com.jn.entities.decorators.JnAsyncWriterEntity;
 import com.jn.entities.decorators.JnDisposableEntity;
-import com.jn.entities.fields.transformers.JnJsonTransformerPutRandomToken.JnJsonTransformersFieldEntityPasswordRandom;
+import com.jn.entities.fields.transformers.JnJsonTransformersFieldEntityPasswordRandom;
 import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault;
 import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDoNothing;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
 import com.jn.json.fields.validation.JnJsonInstantMessengerFields;
 import com.jn.utils.JnDeleteKeysFromCache;
+import com.jn.business.messages.NotifySupportAboutPendingLockedLoginToken;
+import com.jn.business.messages.NotifySupportAboutSolvedLockedLoginToken;
 
 @CcpEntityAsyncWriter(JnAsyncWriterEntity.class)
 @CcpEntityTwin(
@@ -48,8 +49,8 @@ import com.jn.utils.JnDeleteKeysFromCache;
 @CcpEntityFieldsValidator(classReferenceWithTheFields = JnEntityLoginTokenRequestUnlock.Fields.class)
 @CcpEntityOperations(
 		operations = {
-				@CcpEntityOperation(when = _after, operation = delete, from = mainEntity,  execute = {JnBusinessResetLoginToken.class, JnBusinessSendUserToken.class, JnMessages.NotifySupportAboutSolvedLockedLoginToken.class}, operationHandlers = {}),
-				@CcpEntityOperation(when = _after, operation = save, from = mainEntity,  execute = {JnMessages.NotifySupportAboutPendingLockedLoginToken.class}, operationHandlers = {}),
+				@CcpEntityOperation(when = _after, operation = delete, from = mainEntity,  execute = {JnBusinessResetLoginToken.class, JnBusinessSendUserToken.class, NotifySupportAboutSolvedLockedLoginToken.class}, operationHandlers = {}),
+				@CcpEntityOperation(when = _after, operation = save, from = mainEntity,  execute = {NotifySupportAboutPendingLockedLoginToken.class}, operationHandlers = {}),
 		},
 		globalHandlers = {}
 		)

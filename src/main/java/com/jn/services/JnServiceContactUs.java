@@ -1,7 +1,7 @@
 package com.jn.services;
 
 import com.ccp.decorators.CcpJsonRepresentation;
-import com.ccp.decorators.CcpJsonRepresentation.CcpJsonFieldName;
+import com.ccp.decorators.CcpJsonFieldName;
 
 /**
  * Serviço de gerenciamento de contatos ("Fale Conosco"). Os três valores ({@code SaveContactUs},

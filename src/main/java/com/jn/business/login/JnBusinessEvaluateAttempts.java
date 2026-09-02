@@ -3,7 +3,7 @@ package com.jn.business.login;
 import com.ccp.business.CcpBusiness;
 import com.ccp.constants.CcpOtherConstants;
 import com.ccp.decorators.CcpJsonRepresentation;
-import com.ccp.decorators.CcpJsonRepresentation.CcpJsonFieldName;
+import com.ccp.decorators.CcpJsonFieldName;
 import com.ccp.dependency.injection.CcpDependencyInjection;
 import com.ccp.especifications.db.utils.entity.CcpEntity;
 import com.ccp.especifications.password.CcpPasswordHandler;
@@ -19,7 +19,7 @@ import com.jn.utils.JnSystemProperties;
  * CcpErrorFlowDisturb com o status de excesso de tentativas; antes disso, lança o
  * status de "tipo errado" com o número de tentativas atual.
  */
-public class JnBusinessEvaluateAttempts implements CcpBusiness{
+public class JnBusinessEvaluateAttempts implements CcpBusiness{ 
 	enum JsonFieldNames implements CcpJsonFieldName{
 		entities
 	}
@@ -44,7 +44,7 @@ public class JnBusinessEvaluateAttempts implements CcpBusiness{
 	
 	private final CcpJsonFieldName fieldEmailName;
 
-	private JnBusinessEvaluateAttempts(Builder b) {
+	JnBusinessEvaluateAttempts(Builder b) {
 		this.entityToGetTheAttempts             = b.entityToGetTheAttempts;
 		this.entityToGetTheSecret               = b.entityToGetTheSecret;
 		this.databaseFieldName                  = b.databaseFieldName;
@@ -58,65 +58,11 @@ public class JnBusinessEvaluateAttempts implements CcpBusiness{
 	}
 
 	public static Builder builder() {
-		return new Builder();
+		Builder builder = new Builder();
+		return builder;
 	}
 
-	public static class Builder {
-		private CcpEntity entityToGetTheAttempts;
-		private CcpEntity entityToGetTheSecret;
-		private CcpJsonFieldName databaseFieldName;
-		private CcpJsonFieldName userFieldName;
-		private CcpProcessStatus statusToReturnWhenExceedAttempts;
-		private CcpProcessStatus statusToReturnWhenWrongType;
-		private CcpBusiness topicToCreateTheLockWhenExceedTries;
-		private CcpBusiness topicToRegisterSuccess;
-		private CcpJsonFieldName fieldAttempsName;
-		private CcpJsonFieldName fieldEmailName; 
 
-		public Builder entityToGetTheAttempts(CcpEntity entity) {
-			this.entityToGetTheAttempts = entity;
-			return this;
-		}
-		public Builder entityToGetTheSecret(CcpEntity entity) {
-			this.entityToGetTheSecret = entity;
-			return this;
-		}
-		public Builder databaseFieldName(CcpJsonFieldName field) {
-			this.databaseFieldName = field;
-			return this;
-		}
-		public Builder userFieldName(CcpJsonFieldName field) {
-			this.userFieldName = field;
-			return this;
-		}
-		public Builder statusWhenExceedAttempts(CcpProcessStatus status) {
-			this.statusToReturnWhenExceedAttempts = status;
-			return this;
-		}
-		public Builder statusWhenWrongType(CcpProcessStatus status) {
-			this.statusToReturnWhenWrongType = status;
-			return this;
-		}
-		public Builder lockUsing(CcpBusiness business) {
-			this.topicToCreateTheLockWhenExceedTries = business;
-			return this;
-		}
-		public Builder onSuccess(CcpBusiness business) {
-			this.topicToRegisterSuccess = business;
-			return this;
-		}
-		public Builder attemptsFieldName(CcpJsonFieldName field) {
-			this.fieldAttempsName = field;
-			return this;
-		}
-		public Builder emailFieldName(CcpJsonFieldName field) {
-			this.fieldEmailName = field;
-			return this;
-		}
-		public JnBusinessEvaluateAttempts build() {
-			return new JnBusinessEvaluateAttempts(this);
-		}
-	}
 
 	/**
 	 * Busca o segredo no banco, compara com o valor do usuário usando CcpPasswordHandler,
@@ -125,15 +71,21 @@ public class JnBusinessEvaluateAttempts implements CcpBusiness{
 	public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
 
 		String secretFromDatabase = json.getValueFromPath("",CcpEntity.JsonFieldNames._entities, this.entityToGetTheSecret, this.databaseFieldName);
+		String secretFromDatabaseTrim = secretFromDatabase.trim();
+		boolean secretFromDatabaseTrimEmpty = secretFromDatabaseTrim.isEmpty();
 
-		if(secretFromDatabase.trim().isEmpty()) {
-			throw new JnErrorSecretFromDatabaseIsEmpty();
+		if(secretFromDatabaseTrimEmpty) {
+			JnErrorSecretFromDatabaseIsEmpty jnErrorSecretFromDatabaseIsEmpty = new JnErrorSecretFromDatabaseIsEmpty();
+			throw jnErrorSecretFromDatabaseIsEmpty;
 		}
 
 		String secretFromUser = json.getAsString(this.userFieldName);
+		String secretFromUserTrim = secretFromUser.trim();
+		boolean secretFromUserTrimEmpty = secretFromUserTrim.isEmpty();
 
-		if(secretFromUser.trim().isEmpty()) {
-			throw new JnErrorSecretFromUserIsEmpty();
+		if(secretFromUserTrimEmpty) {
+			JnErrorSecretFromUserIsEmpty jnErrorSecretFromUserIsEmpty = new JnErrorSecretFromUserIsEmpty();
+			throw jnErrorSecretFromUserIsEmpty;
 		}
 		
 		CcpPasswordHandler dependency = CcpDependencyInjection.getDependency(CcpPasswordHandler.class);
@@ -154,19 +106,23 @@ public class JnBusinessEvaluateAttempts implements CcpBusiness{
 		boolean exceededAttempts = updatedAttempts >= maxAttempts;
 		if(exceededAttempts) {
 			this.topicToCreateTheLockWhenExceedTries.execute(toReturn);
-			throw new CcpErrorFlowDisturb(toReturn, this.statusToReturnWhenExceedAttempts);
+			CcpErrorFlowDisturb ccpErrorFlowDisturb = new CcpErrorFlowDisturb(toReturn, this.statusToReturnWhenExceedAttempts);
+			throw ccpErrorFlowDisturb;
 		}
 		
 		String email = json.getAsString(this.fieldEmailName);
-		CcpJsonRepresentation put = CcpOtherConstants.EMPTY_JSON
-				.put(this.fieldAttempsName, updatedAttempts)
+		CcpJsonRepresentation put2 = CcpOtherConstants.EMPTY_JSON
+				.put(this.fieldAttempsName, updatedAttempts);
+				CcpJsonRepresentation put = put2
 				.put(this.fieldEmailName, email)
 				;
 		this.entityToGetTheAttempts.save(put);
 		CcpJsonFieldName[] returnedFields = new CcpJsonFieldName[] {
 				this.fieldAttempsName
 		};
-		throw new CcpErrorFlowDisturb(toReturn.put(this.fieldAttempsName, updatedAttempts), this.statusToReturnWhenWrongType, returnedFields);
+		CcpJsonRepresentation put3 = toReturn.put(this.fieldAttempsName, updatedAttempts);
+		CcpErrorFlowDisturb ccpErrorFlowDisturb2 = new CcpErrorFlowDisturb(put3, this.statusToReturnWhenWrongType, returnedFields);
+		throw ccpErrorFlowDisturb2;
 	}
 
 	@SuppressWarnings("serial")

@@ -2,7 +2,7 @@ package com.jn.entities;
 
 import com.ccp.decorators.CcpFieldName;
 import com.ccp.decorators.CcpJsonRepresentation;
-import com.ccp.decorators.CcpJsonRepresentation.CcpJsonFieldName;
+import com.ccp.decorators.CcpJsonFieldName;
 import com.ccp.especifications.db.utils.entity.CcpEntity;
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityCache;
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityDisposable;
@@ -35,12 +35,14 @@ public class JnEntityHttpApiRetrySendRequest implements CcpEntityConfigurator {
 	public static boolean exceededTries(CcpJsonRepresentation json, String fieldName, int limit) {
 		
 		for(int k = 1; k <= limit; k++) {
-			
-			CcpJsonRepresentation put = json.put(new CcpFieldName(fieldName), k);
+			CcpFieldName ccpFieldName = new CcpFieldName(fieldName);
+		
+			CcpJsonRepresentation put = json.put(ccpFieldName, k);
 			
 			boolean exists = ENTITY.exists(put);
-			
-			if(false == exists) {
+			boolean valorIgual = false == exists;
+
+			if(valorIgual) {
 				ENTITY.save(put);
 				return false;
 			}

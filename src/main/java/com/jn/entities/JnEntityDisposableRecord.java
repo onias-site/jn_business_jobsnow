@@ -1,7 +1,7 @@
 package com.jn.entities;
 
 import com.ccp.decorators.CcpJsonRepresentation;
-import com.ccp.decorators.CcpJsonRepresentation.CcpJsonFieldName;
+import com.ccp.decorators.CcpJsonFieldName;
 import com.ccp.decorators.CcpTimeDecorator;
 import com.ccp.especifications.db.utils.entity.CcpEntity;
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityFieldsTransformer;
@@ -64,7 +64,8 @@ public class JnEntityDisposableRecord implements CcpEntityConfigurator {
 		Long trueTimestamp = jsonPiece.getAsLongNumber(Fields.trueTimestamp);
 		Long timestamp = jsonPiece.getAsLongNumber(JnJsonCommonsFields.timestamp);
 		String newFormat = "dd/MM/yyyy - HH:mm";
-		String dateItWasSaved = new CcpTimeDecorator(trueTimestamp).getFormattedDateTime(newFormat);
+		CcpTimeDecorator ccpTimeDecorator = new CcpTimeDecorator(trueTimestamp);
+		String dateItWasSaved = ccpTimeDecorator.getFormattedDateTime(newFormat);
 		CcpTimeDecorator ctd = new CcpTimeDecorator(timestamp);
 		String expirationDate = ctd.getFormattedDateTime(newFormat);
 		
