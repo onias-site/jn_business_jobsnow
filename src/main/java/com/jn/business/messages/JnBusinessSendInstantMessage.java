@@ -150,8 +150,8 @@ public class JnBusinessSendInstantMessage implements CcpHttpApiExecutor{
 				CcpStringDecorator asStringDecorator = json.getAsStringDecorator(JnJsonValidator.botName);
 				CcpJsonFieldName jsonFieldName = asStringDecorator.jsonFieldName();
 				CcpJsonRepresentation result = instantMessenger.sendTextMessage(jsonFieldName, botToken, chatId, replyTo, message);
-				CcpJsonRepresentation jsonPiece = result.getJsonPiece(JnMessageTextJsonValidator.values());
-				return jsonPiece;
+				CcpJsonRepresentation mergeWithAnotherJson = json.mergeWithAnotherJson(result);
+				return mergeWithAnotherJson;
 			}
 
 
@@ -172,8 +172,8 @@ public class JnBusinessSendInstantMessage implements CcpHttpApiExecutor{
 				CcpStringDecorator asStringDecorator = json.getAsStringDecorator(JnJsonValidator.botName);
 				CcpJsonFieldName jsonFieldName = asStringDecorator.jsonFieldName();
 				CcpJsonRepresentation result = instantMessenger.sendFile(jsonFieldName, botToken, chatId, replyTo, fileName, caption, bytes);
-				CcpJsonRepresentation jsonPiece = result.getJsonPiece(JnMessageFileJsonValidator.values());
-				return jsonPiece;
+				CcpJsonRepresentation mergeWithAnotherJson = json.mergeWithAnotherJson(result);
+				return mergeWithAnotherJson;
 			}
 		}
 		;
