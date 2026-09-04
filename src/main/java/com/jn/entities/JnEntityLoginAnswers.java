@@ -33,11 +33,15 @@ public class JnEntityLoginAnswers implements CcpEntityConfigurator {
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		email, 
 		@CcpJsonFieldValidatorRequired
-		@CcpJsonFieldTypeString(allowedValues = {"linkedin", "telegram", "friends", "others"})
+		@CcpJsonFieldTypeString(allowedValuesEnum = VisChannelTypes.class)
 		channel, 
 		@CcpJsonFieldValidatorRequired
-		@CcpJsonFieldTypeString(allowedValues = {"jobs", "recruiting"})
+		@CcpJsonFieldTypeString(allowedValuesEnum = VisGoalTypes.class)
 		goal
 		;
 	}
+	
+	public static enum VisChannelTypes{linkedin, telegram, friends, others}
+	public static enum VisGoalTypes{jobs, recruiting}
 }
+

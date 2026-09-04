@@ -5,6 +5,7 @@ import com.ccp.decorators.CcpJsonFieldName;
 import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeNestedJson;
 import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeNumberUnsigned;
 import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeString;
+import com.jn.utils.JnLanguage;
 
 /**
  * Centraliza as definições de validação dos campos JSON comuns a diversas entidades e serviços do
@@ -70,7 +71,7 @@ public enum JnJsonCommonsFields implements CcpJsonFieldName{
 	@CcpJsonFieldTypeString(maxLength = 100)
 	templateId,
 	
-	@CcpJsonFieldTypeString(allowedValues = {"portuguese", "english", "spanish"})
+	@CcpJsonFieldTypeString(allowedValuesEnum = JnLanguage.class)
 	language, 
 	
 	@CcpJsonFieldTypeString(maxLength = 500)

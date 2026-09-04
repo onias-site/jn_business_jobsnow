@@ -17,7 +17,7 @@ public enum JnInstantMessageType implements CcpBusiness{
 			String message = super.getMessage(json, orElseThrow, JnJsonCommonsFields.message);
 			String botToken = json.getAsString(JnJsonInstantMessengerFields.botToken);
 			Long chatId = json.getAsLongNumber(JnJsonInstantMessengerFields.chatId);
-			Long replyTo = json.getOrDefault(JnBusinessSendInstantMessage.Fields.replyTo, () -> 0L).longValue();
+			Long replyTo = Double.valueOf(json.getOrDefault(JnBusinessSendInstantMessage.Fields.replyTo, () -> (Object)"0").toString()).longValue();
 			CcpStringDecorator asStringDecorator = json.getAsStringDecorator(JnJsonInstantMessengerFields.botName);
 			CcpJsonFieldName jsonFieldName = asStringDecorator.jsonFieldName();
 			CcpJsonRepresentation result = instantMessenger.sendTextMessage(jsonFieldName, botToken, chatId, replyTo, message);
@@ -32,7 +32,7 @@ public enum JnInstantMessageType implements CcpBusiness{
 			
 			String botToken = json.getAsString(JnJsonInstantMessengerFields.botToken) ;
 			Long chatId = json.getAsLongNumber(JnJsonInstantMessengerFields.chatId);
-			Long replyTo = json.getOrDefault(JnBusinessSendInstantMessage.Fields.replyTo, () -> 0d).longValue();
+			Long replyTo = json.getOrDefault(JnBusinessSendInstantMessage.Fields.replyTo, () -> 0L);
 			
 			String message = super.getMessage(json, orElseThrow, JnJsonCommonsFields.message);
 			String caption = super.getMessage(json, orElseThrow, JnJsonInstantMessengerFields.caption);
