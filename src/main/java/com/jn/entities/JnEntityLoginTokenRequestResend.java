@@ -31,7 +31,7 @@ import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDoNothi
 import com.jn.json.fields.validation.JnJsonCommonsFields;
 import com.jn.json.fields.validation.JnJsonInstantMessengerFields;
 import com.jn.utils.JnDeleteKeysFromCache;
-import com.jn.business.messages.NotifySupportAboutPendingResendLoginToken;
+import com.jn.business.messages.JnNotifySupportAboutPendingResendLoginToken;
 import com.jn.business.messages.NotifySupportAboutSolvedResendLoginToken;
 
 @CcpEntityAsyncWriter(JnAsyncWriterEntity.class)
@@ -48,7 +48,7 @@ import com.jn.business.messages.NotifySupportAboutSolvedResendLoginToken;
 @CcpEntityOperations(
 		operations = {
 				@CcpEntityOperation(when = _after, operation = delete, from = mainEntity,  execute = {JnBusinessResetLoginToken.class, JnBusinessSendUserToken.class, NotifySupportAboutSolvedResendLoginToken.class}, operationHandlers = {}),
-				@CcpEntityOperation(when = _after, operation = save, from = mainEntity,  execute = {NotifySupportAboutPendingResendLoginToken.class}, operationHandlers = {}),
+				@CcpEntityOperation(when = _after, operation = save, from = mainEntity,  execute = {JnNotifySupportAboutPendingResendLoginToken.class}, operationHandlers = {}),
 		},
 		globalHandlers = {}
 		)

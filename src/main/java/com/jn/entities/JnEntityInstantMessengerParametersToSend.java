@@ -19,10 +19,10 @@ import com.ccp.json.validations.fields.annotations.CcpJsonCopyFieldValidationsFr
 import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidatorRequired;
 import com.jn.business.messages.JnBusinessSendInstantMessage;
 import com.jn.business.messages.JnBusinessNotifyError;
-import com.jn.business.messages.NotifySupportAboutPendingResendLoginToken;
+import com.jn.business.messages.JnNotifySupportAboutPendingResendLoginToken;
 import com.jn.business.messages.NotifySupportAboutSolvedLockedLoginToken;
 import com.jn.business.messages.NotifySupportAboutSolvedResendLoginToken;
-import com.jn.business.messages.NotifySupportAboutPendingLockedLoginToken;
+import com.jn.business.messages.JnNotifySupportAboutPendingLockedLoginToken;
 import com.jn.entities.decorators.JnVersionableEntity;
 import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault;
 import com.jn.json.fields.validation.JnJsonInstantMessengerFields;
@@ -99,7 +99,7 @@ public class JnEntityInstantMessengerParametersToSend implements CcpEntityConfig
 		;
 		CcpJsonRepresentation put7 = CcpOtherConstants.EMPTY_JSON
 		.put(JnJsonInstantMessengerFields.instantMessageType, JnInstantMessageType.text);
-		String name2 = NotifySupportAboutPendingLockedLoginToken.class.getName();
+		String name2 = JnNotifySupportAboutPendingLockedLoginToken.class.getName();
 		CcpJsonRepresentation put8 = put7
 		.put(JnJsonCommonsFields.templateId, name2);
 		CcpJsonRepresentation addToItem3 = put8
@@ -114,7 +114,7 @@ public class JnEntityInstantMessengerParametersToSend implements CcpEntityConfig
 		;
 		CcpJsonRepresentation put10 = CcpOtherConstants.EMPTY_JSON
 		.put(JnJsonInstantMessengerFields.instantMessageType, JnInstantMessageType.text);
-		String name3 = NotifySupportAboutPendingResendLoginToken.class.getName();
+		String name3 = JnNotifySupportAboutPendingResendLoginToken.class.getName();
 		CcpJsonRepresentation put11 = put10
 		.put(JnJsonCommonsFields.templateId, name3);
 		CcpJsonRepresentation addToItem5 = put11
