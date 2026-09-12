@@ -143,7 +143,7 @@ public class JnSendMessageToUser {
 				MustNotSendMessage.validate(this, unionAll, idToSearch , index);
 			} catch (CcpMessageDidNotSend e) {
 				JnEntityMessageDidNotSent.ENTITY.save(e.jsonToSave);
-				continue;
+				throw e;
 			}
 			
 			JnBusinessSendHttpRequest messenger = this.messengers.get(index);

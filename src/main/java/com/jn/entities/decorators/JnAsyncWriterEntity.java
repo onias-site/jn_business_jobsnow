@@ -12,7 +12,7 @@ import com.jn.mensageria.JnFunctionMensageriaSender;
  * ou {@code copyDataTo} é interceptada e enviada ao PubSub via {@code JnFunctionMensageriaSender}.
  */
 public class JnAsyncWriterEntity extends CcpEntityDelegator  {
-
+	//FIXME NOS CONSUMIDORES, A MENSAGERIA PRECISARA SER THREAD FAKE
 	public JnAsyncWriterEntity(CcpEntity entity, Class<?> clazz) {
 		super(entity);
 	}

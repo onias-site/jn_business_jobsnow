@@ -34,4 +34,8 @@ class SupportInstantMessengerNotification extends JnBusinessSendMessage{
 		
 		return apply;
 	}
+
+	public JnMessageType[] getMessageTypes() {
+		return new JnMessageType[] {JnMessageType.instantMessenger};
+	}
 }

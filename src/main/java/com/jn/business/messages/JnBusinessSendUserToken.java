@@ -1,7 +1,7 @@
 package com.jn.business.messages;
 
-import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.decorators.CcpJsonFieldName;
+import com.ccp.decorators.CcpJsonRepresentation;
 import com.jn.entities.JnEntityLoginToken;
 import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
@@ -38,4 +38,9 @@ public class JnBusinessSendUserToken extends JnBusinessSendMessage{
 		
 		return apply; 
 	}
+	
+	public JnMessageType[] getMessageTypes() {
+		return new JnMessageType[] {JnMessageType.email};
+	}
+
 }

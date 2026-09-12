@@ -4,7 +4,7 @@ public class JnAddDefaultStep {
 
 	final JnSendMessageToUser getMessage;
 
-	JnAddDefaultStep(JnSendMessageToUser getMessage) {
+	public JnAddDefaultStep(JnSendMessageToUser getMessage) {
 		this.getMessage = getMessage;
 	}
 

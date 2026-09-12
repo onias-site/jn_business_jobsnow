@@ -5,7 +5,12 @@ import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.especifications.db.utils.entity.CcpEntity;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
 import com.jn.messages.JnSendMessageToUser;
+import com.jn.messages.JnSoWithAllAddedStepsAnd;
+import com.jn.messages.JnWithTheTemplateId;
 import com.jn.messages.JnAddDefaultStep;
+import com.jn.messages.JnAndWithTheEntityToBlockMessageResend;
+import com.jn.messages.JnAndWithTheJsonValues;
+import com.jn.messages.JnAndWithTheSupportLanguage;
 
 /**
  * Classe base para envio de mensagens que combina envio por email e por mensagem
@@ -13,7 +18,7 @@ import com.jn.messages.JnAddDefaultStep;
  * da classe concreta que a estende; a entidade de bloqueio de reenvio é fornecida
  * pelo construtor.
  */
-public class JnBusinessSendMessage implements CcpBusiness{
+public abstract class JnBusinessSendMessage implements CcpBusiness{
 	
 	public final JnMessageSenderExceptionHandler exceptionHandler; 
 	public final CcpEntity entity;
@@ -36,22 +41,27 @@ public class JnBusinessSendMessage implements CcpBusiness{
 		String topic = clazz.getName();
 		
 		JnSendMessageToUser sender = new JnSendMessageToUser();
-		JnAddDefaultStep addDefaultProcessToEmailSending = sender
-		.addDefaultProcessToEmailSending(this.exceptionHandler);
-		var and = addDefaultProcessToEmailSending
-		.and();
-		var addDefaultStepToInstantMessageSending = and
-		.addDefaultStepToInstantMessageSending(this.exceptionHandler);
-		var soWithAllAddedProcessAnd = addDefaultStepToInstantMessageSending
+		
+		JnMessageType[] messageTypes = this.getMessageTypes();
+		
+		JnAddDefaultStep addDefaultProcessToSendMessage = new JnAddDefaultStep(sender);
+		
+		for (JnMessageType messageType : messageTypes) {
+			addDefaultProcessToSendMessage = messageType.addDefaultProcessToSendMessage(sender, this.exceptionHandler);
+			sender = addDefaultProcessToSendMessage.and();
+		}
+		
+		
+		JnSoWithAllAddedStepsAnd soWithAllAddedProcessAnd = addDefaultProcessToSendMessage
 		.soWithAllAddedProcessAnd();
-		var withTheTemplateEntity = soWithAllAddedProcessAnd
+		JnWithTheTemplateId withTheTemplateEntity = soWithAllAddedProcessAnd
 		.withTheTemplateEntity(topic);
-		var andWithTheEntityToBlockMessageResend = withTheTemplateEntity
+		JnAndWithTheEntityToBlockMessageResend andWithTheEntityToBlockMessageResend = withTheTemplateEntity
 		.andWithTheEntityToBlockMessageResend(this.entity);
 		CcpJsonRepresentation put2 = json.put(JnJsonCommonsFields.subjectType, topic);
-		var andWithTheMessageValuesFromJson = andWithTheEntityToBlockMessageResend
+		JnAndWithTheJsonValues andWithTheMessageValuesFromJson = andWithTheEntityToBlockMessageResend
 		.andWithTheMessageValuesFromJson(put2);
-		var andWithTheSupportLanguage = andWithTheMessageValuesFromJson
+		JnAndWithTheSupportLanguage andWithTheSupportLanguage = andWithTheMessageValuesFromJson
 		.andWithTheSupportLanguage(supportLanguage);
 
 		CcpJsonRepresentation result = andWithTheSupportLanguage
@@ -61,5 +71,7 @@ public class JnBusinessSendMessage implements CcpBusiness{
 		CcpJsonRepresentation put = result.put(JnJsonCommonsFields.subjectType, topic);
 		return put;
 	}
+	
+	public abstract JnMessageType[] getMessageTypes();
 
 }
