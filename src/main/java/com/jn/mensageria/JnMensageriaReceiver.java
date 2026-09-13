@@ -27,8 +27,7 @@ public class JnMensageriaReceiver extends CcpMensageriaReceiver{
 	private JnMensageriaReceiver saveResult(
 			CcpEntity entity, 
 			CcpJsonRepresentation messageDetails, 
-			Throwable e,
-			CcpBusiness jnAsyncBusinessNotifyError
+			Throwable e
 			) {
 		CcpJsonRepresentation response = new CcpJsonRepresentation(e);
 		JnMensageriaReceiver saveResult = this.saveResult(entity, messageDetails, response, false);
@@ -46,8 +45,7 @@ public class JnMensageriaReceiver extends CcpMensageriaReceiver{
 	public JnMensageriaReceiver executeProcess(
 			CcpEntity entity,
 			String processName, 
-			CcpJsonRepresentation json,
-			CcpBusiness jnAsyncBusinessNotifyError
+			CcpJsonRepresentation json
 			) {
 		try {
 			CcpBusiness process = this.getProcess(processName, json);
@@ -55,7 +53,7 @@ public class JnMensageriaReceiver extends CcpMensageriaReceiver{
 			JnMensageriaReceiver saveResult = this.saveResult(entity, json, response);
 			return saveResult;
 		} catch (Throwable e) {
-			JnMensageriaReceiver saveResult = this.saveResult(entity, json, e, jnAsyncBusinessNotifyError);
+			JnMensageriaReceiver saveResult = this.saveResult(entity, json, e);
 			return saveResult;
 		}
 	}

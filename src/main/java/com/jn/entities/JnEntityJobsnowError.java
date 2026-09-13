@@ -1,11 +1,18 @@
 package com.jn.entities;
 
+import static com.ccp.especifications.db.utils.entity.decorators.enums.CcpEntityDecoratorOperationType.save;
+import static com.ccp.especifications.db.utils.entity.decorators.enums.CcpEntityOperationStepType._after;
+import static com.ccp.especifications.db.utils.entity.decorators.enums.CcpEntityType.mainEntity;
+
 import com.ccp.decorators.CcpJsonFieldName;
 import com.ccp.especifications.db.utils.entity.CcpEntity;
+import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityAsyncWriter;
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityCache;
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityDisposable;
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityFieldsTransformer;
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityFieldsValidator;
+import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityOperation;
+import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityOperations;
 import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityFactory;
 import com.ccp.especifications.db.utils.entity.decorators.enums.CcpEntityExpurgableOptions;
 import com.ccp.especifications.db.utils.entity.decorators.interfaces.CcpEntityConfigurator;
@@ -14,11 +21,21 @@ import com.ccp.json.validations.fields.annotations.CcpJsonCopyFieldValidationsFr
 import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidatorArray;
 import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidatorRequired;
 import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeString;
+import com.jn.business.messages.JnBusinessNotifyError;
+import com.jn.entities.decorators.JnAsyncWriterEntity;
 import com.jn.entities.decorators.JnDisposableEntity;
 import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
 
 @CcpEntityCache(3600)
+@CcpEntityAsyncWriter(JnAsyncWriterEntity.class)
+@CcpEntityOperations(
+		operations = {
+				@CcpEntityOperation(when = _after, operation = save, from = mainEntity,  execute = {JnBusinessNotifyError.class}, operationHandlers = {}),
+		},
+		globalHandlers = {}
+		)
+
 @CcpEntityDisposable(expurgTime = CcpEntityExpurgableOptions.hourly, expurgableEntityFactory = JnDisposableEntity.class)
 @CcpEntityFieldsTransformer(classReferenceWithTheFields = JnJsonTransformersFieldsEntityDefault.class)
 @CcpEntityFieldsValidator(classReferenceWithTheFields = JnEntityJobsnowError.Fields.class)

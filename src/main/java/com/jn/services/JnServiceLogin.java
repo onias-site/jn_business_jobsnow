@@ -319,7 +319,7 @@ public enum JnServiceLogin implements JnService {
 			
 			CcpJsonRepresentation[] parametersToSearchInAllEntities = this.createParametersToSearchInAllEntities(jsonWithSubjectType);
 			
-			JnFunctionMensageriaSender sendUserToken = new JnFunctionMensageriaSender(JnBusinessSendUserToken.INSTANCE);
+			CcpBusiness sendUserToken = JnEntityLoginToken.ENTITY.getEntityMetaData().getOperationCallback(CcpEntityOperationType.save);
 			CcpGetEntityId ccpGetEntityId8 = new CcpGetEntityId(parametersToSearchInAllEntities);
 			CcpSelectProcedure toBeginProcedureAnd7 = ccpGetEntityId8
 			.toBeginProcedureAnd();

@@ -1,18 +1,15 @@
 package com.jn.business.messages;
 
 import com.ccp.decorators.CcpJsonRepresentation;
-import com.ccp.especifications.db.utils.entity.CcpEntity;
 import com.jn.business.messages.JnBusinessSendInstantMessage.JnBotType;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
-
-import com.jn.utils.JnSystemProperties;
-
 import com.jn.json.fields.validation.JnJsonInstantMessengerFields;
+import com.jn.utils.JnSystemProperties;
 
 class SupportInstantMessengerNotification extends JnBusinessSendMessage{
 
-	protected SupportInstantMessengerNotification(CcpEntity entity, JnMessageSenderExceptionHandler exceptionHandler) {
-		super(entity, exceptionHandler);
+	protected SupportInstantMessengerNotification(JnMessageSenderExceptionHandler exceptionHandler) {
+		super(exceptionHandler);
 	}
 		 
 	public CcpJsonRepresentation apply(CcpJsonRepresentation json) {

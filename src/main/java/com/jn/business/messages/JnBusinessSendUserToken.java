@@ -2,7 +2,6 @@ package com.jn.business.messages;
 
 import com.ccp.decorators.CcpJsonFieldName;
 import com.ccp.decorators.CcpJsonRepresentation;
-import com.jn.entities.JnEntityLoginToken;
 import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
 import com.jn.json.fields.validation.JnJsonInstantMessengerFields;
@@ -15,7 +14,7 @@ public class JnBusinessSendUserToken extends JnBusinessSendMessage{
 	public static final JnBusinessSendUserToken INSTANCE = new JnBusinessSendUserToken();
 	
 	private JnBusinessSendUserToken() {
-		super(JnEntityLoginToken.ENTITY, JnMessageSenderExceptionHandler.THROWS);
+		super(JnMessageSenderExceptionHandler.THROWS);
 	}
 	
 	/**

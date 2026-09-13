@@ -2,15 +2,13 @@ package com.jn.business.messages;
 
 import com.ccp.business.CcpBusiness;
 import com.ccp.decorators.CcpJsonRepresentation;
-import com.ccp.especifications.db.utils.entity.CcpEntity;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
+import com.jn.messages.JnAddDefaultStep;
+import com.jn.messages.JnAndWithTheJsonValues;
+import com.jn.messages.JnAndWithTheSupportLanguage;
 import com.jn.messages.JnSendMessageToUser;
 import com.jn.messages.JnSoWithAllAddedStepsAnd;
 import com.jn.messages.JnWithTheTemplateId;
-import com.jn.messages.JnAddDefaultStep;
-import com.jn.messages.JnAndWithTheEntityToBlockMessageResend;
-import com.jn.messages.JnAndWithTheJsonValues;
-import com.jn.messages.JnAndWithTheSupportLanguage;
 
 /**
  * Classe base para envio de mensagens que combina envio por email e por mensagem
@@ -21,11 +19,9 @@ import com.jn.messages.JnAndWithTheSupportLanguage;
 public abstract class JnBusinessSendMessage implements CcpBusiness{
 	
 	public final JnMessageSenderExceptionHandler exceptionHandler; 
-	public final CcpEntity entity;
 	
-	protected JnBusinessSendMessage(CcpEntity entity, JnMessageSenderExceptionHandler exceptionHandler) {
+	protected JnBusinessSendMessage(JnMessageSenderExceptionHandler exceptionHandler) {
 		this.exceptionHandler = exceptionHandler;
-		this.entity = entity;
 	}
 
 	/**
@@ -56,10 +52,8 @@ public abstract class JnBusinessSendMessage implements CcpBusiness{
 		.soWithAllAddedProcessAnd();
 		JnWithTheTemplateId withTheTemplateEntity = soWithAllAddedProcessAnd
 		.withTheTemplateEntity(topic);
-		JnAndWithTheEntityToBlockMessageResend andWithTheEntityToBlockMessageResend = withTheTemplateEntity
-		.andWithTheEntityToBlockMessageResend(this.entity);
 		CcpJsonRepresentation put2 = json.put(JnJsonCommonsFields.subjectType, topic);
-		JnAndWithTheJsonValues andWithTheMessageValuesFromJson = andWithTheEntityToBlockMessageResend
+		JnAndWithTheJsonValues andWithTheMessageValuesFromJson = withTheTemplateEntity
 		.andWithTheMessageValuesFromJson(put2);
 		JnAndWithTheSupportLanguage andWithTheSupportLanguage = andWithTheMessageValuesFromJson
 		.andWithTheSupportLanguage(supportLanguage);

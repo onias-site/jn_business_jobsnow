@@ -1,6 +1,6 @@
 package com.jn.messages;
 
-import com.ccp.especifications.db.utils.entity.CcpEntity;
+import com.ccp.decorators.CcpJsonRepresentation;
 
 public class JnWithTheTemplateId {
 
@@ -13,8 +13,8 @@ public class JnWithTheTemplateId {
 		this.templateId             = templateId;
 	}
 
-	public JnAndWithTheEntityToBlockMessageResend andWithTheEntityToBlockMessageResend(CcpEntity entityToSave) {
-		JnAndWithTheEntityToBlockMessageResend jnAndWithTheEntityToBlockMessageResend = new JnAndWithTheEntityToBlockMessageResend(this, entityToSave);
-		return jnAndWithTheEntityToBlockMessageResend;
+	public JnAndWithTheJsonValues andWithTheMessageValuesFromJson(CcpJsonRepresentation jsonValues) {
+		JnAndWithTheJsonValues jnAndWithTheJsonValues = new JnAndWithTheJsonValues(this, jsonValues);
+		return jnAndWithTheJsonValues;
 	}
 }

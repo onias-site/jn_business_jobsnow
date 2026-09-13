@@ -13,6 +13,7 @@ import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidatorRequired
 import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeString;
 import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
+import com.jn.messages.JnMustNotSendMessage;
 
 @CcpEntityFieldsTransformer(classReferenceWithTheFields = JnJsonTransformersFieldsEntityDefault.class)
 @CcpEntityFieldsValidator(classReferenceWithTheFields = JnEntityMessageDidNotSent.Fields.class)
@@ -32,14 +33,30 @@ public class JnEntityMessageDidNotSent implements CcpEntityConfigurator {
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		email, 
 		
-		//LATER ENUM
 		@CcpEntityFieldPrimaryKey
 		@CcpJsonFieldValidatorRequired
+		@CcpJsonFieldTypeString(allowedValuesEnum = JnMustNotSendMessage.class)
 		reasonType,
 		
 		@CcpJsonFieldTypeString
 		@CcpJsonFieldValidatorRequired
-		reasonDescription
+		reasonDescription,
+		
+		
+		@CcpEntityFieldPrimaryKey
+		@CcpJsonFieldValidatorRequired
+		@CcpJsonFieldTypeString(allowedValuesEnum = JnReasonDetails.class)
+		reasonDetails,
+		
+		@CcpJsonFieldTypeString
+		reasonMessage,
 	}
+	
+	public static enum JnReasonDetails{
+		isNotPresentInThisUnionAll,
+		missingFieldsToPrimaryKey,
+		isPresentInThisUnionAll,
+	}
+	
 
 }

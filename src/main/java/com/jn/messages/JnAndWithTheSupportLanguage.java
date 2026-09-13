@@ -14,10 +14,9 @@ public class JnAndWithTheSupportLanguage {
 	}
 
 	public CcpJsonRepresentation sendAllMessages() {
-		CcpJsonRepresentation executeAllSteps = this.andWithJsonValues.andWithEntityToSave.withTemplateId.soExecuteAllAddedSteps.getMessage
+		CcpJsonRepresentation executeAllSteps = this.andWithJsonValues.andWithTheTemplateId.soExecuteAllAddedSteps.getMessage
 				.executeAllSteps(
-						this.andWithJsonValues.andWithEntityToSave.withTemplateId.templateId,
-						this.andWithJsonValues.andWithEntityToSave.entityToSave,
+						this.andWithJsonValues.andWithTheTemplateId.templateId,
 						this.andWithJsonValues.jsonValues,
 						this.supportLanguage
 				);

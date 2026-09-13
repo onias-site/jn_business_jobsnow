@@ -11,7 +11,6 @@ import com.ccp.dependency.injection.CcpDependencyInjection;
 import com.ccp.especifications.db.crud.CcpCrud;
 import com.ccp.especifications.db.crud.CcpSelectUnionAll;
 import com.ccp.especifications.db.utils.entity.CcpEntity;
-import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityMetaData;
 import com.jn.business.http.JnBusinessSendHttpRequest;
 import com.jn.business.messages.JnBusinessSendEmailMessage;
 import com.jn.business.messages.JnBusinessSendInstantMessage;
@@ -24,7 +23,6 @@ import com.jn.entities.JnEntityInstantMessengerBotLocked;
 import com.jn.entities.JnEntityInstantMessengerMessageSent;
 import com.jn.entities.JnEntityInstantMessengerParametersToSend;
 import com.jn.entities.JnEntityInstantMessengerTemplateMessage;
-import com.jn.entities.JnEntityMessageDidNotSent;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
 import com.jn.utils.JnDeleteKeysFromCache;
 
@@ -90,26 +88,7 @@ public class JnSendMessageToUser {
 
 	
 	
-	@SuppressWarnings("serial")
-	static class CcpMessageDidNotSend extends RuntimeException{
-		
-		public final CcpJsonRepresentation jsonToSave;
-		
-		public CcpMessageDidNotSend(JnSendMessageToUser obj, MustNotSendMessage reason, CcpJsonRepresentation json, Integer index) {
-			List<CcpEntity> entities = reason.getEntities(obj);
-			CcpEntity entity = entities.get(index);
-			CcpEntityMetaData entityMetaData = entity.getEntityMetaData();
-			String reasonType = reason.name();
-			CcpJsonRepresentation put = json
-					.put(JnEntityMessageDidNotSent.Fields.reasonType,  entityMetaData.entityName);
-
-					this.jsonToSave = put
-					.put(JnEntityMessageDidNotSent.Fields.reasonDescription,  reasonType)
-									;
-		}
-	}
-	
-	CcpJsonRepresentation executeAllSteps(String templateId, CcpEntity entityToSave, CcpJsonRepresentation entityValues, String languageToUseInErrorCases) {
+	CcpJsonRepresentation executeAllSteps(String templateId, CcpJsonRepresentation entityValues, String languageToUseInErrorCases) {
 		
 		List<CcpEntity> allEntitiesToSearch = new ArrayList<>();
 		
@@ -118,7 +97,6 @@ public class JnSendMessageToUser {
 		allEntitiesToSearch.addAll(this.messageEntities);
 		allEntitiesToSearch.addAll(this.blockEntities);
 		
-		allEntitiesToSearch.add(entityToSave);
 		int allEntitiesToSearchSize = allEntitiesToSearch.size();
 
 		CcpEntity[] entities = allEntitiesToSearch.toArray(new CcpEntity[allEntitiesToSearchSize]);
@@ -132,18 +110,12 @@ public class JnSendMessageToUser {
 		
 		CcpSelectUnionAll unionAll = crud.unionAll(idToSearch, JnDeleteKeysFromCache.INSTANCE, entities);
 
-		boolean alreadySaved = entityToSave.isPresentInThisUnionAll(unionAll, idToSearch);
-		if (alreadySaved) {
-			return entityValues;
-		}
-		
-		boolean messageSent = false;
 		for (int index = 0; index < this.alreadySentEntities.size(); index++) {
-			try {
-				MustNotSendMessage.validate(this, unionAll, idToSearch , index);
-			} catch (CcpMessageDidNotSend e) {
-				JnEntityMessageDidNotSent.ENTITY.save(e.jsonToSave);
-				throw e;
+			
+			JnMustNotSendMessage[] values = JnMustNotSendMessage.values();
+			
+			for (JnMustNotSendMessage value : values) {
+				value.validate(this, unionAll, idToSearch , index);
 			}
 			
 			JnBusinessSendHttpRequest messenger = this.messengers.get(index);
@@ -152,11 +124,6 @@ public class JnSendMessageToUser {
 			String simpleName = class1.getSimpleName();
 			CcpFieldName ccpFieldName = new CcpFieldName(simpleName);
 			idToSearch = idToSearch.put(ccpFieldName, result);
-			messageSent = true;
-		}
-		
-		if(messageSent) {
-			entityToSave.save(idToSearch);
 		}
 
 		return entityValues;

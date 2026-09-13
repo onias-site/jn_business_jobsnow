@@ -18,9 +18,9 @@ public enum JnMessageSenderExceptionHandler implements Function<Throwable, CcpJs
 
 		public CcpJsonRepresentation apply(Throwable e) {
 			CcpJsonRepresentation errorDetails = new CcpJsonRepresentation(e);
-			CcpJsonRepresentation execute = JnBusinessNotifyWarning.instance.execute(errorDetails);
+			JnEntityJobsnowWarning.ENTITY.save(errorDetails);
 			//ATTENTION: ANTES ELE RETORNAVA O JSON DO BUSINESS
-			return execute;
+			return errorDetails;
 		}
 		
 	}, 

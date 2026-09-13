@@ -4,12 +4,12 @@ import com.ccp.decorators.CcpJsonRepresentation;
 
 public class JnAndWithTheJsonValues {
 
-	final JnAndWithTheEntityToBlockMessageResend andWithEntityToSave;
+	final JnWithTheTemplateId andWithTheTemplateId;
 
 	final CcpJsonRepresentation jsonValues;
 
-	JnAndWithTheJsonValues(JnAndWithTheEntityToBlockMessageResend andWithEntityToSave, CcpJsonRepresentation jsonValues) {
-		this.andWithEntityToSave = andWithEntityToSave;
+	JnAndWithTheJsonValues(JnWithTheTemplateId andWithTheTemplateId, CcpJsonRepresentation jsonValues) {
+		this.andWithTheTemplateId = andWithTheTemplateId;
 		this.jsonValues          = jsonValues;
 	}
 

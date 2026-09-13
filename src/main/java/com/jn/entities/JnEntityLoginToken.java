@@ -1,17 +1,24 @@
 package com.jn.entities;
 
+import static com.ccp.especifications.db.utils.entity.decorators.enums.CcpEntityDecoratorOperationType.save;
+import static com.ccp.especifications.db.utils.entity.decorators.enums.CcpEntityOperationStepType._before;
+import static com.ccp.especifications.db.utils.entity.decorators.enums.CcpEntityType.mainEntity;
+
 import com.ccp.decorators.CcpJsonFieldName;
 import com.ccp.especifications.db.utils.entity.CcpEntity;
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityCache;
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityDisposable;
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityFieldsTransformer;
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityFieldsValidator;
+import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityOperation;
+import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityOperations;
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityTwin;
 import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityFactory;
 import com.ccp.especifications.db.utils.entity.decorators.enums.CcpEntityExpurgableOptions;
 import com.ccp.especifications.db.utils.entity.decorators.interfaces.CcpEntityConfigurator;
 import com.ccp.especifications.db.utils.entity.fields.annotations.CcpEntityFieldPrimaryKey;
 import com.ccp.json.validations.fields.annotations.CcpJsonCopyFieldValidationsFrom;
+import com.jn.business.messages.JnBusinessSendUserToken;
 import com.jn.db.bulk.JnExecuteBulkOperation;
 import com.jn.entities.decorators.JnDisposableEntity;
 import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault;
@@ -19,6 +26,13 @@ import com.jn.json.fields.validation.JnJsonCommonsFields;
 import com.jn.utils.JnDeleteKeysFromCache;
 
 @CcpEntityCache(86400)
+@CcpEntityOperations(
+		operations = {
+				@CcpEntityOperation(when = _before, operation = save, from = mainEntity,  execute = {JnBusinessSendUserToken.class}, operationHandlers = {}),
+		},
+		globalHandlers = {}
+		)
+
 @CcpEntityDisposable(expurgTime = CcpEntityExpurgableOptions.monthly, expurgableEntityFactory = JnDisposableEntity.class)
 @CcpEntityTwin(
 		twinEntityName = "login_token_locked",

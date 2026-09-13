@@ -1,7 +1,6 @@
 package com.jn.business.messages;
 
 import com.ccp.decorators.CcpJsonRepresentation;
-import com.jn.entities.JnEntityJobsnowError;
 import com.jn.entities.JnEntityJobsnowPenddingError;
 
 public class JnBusinessNotifyError extends SupportInstantMessengerNotification{
@@ -9,7 +8,7 @@ public class JnBusinessNotifyError extends SupportInstantMessengerNotification{
 	public static final JnBusinessNotifyError instance = new JnBusinessNotifyError();
 	
 	private JnBusinessNotifyError() {
-		super(JnEntityJobsnowError.ENTITY, JnMessageSenderExceptionHandler.LENIENT);
+		super(JnMessageSenderExceptionHandler.LENIENT);
 	}
 	
 	/**
