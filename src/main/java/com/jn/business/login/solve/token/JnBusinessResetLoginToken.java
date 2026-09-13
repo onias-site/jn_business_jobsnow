@@ -6,7 +6,7 @@ import com.ccp.decorators.CcpJsonFieldName;
 import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.json.validations.fields.annotations.CcpJsonCopyFieldValidationsFrom;
 import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidatorRequired;
-import com.jn.business.messages.JnBusinessSendUserToken;
+import com.jn.business.messages.JnMessages;
 import com.jn.entities.JnEntityEmailMessageSent;
 import com.jn.entities.JnEntityLoginToken;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
@@ -36,7 +36,7 @@ public class JnBusinessResetLoginToken implements CcpBusiness{
 		
 		CcpJsonRepresentation redoJson = CcpOtherConstants.EMPTY_JSON.redoJson(json);
 		JnEntityLoginToken.ENTITY.deleteAnyWhere(redoJson);
-		String name = JnBusinessSendUserToken.class.getName();
+		String name = JnMessages.JnBusinessSendUserToken.class.getName();
 		CcpJsonRepresentation messageSent = redoJson.put(JnJsonCommonsFields.subjectType, name);
 		JnEntityEmailMessageSent.ENTITY.delete(messageSent);
 	//TODO LANGUAGE DO USUARIO DENTRO DE ANSWERS

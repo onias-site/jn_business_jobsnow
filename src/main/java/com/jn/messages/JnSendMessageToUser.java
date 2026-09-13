@@ -12,9 +12,8 @@ import com.ccp.especifications.db.crud.CcpCrud;
 import com.ccp.especifications.db.crud.CcpSelectUnionAll;
 import com.ccp.especifications.db.utils.entity.CcpEntity;
 import com.jn.business.http.JnBusinessSendHttpRequest;
-import com.jn.business.messages.JnBusinessSendEmailMessage;
-import com.jn.business.messages.JnBusinessSendInstantMessage;
 import com.jn.business.messages.JnMessageSenderExceptionHandler;
+import com.jn.business.messages.JnMessageType;
 import com.jn.entities.JnEntityEmailMessageSent;
 import com.jn.entities.JnEntityEmailParametersToSend;
 import com.jn.entities.JnEntityEmailReportedAsSpam;
@@ -45,7 +44,7 @@ public class JnSendMessageToUser {
 	}
 
 	public JnAddDefaultStep addDefaultProcessToEmailSending(JnMessageSenderExceptionHandler exceptionHandler) {
-		JnBusinessSendHttpRequest httpRequester = new JnBusinessSendHttpRequest(JnBusinessSendEmailMessage.INSTANCE, exceptionHandler);
+		JnBusinessSendHttpRequest httpRequester = new JnBusinessSendHttpRequest(JnMessageType.email, exceptionHandler);
 		JnSendMessageToUser addOneStep = this.addOneStep(
 				httpRequester,
 				JnEntityEmailParametersToSend.ENTITY,
@@ -58,7 +57,7 @@ public class JnSendMessageToUser {
 	}
 
 	public JnAddDefaultStep addDefaultStepToInstantMessageSending(JnMessageSenderExceptionHandler exceptionHandler) {
-		JnBusinessSendHttpRequest httpRequester = new JnBusinessSendHttpRequest(JnBusinessSendInstantMessage.INSTANCE, exceptionHandler);
+		JnBusinessSendHttpRequest httpRequester = new JnBusinessSendHttpRequest(JnMessageType.instantMessenger, exceptionHandler);
 		JnSendMessageToUser addOneStep = this.addOneStep(
 				httpRequester,
 				JnEntityInstantMessengerParametersToSend.ENTITY,

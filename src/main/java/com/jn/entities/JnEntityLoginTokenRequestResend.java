@@ -1,40 +1,25 @@
 package com.jn.entities;
 
-import static com.ccp.especifications.db.utils.entity.decorators.enums.CcpEntityDecoratorOperationType.delete;
-import static com.ccp.especifications.db.utils.entity.decorators.enums.CcpEntityDecoratorOperationType.save;
-import static com.ccp.especifications.db.utils.entity.decorators.enums.CcpEntityOperationStepType._after;
-import static com.ccp.especifications.db.utils.entity.decorators.enums.CcpEntityType.mainEntity;
-
 import com.ccp.decorators.CcpJsonFieldName;
 import com.ccp.especifications.db.utils.entity.CcpEntity;
-import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityAsyncWriter;
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityCache;
-import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityDisposable;
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityFieldsTransformer;
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityFieldsValidator;
-import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityOperation;
-import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityOperations;
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityTwin;
 import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityFactory;
-import com.ccp.especifications.db.utils.entity.decorators.enums.CcpEntityExpurgableOptions;
 import com.ccp.especifications.db.utils.entity.decorators.interfaces.CcpEntityConfigurator;
 import com.ccp.especifications.db.utils.entity.fields.annotations.CcpEntityFieldPrimaryKey;
 import com.ccp.especifications.db.utils.entity.fields.annotations.CcpEntityFieldTransformer;
 import com.ccp.json.validations.fields.annotations.CcpJsonCopyFieldValidationsFrom;
-import com.jn.business.login.solve.token.JnBusinessResetLoginToken;
-import com.jn.business.messages.JnBusinessSendUserToken;
 import com.jn.db.bulk.JnExecuteBulkOperation;
-import com.jn.entities.decorators.JnAsyncWriterEntity;
-import com.jn.entities.decorators.JnDisposableEntity;
 import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault;
 import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDoNothing;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
 import com.jn.json.fields.validation.JnJsonInstantMessengerFields;
 import com.jn.utils.JnDeleteKeysFromCache;
-import com.jn.business.messages.JnNotifySupportAboutPendingResendLoginToken;
-import com.jn.business.messages.JnNotifySupportAboutSolvedResendLoginToken;
 
-@CcpEntityAsyncWriter(JnAsyncWriterEntity.class)
+//FIXME
+//@CcpEntityAsyncWriter(JnAsyncWriterEntity.class)
 @CcpEntityTwin(
 		twinEntityName = "login_token_fulfilled_resend",
 		bulkExecutorClass = JnExecuteBulkOperation.class,
@@ -42,17 +27,19 @@ import com.jn.business.messages.JnNotifySupportAboutSolvedResendLoginToken;
 		)
 
 @CcpEntityCache(3600)
-@CcpEntityDisposable(expurgTime = CcpEntityExpurgableOptions.daily, expurgableEntityFactory = JnDisposableEntity.class)
+//FIXME
+//@CcpEntityDisposable(expurgTime = CcpEntityExpurgableOptions.daily, expurgableEntityFactory = JnDisposableEntity.class)
 @CcpEntityFieldsTransformer(classReferenceWithTheFields = JnJsonTransformersFieldsEntityDefault.class)
 @CcpEntityFieldsValidator(classReferenceWithTheFields = JnEntityLoginTokenRequestResend.Fields.class)
-@CcpEntityOperations(
-		operations = {
-				@CcpEntityOperation(when = _after, operation = delete, from = mainEntity,  execute = {JnBusinessResetLoginToken.class, JnBusinessSendUserToken.class, JnNotifySupportAboutSolvedResendLoginToken.class}, operationHandlers = {}),
-				@CcpEntityOperation(when = _after, operation = save, from = mainEntity,  execute = {JnNotifySupportAboutPendingResendLoginToken.class}, operationHandlers = {}),
-		},
-		globalHandlers = {}
-		)
-
+//FIXME
+//@CcpEntityOperations(
+//		operations = {
+//				@CcpEntityOperation(when = _after, operation = delete, from = mainEntity,  execute = {JnBusinessResetLoginToken.class, JnBusinessSendUserToken.class, JnNotifySupportAboutSolvedResendLoginToken.class}, operationHandlers = {}),
+//				@CcpEntityOperation(when = _after, operation = save, from = mainEntity,  execute = {JnNotifySupportAboutPendingResendLoginToken.class}, operationHandlers = {}),
+//		},
+//		globalHandlers = {}
+//		)
+//
 /**
  * Registra a solicitação de reenvio de token de login feita pelo usuário. Ao ser salvo,
  * automaticamente reseta e reenvia o token new CcpFieldName(x) da operação, e notifica o suporte _after.

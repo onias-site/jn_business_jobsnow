@@ -14,7 +14,7 @@ import com.ccp.service.CcpService;
  * {@code pacote.NomeDoServico$NomeDoValor}, e não {@code pacote.NomeDoValor}, resultando
  * em {@code JnErrorServiceValidationClassNotFound} em tempo de execução.
  */
-public interface JnService extends CcpService {
+public interface JnService extends CcpService { 
 	default Class<?> getJsonValidationClass() {
 		
 		Class<?> forName;

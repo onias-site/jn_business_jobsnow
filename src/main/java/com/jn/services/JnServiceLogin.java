@@ -2,21 +2,23 @@ package com.jn.services;
 
 import com.ccp.business.CcpBusiness;
 import com.ccp.constants.CcpOtherConstants;
-import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.decorators.CcpJsonFieldName;
+import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.especifications.db.crud.CcpGetEntityId;
 import com.ccp.especifications.db.crud.CcpSelectNextStep;
+import com.ccp.especifications.db.crud.CcpSelectProcedure;
 import com.ccp.especifications.db.utils.entity.CcpEntity;
 import com.ccp.especifications.db.utils.entity.CcpEntityOperationType;
 import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityMetaData;
 import com.ccp.json.validations.fields.annotations.CcpJsonCopyFieldValidationsFrom;
 import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidatorRequired;
 import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeString;
+import com.jn.business.login.Builder;
 import com.jn.business.login.JnBusinessEvaluateAttempts;
 import com.jn.business.login.JnBusinessExecuteLogin;
 import com.jn.business.login.JnBusinessExecuteLogout;
 import com.jn.business.login.JnBusinessSavePassword;
-import com.jn.business.messages.JnBusinessSendUserToken;
+import com.jn.business.messages.JnMessages;
 import com.jn.entities.JnEntityDisposableRecord;
 import com.jn.entities.JnEntityEmailReportedAsSpam;
 import com.jn.entities.JnEntityLoginAnswers;
@@ -34,7 +36,6 @@ import com.jn.entities.JnEntityLoginTokenRequestUnlock;
 import com.jn.entities.JnEntityMessageDidNotSent;
 import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
-
 import com.jn.mensageria.JnFunctionMensageriaSender;
 import com.jn.status.login.JnProcessStatusCreateLoginEmail;
 import com.jn.status.login.JnProcessStatusCreateLoginToken;
@@ -45,8 +46,6 @@ import com.jn.status.login.JnProcessStatusSaveAnswers;
 import com.jn.status.login.JnProcessStatusUnlockLoginToken;
 import com.jn.status.login.JnProcessStatusUpdatePassword;
 import com.jn.utils.JnDeleteKeysFromCache;
-import com.ccp.especifications.db.crud.CcpSelectProcedure;
-import com.jn.business.login.Builder;
 
 /**
  * Serviço central de autenticação do JobsNow. Orquestra todos os fluxos de login usando
@@ -313,9 +312,8 @@ public enum JnServiceLogin implements JnService {
 	},
 	CreateLoginToken {
 		public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
-			String name = JnBusinessSendUserToken.class.getName();
 		
-			CcpJsonRepresentation jsonWithSubjectType = json.put(JnJsonCommonsFields.subjectType, name);
+			CcpJsonRepresentation jsonWithSubjectType = json.put(JnJsonCommonsFields.subjectType, JnMessages.JnBusinessSendUserToken.class.getName());
 			
 			CcpJsonRepresentation[] parametersToSearchInAllEntities = this.createParametersToSearchInAllEntities(jsonWithSubjectType);
 			
@@ -572,7 +570,7 @@ public enum JnServiceLogin implements JnService {
 		
 		CcpEntityMetaData entityMetaData = JnEntityEmailReportedAsSpam.ENTITY.getEntityMetaData();
 		
-		String subjectType = JnBusinessSendUserToken.class.getName();
+		String subjectType = JnMessages.JnBusinessSendUserToken.class.getName();
 		CcpJsonRepresentation put = generatedSessionToken
 				.put(JnEntityMessageDidNotSent.Fields.reasonType, entityMetaData.entityName);
 

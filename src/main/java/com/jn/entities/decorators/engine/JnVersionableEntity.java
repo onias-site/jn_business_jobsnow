@@ -1,4 +1,4 @@
-package com.jn.entities.decorators;
+package com.jn.entities.decorators.engine;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,7 +25,7 @@ import com.jn.json.fields.validation.JnJsonCommonsFields;
  */
 public class JnVersionableEntity extends CcpDefaultEntityDelegator<CcpEntityVersionable>{
 	
-	public JnVersionableEntity(CcpEntity entity, Class<?> clazz) {
+	public JnVersionableEntity(CcpEntity entity) {
 		super(entity, JnExecuteBulkOperation.INSTANCE, JnDeleteKeysFromCache.INSTANCE);
 	}
 

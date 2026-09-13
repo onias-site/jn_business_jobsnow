@@ -1,4 +1,4 @@
-package com.jn.entities.decorators;
+package com.jn.entities.decorators.engine;
 
 import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.especifications.db.utils.entity.CcpEntity;
@@ -12,8 +12,8 @@ import com.jn.mensageria.JnFunctionMensageriaSender;
  * ou {@code copyDataTo} é interceptada e enviada ao PubSub via {@code JnFunctionMensageriaSender}.
  */
 public class JnAsyncWriterEntity extends CcpEntityDelegator  {
-	//FIXME NOS CONSUMIDORES, A MENSAGERIA PRECISARA SER THREAD FAKE
-	public JnAsyncWriterEntity(CcpEntity entity, Class<?> clazz) {
+
+	public JnAsyncWriterEntity(CcpEntity entity) {
 		super(entity);
 	}
 

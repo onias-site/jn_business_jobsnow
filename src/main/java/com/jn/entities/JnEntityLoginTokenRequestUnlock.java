@@ -1,42 +1,26 @@
 package com.jn.entities;
 
-import static com.ccp.especifications.db.utils.entity.decorators.enums.CcpEntityDecoratorOperationType.delete;
-import static com.ccp.especifications.db.utils.entity.decorators.enums.CcpEntityDecoratorOperationType.save;
-import static com.ccp.especifications.db.utils.entity.decorators.enums.CcpEntityOperationStepType._after;
-import static com.ccp.especifications.db.utils.entity.decorators.enums.CcpEntityType.mainEntity;
-
 import com.ccp.decorators.CcpJsonFieldName;
 import com.ccp.especifications.db.utils.entity.CcpEntity;
-import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityAsyncWriter;
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityCache;
-import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityDisposable;
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityFieldsTransformer;
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityFieldsValidator;
-import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityOperation;
-import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityOperations;
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityTwin;
 import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityFactory;
-import com.ccp.especifications.db.utils.entity.decorators.enums.CcpEntityExpurgableOptions;
 import com.ccp.especifications.db.utils.entity.decorators.interfaces.CcpEntityConfigurator;
 import com.ccp.especifications.db.utils.entity.fields.annotations.CcpEntityFieldPrimaryKey;
 import com.ccp.especifications.db.utils.entity.fields.annotations.CcpEntityFieldTransformer;
 import com.ccp.json.validations.fields.annotations.CcpJsonCopyFieldValidationsFrom;
 import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeString;
-import com.jn.business.login.solve.token.JnBusinessResetLoginToken;
-import com.jn.business.messages.JnBusinessSendUserToken;
 import com.jn.db.bulk.JnExecuteBulkOperation;
-import com.jn.entities.decorators.JnAsyncWriterEntity;
-import com.jn.entities.decorators.JnDisposableEntity;
 import com.jn.entities.fields.transformers.JnJsonTransformersFieldEntityPasswordRandom;
 import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault;
 import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDoNothing;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
 import com.jn.json.fields.validation.JnJsonInstantMessengerFields;
 import com.jn.utils.JnDeleteKeysFromCache;
-import com.jn.business.messages.JnNotifySupportAboutPendingLockedLoginToken;
-import com.jn.business.messages.JnNotifySupportAboutSolvedLockedLoginToken;
-
-@CcpEntityAsyncWriter(JnAsyncWriterEntity.class)
+//FIXME
+//@CcpEntityAsyncWriter(JnAsyncWriterEntity.class)
 @CcpEntityTwin(
 		twinEntityName = "login_token_fulfilled_unlock",
 		bulkExecutorClass = JnExecuteBulkOperation.class,
@@ -44,16 +28,21 @@ import com.jn.business.messages.JnNotifySupportAboutSolvedLockedLoginToken;
 		)
 
 @CcpEntityCache(3600)
-@CcpEntityDisposable(expurgTime = CcpEntityExpurgableOptions.daily, expurgableEntityFactory = JnDisposableEntity.class)
+//FIXME
+//@CcpEntityDisposable(expurgTime = CcpEntityExpurgableOptions.daily, expurgableEntityFactory = JnDisposableEntity.class)
 @CcpEntityFieldsTransformer(classReferenceWithTheFields = JnJsonTransformersFieldsEntityDefault.class)
 @CcpEntityFieldsValidator(classReferenceWithTheFields = JnEntityLoginTokenRequestUnlock.Fields.class)
-@CcpEntityOperations(
-		operations = {
-				@CcpEntityOperation(when = _after, operation = delete, from = mainEntity,  execute = {JnBusinessResetLoginToken.class, JnBusinessSendUserToken.class, JnNotifySupportAboutSolvedLockedLoginToken.class}, operationHandlers = {}),
-				@CcpEntityOperation(when = _after, operation = save, from = mainEntity,  execute = {JnNotifySupportAboutPendingLockedLoginToken.class}, operationHandlers = {}),
-		},
-		globalHandlers = {}
-		)
+
+
+
+//FIXME
+//@CcpEntityOperations(
+//		operations = {
+//				@CcpEntityOperation(when = _after, operation = delete, from = mainEntity,  execute = {JnBusinessResetLoginToken.class, JnBusinessSendUserToken.class, JnNotifySupportAboutSolvedLockedLoginToken.class}, operationHandlers = {}),
+//				@CcpEntityOperation(when = _after, operation = save, from = mainEntity,  execute = {JnNotifySupportAboutPendingLockedLoginToken.class}, operationHandlers = {}),
+//		},
+//		globalHandlers = {}
+//		)
 
 
 /**

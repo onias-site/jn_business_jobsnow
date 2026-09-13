@@ -10,23 +10,19 @@ import com.ccp.especifications.db.utils.entity.CcpEntity;
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityCache;
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityFieldsTransformer;
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityFieldsValidator;
-import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityVersionable;
 import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityFactory;
 import com.ccp.especifications.db.utils.entity.decorators.interfaces.CcpEntityConfigurator;
 import com.ccp.especifications.db.utils.entity.fields.annotations.CcpEntityFieldPrimaryKey;
 import com.ccp.json.validations.fields.annotations.CcpJsonCopyFieldValidationsFrom;
 import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidatorRequired;
-import com.jn.business.messages.JnBusinessNotifyError;
-import com.jn.business.messages.JnNotifySupportAboutSolvedLockedLoginToken;
-import com.jn.business.messages.JnNotifySupportAboutSolvedResendLoginToken;
-import com.jn.entities.decorators.JnVersionableEntity;
+import com.jn.business.messages.JnMessages;
 import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
 import com.jn.json.fields.validation.JnJsonInstantMessengerFields;
 import com.jn.utils.JnLanguage;
 
 @CcpEntityCache(3600)
-@CcpEntityVersionable(JnVersionableEntity.class)
+//FIXME @CcpEntityVersionable(JnVersionableEntity.class)
 @CcpEntityFieldsTransformer(classReferenceWithTheFields = JnJsonTransformersFieldsEntityDefault.class)
 @CcpEntityFieldsValidator(classReferenceWithTheFields = JnEntityInstantMessengerTemplateMessage.Fields.class)
 /**
@@ -53,7 +49,8 @@ public class JnEntityInstantMessengerTemplateMessage  implements CcpEntityConfig
 	public List<CcpBulkItem> getFirstRecordsToInsert() {
 		CcpJsonRepresentation put = CcpOtherConstants.EMPTY_JSON
 				.put(JnJsonCommonsFields.message, "{type}\\n\\nError Description:\n {msg}\\n\\n{stackTrace}\\n\\nCaused by:\\n{cause}");
-				String name = JnBusinessNotifyError.class.getName();
+				String name = JnMessages.JnBusinessNotifyError.class.getName();
+				
 				CcpJsonRepresentation put2 = put
 				.put(JnJsonCommonsFields.templateId, name);
 
@@ -62,7 +59,7 @@ public class JnEntityInstantMessengerTemplateMessage  implements CcpEntityConfig
 		;
 		CcpJsonRepresentation put3 = CcpOtherConstants.EMPTY_JSON
 				.put(JnJsonCommonsFields.message, "Ao endereço {email}, envie a seguinte mensagem:\n\n\nVocê solicitou o desbloqueio de seu token para (re) cadastro / desbloqueio de senha. Atendendo ao seu pedido, a senha é {password}, esta senha deve ser informada para desbloqueio de seu token. O token que você deve informar no campo de token é {token}");
-				String name2 = JnNotifySupportAboutSolvedLockedLoginToken.class.getName();
+				String name2 = JnMessages.JnNotifySupportAboutSolvedLockedLoginToken.class.getName();
 				CcpJsonRepresentation put4 = put3
 				.put(JnJsonCommonsFields.templateId, name2);
 
@@ -71,7 +68,7 @@ public class JnEntityInstantMessengerTemplateMessage  implements CcpEntityConfig
 		;
 		CcpJsonRepresentation put5 = CcpOtherConstants.EMPTY_JSON
 				.put(JnJsonCommonsFields.message, "Ao endereço {email}, envie a seguinte mensagem:\n\n\nVocê solicitou o reenvio de seu token para (re) cadastro / desbloqueio de senha. Atendendo ao seu pedido, o token que você deve informar no campo de token é {token}");
-				String name3 = JnNotifySupportAboutSolvedResendLoginToken.class.getName();
+				String name3 = JnMessages.JnNotifySupportAboutSolvedResendLoginToken.class.getName();
 				CcpJsonRepresentation put6 = put5
 				.put(JnJsonCommonsFields.templateId, name3);
 

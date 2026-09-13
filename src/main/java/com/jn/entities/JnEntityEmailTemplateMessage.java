@@ -1,27 +1,26 @@
 package com.jn.entities;
 
 import java.util.List;
+
 import com.ccp.decorators.CcpJsonFieldName;
 import com.ccp.especifications.db.bulk.CcpBulkItem;
 import com.ccp.especifications.db.utils.entity.CcpEntity;
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityCache;
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityFieldsTransformer;
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityFieldsValidator;
-import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityVersionable;
 import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityFactory;
 import com.ccp.especifications.db.utils.entity.decorators.interfaces.CcpEntityConfigurator;
 import com.ccp.especifications.db.utils.entity.fields.annotations.CcpEntityFieldPrimaryKey;
 import com.ccp.json.validations.fields.annotations.CcpJsonCopyFieldValidationsFrom;
 import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidatorRequired;
-import com.jn.business.messages.JnBusinessNotifyError;
-import com.jn.business.messages.JnBusinessSendUserToken;
-import com.jn.entities.decorators.JnVersionableEntity;
+import com.jn.business.messages.JnMessages;
 import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
 import com.jn.utils.JnLanguage;
 
 @CcpEntityCache(3600)
-@CcpEntityVersionable(JnVersionableEntity.class)
+//FIXME
+//@CcpEntityVersionable(JnVersionableEntity.class)
 @CcpEntityFieldsTransformer(classReferenceWithTheFields = JnJsonTransformersFieldsEntityDefault.class)
 @CcpEntityFieldsValidator(classReferenceWithTheFields = JnEntityEmailTemplateMessage.Fields.class)
 /**
@@ -58,7 +57,7 @@ public class JnEntityEmailTemplateMessage  implements CcpEntityConfigurator{
 				+ "\",";
 				String valorMaisMaisMaisMais = valorMaisMaisMais
 				+ "	\"templateId\": \"";
-				String name = JnBusinessSendUserToken.class.getName();
+				String name = JnMessages.JnBusinessSendUserToken.class.getName();
 				String valorMaisMaisMaisMaisMais = valorMaisMaisMaisMais + name;
 				String valorMaisMaisMaisMaisMaisMais = valorMaisMaisMaisMaisMais
 				+ "\",";
@@ -77,7 +76,7 @@ public class JnEntityEmailTemplateMessage  implements CcpEntityConfigurator{
 				+ "\",";
 				String valorMais2MaisMaisMais = valorMais2MaisMais
 				+ "	\"templateId\": \"";
-				String name2 = JnBusinessNotifyError.class.getName();
+				String name2 = JnMessages.JnBusinessNotifyError.class.getName();
 				String valorMais2MaisMaisMaisMais = valorMais2MaisMaisMais + name2;
 				String valorMais2MaisMaisMaisMaisMais = valorMais2MaisMaisMaisMais
 				+ "\",";
