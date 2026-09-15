@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.ccp.constants.CcpOtherConstants;
 import com.ccp.decorators.CcpFieldName;
@@ -17,7 +18,6 @@ import com.ccp.especifications.db.crud.CcpCrud;
 import com.ccp.especifications.db.crud.CcpSelectUnionAll;
 import com.ccp.especifications.db.utils.CcpDbRequester;
 import com.ccp.especifications.db.utils.entity.CcpEntity;
-import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityDisposable;
 import com.ccp.especifications.db.utils.entity.decorators.engine.CcpDefaultEntityDelegator;
 import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityMetaData;
 import com.ccp.especifications.db.utils.entity.decorators.enums.CcpEntityExpurgableOptions;
@@ -26,9 +26,8 @@ import com.jn.db.bulk.JnExecuteBulkOperation;
 import com.jn.entities.JnEntityDisposableRecord;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
 import com.jn.utils.JnDeleteKeysFromCache;
-import java.util.stream.Stream;
 
-public class JnDisposableEntity extends CcpDefaultEntityDelegator<CcpEntityDisposable>{
+public class JnDisposableEntity extends CcpDefaultEntityDelegator<Object>{
 	
 	private final CcpEntityExpurgableOptions timeOption;
 
@@ -395,7 +394,7 @@ public class JnDisposableEntity extends CcpDefaultEntityDelegator<CcpEntityDispo
 	}
 	
 	public CcpJsonRepresentation getRecordFromUnionAll(CcpSelectUnionAll unionAll, Supplier<CcpJsonRepresentation> jsonSupplier) {
-
+ 
 		CcpJsonRepresentation json = jsonSupplier.get();
 
 		CcpEntityMetaData entityDetails = this.getEntityMetaData();

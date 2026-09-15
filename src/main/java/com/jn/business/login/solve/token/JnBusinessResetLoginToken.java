@@ -36,7 +36,7 @@ public class JnBusinessResetLoginToken implements CcpBusiness{
 		
 		CcpJsonRepresentation redoJson = CcpOtherConstants.EMPTY_JSON.redoJson(json);
 		JnEntityLoginToken.ENTITY.deleteAnyWhere(redoJson);
-		String name = JnMessages.JnBusinessSendUserToken.class.getName();
+		String name = JnMessages.JnNotifyUserAboutLoginToken.class.getName();
 		CcpJsonRepresentation messageSent = redoJson.put(JnJsonCommonsFields.subjectType, name);
 		JnEntityEmailMessageSent.ENTITY.delete(messageSent);
 	//TODO LANGUAGE DO USUARIO DENTRO DE ANSWERS

@@ -1,5 +1,7 @@
 package com.jn.entities;
 
+import com.jn.entities.decorators.annotations.JnEntityVersionable;
+import com.jn.entities.decorators.engine.JnVersionableEntity;
 import java.util.List;
 
 import com.ccp.constants.CcpOtherConstants;
@@ -8,6 +10,8 @@ import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.especifications.db.bulk.CcpBulkItem;
 import com.ccp.especifications.db.utils.entity.CcpEntity;
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityCache;
+import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityCustomDecorator;
+import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityCustomDecorators;
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityFieldsTransformer;
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityFieldsValidator;
 import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityFactory;
@@ -16,13 +20,15 @@ import com.ccp.especifications.db.utils.entity.fields.annotations.CcpEntityField
 import com.ccp.json.validations.fields.annotations.CcpJsonCopyFieldValidationsFrom;
 import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidatorRequired;
 import com.jn.business.messages.JnMessages;
+import com.jn.entities.decorators.builders.JnEntityVersionableBuilder;
 import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
 import com.jn.json.fields.validation.JnJsonInstantMessengerFields;
 import com.jn.utils.JnLanguage;
 
 @CcpEntityCache(3600)
-//FIXME @CcpEntityVersionable(JnVersionableEntity.class)
+@CcpEntityCustomDecorators(value = {@CcpEntityCustomDecorator(value = JnEntityVersionableBuilder.class, priority = 2),})
+@JnEntityVersionable(JnVersionableEntity.class)
 @CcpEntityFieldsTransformer(classReferenceWithTheFields = JnJsonTransformersFieldsEntityDefault.class)
 @CcpEntityFieldsValidator(classReferenceWithTheFields = JnEntityInstantMessengerTemplateMessage.Fields.class)
 /**
@@ -49,7 +55,7 @@ public class JnEntityInstantMessengerTemplateMessage  implements CcpEntityConfig
 	public List<CcpBulkItem> getFirstRecordsToInsert() {
 		CcpJsonRepresentation put = CcpOtherConstants.EMPTY_JSON
 				.put(JnJsonCommonsFields.message, "{type}\\n\\nError Description:\n {msg}\\n\\n{stackTrace}\\n\\nCaused by:\\n{cause}");
-				String name = JnMessages.JnBusinessNotifyError.class.getName();
+				String name = JnMessages.JnNotifySupportAboutAnError.class.getName();
 				
 				CcpJsonRepresentation put2 = put
 				.put(JnJsonCommonsFields.templateId, name);

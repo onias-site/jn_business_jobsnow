@@ -10,7 +10,6 @@ import com.ccp.decorators.CcpTimeDecorator;
 import com.ccp.especifications.db.bulk.CcpBulkEntityOperationType;
 import com.ccp.especifications.db.bulk.CcpBulkItem;
 import com.ccp.especifications.db.utils.entity.CcpEntity;
-import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityVersionable;
 import com.ccp.especifications.db.utils.entity.decorators.engine.CcpDefaultEntityDelegator;
 import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityMetaData;
 import com.jn.db.bulk.JnExecuteBulkOperation;
@@ -23,7 +22,7 @@ import com.jn.json.fields.validation.JnJsonCommonsFields;
  * A cada operação bulk, gera automaticamente um registro de histórico em {@code JnEntityVersionable}
  * com o estado anterior do JSON, a operação realizada, data e hora.
  */
-public class JnVersionableEntity extends CcpDefaultEntityDelegator<CcpEntityVersionable>{
+public class JnVersionableEntity extends CcpDefaultEntityDelegator<Object>{
 	
 	public JnVersionableEntity(CcpEntity entity) {
 		super(entity, JnExecuteBulkOperation.INSTANCE, JnDeleteKeysFromCache.INSTANCE);
@@ -96,8 +95,8 @@ public class JnVersionableEntity extends CcpDefaultEntityDelegator<CcpEntityVers
 	}
 	
 	public CcpJsonRepresentation getOneByIdAnyWhere(CcpJsonRepresentation json) {
-		CcpJsonRepresentation throwException = this.throwException();
-		return throwException;
+		Object throwException = this.throwException();
+		return (CcpJsonRepresentation)throwException;
 	}
 	
 

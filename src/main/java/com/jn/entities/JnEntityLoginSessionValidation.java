@@ -3,7 +3,8 @@ package com.jn.entities;
 import com.ccp.decorators.CcpJsonFieldName;
 import com.ccp.especifications.db.utils.entity.CcpEntity;
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityCache;
-import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityDisposable;
+import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityCustomDecorator;
+import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityCustomDecorators;
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityFieldsTransformer;
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityFieldsValidator;
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityTwin;
@@ -14,19 +15,22 @@ import com.ccp.especifications.db.utils.entity.fields.annotations.CcpEntityField
 import com.ccp.especifications.db.utils.entity.fields.annotations.CcpEntityFieldTransformer;
 import com.ccp.json.validations.fields.annotations.CcpJsonCopyFieldValidationsFrom;
 import com.jn.db.bulk.JnExecuteBulkOperation;
-import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault;
+import com.jn.entities.decorators.annotations.JnEntityDisposable;
+import com.jn.entities.decorators.builders.JnEntityDisposableBuilder;
 import com.jn.entities.decorators.engine.JnDisposableEntity;
+import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault;
 import com.jn.entities.fields.transformers.JnJsonTransformersFieldEntityTokenHash;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
 import com.jn.utils.JnDeleteKeysFromCache;
 
 @CcpEntityCache(3600)
-@CcpEntityDisposable(expurgTime = CcpEntityExpurgableOptions.hourly, expurgableEntityFactory = JnDisposableEntity.class)
+@CcpEntityCustomDecorators(value = {@CcpEntityCustomDecorator(value = JnEntityDisposableBuilder.class, priority = 1),})
 @CcpEntityTwin(
 		twinEntityName = "login_session_terminated",
 		bulkExecutorClass = JnExecuteBulkOperation.class,
 		functionToDeleteKeysInTheCacheClass = JnDeleteKeysFromCache.class
 		)
+@JnEntityDisposable(value = JnDisposableEntity.class, timeOption = CcpEntityExpurgableOptions.hourly)
 @CcpEntityFieldsTransformer(classReferenceWithTheFields = JnJsonTransformersFieldsEntityDefault.class)
 @CcpEntityFieldsValidator(classReferenceWithTheFields = JnEntityLoginSessionValidation.Fields.class)
 /**

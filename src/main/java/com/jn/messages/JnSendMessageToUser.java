@@ -6,11 +6,15 @@ import java.util.function.Supplier;
 
 import com.ccp.business.CcpBusiness;
 import com.ccp.decorators.CcpFieldName;
+import com.ccp.decorators.CcpJsonFieldName;
 import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.dependency.injection.CcpDependencyInjection;
 import com.ccp.especifications.db.crud.CcpCrud;
 import com.ccp.especifications.db.crud.CcpSelectUnionAll;
 import com.ccp.especifications.db.utils.entity.CcpEntity;
+import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidatorArray;
+import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidatorRequired;
+import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeString;
 import com.jn.business.http.JnBusinessSendHttpRequest;
 import com.jn.business.messages.JnMessageSenderExceptionHandler;
 import com.jn.business.messages.JnMessageType;
@@ -25,7 +29,7 @@ import com.jn.entities.JnEntityInstantMessengerTemplateMessage;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
 import com.jn.utils.JnDeleteKeysFromCache;
 
-public class JnSendMessageToUser {
+public class JnSendMessageToUser implements CcpBusiness{
 	
 
 	private final List<JnBusinessSendHttpRequest> messengers = new ArrayList<>();
@@ -159,11 +163,70 @@ public class JnSendMessageToUser {
 		return result;
 	}
 
-	// ─── Fluent-API step classes ──────────────────────────────────────────────
+	public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
 
+		JnSendMessageToUser sender = new JnSendMessageToUser();
+		JnAddDefaultStep addDefaultProcessToSendMessage = new JnAddDefaultStep(sender);
+		String supportLanguage = json.getAsString(JnJsonCommonsFields.language);
+		
+		List<JnMessageType> messageTypes = json.getAsEnumList(JsonFields.messageTypes, JnMessageType.class);
+		
+		String topic = json.getAsString(JsonFields.topic);
+		
+		for (JnMessageType messageType : messageTypes) {
+			JnMessageSenderExceptionHandler exceptionHandler = json.getAsEnum(JsonFields.exceptionHandler, JnMessageSenderExceptionHandler.class);
+			addDefaultProcessToSendMessage = messageType.addDefaultProcessToSendMessage(sender, exceptionHandler);
+			sender = addDefaultProcessToSendMessage.and();
+		}
+		
+		JnSoWithAllAddedStepsAnd soWithAllAddedProcessAnd = addDefaultProcessToSendMessage
+		.soWithAllAddedProcessAnd();
+		JnWithTheTemplateId withTheTemplateEntity = soWithAllAddedProcessAnd
+		.withTheTemplateEntity(topic);
+		CcpJsonRepresentation put2 = json.put(JnJsonCommonsFields.subjectType, topic);
+		JnAndWithTheJsonValues andWithTheMessageValuesFromJson = withTheTemplateEntity
+		.andWithTheMessageValuesFromJson(put2);
+		JnAndWithTheSupportLanguage andWithTheSupportLanguage = andWithTheMessageValuesFromJson
+		.andWithTheSupportLanguage(supportLanguage);
 
+		CcpJsonRepresentation result = andWithTheSupportLanguage
+		.sendAllMessages() 
+		;
+		return result;
+	}
 
+	public CcpJsonRepresentation sendAllMessages(CcpJsonRepresentation json, String topic, 
+			JnMessageType[] messageTypes, JnMessageSenderExceptionHandler exceptionHandler) {
+	
+		CcpJsonRepresentation message = json
+		.put(JsonFields.topic, topic)
+		.put(JsonFields.messageTypes, messageTypes)
+		.put(JsonFields.exceptionHandler, exceptionHandler);
+		
+		CcpJsonRepresentation execute = this.execute(message);
+		return execute;
+	}
 
+	public Class<?> getJsonValidationClass() {
+		return JsonFields.class;
+	}
+	static enum JsonFields implements CcpJsonFieldName{
+		@CcpJsonFieldTypeString(allowedValuesEnum = JnMessageType.class)
+		@CcpJsonFieldValidatorArray(minSize = 1)
+		@CcpJsonFieldValidatorRequired
+		messageTypes,
+		
+		@CcpJsonFieldTypeString(allowedValuesEnum = JnMessageSenderExceptionHandler.class)
+		@CcpJsonFieldValidatorRequired
+		exceptionHandler,
+		
+		@CcpJsonFieldValidatorRequired
+		@CcpJsonFieldTypeString
+		topic
+		
+		;
+		
+	}
 
 
 

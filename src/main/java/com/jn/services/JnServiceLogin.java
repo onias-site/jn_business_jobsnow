@@ -313,7 +313,7 @@ public enum JnServiceLogin implements JnService {
 	CreateLoginToken {
 		public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
 		
-			CcpJsonRepresentation jsonWithSubjectType = json.put(JnJsonCommonsFields.subjectType, JnMessages.JnBusinessSendUserToken.class.getName());
+			CcpJsonRepresentation jsonWithSubjectType = json.put(JnJsonCommonsFields.subjectType, JnMessages.JnNotifyUserAboutLoginToken.class.getName());
 			
 			CcpJsonRepresentation[] parametersToSearchInAllEntities = this.createParametersToSearchInAllEntities(jsonWithSubjectType);
 			
@@ -570,7 +570,7 @@ public enum JnServiceLogin implements JnService {
 		
 		CcpEntityMetaData entityMetaData = JnEntityEmailReportedAsSpam.ENTITY.getEntityMetaData();
 		
-		String subjectType = JnMessages.JnBusinessSendUserToken.class.getName();
+		String subjectType = JnMessages.JnNotifyUserAboutLoginToken.class.getName();
 		CcpJsonRepresentation put = generatedSessionToken
 				.put(JnEntityMessageDidNotSent.Fields.reasonType, entityMetaData.entityName);
 
