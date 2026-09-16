@@ -23,26 +23,51 @@ public class JnSendMessageToUserEntityWhenWrite extends CcpEntityDelegator  {
 		this.annotation = annotation;
 	}
 
-	public CcpJsonRepresentation delete(CcpJsonRepresentation json) {
+	/**
+	 * As mensagens do fluxo {@code after} só são enviadas quando a operação aconteceu de fato: o
+	 * {@code delete} encontrou o registro para remover e o {@code save} incluiu um documento novo.
+	 */
+	public boolean delete(CcpJsonRepresentation json) {
 		CcpJsonRepresentation _before = this.executeFlow(json, CcpEntityOperationPhase._before, CcpEntityDecoratorOperationType.delete);
-		this.entity.delete(_before);
-		CcpJsonRepresentation _after = this.executeFlow(_before, CcpEntityOperationPhase._after, CcpEntityDecoratorOperationType.delete);
-		return _after;
-		
+		boolean deleted = this.entity.delete(_before);
+
+		boolean nothingWasDeleted = false == deleted;
+
+		if(nothingWasDeleted) {
+			return false;
+		}
+
+		this.executeFlow(_before, CcpEntityOperationPhase._after, CcpEntityDecoratorOperationType.delete);
+		return deleted;
+
 	}
 
-	public CcpJsonRepresentation deleteAnyWhere(CcpJsonRepresentation json) {
+	public boolean deleteAnyWhere(CcpJsonRepresentation json) {
 		CcpJsonRepresentation _before = this.executeFlow(json, CcpEntityOperationPhase._before, CcpEntityDecoratorOperationType.deleteAnyWhere);
-		this.entity.deleteAnyWhere(_before);
-		CcpJsonRepresentation _after = this.executeFlow(_before, CcpEntityOperationPhase._after, CcpEntityDecoratorOperationType.deleteAnyWhere);
-		return _after;
+		boolean deleted = this.entity.deleteAnyWhere(_before);
+
+		boolean nothingWasDeleted = false == deleted;
+
+		if(nothingWasDeleted) {
+			return false;
+		}
+
+		this.executeFlow(_before, CcpEntityOperationPhase._after, CcpEntityDecoratorOperationType.deleteAnyWhere);
+		return deleted;
 	}
 
-	public CcpJsonRepresentation save(CcpJsonRepresentation json) {
+	public boolean save(CcpJsonRepresentation json) {
 		CcpJsonRepresentation _before = this.executeFlow(json, CcpEntityOperationPhase._before, CcpEntityDecoratorOperationType.save);
-		this.entity.save(_before);
-		CcpJsonRepresentation _after = this.executeFlow(_before, CcpEntityOperationPhase._after, CcpEntityDecoratorOperationType.save);
-		return _after;
+		boolean inserted = this.entity.save(_before);
+
+		boolean documentWasOnlyUpdated = false == inserted;
+
+		if(documentWasOnlyUpdated) {
+			return false;
+		}
+
+		this.executeFlow(_before, CcpEntityOperationPhase._after, CcpEntityDecoratorOperationType.save);
+		return inserted;
 	}
 
 	

@@ -17,36 +17,44 @@ public class JnAsyncWriterEntity extends CcpEntityDelegator  {
 		super(entity);
 	}
 
-	public CcpJsonRepresentation delete(CcpJsonRepresentation json) {
-		CcpJsonRepresentation apply = this.sendToMensageria(json, CcpEntityOperationType.delete);
-		return apply;
+	public boolean delete(CcpJsonRepresentation json) {
+		boolean sent = this.sendToMensageria(json, CcpEntityOperationType.delete);
+		return sent;
 	}
 
-	public CcpJsonRepresentation deleteAnyWhere(CcpJsonRepresentation json) {
-		CcpJsonRepresentation apply = this.sendToMensageria(json, CcpEntityOperationType.deleteAnyWhere);
-		return apply;
+	public boolean deleteAnyWhere(CcpJsonRepresentation json) {
+		boolean sent = this.sendToMensageria(json, CcpEntityOperationType.deleteAnyWhere);
+		return sent;
 	}
 
-	public CcpJsonRepresentation save(CcpJsonRepresentation json) {
-		CcpJsonRepresentation apply = this.sendToMensageria(json, CcpEntityOperationType.save);
-		return apply;
+	public boolean save(CcpJsonRepresentation json) {
+		boolean sent = this.sendToMensageria(json, CcpEntityOperationType.save);
+		return sent;
 	}
 
-	public CcpJsonRepresentation transferDataTo(CcpJsonRepresentation json, CcpEntity entities) {
+	public boolean transferDataTo(CcpJsonRepresentation json, CcpEntity entities) {
 		CcpJsonRepresentation put = json.put(CcpEntityOperationType.Fields.entityToTransfer, entities);
-		CcpJsonRepresentation apply = this.sendToMensageria(put, CcpEntityOperationType.transferDataTo);
-		return apply;
+		boolean sent = this.sendToMensageria(put, CcpEntityOperationType.transferDataTo);
+		return sent;
 	}
 
-	public CcpJsonRepresentation copyDataTo(CcpJsonRepresentation json, CcpEntity entities) {
+	public boolean copyDataTo(CcpJsonRepresentation json, CcpEntity entities) {
 		CcpJsonRepresentation put = json.put(CcpEntityOperationType.Fields.entityToTransfer, entities);
-		CcpJsonRepresentation apply = this.sendToMensageria(put, CcpEntityOperationType.copyDataTo);
-		return apply;
+		boolean sent = this.sendToMensageria(put, CcpEntityOperationType.copyDataTo);
+		return sent;
 	}
-	
-	private CcpJsonRepresentation sendToMensageria(CcpJsonRepresentation json, CcpEntityOperationType operation) {
+
+	/**
+	 * Envia a operação para a mensageria. Como a execução é assíncrona, no momento da chamada ainda não
+	 * há como saber se o documento será incluído, atualizado ou removido, então o retorno indica apenas
+	 * que a mensagem foi aceita pelo tópico. Este é o único ponto da hierarquia onde o booleano não
+	 * carrega o mesmo significado definido em {@code CcpEntity}.
+	 */
+	private boolean sendToMensageria(CcpJsonRepresentation json, CcpEntityOperationType operation) {
 		JnFunctionMensageriaSender sender = new JnFunctionMensageriaSender(this.entity, operation);
 		CcpJsonRepresentation apply = sender.execute(json);
-		return apply;
+		boolean emptyResponse = apply.isEmpty();
+		boolean sent = false == emptyResponse;
+		return sent;
 	}
 }

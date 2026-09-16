@@ -23,18 +23,36 @@ public class JnSendMessageToUserEntityWhenTransfer extends CcpEntityDelegator  {
 		this.annotation = annotation;
 	}
 
-	public CcpJsonRepresentation copyDataTo(CcpJsonRepresentation json, CcpEntity targetEntity) {
+	/**
+	 * As mensagens do fluxo {@code after} só são enviadas quando a transferência aconteceu de fato,
+	 * ou seja, quando havia registro de origem para ser copiado ou movido.
+	 */
+	public boolean copyDataTo(CcpJsonRepresentation json, CcpEntity targetEntity) {
 		CcpJsonRepresentation _before = this.executeFlow(json, CcpEntityOperationPhase._before, CcpEntityDecoratorTransferType.copyDataTo, targetEntity);
-		this.entity.copyDataTo(_before, targetEntity);
-		CcpJsonRepresentation _after = this.executeFlow(_before, CcpEntityOperationPhase._after, CcpEntityDecoratorTransferType.copyDataTo, targetEntity);
-		return _after;
+		boolean copied = this.entity.copyDataTo(_before, targetEntity);
+
+		boolean nothingWasCopied = false == copied;
+
+		if(nothingWasCopied) {
+			return false;
+		}
+
+		this.executeFlow(_before, CcpEntityOperationPhase._after, CcpEntityDecoratorTransferType.copyDataTo, targetEntity);
+		return copied;
 	}
 
-	public CcpJsonRepresentation transferDataTo(CcpJsonRepresentation json, CcpEntity targetEntity) {
+	public boolean transferDataTo(CcpJsonRepresentation json, CcpEntity targetEntity) {
 		CcpJsonRepresentation _before = this.executeFlow(json, CcpEntityOperationPhase._before, CcpEntityDecoratorTransferType.transferDataTo, targetEntity);
-		this.entity.transferDataTo(_before, targetEntity);
-		CcpJsonRepresentation _after = this.executeFlow(_before, CcpEntityOperationPhase._after, CcpEntityDecoratorTransferType.transferDataTo, targetEntity);
-		return _after;
+		boolean transfered = this.entity.transferDataTo(_before, targetEntity);
+
+		boolean nothingWasTransfered = false == transfered;
+
+		if(nothingWasTransfered) {
+			return false;
+		}
+
+		this.executeFlow(_before, CcpEntityOperationPhase._after, CcpEntityDecoratorTransferType.transferDataTo, targetEntity);
+		return transfered;
 	}
 
 	

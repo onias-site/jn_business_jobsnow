@@ -80,11 +80,11 @@ public class JnVersionableEntity extends CcpDefaultEntityDelegator<Object>{
 
 
 
-	public CcpJsonRepresentation deleteAnyWhere(CcpJsonRepresentation json) {
+	public boolean deleteAnyWhere(CcpJsonRepresentation json) {
 
 		//TODO FILA PARA EXCLUIR TODOS OS REGISTROS
 
-		return json;
+		return false;
 	}
 	
 	public List<CcpEntity> getAssociatedEntities() {

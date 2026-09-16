@@ -15,7 +15,7 @@ public class Builder {
 	CcpBusiness topicToCreateTheLockWhenExceedTries;
 	CcpBusiness topicToRegisterSuccess;
 	CcpJsonFieldName fieldAttempsName;
-	CcpJsonFieldName fieldEmailName; 
+	CcpJsonFieldName fieldEmailName;  
 
 	public Builder entityToGetTheAttempts(CcpEntity entity) {
 		this.entityToGetTheAttempts = entity;
