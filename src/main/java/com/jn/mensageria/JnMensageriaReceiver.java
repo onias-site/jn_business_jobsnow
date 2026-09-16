@@ -1,15 +1,19 @@
 package com.jn.mensageria;
 
 import java.util.function.Consumer;
+
+import com.ccp.business.CcpBusiness;
 import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.especifications.db.bulk.CcpExecuteBulkOperation;
 import com.ccp.especifications.db.utils.entity.CcpEntity;
-import com.ccp.business.CcpBusiness;
+import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityFactory;
+import com.ccp.especifications.db.utils.entity.decorators.interfaces.CcpEntityConfigurator;
 import com.ccp.especifications.mensageria.receiver.CcpMensageriaReceiver;
 import com.jn.db.bulk.JnExecuteBulkOperation;
 import com.jn.entities.JnEntityAsyncTask;
-import com.jn.utils.JnDeleteKeysFromCache;
+import com.jn.entities.decorators.builders.JnEntityAsyncWriterBuilder;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
+import com.jn.utils.JnDeleteKeysFromCache;
 
 /**
  * Receptor Singleton de mensagens do PubSub. Roteia cada mensagem recebida para o {@code CcpBusiness}
@@ -81,6 +85,17 @@ public class JnMensageriaReceiver extends CcpMensageriaReceiver{
 
 	public Consumer<String[]> getFunctionToDeleteKeysInTheCache() {
 		return JnDeleteKeysFromCache.INSTANCE;
+	}
+	
+	protected CcpEntity getCustomEntity(Object newInstance) {
+		CcpEntityConfigurator configurator = (CcpEntityConfigurator)newInstance;
+		CcpEntity entity = CcpEntityFactory.getCustomEntity(configurator, JnEntityAsyncWriterBuilder.INSTANCE);
+		return entity;
+	}
+
+	protected CcpEntity getTwinEntity(CcpEntity entity) {
+		CcpEntity twinEntity = entity.getTwinEntity(JnEntityAsyncWriterBuilder.INSTANCE);
+		return twinEntity;
 	}
 
 }

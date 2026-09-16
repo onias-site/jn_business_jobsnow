@@ -3,10 +3,10 @@ package com.jn.entities.decorators.builders;
 import java.lang.reflect.Constructor;
 
 import com.ccp.especifications.db.utils.entity.CcpEntity;
-import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityBuilder;
+import com.ccp.especifications.db.utils.entity.decorators.engine.CcpCustomDecoratorEntity;
 import com.jn.entities.decorators.annotations.JnEntitySendMessageToUserWhenTransfer;
 
-public class JnEntitySendMessageToUserWhenTransferBuilder implements CcpEntityBuilder{
+public class JnEntitySendMessageToUserWhenTransferBuilder extends CcpCustomDecoratorEntity{
 
 	@SuppressWarnings("unchecked")
 	public CcpEntity getEntity(Class<?> configurationClass, CcpEntity entity) {
