@@ -7,6 +7,7 @@ import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeNumberUn
 import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeString;
 import com.jn.utils.JnLanguage;
 
+
 /**
  * Centraliza as definições de validação dos campos JSON comuns a diversas entidades e serviços do
  * JobsNow. Cada valor do enum carrega anotações de tipo ({@code @CcpJsonFieldTypeString}, etc.)
@@ -118,4 +119,23 @@ public enum JnJsonCommonsFields implements CcpJsonFieldName{
 	//TODO FUNDIR COM O DO INSTANT MESSENGER
 	@CcpJsonFieldTypeString
 	contentType,
+
+	/*
+	 * Campos abaixo centralizados a partir de enums locais que os declaravam em duplicidade.
+	 * Ficam sem anotação de validação de propósito: a centralização unifica apenas o nome da
+	 * chave, preservando o comportamento anterior.
+	 */
+	activePosition,
+
+	dateItWasSaved,
+
+	expirationDate,
+
+	maxTriesToSendMessage,
+
+	originalToken,
+
+	sleepToSendMessage,
+
+	typedValue,
 }

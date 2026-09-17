@@ -1,7 +1,6 @@
 package com.jn.business.login;
 
 import com.ccp.decorators.CcpJsonRepresentation;
-import com.ccp.decorators.CcpJsonFieldName;
 import com.ccp.especifications.db.bulk.handlers.CcpBulkHandlerDelete;
 import com.ccp.especifications.db.bulk.handlers.CcpBulkHandlerSave;
 import com.ccp.especifications.db.bulk.handlers.CcpEntityBulkHandlerTransferRecordToTwinEntity;
@@ -16,6 +15,8 @@ import com.jn.entities.JnEntityLoginPasswordAttempts;
 import com.jn.entities.JnEntityLoginSessionValidation;
 import com.jn.services.JnServiceLogin;
 import com.jn.utils.JnDeleteKeysFromCache;
+import com.ccp.json.fields.validation.CcpJsonCommonsFields;
+
 /**
  * Salva (ou altera) a senha do usuário. Em operação bulk atômica: invalida a sessão
  * atual, salva a nova senha, "desbloqueia" a senha transferindo para a entidade twin,
@@ -23,9 +24,6 @@ import com.jn.utils.JnDeleteKeysFromCache;
  * sessão se existir.
  */
 public class JnBusinessSavePassword implements CcpBusiness {
-	enum JsonFieldNames implements CcpJsonFieldName{
-		sessionToken
-	}
  
 	public static final JnBusinessSavePassword INSTANCE = new JnBusinessSavePassword();
 	
@@ -44,7 +42,7 @@ public class JnBusinessSavePassword implements CcpBusiness {
 		CcpEntityBulkHandlerTransferRecordToTwinEntity registerPasswordUnlock = new CcpEntityBulkHandlerTransferRecordToTwinEntity(twinEntity);
 		CcpBulkHandlerDelete removePasswordAttempts = new CcpBulkHandlerDelete(JnEntityLoginPasswordAttempts.ENTITY);
 
-		CcpJsonRepresentation renameField = json.renameField(JsonFieldNames.sessionToken, JnEntityLoginSessionValidation.Fields.token);
+		CcpJsonRepresentation renameField = json.renameField(CcpJsonCommonsFields.sessionToken, JnEntityLoginSessionValidation.Fields.token);
 		CcpBulkHandlerSave updatePassword = new CcpBulkHandlerSave(JnEntityLoginPassword.ENTITY);
 		JnExecuteBulkOperation.INSTANCE
 		.executeSelectUnionAllThenExecuteBulkOperation(

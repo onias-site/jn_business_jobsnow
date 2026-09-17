@@ -9,9 +9,10 @@ import com.ccp.dependency.injection.CcpDependencyInjection;
 import com.ccp.especifications.instant.messenger.CcpInstantMessenger;
 import com.ccp.json.validations.fields.annotations.CcpJsonCopyFieldValidationsFrom;
 import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidatorRequired;
-import com.jn.business.messages.JnMessageType.InstantMessengerApiFields;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
 import com.jn.json.fields.validation.JnJsonInstantMessengerFields;
+
+import com.ccp.json.fields.validation.CcpJsonCommonsFields;
 
 public enum JnInstantMessageType implements CcpBusiness{
 	text(JnMessageTextJsonValidator.class) {
@@ -20,7 +21,7 @@ public enum JnInstantMessageType implements CcpBusiness{
 			String message = super.getMessage(json, orElseThrow, JnJsonCommonsFields.message);
 			String botToken = json.getAsString(JnJsonInstantMessengerFields.botToken);
 			Long chatId = json.getAsLongNumber(JnJsonInstantMessengerFields.chatId);
-			Long replyTo = Double.valueOf(json.getOrDefault(InstantMessengerApiFields.replyTo, () -> (Object)"0").toString()).longValue();
+			Long replyTo = Double.valueOf(json.getOrDefault(CcpJsonCommonsFields.replyTo, () -> (Object)"0").toString()).longValue();
 			CcpStringDecorator asStringDecorator = json.getAsStringDecorator(JnJsonInstantMessengerFields.botName);
 			CcpJsonFieldName jsonFieldName = asStringDecorator.jsonFieldName();
 			CcpJsonRepresentation result = instantMessenger.sendTextMessage(jsonFieldName, botToken, chatId, replyTo, message);
@@ -35,7 +36,7 @@ public enum JnInstantMessageType implements CcpBusiness{
 			
 			String botToken = json.getAsString(JnJsonInstantMessengerFields.botToken) ;
 			Long chatId = json.getAsLongNumber(JnJsonInstantMessengerFields.chatId);
-			Long replyTo = json.getOrDefault(InstantMessengerApiFields.replyTo, () -> 0L);
+			Long replyTo = json.getOrDefault(CcpJsonCommonsFields.replyTo, () -> 0L);
 			
 			String message = super.getMessage(json, orElseThrow, JnJsonCommonsFields.message);
 			String caption = super.getMessage(json, orElseThrow, JnJsonInstantMessengerFields.caption);
@@ -66,7 +67,7 @@ public enum JnInstantMessageType implements CcpBusiness{
 		return message.content;
 	}
 	public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
-		CcpJsonRepresentation message = json.getJsonPiece(JnJsonInstantMessengerFields.fileName, JnJsonInstantMessengerFields.caption, JnJsonCommonsFields.message, InstantMessengerApiFields.replyTo, JnJsonInstantMessengerFields.chatId);
+		CcpJsonRepresentation message = json.getJsonPiece(JnJsonInstantMessengerFields.fileName, JnJsonInstantMessengerFields.caption, JnJsonCommonsFields.message, CcpJsonCommonsFields.replyTo, JnJsonInstantMessengerFields.chatId);
 		CcpJsonRepresentation sendMessage = this.sendMessage(json, message);
 		return sendMessage;
 	}

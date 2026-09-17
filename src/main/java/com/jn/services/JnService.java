@@ -19,15 +19,9 @@ public interface JnService extends CcpService {
 		
 		Class<?> forName;
 		try {
-			var clazz = this.getClass();
-			var packageName = clazz.getPackageName();
-			var packageNameMais = packageName + ".";
-			String name = this.name();
-			var packageNameMaisMais = packageNameMais + name;
-			forName = Class.forName(packageNameMaisMais);
+			forName = Class.forName(this.getClass().getPackageName() + "." + this.name());
 		} catch (ClassNotFoundException e) {
-			JnErrorServiceValidationClassNotFound jnErrorServiceValidationClassNotFound = new JnErrorServiceValidationClassNotFound(e);
-			throw jnErrorServiceValidationClassNotFound;
+			throw new JnErrorServiceValidationClassNotFound(e);
 		}
 		return forName;
 	}

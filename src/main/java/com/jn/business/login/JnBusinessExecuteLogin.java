@@ -3,7 +3,6 @@ package com.jn.business.login;
 import com.ccp.business.CcpBusiness;
 import com.ccp.constants.CcpOtherConstants;
 import com.ccp.decorators.CcpJsonRepresentation;
-import com.ccp.decorators.CcpJsonFieldName;
 import com.ccp.especifications.db.bulk.handlers.CcpBulkHandlerDelete;
 import com.ccp.especifications.db.bulk.handlers.CcpEntityBulkHandlerTransferRecordToTwinEntity;
 import com.ccp.especifications.db.utils.entity.CcpEntity;
@@ -14,6 +13,8 @@ import com.jn.entities.JnEntityLoginPasswordAttempts;
 import com.jn.entities.JnEntityLoginSessionValidation;
 import com.jn.utils.JnDeleteKeysFromCache;
 
+import com.ccp.json.fields.validation.CcpJsonCommonsFields;
+
 /**
  * Executa o login do usuário após validação bem-sucedida da senha. Em operação bulk
  * atômica: renomeia sessionToken para o campo token de sessão, invalida a senha atual
@@ -22,9 +23,6 @@ import com.jn.utils.JnDeleteKeysFromCache;
  */
 public class JnBusinessExecuteLogin implements CcpBusiness {
 		
-	enum JsonFieldNames implements CcpJsonFieldName{
-		sessionToken
-	}
 
 	public static final JnBusinessExecuteLogin INSTANCE = new JnBusinessExecuteLogin();
 	
@@ -36,7 +34,7 @@ public class JnBusinessExecuteLogin implements CcpBusiness {
 	 */
 	@SuppressWarnings("unchecked")
 	public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
-		CcpJsonRepresentation renameField = json.renameField(JsonFieldNames.sessionToken, JnEntityLoginSessionValidation.Fields.token);
+		CcpJsonRepresentation renameField = json.renameField(CcpJsonCommonsFields.sessionToken, JnEntityLoginSessionValidation.Fields.token);
 		
 		CcpEntity twinEntity = JnEntityLoginPassword.ENTITY.getTwinEntity();
 		CcpEntityBulkHandlerTransferRecordToTwinEntity executeUnlock = new CcpEntityBulkHandlerTransferRecordToTwinEntity(twinEntity);

@@ -14,6 +14,7 @@ import com.jn.entities.decorators.annotations.JnEntitySendMessageToUserWhenTrans
 import com.jn.entities.decorators.enums.JnEntitySendMessageToUserWhenTransferOperationType;
 import com.jn.messages.JnSendMessageToUser;
 
+
 public class JnSendMessageToUserEntityWhenTransfer extends CcpEntityDelegator  {
 	
 	private final JnEntitySendMessageToUserWhenTransfer annotation;
@@ -100,7 +101,8 @@ public class JnSendMessageToUserEntityWhenTransfer extends CcpEntityDelegator  {
 			return json;
 		}
 
-		String topic = configuredOperation.messageTemplate().getName();
+		Class<?> messageTemplate = configuredOperation.messageTemplate();
+		String topic = messageTemplate.getName();
 
 		JnMessageType[] messageTypes = operationType.messagesTypes();
 		JnMessageSenderExceptionHandler exceptionHandler2 = operationType.exceptionHandler;

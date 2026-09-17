@@ -3,12 +3,13 @@ package com.jn.db.bulk;
 import java.util.function.Function;
 import com.ccp.constants.CcpOtherConstants;
 import com.ccp.decorators.CcpJsonRepresentation;
-import com.ccp.decorators.CcpJsonFieldName;
 import com.ccp.especifications.db.bulk.CcpBulkItem;
 import com.ccp.especifications.db.bulk.CcpBulkOperationResult;
 import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityMetaData;
 import com.jn.entities.JnEntityRecordToReprocess;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
+
+import com.ccp.json.fields.validation.CcpJsonCommonsFields;
 
 /**
  * Função de mapeamento usada pelo JnExecuteBulkOperation para converter um resultado
@@ -16,9 +17,6 @@ import com.jn.json.fields.validation.JnJsonCommonsFields;
  * Previne loops infinitos ao rejeitar itens que já pertencem à entidade de reprocessamento.
  */
 class FunctionReprocessMapper implements Function<CcpBulkOperationResult, CcpJsonRepresentation>{
-	enum JsonFieldNames implements CcpJsonFieldName{
-		type
-	}
 
 	public static final FunctionReprocessMapper INSTANCE = new FunctionReprocessMapper();
 	
@@ -44,7 +42,7 @@ class FunctionReprocessMapper implements Function<CcpBulkOperationResult, CcpJso
 		CcpJsonRepresentation putAll = put.mergeWithAnotherJson(bulkItem.json);
 		CcpJsonRepresentation errorDetails = result.getErrorDetails();
 		CcpJsonRepresentation putAll2 = putAll.mergeWithAnotherJson(errorDetails);
-		CcpJsonRepresentation renameKey = putAll2.renameField(JsonFieldNames.type, JnEntityRecordToReprocess.Fields.errorType);
+		CcpJsonRepresentation renameKey = putAll2.renameField(CcpJsonCommonsFields.type, JnEntityRecordToReprocess.Fields.errorType);
 		CcpJsonRepresentation put2 = renameKey.put(JnJsonCommonsFields.id, bulkItem.id);
 		CcpJsonRepresentation put3 = put2.put(JnJsonCommonsFields.entity, entityDetails.entityName);
 		var fieldsValues = JnEntityRecordToReprocess.Fields.values();

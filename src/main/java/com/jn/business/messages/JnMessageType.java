@@ -22,6 +22,8 @@ import com.jn.messages.JnAddDefaultStep;
 import com.jn.messages.JnSendMessageToUser;
 import com.jn.utils.JnSystemProperties;
 
+import com.ccp.json.fields.validation.CcpJsonCommonsFields;
+
 public enum JnMessageType implements CcpHttpApiExecutor{
 	email{
 
@@ -48,9 +50,13 @@ public enum JnMessageType implements CcpHttpApiExecutor{
 			var resolveTemplate = asStringDecoratorText.resolveTemplate(json);
 			String message = resolveTemplate.content;
 			CcpHttpContentType contentType = json.getAsEnum(JnJsonCommonsFields.contentType, CcpHttpContentType.class, CcpHttpContentType.TEXT_HTML);
-			String[] recipients = json.getAsStringArray(JnJsonCommonsFields.email, EmailApiFields.emails);
+			String[] recipients = json.getAsStringArray(JnJsonCommonsFields.email, CcpJsonCommonsFields.emails);
 			emailSender.sendSimpleTextEmailMessage(providerToken, providerUrl, templateId, sender, subject, message, contentType, recipients);
 			JnEntityEmailMessageSent.ENTITY.save(json);
+			return json;
+		}
+
+		public CcpJsonRepresentation getParameters(CcpJsonRepresentation json) {
 			return json;
 		}
 
@@ -70,6 +76,7 @@ public enum JnMessageType implements CcpHttpApiExecutor{
 		 * enviar e trata exceções de rate-limit e bloqueio de bot.
 		 */
 		public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
+		
 			CcpStringDecorator asStringDecorator = json.getAsStringDecorator(JnJsonInstantMessengerFields.botName);
 
 			CcpJsonFieldName botName = asStringDecorator.jsonFieldName();
@@ -122,27 +129,49 @@ public enum JnMessageType implements CcpHttpApiExecutor{
 			return putAll;
 		}
 
+		public CcpJsonRepresentation getParameters(CcpJsonRepresentation json) {
+			
+			String botName = json.getAsString(JnJsonInstantMessengerFields.botName);
+			
+			JnBotType botType = JnBotType.valueOf(botName);
+			
+			CcpJsonRepresentation parameters = botType.getParameters(json);
+			
+			return parameters;
+		}
+
 	}
 	;
 
-	public static enum EmailApiFields implements CcpJsonFieldName{
-		
-		emails, 
-	}
 
 	
 	public static enum InstantMessengerApiFields implements CcpJsonFieldName{
-		maxTriesToSendMessage, 
 		triesToSendMessage, 
-		sleepToSendMessage, 
-		bots, 
-		replyTo, 
+		bots
 	}
 	
 	public static enum JnBotType implements CcpJsonFieldName{
-		support,
-		user,
+		support {
+			CcpJsonRepresentation getParameters(CcpJsonRepresentation json) {
+				String supportLanguage =  JnSystemProperties.INSTANCE.supportLanguage();
+
+			return json
+						.put(JnJsonInstantMessengerFields.botName, this.name())
+						.put(JnJsonCommonsFields.language, supportLanguage);
+			}
+		},
+		user {
+			CcpJsonRepresentation getParameters(CcpJsonRepresentation json) {
+				return json
+						.put(JnJsonInstantMessengerFields.botName, this.name())
+						;
+			}
+		},
+		;
+		abstract CcpJsonRepresentation getParameters(CcpJsonRepresentation json);
+	
 	}
+	
 	
 
 	private static enum InstantMessengerJsonValidator implements CcpJsonFieldName{
@@ -163,6 +192,6 @@ public enum JnMessageType implements CcpHttpApiExecutor{
 			super("This message couldn't be sent. Details: " + json);
 		}
 	}
-
+	public abstract CcpJsonRepresentation getParameters(CcpJsonRepresentation json);
 	public abstract JnAddDefaultStep addDefaultProcessToSendMessage(JnSendMessageToUser sender, JnMessageSenderExceptionHandler exceptionHandler);
 }

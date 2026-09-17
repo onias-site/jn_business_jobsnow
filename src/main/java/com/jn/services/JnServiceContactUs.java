@@ -3,6 +3,7 @@ package com.jn.services;
 import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.decorators.CcpJsonFieldName;
 
+
 /**
  * Serviço de gerenciamento de contatos ("Fale Conosco"). Os três valores ({@code SaveContactUs},
  * {@code ListContactUsByUser}, {@code GetContactUsKpis}) estão com implementações pendentes
@@ -25,9 +26,6 @@ public enum JnServiceContactUs implements JnService {
 		}
 	},
 	;
-	enum JsonFieldNames implements CcpJsonFieldName{
-		activePosition
-	}
 }
 
 enum SaveContactUs implements CcpJsonFieldName{

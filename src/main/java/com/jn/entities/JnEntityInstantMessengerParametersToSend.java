@@ -33,6 +33,7 @@ import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault
 import com.jn.json.fields.validation.JnJsonCommonsFields;
 import com.jn.json.fields.validation.JnJsonInstantMessengerFields;
 
+
 @CcpEntityCache(3600)
 @CcpEntityCustomDecorators(value = {@CcpEntityCustomDecorator(value = JnEntityVersionableBuilder.class, priority = 2),})
 @JnEntityVersionable(JnVersionableEntity.class)
@@ -48,10 +49,6 @@ public class JnEntityInstantMessengerParametersToSend implements CcpEntityConfig
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityInstantMessengerParametersToSend.class).entityInstance;
 
 	
-	public static enum MoreParametersFields implements CcpJsonFieldName{
-		maxTriesToSendMessage,
-		sleepToSendMessage
-	}
 	
 	public static enum Fields implements CcpJsonFieldName{
 		@CcpEntityFieldPrimaryKey
@@ -80,9 +77,9 @@ public class JnEntityInstantMessengerParametersToSend implements CcpEntityConfig
 		CcpJsonRepresentation put = CcpOtherConstants.EMPTY_JSON
 		.put(JnJsonInstantMessengerFields.instantMessageType, JnInstantMessageType.file);
 		CcpJsonRepresentation addToItem = put
-		.addToItem(JnJsonCommonsFields.moreParameters, MoreParametersFields.maxTriesToSendMessage, 10);
+		.addToItem(JnJsonCommonsFields.moreParameters, JnJsonCommonsFields.maxTriesToSendMessage, 10);
 		CcpJsonRepresentation addToItem2 = addToItem
-		.addToItem(JnJsonCommonsFields.moreParameters, MoreParametersFields.sleepToSendMessage, 3000);
+		.addToItem(JnJsonCommonsFields.moreParameters, JnJsonCommonsFields.sleepToSendMessage, 3000);
 		String valorMais = "{" + CcpTemplateFunctions.currentTimeMillis;
 		String valorMaisMais = valorMais + "()}.txt";
 		CcpJsonRepresentation put2 = addToItem2
@@ -107,9 +104,9 @@ public class JnEntityInstantMessengerParametersToSend implements CcpEntityConfig
 		CcpJsonRepresentation put8 = put7
 		.put(JnJsonCommonsFields.templateId, name2);
 		CcpJsonRepresentation addToItem3 = put8
-		.addToItem(JnJsonCommonsFields.moreParameters, MoreParametersFields.maxTriesToSendMessage, 10);
+		.addToItem(JnJsonCommonsFields.moreParameters, JnJsonCommonsFields.maxTriesToSendMessage, 10);
 		CcpJsonRepresentation addToItem4 = addToItem3
-		.addToItem(JnJsonCommonsFields.moreParameters, MoreParametersFields.sleepToSendMessage, 3000);
+		.addToItem(JnJsonCommonsFields.moreParameters, JnJsonCommonsFields.sleepToSendMessage, 3000);
 		CcpJsonRepresentation put9 = addToItem4
 		.put(JnJsonInstantMessengerFields.botName, JnMessageType.JnBotType.support);
 
@@ -122,9 +119,9 @@ public class JnEntityInstantMessengerParametersToSend implements CcpEntityConfig
 		CcpJsonRepresentation put11 = put10
 		.put(JnJsonCommonsFields.templateId, name3);
 		CcpJsonRepresentation addToItem5 = put11
-		.addToItem(JnJsonCommonsFields.moreParameters, MoreParametersFields.maxTriesToSendMessage, 10);
+		.addToItem(JnJsonCommonsFields.moreParameters, JnJsonCommonsFields.maxTriesToSendMessage, 10);
 		CcpJsonRepresentation addToItem6 = addToItem5
-		.addToItem(JnJsonCommonsFields.moreParameters, MoreParametersFields.sleepToSendMessage, 3000);
+		.addToItem(JnJsonCommonsFields.moreParameters, JnJsonCommonsFields.sleepToSendMessage, 3000);
 		CcpJsonRepresentation put12 = addToItem6
 		.put(JnJsonInstantMessengerFields.botName, JnMessageType.JnBotType.support);
 
@@ -137,9 +134,9 @@ public class JnEntityInstantMessengerParametersToSend implements CcpEntityConfig
 		CcpJsonRepresentation put14 = put13
 		.put(JnJsonCommonsFields.templateId, name4);
 		CcpJsonRepresentation addToItem7 = put14
-		.addToItem(JnJsonCommonsFields.moreParameters, MoreParametersFields.maxTriesToSendMessage, 10);
+		.addToItem(JnJsonCommonsFields.moreParameters, JnJsonCommonsFields.maxTriesToSendMessage, 10);
 		CcpJsonRepresentation addToItem8 = addToItem7
-		.addToItem(JnJsonCommonsFields.moreParameters, MoreParametersFields.sleepToSendMessage, 3000);
+		.addToItem(JnJsonCommonsFields.moreParameters, JnJsonCommonsFields.sleepToSendMessage, 3000);
 		CcpJsonRepresentation put15 = addToItem8
 		.put(JnJsonInstantMessengerFields.botName, JnMessageType.JnBotType.support);
 
@@ -152,9 +149,9 @@ public class JnEntityInstantMessengerParametersToSend implements CcpEntityConfig
 		CcpJsonRepresentation put17 = put16
 		.put(JnJsonCommonsFields.templateId, name5);
 		CcpJsonRepresentation addToItem9 = put17
-		.addToItem(JnJsonCommonsFields.moreParameters, MoreParametersFields.maxTriesToSendMessage, 10);
+		.addToItem(JnJsonCommonsFields.moreParameters, JnJsonCommonsFields.maxTriesToSendMessage, 10);
 		CcpJsonRepresentation addToItem10 = addToItem9
-		.addToItem(JnJsonCommonsFields.moreParameters, MoreParametersFields.sleepToSendMessage, 3000);
+		.addToItem(JnJsonCommonsFields.moreParameters, JnJsonCommonsFields.sleepToSendMessage, 3000);
 		CcpJsonRepresentation put18 = addToItem10
 		.put(JnJsonInstantMessengerFields.botName, JnMessageType.JnBotType.support);
 

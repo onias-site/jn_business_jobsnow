@@ -29,6 +29,8 @@ import com.jn.entities.JnEntityInstantMessengerTemplateMessage;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
 import com.jn.utils.JnDeleteKeysFromCache;
 
+import com.ccp.json.fields.validation.CcpJsonCommonsFields;
+
 public class JnSendMessageToUser implements CcpBusiness{
 	
 
@@ -43,8 +45,7 @@ public class JnSendMessageToUser implements CcpBusiness{
 	private final List<CcpEntity> blockEntities = new ArrayList<>();
 
 	public JnCreateStep createStep() {
-		JnCreateStep jnCreateStep = new JnCreateStep(this);
-		return jnCreateStep;
+		return new JnCreateStep(this);
 	}
 
 	public JnAddDefaultStep addDefaultProcessToEmailSending(JnMessageSenderExceptionHandler exceptionHandler) {
@@ -56,8 +57,7 @@ public class JnSendMessageToUser implements CcpBusiness{
 				JnEntityEmailReportedAsSpam.ENTITY,
 				JnEntityEmailMessageSent.ENTITY
 		);
-		JnAddDefaultStep jnAddDefaultStep = new JnAddDefaultStep(addOneStep);
-		return jnAddDefaultStep;
+		return new JnAddDefaultStep(addOneStep);
 	}
 
 	public JnAddDefaultStep addDefaultStepToInstantMessageSending(JnMessageSenderExceptionHandler exceptionHandler) {
@@ -69,8 +69,7 @@ public class JnSendMessageToUser implements CcpBusiness{
 				JnEntityInstantMessengerBotLocked.ENTITY,
 				JnEntityInstantMessengerMessageSent.ENTITY
 		);
-		JnAddDefaultStep jnAddDefaultStep2 = new JnAddDefaultStep(addOneStep);
-		return jnAddDefaultStep2;
+		return new JnAddDefaultStep(addOneStep);
 	}
 
 	JnSendMessageToUser addOneStep(JnBusinessSendHttpRequest messenger, CcpEntity parameterEntity, CcpEntity messageEntity, CcpEntity blockEntity, CcpEntity alreadySentEntity) {
@@ -88,10 +87,7 @@ public class JnSendMessageToUser implements CcpBusiness{
 		return getMessage;
 	}
 
-
-	
-	
-	CcpJsonRepresentation executeAllSteps(String templateId, CcpJsonRepresentation entityValues, String languageToUseInErrorCases) {
+	CcpJsonRepresentation executeAllSteps(String templateId, CcpJsonRepresentation json) {
 		
 		List<CcpEntity> allEntitiesToSearch = new ArrayList<>();
 		
@@ -100,14 +96,16 @@ public class JnSendMessageToUser implements CcpBusiness{
 		allEntitiesToSearch.addAll(this.messageEntities);
 		allEntitiesToSearch.addAll(this.blockEntities);
 		
-		int allEntitiesToSearchSize = allEntitiesToSearch.size();
-
-		CcpEntity[] entities = allEntitiesToSearch.toArray(new CcpEntity[allEntitiesToSearchSize]);
-		CcpJsonRepresentation put2 = entityValues
-				.put(JnJsonCommonsFields.language, languageToUseInErrorCases);
-
-				CcpJsonRepresentation idToSearch = put2
-				.put(JnJsonCommonsFields.templateId, templateId);
+		CcpEntity[] entities = allEntitiesToSearch.toArray(new CcpEntity[allEntitiesToSearch.size()]);
+		
+		CcpJsonRepresentation idToSearch = json.put(JnJsonCommonsFields.templateId, templateId);
+		
+		List<JnMessageType> messageTypes = json.getAsEnumList(JsonFields.messageTypes, JnMessageType.class);
+		
+		for (JnMessageType messageType : messageTypes) {
+			CcpJsonRepresentation parameters = messageType.getParameters(idToSearch);
+			idToSearch = idToSearch.mergeWithAnotherJson(parameters);
+		}
 		
 		CcpCrud crud = CcpDependencyInjection.getDependency(CcpCrud.class);
 		
@@ -125,11 +123,10 @@ public class JnSendMessageToUser implements CcpBusiness{
 			CcpJsonRepresentation result = this.sendMessage(unionAll, idToSearch, index);
 			Class<? extends CcpBusiness> class1 = messenger.processThatSendsHttpRequest.getClass();
 			String simpleName = class1.getSimpleName();
-			CcpFieldName ccpFieldName = new CcpFieldName(simpleName);
-			idToSearch = idToSearch.put(ccpFieldName, result);
+			idToSearch = idToSearch.put(new CcpFieldName(simpleName), result);
 		}
 
-		return entityValues;
+		return json;
 	}
 
 	private CcpJsonRepresentation sendMessage(CcpSelectUnionAll unionAll, CcpJsonRepresentation json, int index) {
@@ -167,11 +164,10 @@ public class JnSendMessageToUser implements CcpBusiness{
 
 		JnSendMessageToUser sender = new JnSendMessageToUser();
 		JnAddDefaultStep addDefaultProcessToSendMessage = new JnAddDefaultStep(sender);
-		String supportLanguage = json.getAsString(JnJsonCommonsFields.language);
 		
 		List<JnMessageType> messageTypes = json.getAsEnumList(JsonFields.messageTypes, JnMessageType.class);
 		
-		String topic = json.getAsString(JsonFields.topic);
+		String topic = json.getAsString(CcpJsonCommonsFields.topic);
 		
 		for (JnMessageType messageType : messageTypes) {
 			JnMessageSenderExceptionHandler exceptionHandler = json.getAsEnum(JsonFields.exceptionHandler, JnMessageSenderExceptionHandler.class);
@@ -179,27 +175,21 @@ public class JnSendMessageToUser implements CcpBusiness{
 			sender = addDefaultProcessToSendMessage.and();
 		}
 		
-		JnSoWithAllAddedStepsAnd soWithAllAddedProcessAnd = addDefaultProcessToSendMessage
-		.soWithAllAddedProcessAnd();
-		JnWithTheTemplateId withTheTemplateEntity = soWithAllAddedProcessAnd
-		.withTheTemplateEntity(topic);
-		CcpJsonRepresentation put2 = json.put(JnJsonCommonsFields.subjectType, topic);
-		JnAndWithTheJsonValues andWithTheMessageValuesFromJson = withTheTemplateEntity
-		.andWithTheMessageValuesFromJson(put2);
-		JnAndWithTheSupportLanguage andWithTheSupportLanguage = andWithTheMessageValuesFromJson
-		.andWithTheSupportLanguage(supportLanguage);
-
-		CcpJsonRepresentation result = andWithTheSupportLanguage
-		.sendAllMessages() 
+		CcpJsonRepresentation put = json.put(JnJsonCommonsFields.subjectType, topic);
+		
+		CcpJsonRepresentation result = addDefaultProcessToSendMessage
+		.soWithAllAddedProcessAnd()
+			.withTheTemplateEntity(topic)
+			.andWithTheMessageValuesFromJson(put)
+		.sendAllMessages()
 		;
 		return result;
 	}
 
-	public CcpJsonRepresentation sendAllMessages(CcpJsonRepresentation json, String topic, 
-			JnMessageType[] messageTypes, JnMessageSenderExceptionHandler exceptionHandler) {
+	public CcpJsonRepresentation sendAllMessages(CcpJsonRepresentation json, String topic, JnMessageType[] messageTypes, JnMessageSenderExceptionHandler exceptionHandler) {
 	
 		CcpJsonRepresentation message = json
-		.put(JsonFields.topic, topic)
+		.put(CcpJsonCommonsFields.topic, topic)
 		.put(JsonFields.messageTypes, messageTypes)
 		.put(JsonFields.exceptionHandler, exceptionHandler);
 		

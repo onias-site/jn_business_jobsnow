@@ -17,6 +17,7 @@ import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeString;
 import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
 
+
 /**
  * Registro de expiração (disposable) de outras entidades. Armazena uma cópia do JSON de uma entidade
  * com timestamp de expiração. Usado por {@code JnDisposableEntity} para implementar TTL sem depender
@@ -71,15 +72,11 @@ public class JnEntityDisposableRecord implements CcpEntityConfigurator {
 		
 		CcpJsonRepresentation innerJson = oneById.getInnerJson(JnJsonCommonsFields.json);
 		CcpJsonRepresentation removeFields = jsonPiece.removeFields(JnJsonCommonsFields.json, Fields.format);
-		CcpJsonRepresentation renameField = removeFields.put(ExtraFields.expirationDate, expirationDate);
+		CcpJsonRepresentation renameField = removeFields.put(JnJsonCommonsFields.expirationDate, expirationDate);
 		CcpJsonRepresentation mergeWithAnotherJson = innerJson.mergeWithAnotherJson(renameField);
-		CcpJsonRepresentation put = mergeWithAnotherJson.put(ExtraFields.dateItWasSaved, dateItWasSaved);
+		CcpJsonRepresentation put = mergeWithAnotherJson.put(JnJsonCommonsFields.dateItWasSaved, dateItWasSaved);
 		return put;
 	}
 }
 
-enum ExtraFields implements CcpJsonFieldName{
-	 dateItWasSaved,
-	 expirationDate
-}
 

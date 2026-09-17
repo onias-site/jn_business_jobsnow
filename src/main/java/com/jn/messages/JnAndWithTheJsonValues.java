@@ -2,6 +2,7 @@ package com.jn.messages;
 
 import com.ccp.decorators.CcpJsonRepresentation;
 
+
 public class JnAndWithTheJsonValues {
 
 	final JnWithTheTemplateId andWithTheTemplateId;
@@ -13,8 +14,13 @@ public class JnAndWithTheJsonValues {
 		this.jsonValues          = jsonValues;
 	}
 
-	public JnAndWithTheSupportLanguage andWithTheSupportLanguage(String supportLanguage) {
-		JnAndWithTheSupportLanguage jnAndWithTheSupportLanguage = new JnAndWithTheSupportLanguage(this, supportLanguage);
-		return jnAndWithTheSupportLanguage;
+	public CcpJsonRepresentation sendAllMessages() {
+		CcpJsonRepresentation executeAllSteps = this.andWithTheTemplateId.soExecuteAllAddedSteps.getMessage
+				.executeAllSteps(
+						this.andWithTheTemplateId.templateId,
+						this.jsonValues
+				);
+		return executeAllSteps;
 	}
+
 }

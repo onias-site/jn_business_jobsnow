@@ -5,7 +5,8 @@ import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.especifications.db.utils.entity.CcpEntity;
 import com.jn.entities.JnEntityDisposableRecord;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
-import com.jn.services.JnServiceLogin.JsonFieldNames;
+
+import com.ccp.json.fields.validation.CcpJsonCommonsFields;
 
 class LoadDataAboutToken implements CcpBusiness{
 	
@@ -14,7 +15,7 @@ class LoadDataAboutToken implements CcpBusiness{
 	public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
 		CcpJsonRepresentation innerJsonFromPath = json.getInnerJsonFromPath(CcpEntity.JsonFieldNames._entities, JnEntityDisposableRecord.ENTITY);
 		CcpJsonRepresentation whenAnyFieldsAreFound = innerJsonFromPath.whenAnyFieldsAreFound(JsonTransformer.INSTANCE, JnJsonCommonsFields.timestamp);
-		CcpJsonRepresentation jsonPiece = json.getJsonPiece(JnJsonCommonsFields.email, JsonFieldNames.sessionToken);
+		CcpJsonRepresentation jsonPiece = json.getJsonPiece(JnJsonCommonsFields.email, CcpJsonCommonsFields.sessionToken);
 		CcpJsonRepresentation mergedJson = whenAnyFieldsAreFound.mergeWithAnotherJson(jsonPiece);
 		return mergedJson;
 		
