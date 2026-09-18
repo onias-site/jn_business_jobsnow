@@ -14,64 +14,26 @@ import com.jn.entities.decorators.annotations.JnEntitySendMessageToUserWhenWrite
 import com.jn.entities.decorators.enums.JnEntitySendMessageToUserWhenWriteOperationType;
 import com.jn.messages.JnSendMessageToUser;
 
-public class JnSendMessageToUserEntityWhenWrite extends CcpEntityDelegator  {
-	
+/**
+ * Base compartilhada pelos decorators que enviam mensagens ao usuário em torno das operações de
+ * escrita. Concentra a leitura de {@code @JnEntitySendMessageToUserWhenWrite} e o disparo das
+ * mensagens; cada subclasse decide em qual fase ({@code before} ou {@code after}) o disparo acontece
+ * e ocupa a sua própria posição na cadeia de decorators.
+ */
+public abstract class JnSendMessageToUserEntityOnWrite extends CcpEntityDelegator {
+
 	private final JnEntitySendMessageToUserWhenWrite annotation;
-	
-	public JnSendMessageToUserEntityWhenWrite(CcpEntity entity, JnEntitySendMessageToUserWhenWrite annotation) {
+
+	protected JnSendMessageToUserEntityOnWrite(CcpEntity entity, JnEntitySendMessageToUserWhenWrite annotation) {
 		super(entity);
 		this.annotation = annotation;
 	}
 
 	/**
-	 * As mensagens do fluxo {@code after} só são enviadas quando a operação aconteceu de fato: o
-	 * {@code delete} encontrou o registro para remover e o {@code save} incluiu um documento novo.
+	 * Dispara as mensagens configuradas para a fase e a operação informadas, devolvendo o JSON
+	 * resultante do encadeamento dos envios.
 	 */
-	public boolean delete(CcpJsonRepresentation json) {
-		CcpJsonRepresentation _before = this.executeFlow(json, CcpEntityOperationPhase._before, CcpEntityDecoratorOperationType.delete);
-		boolean deleted = this.entity.delete(_before);
-
-		boolean nothingWasDeleted = false == deleted;
-
-		if(nothingWasDeleted) {
-			return false;
-		}
-
-		this.executeFlow(_before, CcpEntityOperationPhase._after, CcpEntityDecoratorOperationType.delete);
-		return deleted;
-
-	}
-
-	public boolean deleteAnyWhere(CcpJsonRepresentation json) {
-		CcpJsonRepresentation _before = this.executeFlow(json, CcpEntityOperationPhase._before, CcpEntityDecoratorOperationType.deleteAnyWhere);
-		boolean deleted = this.entity.deleteAnyWhere(_before);
-
-		boolean nothingWasDeleted = false == deleted;
-
-		if(nothingWasDeleted) {
-			return false;
-		}
-
-		this.executeFlow(_before, CcpEntityOperationPhase._after, CcpEntityDecoratorOperationType.deleteAnyWhere);
-		return deleted;
-	}
-
-	public boolean save(CcpJsonRepresentation json) {
-		CcpJsonRepresentation _before = this.executeFlow(json, CcpEntityOperationPhase._before, CcpEntityDecoratorOperationType.save);
-		boolean inserted = this.entity.save(_before);
-
-		boolean documentWasOnlyUpdated = false == inserted;
-
-		if(documentWasOnlyUpdated) {
-			return false;
-		}
-
-		this.executeFlow(_before, CcpEntityOperationPhase._after, CcpEntityDecoratorOperationType.save);
-		return inserted;
-	}
-
-	
-	private CcpJsonRepresentation executeFlow(CcpJsonRepresentation json, CcpEntityOperationPhase when, CcpEntityDecoratorOperationType operation) {
+	protected CcpJsonRepresentation executeFlow(CcpJsonRepresentation json, CcpEntityOperationPhase when, CcpEntityDecoratorOperationType operation) {
 
 		JnEntitySendMessageToUserWhenWriteOperation[] operations = this.annotation.value();
 

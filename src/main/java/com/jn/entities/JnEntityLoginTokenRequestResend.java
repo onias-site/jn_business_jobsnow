@@ -25,7 +25,8 @@ import com.jn.entities.decorators.annotations.JnEntitySendMessageToUserWhenWrite
 import com.jn.entities.decorators.annotations.JnEntitySendMessageToUserWhenWriteOperation;
 import com.jn.entities.decorators.builders.JnEntityAsyncWriterBuilder;
 import com.jn.entities.decorators.builders.JnEntityDisposableBuilder;
-import com.jn.entities.decorators.builders.JnEntitySendMessageToUserWhenWriteBuilder;
+import com.jn.entities.decorators.builders.JnEntitySendMessageToUserAfterWriteBuilder;
+import com.jn.entities.decorators.builders.JnEntitySendMessageToUserBeforeWriteBuilder;
 import com.jn.entities.decorators.engine.JnAsyncWriterEntity;
 import com.jn.entities.decorators.engine.JnDisposableEntity;
 import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault;
@@ -36,8 +37,9 @@ import com.jn.utils.JnDeleteKeysFromCache;
 
 @CcpEntityCustomDecorators(value = {
 		@CcpEntityCustomDecorator(value = JnEntityDisposableBuilder.class, priority = 1)
-		,@CcpEntityCustomDecorator(value = JnEntityAsyncWriterBuilder.class, priority = 6)
-		,@CcpEntityCustomDecorator(value = JnEntitySendMessageToUserWhenWriteBuilder.class, priority = 5)
+		,@CcpEntityCustomDecorator(value = JnEntityAsyncWriterBuilder.class, priority = 8)
+		,@CcpEntityCustomDecorator(value = JnEntitySendMessageToUserBeforeWriteBuilder.class, priority = 7)
+		,@CcpEntityCustomDecorator(value = JnEntitySendMessageToUserAfterWriteBuilder.class, priority = 5)
 		
 })
 @JnEntitySendMessageToUserWhenWrite({

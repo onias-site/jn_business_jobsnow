@@ -1,6 +1,7 @@
 package com.jn.messages;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Supplier;
 
@@ -8,6 +9,7 @@ import com.ccp.business.CcpBusiness;
 import com.ccp.decorators.CcpFieldName;
 import com.ccp.decorators.CcpJsonFieldName;
 import com.ccp.decorators.CcpJsonRepresentation;
+import com.ccp.decorators.CcpStringDecorator;
 import com.ccp.dependency.injection.CcpDependencyInjection;
 import com.ccp.especifications.db.crud.CcpCrud;
 import com.ccp.especifications.db.crud.CcpSelectUnionAll;
@@ -168,14 +170,15 @@ public class JnSendMessageToUser implements CcpBusiness{
 		List<JnMessageType> messageTypes = json.getAsEnumList(JsonFields.messageTypes, JnMessageType.class);
 		
 		String topic = json.getAsString(CcpJsonCommonsFields.topic);
-		
+		CcpBusiness jsonHandler =  new CcpStringDecorator(topic).reflection().newInstance();
+		CcpJsonRepresentation handledJsonBeforeSendMessage = jsonHandler.execute(json);
 		for (JnMessageType messageType : messageTypes) {
 			JnMessageSenderExceptionHandler exceptionHandler = json.getAsEnum(JsonFields.exceptionHandler, JnMessageSenderExceptionHandler.class);
 			addDefaultProcessToSendMessage = messageType.addDefaultProcessToSendMessage(sender, exceptionHandler);
 			sender = addDefaultProcessToSendMessage.and();
 		}
 		
-		CcpJsonRepresentation put = json.put(JnJsonCommonsFields.subjectType, topic);
+		CcpJsonRepresentation put = handledJsonBeforeSendMessage.put(JnJsonCommonsFields.subjectType, topic);
 		
 		CcpJsonRepresentation result = addDefaultProcessToSendMessage
 		.soWithAllAddedProcessAnd()
@@ -187,10 +190,11 @@ public class JnSendMessageToUser implements CcpBusiness{
 	}
 
 	public CcpJsonRepresentation sendAllMessages(CcpJsonRepresentation json, String topic, JnMessageType[] messageTypes, JnMessageSenderExceptionHandler exceptionHandler) {
-	
+		//TODO A VALIDACAO TEM QUE SER CAPAZ DE TRATAR ARRAY COMO LIST
+		List<JnMessageType> asList = Arrays.asList(messageTypes);
 		CcpJsonRepresentation message = json
 		.put(CcpJsonCommonsFields.topic, topic)
-		.put(JsonFields.messageTypes, messageTypes)
+		.put(JsonFields.messageTypes, asList)
 		.put(JsonFields.exceptionHandler, exceptionHandler);
 		
 		CcpJsonRepresentation execute = this.execute(message);

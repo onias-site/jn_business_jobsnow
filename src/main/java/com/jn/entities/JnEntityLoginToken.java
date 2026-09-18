@@ -21,11 +21,15 @@ import com.ccp.json.validations.fields.annotations.CcpJsonCopyFieldValidationsFr
 import com.jn.business.login.JnBusinessPrepareLoginTokenBeforeSave;
 import com.jn.business.messages.JnMessages;
 import com.jn.db.bulk.JnExecuteBulkOperation;
+import com.jn.entities.decorators.annotations.JnEntityAsyncWriter;
 import com.jn.entities.decorators.annotations.JnEntityDisposable;
 import com.jn.entities.decorators.annotations.JnEntitySendMessageToUserWhenWrite;
 import com.jn.entities.decorators.annotations.JnEntitySendMessageToUserWhenWriteOperation;
+import com.jn.entities.decorators.builders.JnEntityAsyncWriterBuilder;
 import com.jn.entities.decorators.builders.JnEntityDisposableBuilder;
-import com.jn.entities.decorators.builders.JnEntitySendMessageToUserWhenWriteBuilder;
+import com.jn.entities.decorators.builders.JnEntitySendMessageToUserAfterWriteBuilder;
+import com.jn.entities.decorators.builders.JnEntitySendMessageToUserBeforeWriteBuilder;
+import com.jn.entities.decorators.engine.JnAsyncWriterEntity;
 import com.jn.entities.decorators.engine.JnDisposableEntity;
 import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
@@ -33,8 +37,10 @@ import com.jn.utils.JnDeleteKeysFromCache;
 
 @CcpEntityCache(86400)
 @CcpEntityCustomDecorators(value = {
+		@CcpEntityCustomDecorator(value = JnEntityAsyncWriterBuilder.class, priority = 8),
 		@CcpEntityCustomDecorator(value = JnEntityDisposableBuilder.class, priority = 1)
-		,@CcpEntityCustomDecorator(value = JnEntitySendMessageToUserWhenWriteBuilder.class, priority = 6)
+		,@CcpEntityCustomDecorator(value = JnEntitySendMessageToUserBeforeWriteBuilder.class, priority = 7)
+		,@CcpEntityCustomDecorator(value = JnEntitySendMessageToUserAfterWriteBuilder.class, priority = 5)
 		})
 @CcpEntityOperations({
 		@CcpEntityOperation(operationType = CcpEntityOperationType.beforeSaveFromMainEntity,  execute = {JnBusinessPrepareLoginTokenBeforeSave.class}, operationHandlers = {}),
@@ -45,8 +51,7 @@ import com.jn.utils.JnDeleteKeysFromCache;
 				messageTemplate = JnMessages.JnNotifyUserAboutLoginToken.class
 				)
 })
-
-
+@JnEntityAsyncWriter(JnAsyncWriterEntity.class)
 @CcpEntityTwin(
 		twinEntityName = "login_token_locked",
 		bulkExecutorClass = JnExecuteBulkOperation.class,

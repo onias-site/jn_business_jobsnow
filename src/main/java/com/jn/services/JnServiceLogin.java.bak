@@ -109,7 +109,7 @@ public enum JnServiceLogin implements JnService {
 
 			CcpJsonRepresentation duplicateValueFromField = json.duplicateValueFromField(CcpJsonCommonsFields.sessionToken, JnEntityLoginSessionValidation.Fields.token);
 
-			CcpBusiness lockPassword = CcpEntityOperationType.delete.getOperationCallback(JnEntityLoginPassword.ENTITY);
+			CcpBusiness lockPassword = JnEntityLoginPassword.ENTITY.getEntityMetaData().getOperationCallback(CcpEntityOperationType.delete);
 
 			CcpBusiness incrementAttempts = JnEntityLoginSessionTokenAttempts.incrementAttempts(3, lockPassword);
 
@@ -127,7 +127,7 @@ public enum JnServiceLogin implements JnService {
 
 	CreateLoginEmail {
 		public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
-			CcpBusiness action = CcpEntityOperationType.save.getOperationCallback(JnEntityLoginEmail.ENTITY);
+			CcpBusiness action = JnEntityLoginEmail.ENTITY.getEntityMetaData().getOperationCallback(CcpEntityOperationType.save);
 			CcpJsonRepresentation result = new CcpGetEntityId(json)
 			.toBeginProcedureAnd()
 				.ifThisIdIsPresentInEntity(JnEntityLoginToken.ENTITY.getTwinEntity()).returnStatus(JnProcessStatusCreateLoginEmail.lockedToken).and()
@@ -176,7 +176,7 @@ public enum JnServiceLogin implements JnService {
 	},
 	SaveAnswers {
 		public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
-			CcpBusiness action = CcpEntityOperationType.save.getOperationCallback(JnEntityLoginAnswers.ENTITY);
+			CcpBusiness action = JnEntityLoginAnswers.ENTITY.getEntityMetaData().getOperationCallback(CcpEntityOperationType.save);
 
 			new CcpGetEntityId(json)
 			.toBeginProcedureAnd()
@@ -200,7 +200,7 @@ public enum JnServiceLogin implements JnService {
 
 			CcpJsonRepresentation[] parametersToSearchInAllEntities = this.createParametersToSearchInAllEntities(jsonWithSubjectType);
 
-			CcpBusiness sendUserToken = CcpEntityOperationType.save.getOperationCallback(JnEntityLoginToken.ENTITY);
+			CcpBusiness sendUserToken = JnEntityLoginToken.ENTITY.getEntityMetaData().getOperationCallback(CcpEntityOperationType.save);
 
 			CcpJsonRepresentation result = new CcpGetEntityId(parametersToSearchInAllEntities)
 			.toBeginProcedureAnd()
@@ -262,7 +262,9 @@ public enum JnServiceLogin implements JnService {
 
 			CcpEntity twinEntity = entity.getTwinEntity();
 
-			CcpBusiness save = CcpEntityOperationType.save.getOperationCallback(entity);
+			CcpEntityMetaData entityMetaData = entity.getEntityMetaData();
+
+			CcpBusiness save = entityMetaData.getOperationCallback(CcpEntityOperationType.save);
 
 			CcpGetEntityId ccpGetEntityId = super.getCcpGetEntityId(json, entity);
 
@@ -292,7 +294,9 @@ public enum JnServiceLogin implements JnService {
 
 			CcpEntity twinEntity = entity.getTwinEntity();
 
-			CcpBusiness save = CcpEntityOperationType.save.getOperationCallback(entity);
+			CcpEntityMetaData entityMetaData = entity.getEntityMetaData();
+
+			CcpBusiness save = entityMetaData.getOperationCallback(CcpEntityOperationType.save);
 
 			CcpGetEntityId ccpGetEntityId = super.getCcpGetEntityId(json, entity);
 
@@ -313,7 +317,7 @@ public enum JnServiceLogin implements JnService {
 	}
 	;
 	protected CcpBusiness createFunctionToEvaluatePasswordAttempts() {
-		CcpBusiness lockPassword = CcpEntityOperationType.delete.getOperationCallback(JnEntityLoginPassword.ENTITY);
+		CcpBusiness lockPassword = JnEntityLoginPassword.ENTITY.getEntityMetaData().getOperationCallback(CcpEntityOperationType.delete);
 		JnFunctionMensageriaSender executeLogin = new JnFunctionMensageriaSender(JnBusinessExecuteLogin.INSTANCE);
 		CcpBusiness functionToEvaluatePasswordAttempts = JnBusinessEvaluateAttempts.builder()
 				.entityToGetTheAttempts(JnEntityLoginPasswordAttempts.ENTITY)
@@ -331,7 +335,7 @@ public enum JnServiceLogin implements JnService {
 	}
 
 	protected CcpBusiness createFunctionToEvaluateTokenAttempts() {
-		CcpBusiness lockToken = CcpEntityOperationType.delete.getOperationCallback(JnEntityLoginToken.ENTITY);
+		CcpBusiness lockToken = JnEntityLoginToken.ENTITY.getEntityMetaData().getOperationCallback(CcpEntityOperationType.delete);
 		JnFunctionMensageriaSender updatePassword = new JnFunctionMensageriaSender(JnBusinessSavePassword.INSTANCE);
 
 		CcpBusiness evaluateTokenAttempts = JnBusinessEvaluateAttempts.builder()

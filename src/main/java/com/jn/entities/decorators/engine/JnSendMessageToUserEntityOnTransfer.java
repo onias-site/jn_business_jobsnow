@@ -14,50 +14,26 @@ import com.jn.entities.decorators.annotations.JnEntitySendMessageToUserWhenTrans
 import com.jn.entities.decorators.enums.JnEntitySendMessageToUserWhenTransferOperationType;
 import com.jn.messages.JnSendMessageToUser;
 
+/**
+ * Base compartilhada pelos decorators que enviam mensagens ao usuário em torno das transferências de
+ * dados entre entidades. Concentra a leitura de {@code @JnEntitySendMessageToUserWhenTransfer} e o
+ * disparo das mensagens; cada subclasse decide em qual fase ({@code before} ou {@code after}) o
+ * disparo acontece e ocupa a sua própria posição na cadeia de decorators.
+ */
+public abstract class JnSendMessageToUserEntityOnTransfer extends CcpEntityDelegator {
 
-public class JnSendMessageToUserEntityWhenTransfer extends CcpEntityDelegator  {
-	
 	private final JnEntitySendMessageToUserWhenTransfer annotation;
-	
-	public JnSendMessageToUserEntityWhenTransfer(CcpEntity entity, JnEntitySendMessageToUserWhenTransfer annotation) {
+
+	protected JnSendMessageToUserEntityOnTransfer(CcpEntity entity, JnEntitySendMessageToUserWhenTransfer annotation) {
 		super(entity);
 		this.annotation = annotation;
 	}
 
 	/**
-	 * As mensagens do fluxo {@code after} só são enviadas quando a transferência aconteceu de fato,
-	 * ou seja, quando havia registro de origem para ser copiado ou movido.
+	 * Dispara as mensagens configuradas para a fase e a transferência informadas, devolvendo o JSON
+	 * resultante do encadeamento dos envios.
 	 */
-	public boolean copyDataTo(CcpJsonRepresentation json, CcpEntity targetEntity) {
-		CcpJsonRepresentation _before = this.executeFlow(json, CcpEntityOperationPhase._before, CcpEntityDecoratorTransferType.copyDataTo, targetEntity);
-		boolean copied = this.entity.copyDataTo(_before, targetEntity);
-
-		boolean nothingWasCopied = false == copied;
-
-		if(nothingWasCopied) {
-			return false;
-		}
-
-		this.executeFlow(_before, CcpEntityOperationPhase._after, CcpEntityDecoratorTransferType.copyDataTo, targetEntity);
-		return copied;
-	}
-
-	public boolean transferDataTo(CcpJsonRepresentation json, CcpEntity targetEntity) {
-		CcpJsonRepresentation _before = this.executeFlow(json, CcpEntityOperationPhase._before, CcpEntityDecoratorTransferType.transferDataTo, targetEntity);
-		boolean transfered = this.entity.transferDataTo(_before, targetEntity);
-
-		boolean nothingWasTransfered = false == transfered;
-
-		if(nothingWasTransfered) {
-			return false;
-		}
-
-		this.executeFlow(_before, CcpEntityOperationPhase._after, CcpEntityDecoratorTransferType.transferDataTo, targetEntity);
-		return transfered;
-	}
-
-	
-	private CcpJsonRepresentation executeFlow(CcpJsonRepresentation json, CcpEntityOperationPhase when, CcpEntityDecoratorTransferType operation, CcpEntity targetEntity) {
+	protected CcpJsonRepresentation executeFlow(CcpJsonRepresentation json, CcpEntityOperationPhase when, CcpEntityDecoratorTransferType operation, CcpEntity targetEntity) {
 
 		JnEntitySendMessageToUserWhenTransferOperation[] operations = this.annotation.value();
 
@@ -111,6 +87,4 @@ public class JnSendMessageToUserEntityWhenTransfer extends CcpEntityDelegator  {
 
 		return result;
 	}
-
-
 }
