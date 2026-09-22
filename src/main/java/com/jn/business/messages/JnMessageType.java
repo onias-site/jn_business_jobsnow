@@ -56,8 +56,22 @@ public enum JnMessageType implements CcpHttpApiExecutor{
 			return json;
 		}
 
+		/**
+		 * O idioma compõe a chave primária do template de email, então sem ele a mensagem não é
+		 * localizada. Quem chama pode informá-lo no json; quando não informa, vale o idioma configurado
+		 * para o sistema.
+		 */
 		public CcpJsonRepresentation getParameters(CcpJsonRepresentation json) {
-			return json;
+
+			boolean languageWasInformed = json.containsField(JnJsonCommonsFields.language);
+
+			if(languageWasInformed) {
+				return json;
+			}
+
+			String systemLanguage = JnSystemProperties.INSTANCE.supportLanguage();
+			CcpJsonRepresentation parameters = json.put(JnJsonCommonsFields.language, systemLanguage);
+			return parameters;
 		}
 
 	},
@@ -131,7 +145,7 @@ public enum JnMessageType implements CcpHttpApiExecutor{
 
 		public CcpJsonRepresentation getParameters(CcpJsonRepresentation json) {
 			
-			String botName = json.getAsString(JnJsonInstantMessengerFields.botName);
+			String botName = json.getOrDefault(JnJsonInstantMessengerFields.botName, () -> JnBotType.support.name());
 			
 			JnBotType botType = JnBotType.valueOf(botName);
 			

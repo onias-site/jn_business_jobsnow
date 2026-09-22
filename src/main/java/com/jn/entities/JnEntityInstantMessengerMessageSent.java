@@ -52,7 +52,7 @@ public class JnEntityInstantMessengerMessageSent implements CcpEntityConfigurato
 		contentType,
 		@CcpJsonCopyFieldValidationsFrom(JnJsonInstantMessengerFields.class)
 		fileName,
-		@CcpJsonFieldValidatorRequired
+		@CcpEntityFieldPrimaryKey
 		@CcpEntityFieldTransformer(JnJsonTransformersFieldEntityMessageHash.class)
 		message,
 

@@ -33,12 +33,19 @@ public class JnEntityMessageDidNotSent implements CcpEntityConfigurator {
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		email, 
 		
+		/**
+		 * Nome da entidade cuja pesquisa no union-all impediu o envio, tal como gravado por
+		 * {@code JnMustNotSendMessage} e pesquisado por {@code JnServiceLogin}.
+		 */
 		@CcpEntityFieldPrimaryKey
 		@CcpJsonFieldValidatorRequired
-		@CcpJsonFieldTypeString(allowedValuesEnum = JnMustNotSendMessage.class)
-		reasonType,
-		
 		@CcpJsonFieldTypeString
+		reasonType,
+
+		/**
+		 * Item de {@link JnMustNotSendMessage} — a lista de entidades a que o {@code reasonType} pertence.
+		 */
+		@CcpJsonFieldTypeString(allowedValuesEnum = JnMustNotSendMessage.class)
 		@CcpJsonFieldValidatorRequired
 		reasonDescription,
 		

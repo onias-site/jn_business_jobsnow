@@ -33,8 +33,10 @@ import com.jn.utils.JnLanguage;
 @CcpEntityFieldsValidator(classReferenceWithTheFields = JnEntityInstantMessengerTemplateMessage.Fields.class)
 /**
  * Armazena templates de mensagens instantâneas por idioma e {@code templateId}. O campo
- * {@code message} suporta variáveis de template. Versionável, cache de 1 hora. Possui registro
- * inicial para o template de notificação de erro em português.
+ * {@code message} suporta variáveis de template. Versionável, cache de 1 hora. Possui registros
+ * iniciais em português para a notificação de erro e para os pedidos de reenvio e de desbloqueio de
+ * token, tanto pendentes quanto atendidos — cada um deles precisa do template correspondente, pois o
+ * envio é recusado quando o template não existe.
  */
 public class JnEntityInstantMessengerTemplateMessage  implements CcpEntityConfigurator {
 
@@ -72,21 +74,10 @@ public class JnEntityInstantMessengerTemplateMessage  implements CcpEntityConfig
 				CcpJsonRepresentation notifyAboutSolvedLockedToken = put4
 				.put(JnJsonCommonsFields.language, JnLanguage.portuguese)
 		;
-		CcpJsonRepresentation put5 = CcpOtherConstants.EMPTY_JSON
-				.put(JnJsonCommonsFields.message, "Ao endereço {email}, envie a seguinte mensagem:\n\n\nVocê solicitou o reenvio de seu token para (re) cadastro / desbloqueio de senha. Atendendo ao seu pedido, o token que você deve informar no campo de token é {token}");
-				String name3 = JnMessages.JnNotifySupportAboutSolvedResendLoginToken.class.getName();
-				CcpJsonRepresentation put6 = put5
-				.put(JnJsonCommonsFields.templateId, name3);
-
-				CcpJsonRepresentation notifyAboutSolvedResendToken = put6
-				.put(JnJsonCommonsFields.language, JnLanguage.portuguese)
-		;
-		
 		List<CcpBulkItem> createBulkItems = CcpEntityConfigurator.super.toCreateBulkItems(
 				ENTITY
 				, notifyError
 				, notifyAboutSolvedLockedToken
-				, notifyAboutSolvedResendToken
 				);
 
 		return createBulkItems;

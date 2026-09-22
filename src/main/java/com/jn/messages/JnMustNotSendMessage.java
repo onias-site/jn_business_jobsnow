@@ -67,13 +67,30 @@ public enum JnMustNotSendMessage{
 		String reasonDescription = this.name();
 		CcpJsonRepresentation put = json
 				.put(JnEntityMessageDidNotSent.Fields.reasonDetails,  reasonDetails)
-				.put(JnEntityMessageDidNotSent.Fields.reasonMessage,  reasonMessage)
 				.put(JnEntityMessageDidNotSent.Fields.reasonType,  entityMetaData.entityName)
-				
+				.put(JnEntityMessageDidNotSent.Fields.reasonDescription,  reasonDescription)
 				;
-		CcpJsonRepresentation jsonToSave = put.put(JnEntityMessageDidNotSent.Fields.reasonDescription,  reasonDescription);
+		CcpJsonRepresentation jsonToSave = this.putReasonMessage(put, reasonMessage);
 		JnEntityMessageDidNotSent.ENTITY.save(jsonToSave);
 		throw new MessageDidNotSend(jsonToSave);
+	}
+
+	/**
+	 * O campo é opcional na entidade, que por outro lado não aceita string vazia. Quando o motivo não
+	 * traz mensagem — caso do registro simplesmente ausente no union-all — o campo é retirado do json,
+	 * para que a gravação do diagnóstico não seja recusada pela validação.
+	 */
+	private CcpJsonRepresentation putReasonMessage(CcpJsonRepresentation json, String reasonMessage) {
+
+		boolean thereIsNoReasonMessage = reasonMessage.trim().isEmpty();
+
+		if(thereIsNoReasonMessage) {
+			CcpJsonRepresentation removeFields = json.removeFields(JnEntityMessageDidNotSent.Fields.reasonMessage);
+			return removeFields;
+		}
+
+		CcpJsonRepresentation put = json.put(JnEntityMessageDidNotSent.Fields.reasonMessage, reasonMessage);
+		return put;
 	}
 	
 	@SuppressWarnings("serial")

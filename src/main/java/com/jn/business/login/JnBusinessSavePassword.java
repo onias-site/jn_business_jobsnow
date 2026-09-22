@@ -5,6 +5,9 @@ import com.ccp.especifications.db.bulk.handlers.CcpBulkHandlerDelete;
 import com.ccp.especifications.db.bulk.handlers.CcpBulkHandlerSave;
 import com.ccp.especifications.db.bulk.handlers.CcpEntityBulkHandlerTransferRecordToTwinEntity;
 import com.ccp.especifications.db.utils.entity.CcpEntity;
+
+import java.util.Arrays;
+
 import com.ccp.business.CcpBusiness;
 import com.ccp.constants.CcpOtherConstants;
 import com.jn.db.bulk.JnExecuteBulkOperation;
@@ -36,10 +39,10 @@ public class JnBusinessSavePassword implements CcpBusiness {
 	@SuppressWarnings("unchecked")
 	public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
 
-		CcpEntityBulkHandlerTransferRecordToTwinEntity executeLogout = new CcpEntityBulkHandlerTransferRecordToTwinEntity(JnEntityLoginSessionValidation.ENTITY);
+		CcpEntityBulkHandlerTransferRecordToTwinEntity executeLogout = new CcpEntityBulkHandlerTransferRecordToTwinEntity(JnEntityLoginSessionValidation.ENTITY, x -> Arrays.asList());
 		
 		CcpEntity twinEntity = JnEntityLoginPassword.ENTITY.getTwinEntity();
-		CcpEntityBulkHandlerTransferRecordToTwinEntity registerPasswordUnlock = new CcpEntityBulkHandlerTransferRecordToTwinEntity(twinEntity);
+		CcpEntityBulkHandlerTransferRecordToTwinEntity registerPasswordUnlock = new CcpEntityBulkHandlerTransferRecordToTwinEntity(twinEntity, x -> Arrays.asList());
 		CcpBulkHandlerDelete removePasswordAttempts = new CcpBulkHandlerDelete(JnEntityLoginPasswordAttempts.ENTITY);
 
 		CcpJsonRepresentation renameField = json.renameField(CcpJsonCommonsFields.sessionToken, JnEntityLoginSessionValidation.Fields.token);

@@ -1,5 +1,7 @@
 package com.jn.business.login;
 
+import java.util.Arrays;
+
 import com.ccp.business.CcpBusiness;
 import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.especifications.db.bulk.handlers.CcpBulkHandlerDelete;
@@ -28,7 +30,7 @@ public class JnBusinessExecuteLogout implements CcpBusiness{
 	@SuppressWarnings("unchecked")
 	public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
 
-		CcpEntityBulkHandlerTransferRecordToTwinEntity executeLogout = new CcpEntityBulkHandlerTransferRecordToTwinEntity(JnEntityLoginSessionValidation.ENTITY);
+		CcpEntityBulkHandlerTransferRecordToTwinEntity executeLogout = new CcpEntityBulkHandlerTransferRecordToTwinEntity(JnEntityLoginSessionValidation.ENTITY, x -> Arrays.asList());
 		CcpBulkHandlerDelete deleteLoginSessionConflict = new CcpBulkHandlerDelete(JnEntityLoginSessionConflict.ENTITY);
 		JnExecuteBulkOperation.INSTANCE.
 		executeSelectUnionAllThenExecuteBulkOperation(

@@ -1,19 +1,20 @@
 package com.jn.business.login;
 
+import java.util.Arrays;
+
 import com.ccp.business.CcpBusiness;
 import com.ccp.constants.CcpOtherConstants;
 import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.especifications.db.bulk.handlers.CcpBulkHandlerDelete;
 import com.ccp.especifications.db.bulk.handlers.CcpEntityBulkHandlerTransferRecordToTwinEntity;
 import com.ccp.especifications.db.utils.entity.CcpEntity;
+import com.ccp.json.fields.validation.CcpJsonCommonsFields;
 import com.jn.db.bulk.JnExecuteBulkOperation;
 import com.jn.db.bulk.handlers.JnBulkHandlerRegisterLogin;
 import com.jn.entities.JnEntityLoginPassword;
 import com.jn.entities.JnEntityLoginPasswordAttempts;
 import com.jn.entities.JnEntityLoginSessionValidation;
 import com.jn.utils.JnDeleteKeysFromCache;
-
-import com.ccp.json.fields.validation.CcpJsonCommonsFields;
 
 /**
  * Executa o login do usuário após validação bem-sucedida da senha. Em operação bulk
@@ -37,7 +38,7 @@ public class JnBusinessExecuteLogin implements CcpBusiness {
 		CcpJsonRepresentation renameField = json.renameField(CcpJsonCommonsFields.sessionToken, JnEntityLoginSessionValidation.Fields.token);
 		
 		CcpEntity twinEntity = JnEntityLoginPassword.ENTITY.getTwinEntity();
-		CcpEntityBulkHandlerTransferRecordToTwinEntity executeUnlock = new CcpEntityBulkHandlerTransferRecordToTwinEntity(twinEntity);
+		CcpEntityBulkHandlerTransferRecordToTwinEntity executeUnlock = new CcpEntityBulkHandlerTransferRecordToTwinEntity(twinEntity, x -> Arrays.asList());
 		CcpEntity entityAttempts = JnEntityLoginPasswordAttempts.ENTITY;
 		
 		CcpBulkHandlerDelete removeAttempts = new CcpBulkHandlerDelete(entityAttempts);

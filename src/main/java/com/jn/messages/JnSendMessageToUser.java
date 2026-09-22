@@ -10,10 +10,12 @@ import com.ccp.decorators.CcpFieldName;
 import com.ccp.decorators.CcpJsonFieldName;
 import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.decorators.CcpStringDecorator;
+import com.ccp.decorators.CcpTextDecorator;
 import com.ccp.dependency.injection.CcpDependencyInjection;
 import com.ccp.especifications.db.crud.CcpCrud;
 import com.ccp.especifications.db.crud.CcpSelectUnionAll;
 import com.ccp.especifications.db.utils.entity.CcpEntity;
+import com.ccp.especifications.db.utils.entity.decorators.engine.CcpErrorEntityPrimaryKeyIsMissing;
 import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidatorArray;
 import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidatorRequired;
 import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeString;
@@ -110,7 +112,9 @@ public class JnSendMessageToUser implements CcpBusiness{
 		}
 		
 		CcpCrud crud = CcpDependencyInjection.getDependency(CcpCrud.class);
-		
+
+		idToSearch = this.mergeSendingParameters(crud, idToSearch);
+
 		CcpSelectUnionAll unionAll = crud.unionAll(idToSearch, JnDeleteKeysFromCache.INSTANCE, entities);
 
 		for (int index = 0; index < this.alreadySentEntities.size(); index++) {
@@ -129,6 +133,79 @@ public class JnSendMessageToUser implements CcpBusiness{
 		}
 
 		return json;
+	}
+
+	/**
+	 * Resolve, antes da busca condensada que alimenta as validações, os registros que guardam os
+	 * parâmetros e o texto de cada envio. Campos como o chatId do destinatário e a mensagem do template
+	 * só existem nesses registros, e sem eles as chaves primárias das demais entidades pesquisadas no
+	 * union-all ficam incompletas: a entidade não chega a ser consultada e a validação a reporta como
+	 * chave primária faltante. Os valores já presentes no json continuam tendo precedência sobre os
+	 * recuperados, como acontece na montagem da mensagem. Quando a própria chave primária do registro de
+	 * parâmetros não pode ser calculada, nada é mesclado e o diagnóstico fica a cargo das validações.
+	 */
+	private CcpJsonRepresentation mergeSendingParameters(CcpCrud crud, CcpJsonRepresentation json) {
+
+		List<CcpEntity> entitiesWithTheSendingParameters = new ArrayList<>();
+
+		entitiesWithTheSendingParameters.addAll(this.parameterEntities);
+		entitiesWithTheSendingParameters.addAll(this.messageEntities);
+
+		CcpEntity[] entities = entitiesWithTheSendingParameters.toArray(new CcpEntity[entitiesWithTheSendingParameters.size()]);
+
+		CcpSelectUnionAll sendingParameters = crud.unionAll(json, JnDeleteKeysFromCache.INSTANCE, entities);
+
+		CcpJsonRepresentation result = json;
+
+		for (CcpEntity entity : entitiesWithTheSendingParameters) {
+
+			Supplier<CcpJsonRepresentation> jsonSupplier = result.getJsonSupplier();
+
+			try {
+				CcpJsonRepresentation record = entity.getRecordFromUnionAll(sendingParameters, jsonSupplier);
+				CcpJsonRepresentation flattenedRecord = this.flattenMoreParameters(record);
+				result = flattenedRecord.mergeWithAnotherJson(result);
+
+			} catch (CcpErrorEntityPrimaryKeyIsMissing e) {
+				continue;
+			}
+		}
+
+		CcpJsonRepresentation resultWithTheMessageResolved = this.resolveMessageTemplate(result);
+
+		return resultWithTheMessageResolved;
+	}
+
+	/**
+	 * Os parâmetros extras do envio ficam num json interno, mas o texto da mensagem os referencia pelo
+	 * nome simples, então eles também precisam estar na raiz — é o mesmo desempacotamento que a montagem
+	 * da mensagem faz. O json interno é preservado.
+	 */
+	private CcpJsonRepresentation flattenMoreParameters(CcpJsonRepresentation record) {
+
+		CcpJsonRepresentation moreParameters = record.getInnerJson(JnJsonCommonsFields.moreParameters);
+		CcpJsonRepresentation flattenedRecord = record.mergeWithAnotherJson(moreParameters);
+		return flattenedRecord;
+	}
+
+	/**
+	 * Troca o texto do template pelo texto já resolvido com os valores deste envio. O texto resolvido é o
+	 * que identifica a mensagem: ele compõe a chave primária da entidade que registra os envios já feitos,
+	 * e é pelo template cru que mensagens destinadas a usuários diferentes acabariam com a mesma chave —
+	 * a segunda delas recusada como se fosse repetição da primeira.
+	 */
+	private CcpJsonRepresentation resolveMessageTemplate(CcpJsonRepresentation json) {
+
+		boolean thereIsNoMessage = false == json.containsField(JnJsonCommonsFields.message);
+
+		if(thereIsNoMessage) {
+			return json;
+		}
+
+		CcpTextDecorator template = json.getAsTextDecorator(JnJsonCommonsFields.message);
+		CcpTextDecorator resolvedTemplate = template.resolveTemplate(json);
+		CcpJsonRepresentation withTheMessageResolved = json.put(JnJsonCommonsFields.message, resolvedTemplate.content);
+		return withTheMessageResolved;
 	}
 
 	private CcpJsonRepresentation sendMessage(CcpSelectUnionAll unionAll, CcpJsonRepresentation json, int index) {
