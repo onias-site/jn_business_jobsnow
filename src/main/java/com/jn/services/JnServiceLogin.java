@@ -298,15 +298,17 @@ public enum JnServiceLogin implements JnService {
 
 			CcpJsonRepresentation result = ccpGetEntityId
 			.toBeginProcedureAnd()
+				.loadThisIdFromEntity(JnEntityDisposableRecord.ENTITY).and()
 				.ifThisIdIsNotPresentInEntity(JnEntityLoginToken.ENTITY.getTwinEntity()).returnStatus(JnProcessStatusUnlockLoginToken.statusTokenNotLocked).and()
 				.ifThisIdIsPresentInEntity(twinEntity).returnStatus(JnProcessStatusUnlockLoginToken.statusTokenAlredyUnlocked).and()
 				.ifThisIdIsPresentInEntity(entity).returnStatus(JnProcessStatusUnlockLoginToken.statusAlreadyRequested)
 				.andFinallyReturningTheseFields(
 						JnJsonCommonsFields.expirationDate,
 						JnJsonCommonsFields.dateItWasSaved,
+						JnJsonCommonsFields.timestamp,
 						CcpJsonCommonsFields.sessionToken
 						)
-			.endThisProcedureRetrievingTheResultingData(this, CcpOtherConstants.DO_NOTHING, save, JnDeleteKeysFromCache.INSTANCE);
+			.endThisProcedureRetrievingTheResultingData(this, LoadDataAboutToken.INSTANCE, save, JnDeleteKeysFromCache.INSTANCE);
 
 			return result;
 		}

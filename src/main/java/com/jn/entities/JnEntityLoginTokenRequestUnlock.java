@@ -29,7 +29,6 @@ import com.jn.entities.decorators.builders.JnEntitySendMessageToUserAfterWriteBu
 import com.jn.entities.decorators.builders.JnEntitySendMessageToUserBeforeWriteBuilder;
 import com.jn.entities.decorators.engine.JnAsyncWriterEntity;
 import com.jn.entities.decorators.engine.JnDisposableEntity;
-import com.jn.entities.fields.transformers.JnJsonTransformersFieldEntityPasswordRandom;
 import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault;
 import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDoNothing;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
@@ -80,16 +79,7 @@ public class JnEntityLoginTokenRequestUnlock implements CcpEntityConfigurator {
 		email,
 		
 		@CcpJsonCopyFieldValidationsFrom(JnJsonInstantMessengerFields.class)
-		chatId, 
-		
-		/**
-		 * Senha de desbloqueio, sempre sorteada com oito caracteres pelo transformador — o valor que
-		 * chegue no pedido é descartado. Por isso o campo não tem validação: ela recairia sobre a entrada,
-		 * que é justamente o que não vai ser gravado, e recusaria o pedido de quem mandasse a sua própria
-		 * senha junto (é o que o campo {@code password} significa em todo o resto do fluxo de login).
-		 */
-		@CcpEntityFieldTransformer(JnJsonTransformersFieldEntityPasswordRandom.class)
-		password
+		chatId
 		;
 	}
 }

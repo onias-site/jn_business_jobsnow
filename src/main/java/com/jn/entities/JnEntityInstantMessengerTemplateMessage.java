@@ -65,19 +65,31 @@ public class JnEntityInstantMessengerTemplateMessage  implements CcpEntityConfig
 				CcpJsonRepresentation notifyError = put2
 				.put(JnJsonCommonsFields.language, JnLanguage.portuguese)
 		;
-		CcpJsonRepresentation put3 = CcpOtherConstants.EMPTY_JSON
-				.put(JnJsonCommonsFields.message, "Ao endereço {email}, envie a seguinte mensagem:\n\n\nVocê solicitou o desbloqueio de seu token para (re) cadastro / desbloqueio de senha. Atendendo ao seu pedido, a senha é {password}, esta senha deve ser informada para desbloqueio de seu token. O token que você deve informar no campo de token é {token}");
-				String name2 = JnMessages.JnNotifySupportAboutSolvedLockedLoginToken.class.getName();
-				CcpJsonRepresentation put4 = put3
-				.put(JnJsonCommonsFields.templateId, name2);
+				
+				CcpJsonRepresentation put3 = CcpOtherConstants.EMPTY_JSON
+						.put(JnJsonCommonsFields.message, "Ao endereço {email}, envie a seguinte mensagem:\n\n\nVocê solicitou o desbloqueio de seu token para (re) cadastro / desbloqueio de senha. Atendendo ao seu pedido. O token que você deve informar no campo de token é {token}");
+						String name2 = JnMessages.JnNotifySupportAboutSolvedLockedLoginToken.class.getName();
+						CcpJsonRepresentation put4 = put3
+						.put(JnJsonCommonsFields.templateId, name2);
 
-				CcpJsonRepresentation notifyAboutSolvedLockedToken = put4
-				.put(JnJsonCommonsFields.language, JnLanguage.portuguese)
-		;
+						CcpJsonRepresentation notifyAboutSolvedLockedToken = put4
+						.put(JnJsonCommonsFields.language, JnLanguage.portuguese)
+				;
+				CcpJsonRepresentation put5 = CcpOtherConstants.EMPTY_JSON
+						.put(JnJsonCommonsFields.message, "Ao endereço {email}, envie a seguinte mensagem:\n\n\nVocê solicitou o reenvio de seu token para (re) cadastro / desbloqueio de senha. Atendendo ao seu pedido, o token que você deve informar no campo de token é {token}");
+						String name3 = JnMessages.JnNotifySupportAboutSolvedResendLoginToken.class.getName();
+						CcpJsonRepresentation put6 = put5
+						.put(JnJsonCommonsFields.templateId, name3);
+
+						CcpJsonRepresentation notifyAboutSolvedResendToken = put6
+						.put(JnJsonCommonsFields.language, JnLanguage.portuguese)
+				;
+				
 		List<CcpBulkItem> createBulkItems = CcpEntityConfigurator.super.toCreateBulkItems(
 				ENTITY
 				, notifyError
 				, notifyAboutSolvedLockedToken
+				, notifyAboutSolvedResendToken				
 				);
 
 		return createBulkItems;
