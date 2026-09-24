@@ -1,7 +1,6 @@
 package com.jn.messages;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.function.Supplier;
 
@@ -267,11 +266,9 @@ public class JnSendMessageToUser implements CcpBusiness{
 	}
 
 	public CcpJsonRepresentation sendAllMessages(CcpJsonRepresentation json, String topic, JnMessageType[] messageTypes, JnMessageSenderExceptionHandler exceptionHandler) {
-		//TODO A VALIDACAO TEM QUE SER CAPAZ DE TRATAR ARRAY COMO LIST
-		List<JnMessageType> asList = Arrays.asList(messageTypes);
 		CcpJsonRepresentation message = json
 		.put(CcpJsonCommonsFields.topic, topic)
-		.put(JsonFields.messageTypes, asList)
+		.put(JsonFields.messageTypes, messageTypes)
 		.put(JsonFields.exceptionHandler, exceptionHandler);
 		
 		CcpJsonRepresentation execute = this.execute(message);

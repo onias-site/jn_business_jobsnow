@@ -1,7 +1,7 @@
 package com.jn.json.fields.validation;
 
 import com.ccp.decorators.CcpJsonFieldName;
-import com.ccp.especifications.http.CcpHttpContentType;
+import com.ccp.json.defaultvalues.annotations.CcpJsonFieldDefaultValue;
 import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeNestedJson;
 import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeNumber;
 import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeString;
@@ -22,17 +22,11 @@ public enum JnJsonInstantMessengerFields implements CcpJsonFieldName{
 	@CcpJsonFieldTypeNestedJson
 	moreParameters,
 	
-	@CcpJsonFieldTypeString(maxLength = 100)
-	templateId,
-	
 	@CcpJsonFieldTypeString
 	caption,
 
-	@CcpJsonFieldTypeString(allowedValuesEnum = CcpHttpContentType.class)
-	contentType,
-	
 	@CcpJsonFieldTypeString
-	//LATER DEFAULT VALUE
+	@CcpJsonFieldDefaultValue(defaultStrings = "{file}")
 	fileName,
 	
 	@CcpJsonFieldTypeString(allowedValuesEnum = JnInstantMessageType.class)

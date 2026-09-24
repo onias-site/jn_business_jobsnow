@@ -68,7 +68,7 @@ public class JnBusinessResetLoginToken implements CcpBusiness{
 				JnEntityEmailMessageSent.ENTITY
 				);
 
-	//TODO LANGUAGE DO USUARIO DENTRO DE ANSWERS
+	//LATER LANGUAGE DO USUARIO DENTRO DE ANSWERS
 		CcpJsonRepresentation put = json.put(JnJsonCommonsFields.language, JnLanguage.portuguese);
 		return put;
 	}

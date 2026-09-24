@@ -71,7 +71,6 @@ import com.jn.utils.JnDeleteKeysFromCache;
 public class JnEntityLoginTokenRequestResend implements CcpEntityConfigurator {
 	
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityLoginTokenRequestResend.class).entityInstance;
-	//FIXME sempre está copiando o  JnJsonCommonsFields
 	public static enum Fields implements CcpJsonFieldName{
 		@CcpEntityFieldPrimaryKey
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)

@@ -2,6 +2,7 @@ package com.jn.json.fields.validation;
 
 import com.ccp.decorators.CcpEmailDecorator;
 import com.ccp.decorators.CcpJsonFieldName;
+import com.ccp.especifications.http.CcpHttpContentType;
 import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeNestedJson;
 import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeNumberUnsigned;
 import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeString;
@@ -69,7 +70,7 @@ public enum JnJsonCommonsFields implements CcpJsonFieldName{
 	@CcpJsonFieldTypeNestedJson
 	moreParameters,
 	
-	@CcpJsonFieldTypeString(maxLength = 100)
+	@CcpJsonFieldTypeString(maxLength = 100, isJavaClass = true)
 	templateId,
 	
 	@CcpJsonFieldTypeString(allowedValuesEnum = JnLanguage.class)
@@ -116,8 +117,8 @@ public enum JnJsonCommonsFields implements CcpJsonFieldName{
 	
 	@CcpJsonFieldTypeNumberUnsigned(minValue = 200, maxValue = 599)
 	httpStatus,
-	//TODO FUNDIR COM O DO INSTANT MESSENGER
-	@CcpJsonFieldTypeString
+
+	@CcpJsonFieldTypeString(allowedValuesEnum = CcpHttpContentType.class)
 	contentType,
 
 	/*
