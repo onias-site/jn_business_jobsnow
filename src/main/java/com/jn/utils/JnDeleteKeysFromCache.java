@@ -25,14 +25,19 @@ public class JnDeleteKeysFromCache implements  CcpBusiness, Consumer<String[]> {
 	
 	private JnDeleteKeysFromCache() {}
 	
+	/**
+	 * Apaga todas as chaves numa só conversa com o servidor de cache.
+	 *
+	 * <p>Antes daqui saía um laço que apagava chave por chave, e como
+	 * {@code CcpCrud.deleteKeysInCache} dispara esta limpeza antes de <b>toda</b> busca — inclusive as
+	 * de leitura pura — uma consulta que tocava nove entidades virava nove idas à rede.</p>
+	 */
 	public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
-		
+
 		Collection<String> allCacheKeys = json.getAsStringList(JsonFieldNames.keysToDeleteInCache);
-		
-		for (String cacheKey : allCacheKeys) {
-			CcpCacheDecorator cache = new CcpCacheDecorator(cacheKey);
-			cache.delete();
-		}
+
+		CcpCacheDecorator.deleteAll(allCacheKeys);
+
 		return json;
 	}
 

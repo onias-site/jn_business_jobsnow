@@ -62,10 +62,18 @@ public class JnMensageriaReceiver extends CcpMensageriaReceiver{
 		}
 	}
 	
+	/**
+	 * Registra o desfecho do processamento na tarefa assíncrona.
+	 *
+	 * <p>O instante de início vem da própria mensagem, e não de uma consulta ao banco:
+	 * {@code JnFunctionMensageriaSender.getMessageDetails} grava {@code started} no json <b>antes</b>
+	 * de publicá-lo, então o campo chega aqui junto com a mensagem. Buscar o registro só para reler
+	 * esse número custava uma ida ao banco por mensagem consumida, em todo fluxo assíncrono do
+	 * sistema.</p>
+	 */
 	private JnMensageriaReceiver saveResult(CcpEntity entity, CcpJsonRepresentation messageDetails, CcpJsonRepresentation response, boolean success) {
 		Long finished = System.currentTimeMillis();
-		CcpJsonRepresentation oneById = entity.getOneById(messageDetails);
-		Long started = oneById.getAsLongNumber(JnEntityAsyncTask.Fields.started);
+		Long started = messageDetails.getOrDefault(JnEntityAsyncTask.Fields.started, () -> finished);
 		Long enlapsedTime = finished - started;
 		CcpJsonRepresentation put = messageDetails
 				.put(JnEntityAsyncTask.Fields.enlapsedTime, enlapsedTime);

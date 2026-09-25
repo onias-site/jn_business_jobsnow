@@ -207,6 +207,18 @@ public class JnSendMessageToUser implements CcpBusiness{
 		return withTheMessageResolved;
 	}
 
+	/**
+	 * Monta a mensagem deste canal com os parâmetros e o template recuperados do union-all e a entrega
+	 * ao mensageiro.
+	 *
+	 * <p>Quem registra o envio em {@code alreadySentEntities} é o próprio {@link JnMessageType}, e não
+	 * este método. Só o tipo de mensagem sabe se a entrega de fato aconteceu e o que o provedor
+	 * respondeu: o {@code instantMessenger} grava o json já mesclado com a resposta do mensageiro — que
+	 * traz o identificador da mensagem — e <b>não</b> grava nada quando o bot foi bloqueado pelo
+	 * destinatário ou quando o provedor recusou por excesso de requisições, casos em que ele devolve o
+	 * json normalmente. Gravar aqui, a partir do retorno, registrava o envio duas vezes no caminho
+	 * feliz e registrava como enviada uma mensagem que nunca saiu nos dois caminhos de exceção.</p>
+	 */
 	private CcpJsonRepresentation sendMessage(CcpSelectUnionAll unionAll, CcpJsonRepresentation json, int index) {
 
 		Supplier<CcpJsonRepresentation> jsonSupplier = json.getJsonSupplier();
@@ -231,10 +243,6 @@ public class JnSendMessageToUser implements CcpBusiness{
 		CcpJsonRepresentation message              = mergeWithAnotherJson.mergeWithAnotherJson(json);
 		CcpJsonRepresentation result               = messenger.execute(message);
 
-		CcpEntity alreadySentEntity = this.alreadySentEntities.get(index);
-		
-		alreadySentEntity.save(result);
-		
 		return result;
 	}
 
