@@ -15,12 +15,12 @@ public class JnEntityAsyncWriterBuilder extends CcpCustomDecoratorEntity{
 	@SuppressWarnings("unchecked")
 	public CcpEntity getEntity(Class<?> configurationClass, CcpEntity entity) {
 		var annotation = configurationClass.getAnnotation(JnEntityAsyncWriter.class);
-		Class<CcpEntity> value = (Class<CcpEntity>) annotation.value();
+		Class<CcpEntity> decoratorClass = (Class<CcpEntity>) annotation.value();
 
 		try {
-			Constructor<CcpEntity> constructor = value.getConstructor(CcpEntity.class);
-			CcpEntity newInstance = constructor.newInstance(entity);
-			return newInstance;
+			Constructor<CcpEntity> constructor = decoratorClass.getConstructor(CcpEntity.class);
+			CcpEntity decoratedEntity = constructor.newInstance(entity);
+			return decoratedEntity;
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}

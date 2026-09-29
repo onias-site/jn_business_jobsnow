@@ -19,6 +19,7 @@ import com.jn.entities.decorators.builders.JnEntityDisposableBuilder;
 import com.jn.entities.decorators.engine.JnDisposableEntity;
 import com.jn.entities.fields.transformers.JnJsonTransformersFieldEntityMessageHash;
 import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault;
+import com.jn.json.fields.validation.JnJsonCommonsFields;
 import com.jn.json.fields.validation.JnJsonInstantMessengerFields;
 
 @CcpEntityCache(3600)
@@ -27,9 +28,9 @@ import com.jn.json.fields.validation.JnJsonInstantMessengerFields;
 @CcpEntityFieldsTransformer(classReferenceWithTheFields = JnJsonTransformersFieldsEntityDefault.class)
 @CcpEntityFieldsValidator(classReferenceWithTheFields = JnEntityInstantMessengerMessageSent.Fields.class)
 /**
- * Registra mensagens instantâneas enviadas com sucesso. O campo {@code message} é armazenado como
- * hash SHA-1 para funcionar como chave primária e evitar reenvio da mesma mensagem para o mesmo
- * destinatário na mesma hora. Descartável por hora, cache de 1 hora.
+ * Records instant messages sent successfully. The {@code message} field is stored as a SHA-1
+ * hash to work as the primary key and prevent the same message from being resent to the same
+ * recipient within the same hour. Disposable hourly, 1-hour cache.
  */
 public class JnEntityInstantMessengerMessageSent implements CcpEntityConfigurator {
 	
@@ -48,7 +49,7 @@ public class JnEntityInstantMessengerMessageSent implements CcpEntityConfigurato
 		instantMessageType,
 		@CcpJsonCopyFieldValidationsFrom(JnJsonInstantMessengerFields.class)
 		caption,
-		@CcpJsonCopyFieldValidationsFrom(JnJsonInstantMessengerFields.class)
+		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		contentType,
 		@CcpJsonCopyFieldValidationsFrom(JnJsonInstantMessengerFields.class)
 		fileName,

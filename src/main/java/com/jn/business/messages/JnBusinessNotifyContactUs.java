@@ -4,9 +4,9 @@ import com.ccp.business.CcpBusiness;
 import com.ccp.decorators.CcpJsonRepresentation;
 
 /**
- * Notifica o suporte sobre um novo contato recebido (formulário "Fale Conosco").
- * Utiliza JnBusinessNotifySupport com a entidade JnEntityContactUs como entidade
- * de bloqueio de reenvio e JnSendMessageToUser como remetente.
+ * Notifies support about a new contact received ("Contact Us" form).
+ * Uses JnBusinessNotifySupport with the JnEntityContactUs entity as the resend-lock
+ * entity and JnSendMessageToUser as the sender.
  */
 public class JnBusinessNotifyContactUs implements CcpBusiness{
 		

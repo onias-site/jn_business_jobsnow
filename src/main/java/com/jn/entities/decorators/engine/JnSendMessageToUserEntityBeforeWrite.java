@@ -7,9 +7,9 @@ import com.ccp.especifications.db.utils.entity.decorators.enums.CcpEntityOperati
 import com.jn.entities.decorators.annotations.JnEntitySendMessageToUserWhenWrite;
 
 /**
- * Decorator que envia apenas as mensagens do fluxo {@code before} das operações de escrita. Fica na
- * parte externa da cadeia (prioridade alta) para que o envio aconteça antes dos demais decorators e o
- * JSON resultante seja o que segue para dentro. O fluxo {@code after} é responsabilidade de
+ * Decorator that sends only the messages of the {@code before} flow of write operations. It stays in
+ * the outer part of the chain (high priority) so that the sending happens before the other decorators
+ * and the resulting JSON is what goes further in. The {@code after} flow is the responsibility of
  * {@code JnSendMessageToUserEntityAfterWrite}.
  */
 public class JnSendMessageToUserEntityBeforeWrite extends JnSendMessageToUserEntityOnWrite {
@@ -19,20 +19,20 @@ public class JnSendMessageToUserEntityBeforeWrite extends JnSendMessageToUserEnt
 	}
 
 	public boolean delete(CcpJsonRepresentation json) {
-		CcpJsonRepresentation _before = this.executeFlow(json, CcpEntityOperationPhase._before, CcpEntityDecoratorOperationType.delete);
-		boolean deleted = this.entity.delete(_before);
+		CcpJsonRepresentation preparedJson = this.executeFlow(json, CcpEntityOperationPhase._before, CcpEntityDecoratorOperationType.delete);
+		boolean deleted = this.entity.delete(preparedJson);
 		return deleted;
 	}
 
 	public boolean deleteAnyWhere(CcpJsonRepresentation json) {
-		CcpJsonRepresentation _before = this.executeFlow(json, CcpEntityOperationPhase._before, CcpEntityDecoratorOperationType.deleteAnyWhere);
-		boolean deleted = this.entity.deleteAnyWhere(_before);
+		CcpJsonRepresentation preparedJson = this.executeFlow(json, CcpEntityOperationPhase._before, CcpEntityDecoratorOperationType.deleteAnyWhere);
+		boolean deleted = this.entity.deleteAnyWhere(preparedJson);
 		return deleted;
 	}
 
 	public boolean save(CcpJsonRepresentation json) {
-		CcpJsonRepresentation _before = this.executeFlow(json, CcpEntityOperationPhase._before, CcpEntityDecoratorOperationType.save);
-		boolean inserted = this.entity.save(_before);
+		CcpJsonRepresentation preparedJson = this.executeFlow(json, CcpEntityOperationPhase._before, CcpEntityDecoratorOperationType.save);
+		boolean inserted = this.entity.save(preparedJson);
 		return inserted;
 	}
 }

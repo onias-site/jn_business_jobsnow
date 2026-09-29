@@ -11,6 +11,7 @@ import com.ccp.especifications.db.utils.entity.fields.annotations.CcpEntityField
 import com.ccp.json.validations.fields.annotations.CcpJsonCopyFieldValidationsFrom;
 import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidatorRequired;
 import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault;
+import com.jn.json.fields.validation.JnJsonCommonsFields;
 import com.jn.json.fields.validation.JnJsonInstantMessengerFields;
 
 
@@ -18,9 +19,9 @@ import com.jn.json.fields.validation.JnJsonInstantMessengerFields;
 @CcpEntityFieldsTransformer(classReferenceWithTheFields = JnJsonTransformersFieldsEntityDefault.class)
 @CcpEntityFieldsValidator(classReferenceWithTheFields = JnEntityInstantMessengerBotLocked.Fields.class)
 /**
- * Registra combinações de bot + usuário ({@code chatId}) em que o bot foi bloqueado pelo usuário.
- * O sistema de envio de mensagens instantâneas consulta esta entidade para evitar novas tentativas
- * para destinatários que bloquearam o bot. Cache de 1 hora.
+ * Records bot + user ({@code chatId}) combinations in which the bot was blocked by the user.
+ * The instant message sending system checks this entity to avoid new attempts to recipients
+ * who blocked the bot. 1-hour cache.
  */
 public class JnEntityInstantMessengerBotLocked implements CcpEntityConfigurator {
 	
@@ -34,7 +35,7 @@ public class JnEntityInstantMessengerBotLocked implements CcpEntityConfigurator 
 		@CcpJsonCopyFieldValidationsFrom(JnJsonInstantMessengerFields.class)
 		chatId, 
 		@CcpJsonFieldValidatorRequired
-		@CcpJsonCopyFieldValidationsFrom(JnJsonInstantMessengerFields.class)
+		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		subjectType, 
 		;
 	}

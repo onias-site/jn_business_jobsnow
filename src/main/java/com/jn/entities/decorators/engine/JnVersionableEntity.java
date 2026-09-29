@@ -21,9 +21,9 @@ import com.jn.utils.JnDeleteKeysFromCache;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
 
 /**
- * Decorador que adiciona versionamento/auditoria a entidades marcadas com {@code @CcpEntityVersionable}.
- * A cada operação bulk, gera automaticamente um registro de histórico em {@code JnEntityVersionable}
- * com o estado anterior do JSON, a operação realizada, data e hora.
+ * Decorator that adds versioning/auditing to entities marked with {@code @CcpEntityVersionable}.
+ * On every bulk operation, it automatically produces a history record in {@code JnEntityVersionable}
+ * with the previous state of the JSON, the operation performed, date and time.
  */
 public class JnVersionableEntity extends CcpDefaultEntityDelegator<Object>{
 	
@@ -34,19 +34,17 @@ public class JnVersionableEntity extends CcpDefaultEntityDelegator<Object>{
 	private final CcpBulkItem getVersionableToBulkOperationToBulkOperation(CcpJsonRepresentation json, CcpBulkEntityOperationType operation) {
 		
 		CcpJsonRepresentation versionable = this.getVersionableRecord(json, operation);
-		String calculateId = JnEntityVersionable.ENTITY.calculateId(versionable);
-		CcpBulkItem ccpBulkItem = new CcpBulkItem(versionable, CcpBulkEntityOperationType.create, JnEntityVersionable.ENTITY, calculateId);
+		String historyRecordId = JnEntityVersionable.ENTITY.calculateId(versionable);
+		CcpBulkItem historyBulkItem = new CcpBulkItem(versionable, CcpBulkEntityOperationType.create, JnEntityVersionable.ENTITY, historyRecordId);
 				
-		return ccpBulkItem;
+		return historyBulkItem;
 	}
 
 	/**
-	 * Devolve o registro que será retratado na linha de histórico: o que está gravado no banco quando
-	 * ele existe, ou os campos da entidade presentes no json quando ainda não existe.
+	 * Returns the record that will be pictured in the history row: the one saved in the database when
+	 * it exists, or the entity fields present in the json when it does not exist yet.
 	 */
-	private CcpJsonRepresentation getRecordToAudit(CcpJsonRepresentation json) {
-
-		CcpEntityMetaData entityDetails = this.entity.getEntityMetaData();
+	private static CcpJsonRepresentation getRecordToAudit(CcpEntityMetaData entityDetails, CcpJsonRepresentation json) {
 
 		CcpBusiness ifNotFound = x ->
 
@@ -56,18 +54,16 @@ public class JnVersionableEntity extends CcpDefaultEntityDelegator<Object>{
 			return onlyExistingFields;
 		};
 
-		CcpJsonRepresentation oneById = entityDetails.getOneByIdOrHandleItIfThisIdWasNotFound(json, ifNotFound);
+		CcpJsonRepresentation recordToAudit = entityDetails.getOneByIdOrHandleItIfThisIdWasNotFound(json, ifNotFound);
 
-		return oneById;
+		return recordToAudit;
 	}
 
 	/**
-	 * Calcula o valor gravado no campo {@code id} da linha de histórico: a chave primária do registro
-	 * serializada. É por ele, junto com o nome da entidade, que o histórico de um registro é localizado.
+	 * Computes the value saved in the {@code id} field of the history row: the record's serialized
+	 * primary key. It is by this value, together with the entity name, that a record's history is found.
 	 */
-	private String getVersionableRecordId(CcpJsonRepresentation recordToAudit) {
-
-		CcpEntityMetaData entityDetails = this.entity.getEntityMetaData();
+	private static String getVersionableRecordId(CcpEntityMetaData entityDetails, CcpJsonRepresentation recordToAudit) {
 
 		Supplier<CcpJsonRepresentation> jsonSupplier = recordToAudit.getJsonSupplier();
 		CcpJsonRepresentation primaryKeyValues = entityDetails.getPrimaryKeyValues(jsonSupplier);
@@ -81,27 +77,27 @@ public class JnVersionableEntity extends CcpDefaultEntityDelegator<Object>{
 
 		CcpEntityMetaData entityDetails = this.entity.getEntityMetaData();
 
-		CcpJsonRepresentation oneById = this.getRecordToAudit(json);
+		CcpJsonRepresentation recordToAudit = getRecordToAudit(entityDetails, json);
 
-		String id = this.getVersionableRecordId(oneById);
-		CcpTimeDecorator ccpTimeDecorator = new CcpTimeDecorator();
+		String id = getVersionableRecordId(entityDetails, recordToAudit);
+		CcpTimeDecorator currentTime = new CcpTimeDecorator();
 
-		String formattedDateTime = ccpTimeDecorator.getFormattedDateTime("dd/MM/yyyy HH:mm:ss.SSS");
-		CcpJsonRepresentation put = CcpOtherConstants.EMPTY_JSON
+		String formattedDateTime = currentTime.getFormattedDateTime("dd/MM/yyyy HH:mm:ss.SSS");
+		CcpJsonRepresentation jsonWithId = CcpOtherConstants.EMPTY_JSON
 				.put(JnJsonCommonsFields.id, id);
-				String valorMais = "" + oneById;
-				CcpJsonRepresentation put2 = put
-				.put(JnJsonCommonsFields.json, valorMais);
-				CcpJsonRepresentation put3 = put2
+				String recordAsText = "" + recordToAudit;
+				CcpJsonRepresentation jsonWithRecord = jsonWithId
+				.put(JnJsonCommonsFields.json, recordAsText);
+				CcpJsonRepresentation jsonWithOperation = jsonWithRecord
 				.put(JnJsonCommonsFields.operation, operation);
-				CcpJsonRepresentation put4 = put3
+				CcpJsonRepresentation jsonWithDate = jsonWithOperation
 				.put(JnJsonCommonsFields.date, formattedDateTime);
-				CcpJsonRepresentation put5 = put4
+				CcpJsonRepresentation jsonWithEntity = jsonWithDate
 				.put(JnJsonCommonsFields.entity, entityDetails.entityName);
 				long currentTimeMillis = System.currentTimeMillis();
 
 		CcpJsonRepresentation audit = 
-				put5
+				jsonWithEntity
 				.put(JnJsonCommonsFields.timestamp, currentTimeMillis)
 		;
 		return audit;
@@ -110,77 +106,57 @@ public class JnVersionableEntity extends CcpDefaultEntityDelegator<Object>{
 
 
 	/**
-	 * Enfileira o expurgo do registro: a exclusão do documento na própria tabela e a de todas as linhas
-	 * de histórico gravadas para ele em {@code JnEntityVersionable}. O trabalho é assíncrono porque o
-	 * histórico cresce uma linha por operação já realizada sobre o registro, e apagá-lo em linha
-	 * penalizaria quem só pediu para remover um documento.
+	 * Builds the message consumed by {@code JnBusinessDeleteVersionableRecords}: the {@code id} each
+	 * history row stores and the names under which they may have been saved (main and twin).
 	 *
-	 * <p>O retorno mantém o significado que {@code CcpEntity.deleteAnyWhere} dá ao booleano — o registro
-	 * existia antes da remoção — e não o de {@code JnAsyncWriterEntity}, que informa apenas que a
-	 * mensagem foi aceita. Isso é possível porque a existência é consultada aqui, antes do enfileiramento.
+	 * <p>The one that enqueues the purge is {@code JnVersionablePurgeEntity}, not this decorator: this one
+	 * sits inside the twin, and the twin's {@code deleteAnyWhere} never reaches it. The building lives here
+	 * because it uses the same {@code id} computation as the saving of the history rows — both sides
+	 * must agree, otherwise the purge does not find what was saved. It must be called before the
+	 * deletion: the saved record is read to extract the primary key.
 	 */
-	public boolean deleteAnyWhere(CcpJsonRepresentation json) {
+	static CcpJsonRepresentation getDeletionRequest(CcpEntity entity, CcpJsonRepresentation json) {
 
-		boolean existedBeforeTheDeletion = this.exists(json);
+		CcpEntityMetaData entityDetails = entity.getEntityMetaData();
 
-		CcpJsonRepresentation deletionRequest = this.getDeletionRequest(json);
+		CcpJsonRepresentation recordToDelete = getRecordToAudit(entityDetails, json);
 
-		JnBusinessDeleteVersionableRecords.INSTANCE.sendToMensageria(deletionRequest);
+		String versionableRecordId = getVersionableRecordId(entityDetails, recordToDelete);
 
-		return existedBeforeTheDeletion;
-	}
-
-	/**
-	 * Monta a mensagem consumida por {@code JnBusinessDeleteVersionableRecords}: o par
-	 * ({@code entity}, {@code id}) que localiza o histórico do registro, as tabelas de onde o próprio
-	 * registro deve sair e o id do documento nelas.
-	 */
-	private CcpJsonRepresentation getDeletionRequest(CcpJsonRepresentation json) {
-
-		CcpEntityMetaData entityDetails = this.entity.getEntityMetaData();
-
-		CcpJsonRepresentation recordToDelete = this.getRecordToAudit(json);
-
-		String versionableRecordId = this.getVersionableRecordId(recordToDelete);
-
-		String[] entitiesToDelete = this.getEntitiesToDelete(entityDetails);
-
-		String documentId = this.calculateId(json);
+		String[] entitiesToDelete = getEntitiesToDelete(entityDetails);
 
 		CcpJsonRepresentation withEntityName = CcpOtherConstants.EMPTY_JSON
 				.put(JnJsonCommonsFields.entity, entityDetails.entityName);
 				CcpJsonRepresentation withRecordId = withEntityName
 				.put(JnJsonCommonsFields.id, versionableRecordId);
-				CcpJsonRepresentation withEntitiesToDelete = withRecordId
-				.put(JnBusinessDeleteVersionableRecords.JsonFieldNames.entitiesToDelete, entitiesToDelete);
 
-		CcpJsonRepresentation deletionRequest = withEntitiesToDelete
-				.put(JnBusinessDeleteVersionableRecords.JsonFieldNames.documentId, documentId);
+		CcpJsonRepresentation deletionRequest = withRecordId
+				.put(JnBusinessDeleteVersionableRecords.JsonFieldNames.entitiesToDelete, entitiesToDelete);
 
 		return deletionRequest;
 	}
 
 	/**
-	 * Lista as tabelas de onde o registro em si deve ser apagado: a principal e a gêmea, quando existe.
-	 * {@code JnEntityVersionable} é retirada da lista porque suas linhas não são localizadas pelo id do
-	 * documento, e sim pelo par ({@code entity}, {@code id}) — quem as apaga é o outro critério da query
-	 * do expurgo, que o próprio {@code JnBusinessDeleteVersionableRecords} acrescenta.
+	 * Lists the tables from which the record itself must be deleted: the main one and the twin, when it exists.
+	 * {@code JnEntityVersionable} is removed from the list because its rows are not found by the document
+	 * id, but by the pair ({@code entity}, {@code id}) — they are deleted by the other criterion of the purge
+	 * query, which {@code JnBusinessDeleteVersionableRecords} itself adds.
 	 */
-	private String[] getEntitiesToDelete(CcpEntityMetaData entityDetails) {
+	private static String[] getEntitiesToDelete(CcpEntityMetaData entityDetails) {
 
 		CcpEntityMetaData versionableMetaData = JnEntityVersionable.ENTITY.getEntityMetaData();
 
 		String[] entitiesToSelect = entityDetails.getEntitiesToSelect();
 		List<String> allEntities = Arrays.asList(entitiesToSelect);
-		Stream<String> stream = allEntities.stream();
-		var withoutTheHistory = stream.filter(x -> false == x.equals(versionableMetaData.entityName));
+		Stream<String> allEntitiesStream = allEntities.stream();
+		var withoutTheHistory = allEntitiesStream.filter(x -> false == x.equals(versionableMetaData.entityName));
 
 		List<String> entitiesToDelete = withoutTheHistory.collect(Collectors.toList());
 		int size = entitiesToDelete.size();
 
-		String[] array = entitiesToDelete.toArray(new String[size]);
+		String[] entitiesToDeleteArray = entitiesToDelete.toArray(new String[size]);
 
-		return array;
+		return entitiesToDeleteArray;
 	}
 	
 	public List<CcpEntity> getAssociatedEntities() {
@@ -198,11 +174,11 @@ public class JnVersionableEntity extends CcpDefaultEntityDelegator<Object>{
 
 	public List<CcpBulkItem> toBulkItems(CcpJsonRepresentation json, CcpBulkEntityOperationType operation) {
 		List<CcpBulkItem> bulkItems = this.entity.toBulkItems(json, operation);
-		List<CcpBulkItem> asList = new ArrayList<>(bulkItems);
+		List<CcpBulkItem> bulkItemsWithHistory = new ArrayList<>(bulkItems);
 		
 		CcpBulkItem versionableToBulkOperation = this.getVersionableToBulkOperationToBulkOperation(json, operation);
-		asList.add(versionableToBulkOperation);
-		return asList;
+		bulkItemsWithHistory.add(versionableToBulkOperation);
+		return bulkItemsWithHistory;
 	}
 
 	

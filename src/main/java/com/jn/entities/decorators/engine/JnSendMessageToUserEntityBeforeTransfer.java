@@ -7,9 +7,9 @@ import com.ccp.especifications.db.utils.entity.decorators.enums.CcpEntityOperati
 import com.jn.entities.decorators.annotations.JnEntitySendMessageToUserWhenTransfer;
 
 /**
- * Decorator que envia apenas as mensagens do fluxo {@code before} das transferências de dados. Fica
- * na parte externa da cadeia (prioridade alta) para que o envio aconteça antes dos demais decorators
- * e o JSON resultante seja o que segue para dentro. O fluxo {@code after} é responsabilidade de
+ * Decorator that sends only the messages of the {@code before} flow of data transfers. It stays in
+ * the outer part of the chain (high priority) so that the sending happens before the other decorators
+ * and the resulting JSON is what goes further in. The {@code after} flow is the responsibility of
  * {@code JnSendMessageToUserEntityAfterTransfer}.
  */
 public class JnSendMessageToUserEntityBeforeTransfer extends JnSendMessageToUserEntityOnTransfer {
@@ -19,14 +19,14 @@ public class JnSendMessageToUserEntityBeforeTransfer extends JnSendMessageToUser
 	}
 
 	public boolean copyDataTo(CcpJsonRepresentation json, CcpEntity targetEntity) {
-		CcpJsonRepresentation _before = this.executeFlow(json, CcpEntityOperationPhase._before, CcpEntityDecoratorTransferType.copyDataTo, targetEntity);
-		boolean copied = this.entity.copyDataTo(_before, targetEntity);
+		CcpJsonRepresentation preparedJson = this.executeFlow(json, CcpEntityOperationPhase._before, CcpEntityDecoratorTransferType.copyDataTo, targetEntity);
+		boolean copied = this.entity.copyDataTo(preparedJson, targetEntity);
 		return copied;
 	}
 
 	public boolean transferDataTo(CcpJsonRepresentation json, CcpEntity targetEntity) {
-		CcpJsonRepresentation _before = this.executeFlow(json, CcpEntityOperationPhase._before, CcpEntityDecoratorTransferType.transferDataTo, targetEntity);
-		boolean transfered = this.entity.transferDataTo(_before, targetEntity);
+		CcpJsonRepresentation preparedJson = this.executeFlow(json, CcpEntityOperationPhase._before, CcpEntityDecoratorTransferType.transferDataTo, targetEntity);
+		boolean transfered = this.entity.transferDataTo(preparedJson, targetEntity);
 		return transfered;
 	}
 }

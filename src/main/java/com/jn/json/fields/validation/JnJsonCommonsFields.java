@@ -98,8 +98,14 @@ public enum JnJsonCommonsFields implements CcpJsonFieldName{
 	cause, 
 	
 	@CcpJsonFieldTypeString
-	stackTrace, 
-	
+	stackTrace,
+
+	@CcpJsonFieldTypeString
+	type,
+
+	@CcpJsonFieldTypeString
+	token,
+
 	@CcpJsonFieldTypeNumberUnsigned
 	attempts,
 	

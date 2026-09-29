@@ -71,8 +71,27 @@ public enum JnMustNotSendMessage{
 				.put(JnEntityMessageDidNotSent.Fields.reasonDescription,  reasonDescription)
 				;
 		CcpJsonRepresentation jsonToSave = this.putReasonMessage(put, reasonMessage);
-		JnEntityMessageDidNotSent.ENTITY.save(jsonToSave);
+		this.saveDiagnosticWhenItHasARecipient(jsonToSave);
 		throw new MessageDidNotSend(jsonToSave);
+	}
+
+	/**
+	 * O diagnóstico é indexado pelo destinatário: {@code email} faz parte da chave primária de
+	 * {@code JnEntityMessageDidNotSent}. Aviso ao suporte não tem e-mail de destinatário: tentar gravá-lo
+	 * fazia a validação da entidade estourar e trocava a recusa, que é esperada, por um erro de
+	 * validação. Sem destinatário não há a quem o diagnóstico sirva, e a recusa segue sendo lançada.
+	 */
+	private void saveDiagnosticWhenItHasARecipient(CcpJsonRepresentation jsonToSave) {
+
+		CcpEntityMetaData didNotSentMetaData = JnEntityMessageDidNotSent.ENTITY.getEntityMetaData();
+
+		boolean hasNoRecipient = false == jsonToSave.containsAllFields(didNotSentMetaData.primaryKeyNames);
+
+		if(hasNoRecipient) {
+			return;
+		}
+
+		JnEntityMessageDidNotSent.ENTITY.save(jsonToSave);
 	}
 
 	/**
@@ -94,7 +113,7 @@ public enum JnMustNotSendMessage{
 	}
 	
 	@SuppressWarnings("serial")
-	private static class MessageDidNotSend extends RuntimeException{
+	static class MessageDidNotSend extends RuntimeException{
 		protected MessageDidNotSend(CcpJsonRepresentation json) {
 			super(json.toString());
 		}

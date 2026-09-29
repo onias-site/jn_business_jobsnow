@@ -15,10 +15,10 @@ import com.jn.entities.decorators.enums.JnEntitySendMessageToUserWhenTransferOpe
 import com.jn.messages.JnSendMessageToUser;
 
 /**
- * Base compartilhada pelos decorators que enviam mensagens ao usuário em torno das transferências de
- * dados entre entidades. Concentra a leitura de {@code @JnEntitySendMessageToUserWhenTransfer} e o
- * disparo das mensagens; cada subclasse decide em qual fase ({@code before} ou {@code after}) o
- * disparo acontece e ocupa a sua própria posição na cadeia de decorators.
+ * Base shared by the decorators that send messages to the user around data transfers between
+ * entities. It centralizes reading {@code @JnEntitySendMessageToUserWhenTransfer} and firing the
+ * messages; each subclass decides in which phase ({@code before} or {@code after}) the firing
+ * happens and takes its own position in the decorator chain.
  */
 public abstract class JnSendMessageToUserEntityOnTransfer extends CcpEntityDelegator {
 
@@ -30,8 +30,8 @@ public abstract class JnSendMessageToUserEntityOnTransfer extends CcpEntityDeleg
 	}
 
 	/**
-	 * Dispara as mensagens configuradas para a fase e a transferência informadas, devolvendo o JSON
-	 * resultante do encadeamento dos envios.
+	 * Fires the messages configured for the given phase and transfer, returning the JSON that
+	 * results from chaining the sends.
 	 */
 	protected CcpJsonRepresentation executeFlow(CcpJsonRepresentation json, CcpEntityOperationPhase when, CcpEntityDecoratorTransferType operation, CcpEntity targetEntity) {
 
@@ -50,17 +50,17 @@ public abstract class JnSendMessageToUserEntityOnTransfer extends CcpEntityDeleg
 
 		JnEntitySendMessageToUserWhenTransferOperationType operationType = configuredOperation.operationType();
 
-		CcpEntityOperationPhase when2 = operationType.operationPhase;
+		CcpEntityOperationPhase configuredPhase = operationType.operationPhase;
 
-		boolean wrongStep = false == when2.equals(when);
+		boolean wrongStep = false == configuredPhase.equals(when);
 
 		if(wrongStep) {
 			return json;
 		}
 
-		CcpEntityDecoratorTransferType operation2 = operationType.transferType;
+		CcpEntityDecoratorTransferType configuredTransferType = operationType.transferType;
 
-		boolean wrongOperation = false == operation2.equals(operation);
+		boolean wrongOperation = false == configuredTransferType.equals(operation);
 
 		if(wrongOperation) {
 			return json;
@@ -68,10 +68,10 @@ public abstract class JnSendMessageToUserEntityOnTransfer extends CcpEntityDeleg
 
 		CcpEntityPhase entityPhase = operationType.entityPhase;
 		CcpEntityMetaData entityDetails = entity.getEntityMetaData();
-		String extractEntityName = entityPhase.extractEntityName(entityDetails.configurationClass);
-		boolean extractEntityNameEquals = extractEntityName.equals(entityDetails.entityName);
+		String phaseEntityName = entityPhase.extractEntityName(entityDetails.configurationClass);
+		boolean isSameEntity = phaseEntityName.equals(entityDetails.entityName);
 
-		boolean wrongPhase = false == extractEntityNameEquals;
+		boolean wrongPhase = false == isSameEntity;
 
 		if(wrongPhase) {
 			return json;
@@ -81,9 +81,9 @@ public abstract class JnSendMessageToUserEntityOnTransfer extends CcpEntityDeleg
 		String topic = messageTemplate.getName();
 
 		JnMessageType[] messageTypes = operationType.messagesTypes();
-		JnMessageSenderExceptionHandler exceptionHandler2 = operationType.exceptionHandler;
+		JnMessageSenderExceptionHandler exceptionHandler = operationType.exceptionHandler;
 
-		CcpJsonRepresentation result = new JnSendMessageToUser().sendAllMessages(json, topic, messageTypes, exceptionHandler2);
+		CcpJsonRepresentation result = new JnSendMessageToUser().sendAllMessages(json, topic, messageTypes, exceptionHandler);
 
 		return result;
 	}

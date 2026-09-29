@@ -9,9 +9,9 @@ import java.lang.annotation.Target;
 import com.jn.entities.decorators.enums.JnEntitySendMessageToUserWhenTransferOperationType;
 
 /**
- * Configura uma operação de envio de mensagem ao usuário durante a transferência de dados da
- * entidade. A combinação de fase, tipo de transferência, entidade de origem, tipos de mensagem e
- * política de erro vem encapsulada em um único item de
+ * Configures a message sending operation to the user during the entity's data transfer. The
+ * combination of phase, transfer type, source entity, message types and error policy is
+ * encapsulated in a single item of
  * {@code JnEntitySendMessageToUserWhenTransferOperationType}.
  */
 @Retention(RUNTIME)
@@ -19,15 +19,15 @@ import com.jn.entities.decorators.enums.JnEntitySendMessageToUserWhenTransferOpe
 public @interface JnEntitySendMessageToUserWhenTransferOperation {
 
 	/**
-	 * Combinação de {@code operationPhase}, {@code transferType}, {@code entityPhase},
-	 * {@code messagesTypes} e {@code exceptionHandler} desta operação.
+	 * Combination of {@code operationPhase}, {@code transferType}, {@code entityPhase},
+	 * {@code messagesTypes} and {@code exceptionHandler} of this operation.
 	 */
 	JnEntitySendMessageToUserWhenTransferOperationType operationType();
 
 	Class<?> messageTemplate();
 
 	/**
-	 * Classe de configuração da entidade destino.
+	 * Configuration class of the target entity.
 	 */
 	Class<?> targetEntity();
 }

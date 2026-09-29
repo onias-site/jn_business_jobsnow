@@ -1,6 +1,6 @@
 package com.jn.entities;
 
-import static com.jn.entities.decorators.enums.JnEntitySendMessageToUserWhenWriteOperationType.afterSaveFromMainEntitySendAnInstantMessageAndIfFailsLogTheError;
+import static com.jn.entities.decorators.enums.JnEntitySendMessageToUserWhenWriteOperationType.afterInsertFromMainEntitySendAnInstantMessageAndIfFailsLogTheError;
 
 import com.ccp.decorators.CcpJsonFieldName;
 import com.ccp.especifications.db.utils.entity.CcpEntity;
@@ -38,7 +38,7 @@ import com.jn.json.fields.validation.JnJsonCommonsFields;
 		})
 @JnEntitySendMessageToUserWhenWrite({
 		@JnEntitySendMessageToUserWhenWriteOperation(
-				operationType = afterSaveFromMainEntitySendAnInstantMessageAndIfFailsLogTheError,
+				operationType = afterInsertFromMainEntitySendAnInstantMessageAndIfFailsLogTheError,
 				messageTemplate = JnMessages.JnNotifySupportAboutWaring.class
 				)
 })

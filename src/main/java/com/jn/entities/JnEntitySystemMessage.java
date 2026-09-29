@@ -107,10 +107,10 @@ public class JnEntitySystemMessage implements CcpEntityConfigurator {
 				, "mail.ru"
 				);
 
-		CcpJsonRepresentation comNome = CcpOtherConstants.EMPTY_JSON
+		CcpJsonRepresentation withName = CcpOtherConstants.EMPTY_JSON
 				.put(Fields.systemMessageName, NON_PROFESSIONAL_DOMAINS);
 
-		CcpJsonRepresentation comIdioma = comNome
+		CcpJsonRepresentation comIdioma = withName
 				.put(JnJsonCommonsFields.language, JnLanguage.portuguese);
 
 		CcpJsonRepresentation nonProfessionalDomainsMessage = comIdioma

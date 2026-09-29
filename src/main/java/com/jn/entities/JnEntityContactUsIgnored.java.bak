@@ -7,59 +7,44 @@ import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityC
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityCustomDecorators;
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityFieldsTransformer;
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityFieldsValidator;
+import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityTwin;
 import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityFactory;
 import com.ccp.especifications.db.utils.entity.decorators.enums.CcpEntityExpurgableOptions;
 import com.ccp.especifications.db.utils.entity.decorators.interfaces.CcpEntityConfigurator;
 import com.ccp.especifications.db.utils.entity.fields.annotations.CcpEntityFieldPrimaryKey;
 import com.ccp.json.validations.fields.annotations.CcpJsonCopyFieldValidationsFrom;
-import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidatorRequired;
+import com.jn.db.bulk.JnExecuteBulkOperation;
 import com.jn.entities.decorators.annotations.JnEntityDisposable;
 import com.jn.entities.decorators.builders.JnEntityDisposableBuilder;
 import com.jn.entities.decorators.engine.JnDisposableEntity;
 import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
+import com.jn.utils.JnDeleteKeysFromCache;
 
-@CcpEntityCache(3600)
 @CcpEntityCustomDecorators(value = {@CcpEntityCustomDecorator(value = JnEntityDisposableBuilder.class, priority = 1),})
-@JnEntityDisposable(value = JnDisposableEntity.class, timeOption = CcpEntityExpurgableOptions.hourly)
+@CcpEntityCache(86400)
+@JnEntityDisposable(value = JnDisposableEntity.class, timeOption = CcpEntityExpurgableOptions.daily)
 @CcpEntityFieldsTransformer(classReferenceWithTheFields = JnJsonTransformersFieldsEntityDefault.class)
-@CcpEntityFieldsValidator(classReferenceWithTheFields = JnEntityHttpApiErrorClient.Fields.class)
+@CcpEntityFieldsValidator(classReferenceWithTheFields = JnEntityContactUsIgnored.Fields.class)
+@CcpEntityTwin(
+		twinEntityName = "jn_contact_us_reread",
+		bulkExecutorClass = JnExecuteBulkOperation.class,
+		functionToDeleteKeysInTheCacheClass = JnDeleteKeysFromCache.class
+		)
 /**
- * Records HTTP client errors (4xx) that occurred while calling external APIs. Disposable
- * every hour (temporary records for diagnosis), 1-hour cache.
+ * Registra contatos ignorados pelo suporte. Entidade descartável com expiração diária.
+ * Possui twin contact_us_reread para reaproveitamento posterior.
  */
-public class JnEntityHttpApiErrorClient implements CcpEntityConfigurator {
+public class JnEntityContactUsIgnored implements CcpEntityConfigurator {
 	
-	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityHttpApiErrorClient.class).entityInstance;
-
+	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityContactUsIgnored.class).entityInstance;
+	
 	public static enum Fields implements CcpJsonFieldName{
 		@CcpEntityFieldPrimaryKey
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
-		url, 
-		@CcpEntityFieldPrimaryKey
-		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
-		method, 
-		@CcpEntityFieldPrimaryKey
-		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
-		headers, 
-		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
-		request, 
-		@CcpEntityFieldPrimaryKey
-		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
-		apiName,
-		@CcpEntityFieldPrimaryKey
-		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
-		details, 
-		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
-		response, 
-		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
-		httpStatus,
-		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
-		date,
-		@CcpJsonFieldValidatorRequired
-		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
-		timestamp
+		email
 		;
+
 	}
 
 }

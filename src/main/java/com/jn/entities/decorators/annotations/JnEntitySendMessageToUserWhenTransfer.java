@@ -10,26 +10,26 @@ import com.jn.entities.decorators.engine.JnSendMessageToUserEntityAfterTransfer;
 import com.jn.entities.decorators.engine.JnSendMessageToUserEntityBeforeTransfer;
 
 /**
- * Agrupa múltiplas configurações de {@code @JnEntitySendMessageToUserWhenTransferOperation} em uma
- * entidade, além de definir as classes decoradoras que executam essas operações: uma para o fluxo
- * {@code before} e outra para o fluxo {@code after}, cada uma com a sua própria posição na cadeia.
+ * Groups multiple {@code @JnEntitySendMessageToUserWhenTransferOperation} configurations on an
+ * entity, and also defines the decorator classes that run those operations: one for the
+ * {@code before} flow and another for the {@code after} flow, each with its own position in the chain.
  */
 @Retention(RUNTIME)
 @Target({ ElementType.TYPE })
 public @interface JnEntitySendMessageToUserWhenTransfer {
 
 	/**
-	 * Array de operações de envio de mensagem configuradas para a entidade.
+	 * Array of message sending operations configured for the entity.
 	 */
 	JnEntitySendMessageToUserWhenTransferOperation[] value();
 
 	/**
-	 * Classe decoradora que executa as operações do fluxo {@code before}.
+	 * Decorator class that runs the operations of the {@code before} flow.
 	 */
 	Class<?> beforeDecoratorClass() default JnSendMessageToUserEntityBeforeTransfer.class;
 
 	/**
-	 * Classe decoradora que executa as operações do fluxo {@code after}.
+	 * Decorator class that runs the operations of the {@code after} flow.
 	 */
 	Class<?> afterDecoratorClass() default JnSendMessageToUserEntityAfterTransfer.class;
 }

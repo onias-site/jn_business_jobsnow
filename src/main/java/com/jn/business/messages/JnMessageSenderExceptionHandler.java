@@ -1,9 +1,12 @@
 package com.jn.business.messages;
 
+import java.util.List;
 import java.util.function.Function;
 
+import com.ccp.constants.CcpOtherConstants;
 import com.ccp.decorators.CcpJsonRepresentation;
 import com.jn.entities.JnEntityJobsnowWarning;
+import com.jn.json.fields.validation.JnJsonCommonsFields;
 
 public enum JnMessageSenderExceptionHandler implements Function<Throwable, CcpJsonRepresentation> {
 	THROWS{
@@ -17,20 +20,20 @@ public enum JnMessageSenderExceptionHandler implements Function<Throwable, CcpJs
 	LENIENT{
 
 		public CcpJsonRepresentation apply(Throwable e) {
-			CcpJsonRepresentation errorDetails = new CcpJsonRepresentation(e);
+			CcpJsonRepresentation errorDetails = getWarning(e);
 			JnEntityJobsnowWarning.ENTITY.save(errorDetails);
-			//ATTENTION: ANTES ELE RETORNAVA O JSON DO BUSINESS
+			//ATTENTION: IT USED TO RETURN THE BUSINESS JSON
 			return errorDetails;
 		}
-		
-	}, 
+
+	},
 	LOG{
 
 		public CcpJsonRepresentation apply(Throwable e) {
-			CcpJsonRepresentation errorDetails = new CcpJsonRepresentation(e);
+			CcpJsonRepresentation errorDetails = getWarning(e);
 			JnEntityJobsnowWarning.ENTITY.save(errorDetails);
 			e.printStackTrace();
-			//ATTENTION: ANTES ELE RETORNAVA O JSON DO BUSINESS
+			//ATTENTION: IT USED TO RETURN THE BUSINESS JSON
 			return errorDetails;
 		}
 
@@ -39,13 +42,47 @@ public enum JnMessageSenderExceptionHandler implements Function<Throwable, CcpJs
 	;
 
 	/**
-	 * Exceção lançada pela política {@code THROWS} para propagar ao chamador a falha ocorrida no envio da mensagem.
+	 * Translates the exception into the {@code JnEntityJobsnowWarning} format. The json that
+	 * {@code CcpJsonRepresentation} builds from an exception carries {@code stackTrace} as a list and
+	 * {@code cause} as empty text when there is no cause; the warning stores both as text and rejects
+	 * empty text. Saving the raw json made the warning validation blow up — the {@code LENIENT}
+	 * and {@code LOG} handlers could never record anything.
+	 */
+	private static CcpJsonRepresentation getWarning(Throwable e) {
+		CcpJsonRepresentation errorDetails = new CcpJsonRepresentation(e);
+
+		String type = errorDetails.getAsString(JnJsonCommonsFields.type);
+		String message = errorDetails.getAsString(JnJsonCommonsFields.message);
+		List<String> stackTraceLines = errorDetails.getAsStringList(JnJsonCommonsFields.stackTrace);
+		String stackTrace = String.join("\n", stackTraceLines);
+		String cause = errorDetails.getAsString(JnJsonCommonsFields.cause);
+
+		boolean hasNoMessage = message.trim().isEmpty();
+		String messageOrType = hasNoMessage ? type : message;
+
+		CcpJsonRepresentation warning = CcpOtherConstants.EMPTY_JSON
+				.put(JnJsonCommonsFields.type, type)
+				.put(JnJsonCommonsFields.message, messageOrType)
+				.put(JnJsonCommonsFields.stackTrace, stackTrace);
+
+		boolean hasNoCause = cause.trim().isEmpty();
+
+		if(hasNoCause) {
+			return warning;
+		}
+
+		CcpJsonRepresentation withCause = warning.put(JnJsonCommonsFields.cause, cause);
+		return withCause;
+	}
+
+	/**
+	 * Exception thrown by the {@code THROWS} policy to propagate to the caller the failure that occurred while sending the message.
 	 */
 	@SuppressWarnings("serial")
 	public static class JnErrorMessageSenderFailed extends RuntimeException {
 		/**
-		 * Encadeia a exceção original ocorrida durante o envio da mensagem.
-		 * @param cause a exceção original
+		 * Chains the original exception that occurred while sending the message.
+		 * @param cause the original exception
 		 */
 		private JnErrorMessageSenderFailed(Throwable cause) {
 			super("It was not possible to send the message", cause);

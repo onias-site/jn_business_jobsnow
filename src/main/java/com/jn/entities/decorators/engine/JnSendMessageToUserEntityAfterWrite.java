@@ -7,10 +7,12 @@ import com.ccp.especifications.db.utils.entity.decorators.enums.CcpEntityOperati
 import com.jn.entities.decorators.annotations.JnEntitySendMessageToUserWhenWrite;
 
 /**
- * Decorator que envia apenas as mensagens do fluxo {@code after} das operações de escrita. Fica na
- * parte interna da cadeia (prioridade baixa) e só dispara quando a operação aconteceu de fato: o
- * {@code delete} encontrou o registro para remover e o {@code save} incluiu um documento novo. O
- * fluxo {@code before} é responsabilidade de {@code JnSendMessageToUserEntityBeforeWrite}.
+ * Decorator that sends only the messages of the {@code after} flow of write operations. It stays in the
+ * inner part of the chain (low priority). On {@code delete} it only fires when the record was found and
+ * removed; on {@code save} it always fires, and the outcome ({@code insert} when {@code save} returns
+ * {@code true}, {@code update} when it returns {@code false}) decides which configured items send a
+ * message. The {@code before} flow is the responsibility of
+ * {@code JnSendMessageToUserEntityBeforeWrite}.
  */
 public class JnSendMessageToUserEntityAfterWrite extends JnSendMessageToUserEntityOnWrite {
 
@@ -47,13 +49,8 @@ public class JnSendMessageToUserEntityAfterWrite extends JnSendMessageToUserEnti
 	public boolean save(CcpJsonRepresentation json) {
 		boolean inserted = this.entity.save(json);
 
-		boolean documentWasOnlyUpdated = false == inserted;
-
-		if(documentWasOnlyUpdated) {
-			return false;
-		}
-
-		this.executeFlow(json, CcpEntityOperationPhase._after, CcpEntityDecoratorOperationType.save);
+		CcpEntityDecoratorOperationType outcome = CcpEntityDecoratorOperationType.save.getOutcome(inserted);
+		this.executeFlow(json, CcpEntityOperationPhase._after, outcome);
 		return inserted;
 	}
 }

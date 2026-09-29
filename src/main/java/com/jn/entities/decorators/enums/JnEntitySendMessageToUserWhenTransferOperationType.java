@@ -19,12 +19,12 @@ import com.jn.business.messages.JnMessageSenderExceptionHandler;
 import com.jn.business.messages.JnMessageType;
 
 /**
- * Prevê todas as combinações possíveis dos campos {@code operationPhase}, {@code transferType},
- * {@code entityPhase}, {@code messagesTypes} e {@code exceptionHandler} de
- * {@code @JnEntitySendMessageToUserWhenTransferOperation}. Cada item encapsula os valores que o seu
- * nome expressa, de modo que a anotação declare uma única constante em vez dos cinco campos.
+ * Covers every possible combination of the {@code operationPhase}, {@code transferType},
+ * {@code entityPhase}, {@code messagesTypes} and {@code exceptionHandler} fields of
+ * {@code @JnEntitySendMessageToUserWhenTransferOperation}. Each item encapsulates the values its
+ * name expresses, so that the annotation declares a single constant instead of the five fields.
  *
- * <p>O nome de cada item é lido como uma frase: {@code [operationPhase][transferType]From
+ * <p>Each item name reads as a sentence: {@code [operationPhase][transferType]From
  * [entityPhase]Send[messagesTypes]AndIfFails[exceptionHandler]}.
  */
 public enum JnEntitySendMessageToUserWhenTransferOperationType {
@@ -103,22 +103,22 @@ public enum JnEntitySendMessageToUserWhenTransferOperationType {
 	;
 
 	/**
-	 * Momento de execução: {@code _before} (antes) ou {@code _after} (depois) da transferência.
+	 * Execution moment: {@code _before} or {@code _after} the transfer.
 	 */
 	public final CcpEntityOperationPhase operationPhase;
 
 	/**
-	 * Tipo da transferência: {@code copyDataTo} ou {@code transferDataTo}.
+	 * Transfer type: {@code copyDataTo} or {@code transferDataTo}.
 	 */
 	public final CcpEntityDecoratorTransferType transferType;
 
 	/**
-	 * Entidade de origem (mainEntity ou twinEntity).
+	 * Source entity (mainEntity or twinEntity).
 	 */
 	public final CcpEntityPhase entityPhase;
 
 	/**
-	 * Política de tratamento de falha no envio da mensagem.
+	 * Policy for handling a failure while sending the message.
 	 */
 	public final JnMessageSenderExceptionHandler exceptionHandler;
 
@@ -138,7 +138,7 @@ public enum JnEntitySendMessageToUserWhenTransferOperationType {
 	}
 
 	/**
-	 * Tipos de mensagem a enviar. Nunca vem vazio: toda combinação prevista tem ao menos um tipo.
+	 * Message types to send. Never empty: every covered combination has at least one type.
 	 */
 	public JnMessageType[] messagesTypes() {
 		JnMessageType[] copy = this.messagesTypes.clone();

@@ -16,39 +16,39 @@ import com.ccp.json.fields.validation.CcpJsonCommonsFields;
 
 public enum JnInstantMessageType implements CcpBusiness{
 	text(JnMessageTextJsonValidator.class) {
-		public CcpJsonRepresentation sendMessage(CcpJsonRepresentation json, CcpJsonRepresentation orElseThrow) {
+		public CcpJsonRepresentation sendMessage(CcpJsonRepresentation json, CcpJsonRepresentation messageFields) {
 			CcpInstantMessenger instantMessenger = CcpDependencyInjection.getDependency(CcpInstantMessenger.class);
-			String message = super.getMessage(json, orElseThrow, JnJsonCommonsFields.message);
+			String message = super.getMessage(json, messageFields, JnJsonCommonsFields.message);
 			String botToken = json.getAsString(JnJsonInstantMessengerFields.botToken);
 			Long chatId = json.getAsLongNumber(JnJsonInstantMessengerFields.chatId);
 			Long replyTo = Double.valueOf(json.getOrDefault(CcpJsonCommonsFields.replyTo, () -> (Object)"0").toString()).longValue();
-			CcpStringDecorator asStringDecorator = json.getAsStringDecorator(JnJsonInstantMessengerFields.botName);
-			CcpJsonFieldName jsonFieldName = asStringDecorator.jsonFieldName();
-			CcpJsonRepresentation result = instantMessenger.sendTextMessage(jsonFieldName, botToken, chatId, replyTo, message);
-			CcpJsonRepresentation mergeWithAnotherJson = json.mergeWithAnotherJson(result);
-			return mergeWithAnotherJson;
+			CcpStringDecorator botNameDecorator = json.getAsStringDecorator(JnJsonInstantMessengerFields.botName);
+			CcpJsonFieldName botName = botNameDecorator.jsonFieldName();
+			CcpJsonRepresentation result = instantMessenger.sendTextMessage(botName, botToken, chatId, replyTo, message);
+			CcpJsonRepresentation jsonWithResult = json.mergeWithAnotherJson(result);
+			return jsonWithResult;
 		}
 
 	},
 	file(JnMessageFileJsonValidator.class) {
-		public CcpJsonRepresentation sendMessage(CcpJsonRepresentation json, CcpJsonRepresentation orElseThrow) {
+		public CcpJsonRepresentation sendMessage(CcpJsonRepresentation json, CcpJsonRepresentation messageFields) {
 			CcpInstantMessenger instantMessenger = CcpDependencyInjection.getDependency(CcpInstantMessenger.class);
 			
 			String botToken = json.getAsString(JnJsonInstantMessengerFields.botToken) ;
 			Long chatId = json.getAsLongNumber(JnJsonInstantMessengerFields.chatId);
 			Long replyTo = json.getOrDefault(CcpJsonCommonsFields.replyTo, () -> 0L);
 			
-			String message = super.getMessage(json, orElseThrow, JnJsonCommonsFields.message);
-			String caption = super.getMessage(json, orElseThrow, JnJsonInstantMessengerFields.caption);
-			String fileName = super.getMessage(json, orElseThrow, JnJsonInstantMessengerFields.fileName);
-			CcpStringDecorator ccpStringDecorator = new CcpStringDecorator(message);
+			String message = super.getMessage(json, messageFields, JnJsonCommonsFields.message);
+			String caption = super.getMessage(json, messageFields, JnJsonInstantMessengerFields.caption);
+			String fileName = super.getMessage(json, messageFields, JnJsonInstantMessengerFields.fileName);
+			CcpStringDecorator messageDecorator = new CcpStringDecorator(message);
 
-			Byte[] bytes = ccpStringDecorator.getBytes();
-			CcpStringDecorator asStringDecorator = json.getAsStringDecorator(JnJsonInstantMessengerFields.botName);
-			CcpJsonFieldName jsonFieldName = asStringDecorator.jsonFieldName();
-			CcpJsonRepresentation result = instantMessenger.sendFile(jsonFieldName, botToken, chatId, replyTo, fileName, caption, bytes);
-			CcpJsonRepresentation mergeWithAnotherJson = json.mergeWithAnotherJson(result);
-			return mergeWithAnotherJson;
+			Byte[] bytes = messageDecorator.getBytes();
+			CcpStringDecorator botNameDecorator = json.getAsStringDecorator(JnJsonInstantMessengerFields.botName);
+			CcpJsonFieldName botName = botNameDecorator.jsonFieldName();
+			CcpJsonRepresentation result = instantMessenger.sendFile(botName, botToken, chatId, replyTo, fileName, caption, bytes);
+			CcpJsonRepresentation jsonWithResult = json.mergeWithAnotherJson(result);
+			return jsonWithResult;
 		}
 	}
 	;
@@ -61,18 +61,18 @@ public enum JnInstantMessageType implements CcpBusiness{
 	private JnInstantMessageType(Class<?> jsonValidationClass) {
 		this.jsonValidationClass = jsonValidationClass;
 	}
-	protected String getMessage(CcpJsonRepresentation json, CcpJsonRepresentation orElseThrow, CcpJsonFieldName field) {
-		CcpTextDecorator text = orElseThrow.getAsTextDecorator(field);
-		CcpTextDecorator message = text.resolveTemplate(json);
-		return message.content;
+	protected String getMessage(CcpJsonRepresentation json, CcpJsonRepresentation messageFields, CcpJsonFieldName field) {
+		CcpTextDecorator template = messageFields.getAsTextDecorator(field);
+		CcpTextDecorator resolvedMessage = template.resolveTemplate(json);
+		return resolvedMessage.content;
 	}
 	public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
-		CcpJsonRepresentation message = json.getJsonPiece(JnJsonInstantMessengerFields.fileName, JnJsonInstantMessengerFields.caption, JnJsonCommonsFields.message, CcpJsonCommonsFields.replyTo, JnJsonInstantMessengerFields.chatId);
-		CcpJsonRepresentation sendMessage = this.sendMessage(json, message);
-		return sendMessage;
+		CcpJsonRepresentation messageFields = json.getJsonPiece(JnJsonInstantMessengerFields.fileName, JnJsonInstantMessengerFields.caption, JnJsonCommonsFields.message, CcpJsonCommonsFields.replyTo, JnJsonInstantMessengerFields.chatId);
+		CcpJsonRepresentation sentMessage = this.sendMessage(json, messageFields);
+		return sentMessage;
 	}
 
-	public abstract CcpJsonRepresentation sendMessage (CcpJsonRepresentation json, CcpJsonRepresentation message);
+	public abstract CcpJsonRepresentation sendMessage (CcpJsonRepresentation json, CcpJsonRepresentation messageFields);
 
 	
 	private static enum JnMessageTextJsonValidator implements CcpJsonFieldName{
@@ -90,7 +90,7 @@ public enum JnInstantMessageType implements CcpBusiness{
 		@CcpJsonCopyFieldValidationsFrom(JnJsonInstantMessengerFields.class)
 		caption,
 		@CcpJsonFieldValidatorRequired
-		@CcpJsonCopyFieldValidationsFrom(JnJsonInstantMessengerFields.class)
+		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		contentType,
 		@CcpJsonFieldValidatorRequired
 		@CcpJsonCopyFieldValidationsFrom(JnJsonInstantMessengerFields.class)

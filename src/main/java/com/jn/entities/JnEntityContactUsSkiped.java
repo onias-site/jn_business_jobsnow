@@ -24,8 +24,8 @@ import com.jn.json.fields.validation.JnJsonCommonsFields;
 @CcpEntityFieldsTransformer(classReferenceWithTheFields = JnJsonTransformersFieldsEntityDefault.class)
 @CcpEntityFieldsValidator(classReferenceWithTheFields = JnEntityContactUsSkiped.Fields.class)
 /**
- * Registra contatos pulados (skipped) pelo suporte durante a triagem do "Fale Conosco".
- * Descartável diariamente e com cache de 24 horas.
+ * Records contacts skipped by support while triaging the "Contact Us" form.
+ * Disposable daily, with a 24-hour cache.
  */
 public class JnEntityContactUsSkiped implements CcpEntityConfigurator {
 

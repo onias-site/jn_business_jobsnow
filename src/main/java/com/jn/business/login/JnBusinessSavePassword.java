@@ -21,10 +21,10 @@ import com.jn.utils.JnDeleteKeysFromCache;
 import com.ccp.json.fields.validation.CcpJsonCommonsFields;
 
 /**
- * Salva (ou altera) a senha do usuário. Em operação bulk atômica: invalida a sessão
- * atual, salva a nova senha, "desbloqueia" a senha transferindo para a entidade twin,
- * remove as tentativas de senha falhas, registra novo login e resolve conflito de
- * sessão se existir.
+ * Saves (or changes) the user's password. In an atomic bulk operation: invalidates the
+ * current session, saves the new password, "unlocks" the password by transferring it to the
+ * twin entity, removes the failed password attempts, registers a new login and solves the
+ * session conflict if there is one.
  */
 public class JnBusinessSavePassword implements CcpBusiness {
  
@@ -33,8 +33,8 @@ public class JnBusinessSavePassword implements CcpBusiness {
 	private JnBusinessSavePassword() {}
 
 	/**
-	 * Executa todas as operações de atualização de senha e sessão em lote.
-	 * Retorna JSON vazio.
+	 * Executes all password and session update operations in a single bulk.
+	 * Returns an empty JSON.
 	 */
 	@SuppressWarnings("unchecked")
 	public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
@@ -45,11 +45,11 @@ public class JnBusinessSavePassword implements CcpBusiness {
 		CcpEntityBulkHandlerTransferRecordToTwinEntity registerPasswordUnlock = new CcpEntityBulkHandlerTransferRecordToTwinEntity(twinEntity, x -> Arrays.asList());
 		CcpBulkHandlerDelete removePasswordAttempts = new CcpBulkHandlerDelete(JnEntityLoginPasswordAttempts.ENTITY);
 
-		CcpJsonRepresentation renameField = json.renameField(CcpJsonCommonsFields.sessionToken, JnEntityLoginSessionValidation.Fields.token);
+		CcpJsonRepresentation jsonWithTokenField = json.renameField(CcpJsonCommonsFields.sessionToken, JnEntityLoginSessionValidation.Fields.token);
 		CcpBulkHandlerSave updatePassword = new CcpBulkHandlerSave(JnEntityLoginPassword.ENTITY);
 		JnExecuteBulkOperation.INSTANCE
 		.executeSelectUnionAllThenExecuteBulkOperation(
-				renameField 
+				jsonWithTokenField
 				, JnDeleteKeysFromCache.INSTANCE
 				, updatePassword
 				, registerPasswordUnlock
@@ -63,7 +63,7 @@ public class JnBusinessSavePassword implements CcpBusiness {
 	}
 
 	/**
-	 * Retorna a classe de validação JSON definida em JnServiceLogin.SavePassword.
+	 * Returns the JSON validation class defined in JnServiceLogin.SavePassword.
 	 */
 	public Class<?> getJsonValidationClass() {
 		var jsonValidationClass = JnServiceLogin.SavePassword.getJsonValidationClass();

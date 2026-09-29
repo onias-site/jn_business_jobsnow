@@ -8,10 +8,10 @@ import com.ccp.especifications.db.utils.entity.fields.CcpJsonTransformersDefault
 import com.ccp.hash.CcpHashAlgorithm;
 
 /**
- * Transformador de campo que calcula o hash SHA-1 de um campo e armazena tanto o valor original
- * quanto o hash. Permite que o hash seja usado como chave primária enquanto o valor original fica
- * disponível em outro campo. A subclasse {@code JnJsonTransformersFieldEntityTokenHash} especializa
- * este comportamento para o campo {@code token} de {@code JnEntityLoginSessionValidation}.
+ * Field transformer that computes the SHA-1 hash of a field and stores both the original value
+ * and the hash. It allows the hash to be used as the primary key while the original value remains
+ * available in another field. The subclass {@code JnJsonTransformersFieldEntityTokenHash} specializes
+ * this behavior for the {@code token} field of {@code JnEntityLoginSessionValidation}.
  */
 public class JnJsonTransformersFieldEntityFieldCalculateHash implements CcpJsonTransformersDefaultEntityField{
 
@@ -31,18 +31,18 @@ public class JnJsonTransformersFieldEntityFieldCalculateHash implements CcpJsonT
 
 	public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
 		String originalToken = json.getOrDefault(this.fieldName, () -> JnJsonTransformersFieldsEntityDefault.getOriginalToken());
-		CcpStringDecorator ccpStringDecorator = new CcpStringDecorator(originalToken);
-		CcpHashDecorator hash = ccpStringDecorator.hash();
+		CcpStringDecorator originalValueDecorator = new CcpStringDecorator(originalToken);
+		CcpHashDecorator hash = originalValueDecorator.hash();
 		
 		String token = hash.asString(CcpHashAlgorithm.SHA1);
-		CcpJsonRepresentation put2 = json
+		CcpJsonRepresentation jsonWithHash = json
 				.put(this.fieldName, token);
 
-				CcpJsonRepresentation put = put2
+				CcpJsonRepresentation jsonWithOriginalValue = jsonWithHash
 				.put(this.originalName, originalToken)
 				;
 		
-		return put;
+		return jsonWithOriginalValue;
 	}
 
 	public boolean canBePrimaryKey() {
@@ -50,7 +50,7 @@ public class JnJsonTransformersFieldEntityFieldCalculateHash implements CcpJsonT
 	}
 
 	public String name() {
-		String nameName = this.name.name();
-		return nameName;
+		String transformerName = this.name.name();
+		return transformerName;
 	}
 }

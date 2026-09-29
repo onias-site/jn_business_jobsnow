@@ -26,9 +26,9 @@ import com.jn.json.fields.validation.JnJsonCommonsFields;
 @CcpEntityCache(3600)
 
 /**
- * Registra os emails enviados pela plataforma para impedir reenvio duplicado. A chave composta
- * ({@code subjectType} + {@code email}) garante que o mesmo tipo de mensagem não seja reenviado
- * duas vezes ao mesmo destinatário no mesmo dia. Descartável diariamente, cache de 1 hora.
+ * Records the emails sent by the platform to prevent duplicate resending. The composite key
+ * ({@code subjectType} + {@code email}) ensures that the same message type is not sent twice
+ * to the same recipient on the same day. Disposable daily, 1-hour cache.
  */
 public class JnEntityEmailMessageSent implements CcpEntityConfigurator {
 	

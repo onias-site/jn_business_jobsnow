@@ -12,12 +12,12 @@ import com.ccp.process.CcpProcessStatus;
 import com.jn.utils.JnSystemProperties;
 
 /**
- * Avalia tentativas de autenticação (senha ou token) comparando o valor fornecido
- * pelo usuário com o armazenado no banco, via CcpPasswordHandler.matches. Se correto,
- * delega ao business de sucesso. Se incorreto, incrementa o contador de tentativas;
- * ao atingir 3 tentativas erradas, aciona o business de bloqueio e lança
- * CcpErrorFlowDisturb com o status de excesso de tentativas; antes disso, lança o
- * status de "tipo errado" com o número de tentativas atual.
+ * Evaluates authentication attempts (password or token) by comparing the value supplied
+ * by the user with the one stored in the database, via CcpPasswordHandler.matches. If it
+ * matches, delegates to the success business. Otherwise, increments the attempt counter;
+ * after 3 wrong attempts, triggers the lock business and throws CcpErrorFlowDisturb with
+ * the "exceeded attempts" status; before that, throws the "wrong type" status with the
+ * current number of attempts.
  */
 public class JnBusinessEvaluateAttempts implements CcpBusiness{ 
 	enum JsonFieldNames implements CcpJsonFieldName{
@@ -44,17 +44,17 @@ public class JnBusinessEvaluateAttempts implements CcpBusiness{
 	
 	private final CcpJsonFieldName fieldEmailName;
 
-	JnBusinessEvaluateAttempts(Builder b) {
-		this.entityToGetTheAttempts             = b.entityToGetTheAttempts;
-		this.entityToGetTheSecret               = b.entityToGetTheSecret;
-		this.databaseFieldName                  = b.databaseFieldName;
-		this.userFieldName                      = b.userFieldName;
-		this.statusToReturnWhenExceedAttempts   = b.statusToReturnWhenExceedAttempts;
-		this.statusToReturnWhenWrongType        = b.statusToReturnWhenWrongType;
-		this.topicToCreateTheLockWhenExceedTries = b.topicToCreateTheLockWhenExceedTries;
-		this.topicToRegisterSuccess             = b.topicToRegisterSuccess;
-		this.fieldAttempsName                   = b.fieldAttempsName;
-		this.fieldEmailName                     = b.fieldEmailName;
+	JnBusinessEvaluateAttempts(Builder builder) {
+		this.entityToGetTheAttempts             = builder.entityToGetTheAttempts;
+		this.entityToGetTheSecret               = builder.entityToGetTheSecret;
+		this.databaseFieldName                  = builder.databaseFieldName;
+		this.userFieldName                      = builder.userFieldName;
+		this.statusToReturnWhenExceedAttempts   = builder.statusToReturnWhenExceedAttempts;
+		this.statusToReturnWhenWrongType        = builder.statusToReturnWhenWrongType;
+		this.topicToCreateTheLockWhenExceedTries = builder.topicToCreateTheLockWhenExceedTries;
+		this.topicToRegisterSuccess             = builder.topicToRegisterSuccess;
+		this.fieldAttempsName                   = builder.fieldAttempsName;
+		this.fieldEmailName                     = builder.fieldEmailName;
 	}
 
 	public static Builder builder() {
@@ -65,8 +65,8 @@ public class JnBusinessEvaluateAttempts implements CcpBusiness{
 
 
 	/**
-	 * Busca o segredo no banco, compara com o valor do usuário usando CcpPasswordHandler,
-	 * e controla o fluxo de sucesso/bloqueio/tentativas.
+	 * Fetches the secret from the database, compares it with the user's value using
+	 * CcpPasswordHandler, and drives the success/lock/attempts flow.
 	 */
 	public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
 
@@ -88,9 +88,9 @@ public class JnBusinessEvaluateAttempts implements CcpBusiness{
 			throw jnErrorSecretFromUserIsEmpty;
 		}
 		
-		CcpPasswordHandler dependency = CcpDependencyInjection.getDependency(CcpPasswordHandler.class);
-		
-		boolean correctSecret = dependency.matches(secretFromUser, secretFromDatabase);
+		CcpPasswordHandler passwordHandler = CcpDependencyInjection.getDependency(CcpPasswordHandler.class);
+
+		boolean correctSecret = passwordHandler.matches(secretFromUser, secretFromDatabase);
 		
 		CcpJsonRepresentation toReturn = json.removeFields(JsonFieldNames.entities);
 		
@@ -106,23 +106,23 @@ public class JnBusinessEvaluateAttempts implements CcpBusiness{
 		boolean exceededAttempts = updatedAttempts >= maxAttempts;
 		if(exceededAttempts) {
 			this.topicToCreateTheLockWhenExceedTries.execute(toReturn);
-			CcpErrorFlowDisturb ccpErrorFlowDisturb = new CcpErrorFlowDisturb(toReturn, this.statusToReturnWhenExceedAttempts);
-			throw ccpErrorFlowDisturb;
+			CcpErrorFlowDisturb exceededAttemptsError = new CcpErrorFlowDisturb(toReturn, this.statusToReturnWhenExceedAttempts);
+			throw exceededAttemptsError;
 		}
-		
+
 		String email = json.getAsString(this.fieldEmailName);
-		CcpJsonRepresentation put2 = CcpOtherConstants.EMPTY_JSON
+		CcpJsonRepresentation jsonWithAttempts = CcpOtherConstants.EMPTY_JSON
 				.put(this.fieldAttempsName, updatedAttempts);
-				CcpJsonRepresentation put = put2
+				CcpJsonRepresentation attemptsRecord = jsonWithAttempts
 				.put(this.fieldEmailName, email)
 				;
-		this.entityToGetTheAttempts.save(put);
+		this.entityToGetTheAttempts.save(attemptsRecord);
 		CcpJsonFieldName[] returnedFields = new CcpJsonFieldName[] {
 				this.fieldAttempsName
 		};
-		CcpJsonRepresentation put3 = toReturn.put(this.fieldAttempsName, updatedAttempts);
-		CcpErrorFlowDisturb ccpErrorFlowDisturb2 = new CcpErrorFlowDisturb(put3, this.statusToReturnWhenWrongType, returnedFields);
-		throw ccpErrorFlowDisturb2;
+		CcpJsonRepresentation jsonWithUpdatedAttempts = toReturn.put(this.fieldAttempsName, updatedAttempts);
+		CcpErrorFlowDisturb wrongSecretError = new CcpErrorFlowDisturb(jsonWithUpdatedAttempts, this.statusToReturnWhenWrongType, returnedFields);
+		throw wrongSecretError;
 	}
 
 	@SuppressWarnings("serial")

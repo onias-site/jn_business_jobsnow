@@ -18,25 +18,26 @@ import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeString;
 import com.jn.db.bulk.JnExecuteBulkOperation;
 import com.jn.entities.decorators.annotations.JnEntityVersionable;
 import com.jn.entities.decorators.builders.JnEntityVersionableBuilder;
+import com.jn.entities.decorators.builders.JnEntityVersionablePurgeBuilder;
 import com.jn.entities.decorators.engine.JnVersionableEntity;
 import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
 import com.jn.utils.JnDeleteKeysFromCache;
 
 @CcpEntityTwin(
-		twinEntityName = "jobsnow_solved_error",
+		twinEntityName = "jn_jobsnow_solved_error",
 		bulkExecutorClass = JnExecuteBulkOperation.class,
 		functionToDeleteKeysInTheCacheClass = JnDeleteKeysFromCache.class
 		)
 @CcpEntityCache(3600)
-@CcpEntityCustomDecorators(value = {@CcpEntityCustomDecorator(value = JnEntityVersionableBuilder.class, priority = 2),})
+@CcpEntityCustomDecorators(value = {@CcpEntityCustomDecorator(value = JnEntityVersionableBuilder.class, priority = 2),@CcpEntityCustomDecorator(value = JnEntityVersionablePurgeBuilder.class, priority = 5),})
 @JnEntityVersionable(JnVersionableEntity.class)
 @CcpEntityFieldsTransformer(classReferenceWithTheFields = JnJsonTransformersFieldsEntityDefault.class)
 @CcpEntityFieldsValidator(classReferenceWithTheFields = JnEntityJobsnowPenddingError.Fields.class)
 /**
  * Registra erros pendentes de resolução pela equipe de suporte. Diferente de
  * {@code JnEntityJobsnowError} (efêmero), este possui versionamento e entidade twin
- * {@code jobsnow_solved_error}, permitindo rastrear o ciclo de vida do erro até sua resolução.
+ * {@code jn_jobsnow_solved_error}, permitindo rastrear o ciclo de vida do erro até sua resolução.
  */
 public class JnEntityJobsnowPenddingError implements CcpEntityConfigurator {
 

@@ -2,7 +2,9 @@ package com.jn.entities.decorators.enums;
 
 import static com.ccp.especifications.db.utils.entity.decorators.enums.CcpEntityDecoratorOperationType.delete;
 import static com.ccp.especifications.db.utils.entity.decorators.enums.CcpEntityDecoratorOperationType.deleteAnyWhere;
+import static com.ccp.especifications.db.utils.entity.decorators.enums.CcpEntityDecoratorOperationType.insert;
 import static com.ccp.especifications.db.utils.entity.decorators.enums.CcpEntityDecoratorOperationType.save;
+import static com.ccp.especifications.db.utils.entity.decorators.enums.CcpEntityDecoratorOperationType.update;
 import static com.ccp.especifications.db.utils.entity.decorators.enums.CcpEntityOperationPhase._after;
 import static com.ccp.especifications.db.utils.entity.decorators.enums.CcpEntityOperationPhase._before;
 import static com.ccp.especifications.db.utils.entity.decorators.enums.CcpEntityPhase.mainEntity;
@@ -20,13 +22,18 @@ import com.jn.business.messages.JnMessageSenderExceptionHandler;
 import com.jn.business.messages.JnMessageType;
 
 /**
- * Prevê todas as combinações possíveis dos campos {@code operationPhase}, {@code operationType},
- * {@code entityPhase}, {@code messagesTypes} e {@code exceptionHandler} de
- * {@code @JnEntitySendMessageToUserWhenWriteOperation}. Cada item encapsula os valores que o seu
- * nome expressa, de modo que a anotação declare uma única constante em vez dos cinco campos.
+ * Covers every possible combination of the {@code operationPhase}, {@code operationType},
+ * {@code entityPhase}, {@code messagesTypes} and {@code exceptionHandler} fields of
+ * {@code @JnEntitySendMessageToUserWhenWriteOperation}. Each item encapsulates the values its
+ * name expresses, so that the annotation declares a single constant instead of the five fields.
  *
- * <p>O nome de cada item é lido como uma frase: {@code [operationPhase][operationType]From
+ * <p>Each item name reads as a sentence: {@code [operationPhase][operationType]From
  * [entityPhase]Send[messagesTypes]AndIfFails[exceptionHandler]}.
+ *
+ * <p>{@code afterSave} fires on any {@code save}, regardless of the return value;
+ * {@code afterInsert} only when {@code save} returns {@code true} and {@code afterUpdate} only when
+ * it returns {@code false}. There is no {@code beforeInsert} or {@code beforeUpdate}, because before
+ * {@code save} the return value is not known yet.
  */
 public enum JnEntitySendMessageToUserWhenWriteOperationType {
 	afterSaveFromMainEntitySendAnEmailMessageAndIfFailsThrowAnError(_after, save, mainEntity, THROWS, email),
@@ -47,6 +54,42 @@ public enum JnEntitySendMessageToUserWhenWriteOperationType {
 	afterSaveFromTwinEntitySendAnEmailMessageAndInstantMessageAndIfFailsThrowAnError(_after, save, twinEntity, THROWS, email, instantMessenger),
 	afterSaveFromTwinEntitySendAnEmailMessageAndInstantMessageAndIfFailsSaveAWarning(_after, save, twinEntity, LENIENT, email, instantMessenger),
 	afterSaveFromTwinEntitySendAnEmailMessageAndInstantMessageAndIfFailsLogTheError(_after, save, twinEntity, LOG, email, instantMessenger),
+	afterInsertFromMainEntitySendAnEmailMessageAndIfFailsThrowAnError(_after, insert, mainEntity, THROWS, email),
+	afterInsertFromMainEntitySendAnEmailMessageAndIfFailsSaveAWarning(_after, insert, mainEntity, LENIENT, email),
+	afterInsertFromMainEntitySendAnEmailMessageAndIfFailsLogTheError(_after, insert, mainEntity, LOG, email),
+	afterInsertFromMainEntitySendAnInstantMessageAndIfFailsThrowAnError(_after, insert, mainEntity, THROWS, instantMessenger),
+	afterInsertFromMainEntitySendAnInstantMessageAndIfFailsSaveAWarning(_after, insert, mainEntity, LENIENT, instantMessenger),
+	afterInsertFromMainEntitySendAnInstantMessageAndIfFailsLogTheError(_after, insert, mainEntity, LOG, instantMessenger),
+	afterInsertFromMainEntitySendAnEmailMessageAndInstantMessageAndIfFailsThrowAnError(_after, insert, mainEntity, THROWS, email, instantMessenger),
+	afterInsertFromMainEntitySendAnEmailMessageAndInstantMessageAndIfFailsSaveAWarning(_after, insert, mainEntity, LENIENT, email, instantMessenger),
+	afterInsertFromMainEntitySendAnEmailMessageAndInstantMessageAndIfFailsLogTheError(_after, insert, mainEntity, LOG, email, instantMessenger),
+	afterInsertFromTwinEntitySendAnEmailMessageAndIfFailsThrowAnError(_after, insert, twinEntity, THROWS, email),
+	afterInsertFromTwinEntitySendAnEmailMessageAndIfFailsSaveAWarning(_after, insert, twinEntity, LENIENT, email),
+	afterInsertFromTwinEntitySendAnEmailMessageAndIfFailsLogTheError(_after, insert, twinEntity, LOG, email),
+	afterInsertFromTwinEntitySendAnInstantMessageAndIfFailsThrowAnError(_after, insert, twinEntity, THROWS, instantMessenger),
+	afterInsertFromTwinEntitySendAnInstantMessageAndIfFailsSaveAWarning(_after, insert, twinEntity, LENIENT, instantMessenger),
+	afterInsertFromTwinEntitySendAnInstantMessageAndIfFailsLogTheError(_after, insert, twinEntity, LOG, instantMessenger),
+	afterInsertFromTwinEntitySendAnEmailMessageAndInstantMessageAndIfFailsThrowAnError(_after, insert, twinEntity, THROWS, email, instantMessenger),
+	afterInsertFromTwinEntitySendAnEmailMessageAndInstantMessageAndIfFailsSaveAWarning(_after, insert, twinEntity, LENIENT, email, instantMessenger),
+	afterInsertFromTwinEntitySendAnEmailMessageAndInstantMessageAndIfFailsLogTheError(_after, insert, twinEntity, LOG, email, instantMessenger),
+	afterUpdateFromMainEntitySendAnEmailMessageAndIfFailsThrowAnError(_after, update, mainEntity, THROWS, email),
+	afterUpdateFromMainEntitySendAnEmailMessageAndIfFailsSaveAWarning(_after, update, mainEntity, LENIENT, email),
+	afterUpdateFromMainEntitySendAnEmailMessageAndIfFailsLogTheError(_after, update, mainEntity, LOG, email),
+	afterUpdateFromMainEntitySendAnInstantMessageAndIfFailsThrowAnError(_after, update, mainEntity, THROWS, instantMessenger),
+	afterUpdateFromMainEntitySendAnInstantMessageAndIfFailsSaveAWarning(_after, update, mainEntity, LENIENT, instantMessenger),
+	afterUpdateFromMainEntitySendAnInstantMessageAndIfFailsLogTheError(_after, update, mainEntity, LOG, instantMessenger),
+	afterUpdateFromMainEntitySendAnEmailMessageAndInstantMessageAndIfFailsThrowAnError(_after, update, mainEntity, THROWS, email, instantMessenger),
+	afterUpdateFromMainEntitySendAnEmailMessageAndInstantMessageAndIfFailsSaveAWarning(_after, update, mainEntity, LENIENT, email, instantMessenger),
+	afterUpdateFromMainEntitySendAnEmailMessageAndInstantMessageAndIfFailsLogTheError(_after, update, mainEntity, LOG, email, instantMessenger),
+	afterUpdateFromTwinEntitySendAnEmailMessageAndIfFailsThrowAnError(_after, update, twinEntity, THROWS, email),
+	afterUpdateFromTwinEntitySendAnEmailMessageAndIfFailsSaveAWarning(_after, update, twinEntity, LENIENT, email),
+	afterUpdateFromTwinEntitySendAnEmailMessageAndIfFailsLogTheError(_after, update, twinEntity, LOG, email),
+	afterUpdateFromTwinEntitySendAnInstantMessageAndIfFailsThrowAnError(_after, update, twinEntity, THROWS, instantMessenger),
+	afterUpdateFromTwinEntitySendAnInstantMessageAndIfFailsSaveAWarning(_after, update, twinEntity, LENIENT, instantMessenger),
+	afterUpdateFromTwinEntitySendAnInstantMessageAndIfFailsLogTheError(_after, update, twinEntity, LOG, instantMessenger),
+	afterUpdateFromTwinEntitySendAnEmailMessageAndInstantMessageAndIfFailsThrowAnError(_after, update, twinEntity, THROWS, email, instantMessenger),
+	afterUpdateFromTwinEntitySendAnEmailMessageAndInstantMessageAndIfFailsSaveAWarning(_after, update, twinEntity, LENIENT, email, instantMessenger),
+	afterUpdateFromTwinEntitySendAnEmailMessageAndInstantMessageAndIfFailsLogTheError(_after, update, twinEntity, LOG, email, instantMessenger),
 	afterDeleteFromMainEntitySendAnEmailMessageAndIfFailsThrowAnError(_after, delete, mainEntity, THROWS, email),
 	afterDeleteFromMainEntitySendAnEmailMessageAndIfFailsSaveAWarning(_after, delete, mainEntity, LENIENT, email),
 	afterDeleteFromMainEntitySendAnEmailMessageAndIfFailsLogTheError(_after, delete, mainEntity, LOG, email),
@@ -140,22 +183,23 @@ public enum JnEntitySendMessageToUserWhenWriteOperationType {
 	;
 
 	/**
-	 * Momento de execução: {@code _before} (antes) ou {@code _after} (depois) da operação.
+	 * Execution moment: {@code _before} or {@code _after} the operation.
 	 */
 	public final CcpEntityOperationPhase operationPhase;
 
 	/**
-	 * Tipo da operação: {@code save}, {@code delete} ou {@code deleteAnyWhere}.
+	 * Operation type: {@code save}, {@code insert}, {@code update}, {@code delete} or
+	 * {@code deleteAnyWhere}.
 	 */
 	public final CcpEntityDecoratorOperationType operationType;
 
 	/**
-	 * Entidade de origem (mainEntity ou twinEntity).
+	 * Source entity (mainEntity or twinEntity).
 	 */
 	public final CcpEntityPhase entityPhase;
 
 	/**
-	 * Política de tratamento de falha no envio da mensagem.
+	 * Policy for handling a failure while sending the message.
 	 */
 	public final JnMessageSenderExceptionHandler exceptionHandler;
 
@@ -175,7 +219,7 @@ public enum JnEntitySendMessageToUserWhenWriteOperationType {
 	}
 
 	/**
-	 * Tipos de mensagem a enviar. Nunca vem vazio: toda combinação prevista tem ao menos um tipo.
+	 * Message types to send. Never empty: every covered combination has at least one type.
 	 */
 	public JnMessageType[] messagesTypes() {
 		JnMessageType[] copy = this.messagesTypes.clone();

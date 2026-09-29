@@ -9,9 +9,9 @@ import java.lang.annotation.Target;
 import com.jn.entities.decorators.enums.JnEntitySendMessageToUserWhenWriteOperationType;
 
 /**
- * Configura uma operação de envio de mensagem ao usuário durante a escrita da entidade. A
- * combinação de fase, tipo de operação, entidade de origem, tipos de mensagem e política de erro
- * vem encapsulada em um único item de
+ * Configures a message sending operation to the user during the entity's write. The
+ * combination of phase, operation type, source entity, message types and error policy is
+ * encapsulated in a single item of
  * {@code JnEntitySendMessageToUserWhenWriteOperationType}.
  */
 @Retention(RUNTIME)
@@ -19,8 +19,8 @@ import com.jn.entities.decorators.enums.JnEntitySendMessageToUserWhenWriteOperat
 public @interface JnEntitySendMessageToUserWhenWriteOperation {
 
 	/**
-	 * Combinação de {@code operationPhase}, {@code operationType}, {@code entityPhase},
-	 * {@code messagesTypes} e {@code exceptionHandler} desta operação.
+	 * Combination of {@code operationPhase}, {@code operationType}, {@code entityPhase},
+	 * {@code messagesTypes} and {@code exceptionHandler} of this operation.
 	 */
 	JnEntitySendMessageToUserWhenWriteOperationType operationType();
 

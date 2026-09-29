@@ -7,10 +7,10 @@ import com.ccp.especifications.db.utils.entity.decorators.enums.CcpEntityOperati
 import com.jn.entities.decorators.annotations.JnEntitySendMessageToUserWhenTransfer;
 
 /**
- * Decorator que envia apenas as mensagens do fluxo {@code after} das transferências de dados. Fica na
- * parte interna da cadeia (prioridade baixa) e só dispara quando a transferência aconteceu de fato,
- * ou seja, quando havia registro de origem para ser copiado ou movido. O fluxo {@code before} é
- * responsabilidade de {@code JnSendMessageToUserEntityBeforeTransfer}.
+ * Decorator that sends only the messages of the {@code after} flow of data transfers. It stays in the
+ * inner part of the chain (low priority) and only fires when the transfer actually happened, that is,
+ * when there was a source record to be copied or moved. The {@code before} flow is the
+ * responsibility of {@code JnSendMessageToUserEntityBeforeTransfer}.
  */
 public class JnSendMessageToUserEntityAfterTransfer extends JnSendMessageToUserEntityOnTransfer {
 

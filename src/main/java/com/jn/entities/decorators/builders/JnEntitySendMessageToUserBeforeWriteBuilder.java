@@ -7,21 +7,21 @@ import com.ccp.especifications.db.utils.entity.decorators.engine.CcpCustomDecora
 import com.jn.entities.decorators.annotations.JnEntitySendMessageToUserWhenWrite;
 
 /**
- * Constrói o decorator que envia as mensagens do fluxo {@code before} das operações de escrita.
- * Declare-o em {@code @CcpEntityCustomDecorators} com prioridade alta, para que fique na parte
- * externa da cadeia.
+ * Builds the decorator that sends the messages of the {@code before} flow of write operations.
+ * Declare it in {@code @CcpEntityCustomDecorators} with a high priority, so that it stays in the
+ * outer part of the chain.
  */
 public class JnEntitySendMessageToUserBeforeWriteBuilder extends CcpCustomDecoratorEntity{
 
 	@SuppressWarnings("unchecked")
 	public CcpEntity getEntity(Class<?> configurationClass, CcpEntity entity) {
 		var annotation = configurationClass.getAnnotation(JnEntitySendMessageToUserWhenWrite.class);
-		Class<CcpEntity> value = (Class<CcpEntity>) annotation.beforeDecoratorClass();
+		Class<CcpEntity> decoratorClass = (Class<CcpEntity>) annotation.beforeDecoratorClass();
 
 		try {
-			Constructor<CcpEntity> constructor = value.getConstructor(CcpEntity.class, JnEntitySendMessageToUserWhenWrite.class);
-			CcpEntity newInstance = constructor.newInstance(entity, annotation);
-			return newInstance;
+			Constructor<CcpEntity> constructor = decoratorClass.getConstructor(CcpEntity.class, JnEntitySendMessageToUserWhenWrite.class);
+			CcpEntity decoratedEntity = constructor.newInstance(entity, annotation);
+			return decoratedEntity;
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}

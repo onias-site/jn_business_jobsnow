@@ -7,58 +7,61 @@ import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityC
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityCustomDecorators;
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityFieldsTransformer;
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityFieldsValidator;
+import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityTwin;
 import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityFactory;
-import com.ccp.especifications.db.utils.entity.decorators.enums.CcpEntityExpurgableOptions;
 import com.ccp.especifications.db.utils.entity.decorators.interfaces.CcpEntityConfigurator;
 import com.ccp.especifications.db.utils.entity.fields.annotations.CcpEntityFieldPrimaryKey;
 import com.ccp.json.validations.fields.annotations.CcpJsonCopyFieldValidationsFrom;
+import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidatorArray;
 import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidatorRequired;
-import com.jn.entities.decorators.annotations.JnEntityDisposable;
-import com.jn.entities.decorators.builders.JnEntityDisposableBuilder;
-import com.jn.entities.decorators.engine.JnDisposableEntity;
+import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeString;
+import com.jn.db.bulk.JnExecuteBulkOperation;
+import com.jn.entities.decorators.annotations.JnEntityVersionable;
+import com.jn.entities.decorators.builders.JnEntityVersionableBuilder;
+import com.jn.entities.decorators.engine.JnVersionableEntity;
 import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
+import com.jn.utils.JnDeleteKeysFromCache;
 
+@CcpEntityTwin(
+		twinEntityName = "jn_jobsnow_solved_error",
+		bulkExecutorClass = JnExecuteBulkOperation.class,
+		functionToDeleteKeysInTheCacheClass = JnDeleteKeysFromCache.class
+		)
 @CcpEntityCache(3600)
-@CcpEntityCustomDecorators(value = {@CcpEntityCustomDecorator(value = JnEntityDisposableBuilder.class, priority = 1),})
-@JnEntityDisposable(value = JnDisposableEntity.class, timeOption = CcpEntityExpurgableOptions.hourly)
+@CcpEntityCustomDecorators(value = {@CcpEntityCustomDecorator(value = JnEntityVersionableBuilder.class, priority = 2),})
+@JnEntityVersionable(JnVersionableEntity.class)
 @CcpEntityFieldsTransformer(classReferenceWithTheFields = JnJsonTransformersFieldsEntityDefault.class)
-@CcpEntityFieldsValidator(classReferenceWithTheFields = JnEntityHttpApiErrorClient.Fields.class)
+@CcpEntityFieldsValidator(classReferenceWithTheFields = JnEntityJobsnowPenddingError.Fields.class)
 /**
- * Records HTTP client errors (4xx) that occurred while calling external APIs. Disposable
- * every hour (temporary records for diagnosis), 1-hour cache.
+ * Registra erros pendentes de resolução pela equipe de suporte. Diferente de
+ * {@code JnEntityJobsnowError} (efêmero), este possui versionamento e entidade twin
+ * {@code jobsnow_solved_error}, permitindo rastrear o ciclo de vida do erro até sua resolução.
  */
-public class JnEntityHttpApiErrorClient implements CcpEntityConfigurator {
-	
-	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityHttpApiErrorClient.class).entityInstance;
+public class JnEntityJobsnowPenddingError implements CcpEntityConfigurator {
 
+	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityJobsnowPenddingError.class).entityInstance;
+	
 	public static enum Fields implements CcpJsonFieldName{
+		@CcpJsonFieldValidatorArray(nonRepeatedItems = false)
+		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
+		cause, 
+		@CcpJsonFieldValidatorArray(nonRepeatedItems = false)
+		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
+		stackTrace, 
+		@CcpEntityFieldPrimaryKey
+		@CcpJsonFieldTypeString
+		stackTraceHash,
 		@CcpEntityFieldPrimaryKey
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
-		url, 
-		@CcpEntityFieldPrimaryKey
-		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
-		method, 
-		@CcpEntityFieldPrimaryKey
-		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
-		headers, 
-		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
-		request, 
-		@CcpEntityFieldPrimaryKey
-		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
-		apiName,
-		@CcpEntityFieldPrimaryKey
-		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
-		details, 
-		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
-		response, 
-		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
-		httpStatus,
-		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
-		date,
+		type, 
 		@CcpJsonFieldValidatorRequired
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
-		timestamp
+		message, 
+		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
+		timestamp, 
+		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
+		date
 		;
 	}
 

@@ -33,8 +33,8 @@ public enum JnMessageType implements CcpHttpApiExecutor{
 		}
 		
 		/**
-		 * Obtém os parâmetros de email do JSON e das propriedades do sistema, resolve o
-		 * template da mensagem, envia via CcpEmailSender e salva o registro de envio.
+		 * Gets the email parameters from the JSON and from the system properties, resolves the
+		 * message template, sends it via CcpEmailSender and saves the sending record.
 		 */
 		public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
 
@@ -45,10 +45,10 @@ public enum JnMessageType implements CcpHttpApiExecutor{
 			String templateId = json.getAsString(JnJsonCommonsFields.templateId);
 			String sender = json.getAsString(JnJsonCommonsFields.sender);
 			String subject = json.getAsString(JnJsonCommonsFields.subject);
-			CcpStringDecorator asStringDecorator = json.getAsStringDecorator(JnJsonCommonsFields.message);
-			var asStringDecoratorText = asStringDecorator.text();
-			var resolveTemplate = asStringDecoratorText.resolveTemplate(json);
-			String message = resolveTemplate.content;
+			CcpStringDecorator messageDecorator = json.getAsStringDecorator(JnJsonCommonsFields.message);
+			var messageTemplate = messageDecorator.text();
+			var resolvedMessage = messageTemplate.resolveTemplate(json);
+			String message = resolvedMessage.content;
 			CcpHttpContentType contentType = json.getAsEnum(JnJsonCommonsFields.contentType, CcpHttpContentType.class, CcpHttpContentType.TEXT_HTML);
 			String[] recipients = json.getAsStringArray(JnJsonCommonsFields.email, CcpJsonCommonsFields.emails);
 			emailSender.sendSimpleTextEmailMessage(providerToken, providerUrl, templateId, sender, subject, message, contentType, recipients);
@@ -57,9 +57,9 @@ public enum JnMessageType implements CcpHttpApiExecutor{
 		}
 
 		/**
-		 * O idioma compõe a chave primária do template de email, então sem ele a mensagem não é
-		 * localizada. Quem chama pode informá-lo no json; quando não informa, vale o idioma configurado
-		 * para o sistema.
+		 * The language is part of the email template's primary key, so without it the message is
+		 * not found. The caller may provide it in the json; when it does not, the language configured
+		 * for the system is used.
 		 */
 		public CcpJsonRepresentation getParameters(CcpJsonRepresentation json) {
 
@@ -86,14 +86,14 @@ public enum JnMessageType implements CcpHttpApiExecutor{
 			return InstantMessengerJsonValidator.class;
 		}
 		/**
-		 * Obtém o token do bot via JnSystemProperties, determina o tipo de mensagem, tenta
-		 * enviar e trata exceções de rate-limit e bloqueio de bot.
+		 * Gets the bot token via JnSystemProperties, determines the message type, tries to
+		 * send it and handles rate-limit and blocked-bot exceptions.
 		 */
 		public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
 		
-			CcpStringDecorator asStringDecorator = json.getAsStringDecorator(JnJsonInstantMessengerFields.botName);
+			CcpStringDecorator botNameDecorator = json.getAsStringDecorator(JnJsonInstantMessengerFields.botName);
 
-			CcpJsonFieldName botName = asStringDecorator.jsonFieldName();
+			CcpJsonFieldName botName = botNameDecorator.jsonFieldName();
 			
 			String botToken =  JnSystemProperties.INSTANCE.getSystemInnerProperty(InstantMessengerApiFields.bots, botName);
 			
@@ -107,12 +107,12 @@ public enum JnMessageType implements CcpHttpApiExecutor{
 				JnEntityInstantMessengerMessageSent.ENTITY.save(instantMessageSent);
 				return jsonWithBotToken;
 			} catch (CcpHttpTooManyRequests e) {
-				CcpJsonRepresentation retryToSendMessage = this.retryToSendMessage(jsonWithBotToken);
-				return retryToSendMessage;
+				CcpJsonRepresentation retryResponse = this.retryToSendMessage(jsonWithBotToken);
+				return retryResponse;
 				
 			} catch(CcpErrorInstantMessageThisBotWasBlockedByThisUser e) {
-				CcpJsonRepresentation saveBlockedBot = this.saveBlockedBot(jsonWithBotToken, e.botName);
-				return saveBlockedBot;
+				CcpJsonRepresentation jsonWithBlockedBot = this.saveBlockedBot(jsonWithBotToken, e.botName);
+				return jsonWithBlockedBot;
 			}
 		}
 
@@ -120,27 +120,27 @@ public enum JnMessageType implements CcpHttpApiExecutor{
 			
 			Integer maxTriesToSendMessage = this.getMaxTries();
 			Integer triesToSendMessage = json.getOrDefault(InstantMessengerApiFields.triesToSendMessage, () -> 1);
-			boolean triesToSendMessageMaiorOuIgual = triesToSendMessage >= maxTriesToSendMessage;
+			boolean exceededMaxTries = triesToSendMessage >= maxTriesToSendMessage;
 
-			if(triesToSendMessageMaiorOuIgual) {
+			if(exceededMaxTries) {
 				JnErrorUnableToSendInstantMessage jnErrorUnableToSendInstantMessage = new JnErrorUnableToSendInstantMessage(json);
 				throw jnErrorUnableToSendInstantMessage;
 			}
 			
 			Integer sleepToSendMessage = this.getSleepTimeToRetry();
-			CcpTimeDecorator ccpTimeDecorator = new CcpTimeDecorator();
+			CcpTimeDecorator timer = new CcpTimeDecorator();
 
-			ccpTimeDecorator.sleep(sleepToSendMessage);
-			int triesToSendMessageMais = triesToSendMessage + 1;
-			CcpJsonRepresentation put = json.put(InstantMessengerApiFields.triesToSendMessage, triesToSendMessageMais);
-			CcpJsonRepresentation apply = this.execute(put);
-			return apply;
+			timer.sleep(sleepToSendMessage);
+			int nextTry = triesToSendMessage + 1;
+			CcpJsonRepresentation jsonWithNextTry = json.put(InstantMessengerApiFields.triesToSendMessage, nextTry);
+			CcpJsonRepresentation retryResponse = this.execute(jsonWithNextTry);
+			return retryResponse;
 		}
 
-		private CcpJsonRepresentation saveBlockedBot(CcpJsonRepresentation putAll, String token) {
-			CcpJsonRepresentation put2 = putAll.put(JnJsonInstantMessengerFields.botName, token);
-			JnEntityInstantMessengerBotLocked.ENTITY.save(put2);
-			return putAll;
+		private CcpJsonRepresentation saveBlockedBot(CcpJsonRepresentation json, String botName) {
+			CcpJsonRepresentation blockedBotRecord = json.put(JnJsonInstantMessengerFields.botName, botName);
+			JnEntityInstantMessengerBotLocked.ENTITY.save(blockedBotRecord);
+			return json;
 		}
 
 		public CcpJsonRepresentation getParameters(CcpJsonRepresentation json) {

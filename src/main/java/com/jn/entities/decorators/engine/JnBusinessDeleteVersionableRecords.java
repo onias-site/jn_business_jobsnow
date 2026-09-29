@@ -1,41 +1,40 @@
 package com.jn.entities.decorators.engine;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import com.ccp.constants.CcpOtherConstants;
 import com.ccp.decorators.CcpJsonFieldName;
 import com.ccp.decorators.CcpJsonRepresentation;
-import com.ccp.especifications.db.query.CcpQueryBool;
 import com.ccp.especifications.db.query.CcpQueryExecutorDecorator;
-import com.ccp.especifications.db.query.CcpQueryMust;
 import com.ccp.especifications.db.query.CcpQueryOptions;
-import com.ccp.especifications.db.query.CcpQueryShould;
 import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityMetaData;
-import com.ccp.json.fields.validation.CcpJsonCommonsFields;
 import com.jn.entities.JnEntityVersionable;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
 import com.jn.mensageria.JnBusinessSendToMensageria;
 
 /**
- * Tarefa assíncrona que expurga um registro de entidade versionável: apaga o documento da própria
- * tabela (e da gêmea, quando existe) e todas as linhas de histórico que {@code JnVersionableEntity}
- * gravou para ele em {@code JnEntityVersionable}.
+ * Asynchronous task that purges the history of a versionable entity record: every row that
+ * {@code JnVersionableEntity} saved for it in {@code JnEntityVersionable}.
  *
- * <p>A exclusão é feita por query, e não pela API de entidade, por dois motivos. O primeiro é o
- * volume: um único registro acumula uma linha de histórico por operação já realizada sobre ele, e a
- * chave primária dessas linhas inclui o {@code timestamp} da operação, então não há um conjunto de
- * ids conhecido a apagar, e sim um conjunto identificado pelo par ({@code entity}, {@code id}) —
- * exatamente o par que {@code JnVersionableEntity} grava em cada linha. O segundo é evitar o efeito
- * colateral do próprio decorator: apagar pela entidade passaria de novo pelo {@code toBulkItems}
- * versionável e gravaria mais uma linha de histórico justamente no expurgo que deveria zerá-lo.
+ * <p>The record itself is not deleted here. The one that enqueues this task is
+ * {@code JnVersionablePurgeEntity}, which has already delegated the real deletion down the chain. Until
+ * 2026-09-27 the query also deleted the record by {@code _id}: with the real deletion happening
+ * milliseconds earlier, the {@code _delete_by_query} search still saw the old version of the
+ * document and Elasticsearch aborted with 409 (version conflict) — which stayed hidden while
+ * {@code CcpHttpHandler} swallowed unexpected statuses.
  *
- * <p>Os dois alvos são apagados numa única ida ao banco. Como {@code _delete_by_query} aceita vários
- * índices na mesma chamada, basta enviar a união das tabelas e uma condição {@code should} com os
- * dois critérios: o registro sai por {@code _id}, o histórico sai pelo par ({@code entity},
- * {@code id}). Cada critério é amarrado ao seu {@code _index} para que continue valendo apenas sobre
- * as tabelas a que se destina, preservando o significado que as duas queries separadas tinham.
+ * <p>The deletion is done by query, not through the entity API, for two reasons. The first is
+ * volume: a single record accumulates one history row per operation ever performed on it, and the
+ * primary key of those rows includes the operation {@code timestamp}, so there is no known set of
+ * ids to delete, but rather a set identified by the pair ({@code entity}, {@code id}) —
+ * exactly the pair that {@code JnVersionableEntity} saves in each row. The second is to avoid the
+ * decorator's own side effect: deleting through the entity would go through the versionable
+ * {@code toBulkItems} again and save one more history row precisely in the purge meant to wipe it.
+ *
+ * <p>The entity name is searched among all the record's tables, not only the main one: in a
+ * twin entity each transfer saves history on both ends, one row under the main entity's name
+ * and another under the twin's.
  */
 public class JnBusinessDeleteVersionableRecords implements JnBusinessSendToMensageria {
 
@@ -44,26 +43,18 @@ public class JnBusinessDeleteVersionableRecords implements JnBusinessSendToMensa
 	private JnBusinessDeleteVersionableRecords() {}
 
 	public static enum JsonFieldNames implements CcpJsonFieldName {
-		entitiesToDelete, documentId, deleted
+		entitiesToDelete, deleted
 	}
-
-	private static final int AT_LEAST_ONE_CRITERIA = 1;
 
 	public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
 
-		String[] entitiesToDelete = json.getAsStringArray(JsonFieldNames.entitiesToDelete);
+		CcpQueryOptions request = this.getRequestToDeleteTheHistory(json);
 
 		CcpEntityMetaData versionableMetaData = JnEntityVersionable.ENTITY.getEntityMetaData();
 
-		String versionableEntityName = versionableMetaData.entityName;
+		CcpQueryExecutorDecorator historyToDelete = request.selectFrom(versionableMetaData.entityName);
 
-		CcpQueryOptions request = this.getRequestToDeleteEverything(json, entitiesToDelete, versionableEntityName);
-
-		String[] allEntities = this.getAllEntities(entitiesToDelete, versionableEntityName);
-
-		CcpQueryExecutorDecorator everythingToDelete = request.selectFrom(allEntities);
-
-		CcpJsonRepresentation response = everythingToDelete.delete();
+		CcpJsonRepresentation response = historyToDelete.delete();
 
 		Object noneWasDeleted = 0;
 
@@ -76,101 +67,32 @@ public class JnBusinessDeleteVersionableRecords implements JnBusinessSendToMensa
 	}
 
 	/**
-	 * Monta a única query do expurgo: um {@code should} com os dois critérios, o do registro e o do
-	 * histórico, exigindo que ao menos um deles seja satisfeito.
+	 * Finds the record's history by the pair every row stores: the source entity name in
+	 * {@code entity} and the serialized primary key in {@code id}.
 	 */
-	private CcpQueryOptions getRequestToDeleteEverything(CcpJsonRepresentation json, String[] entitiesToDelete, String versionableEntityName) {
+	private CcpQueryOptions getRequestToDeleteTheHistory(CcpJsonRepresentation json) {
 
-		var queryToDeleteEverything = CcpQueryOptions.INSTANCE
-				.startQuery();
-				var boolToDeleteEverything = queryToDeleteEverything
-				.startBool();
-				var shouldToDeleteEverything = boolToDeleteEverything
-				.startShould(AT_LEAST_ONE_CRITERIA);
-				var shouldWithTheRecord = this.addTheRecordItSelf(shouldToDeleteEverything, json, entitiesToDelete);
-				var shouldWithTheVersions = this.addTheVersionsOfTheRecord(shouldWithTheRecord, json, versionableEntityName);
-				var boolWithBothCriterias = shouldWithTheVersions
-				.endShouldAndBackToBool();
-				var queryWithBothCriterias = boolWithBothCriterias
-				.endBoolAndBackToQuery();
-
-		CcpQueryOptions requestToDeleteEverything = queryWithBothCriterias
-				.endQueryAndBackToRequest();
-
-		return requestToDeleteEverything;
-	}
-
-	/**
-	 * Acrescenta ao {@code should} o critério que localiza o documento nas tabelas informadas em
-	 * {@code entitiesToDelete}. O id do documento é o mesmo na tabela principal e na gêmea, porque ele
-	 * é calculado a partir da chave primária.
-	 */
-	private CcpQueryShould addTheRecordItSelf(CcpQueryShould should, CcpJsonRepresentation json, String[] entitiesToDelete) {
-
-		String documentId = json.getAsString(JsonFieldNames.documentId);
-
+		String[] entitiesToDelete = json.getAsStringArray(JsonFieldNames.entitiesToDelete);
 		List<String> entitiesOfTheRecord = Arrays.asList(entitiesToDelete);
-
-		CcpQueryBool boolToDeleteTheRecord = should
-				.startBool();
-				CcpQueryMust mustWithTheEntitiesOfTheRecord = boolToDeleteTheRecord
-				.startMust()
-				.terms(CcpJsonCommonsFields._index, entitiesOfTheRecord);
-				CcpQueryMust mustWithTheDocumentId = mustWithTheEntitiesOfTheRecord
-				.term(CcpJsonCommonsFields._id, documentId);
-				CcpQueryBool boolWithTheDocumentId = mustWithTheDocumentId
-				.endMustAndBackToBool();
-
-		CcpQueryShould shouldWithTheRecord = boolWithTheDocumentId
-				.endBoolAndBackToShould();
-
-		return shouldWithTheRecord;
-	}
-
-	/**
-	 * Acrescenta ao {@code should} o critério que localiza todo o histórico do registro em
-	 * {@code JnEntityVersionable}. Cada linha de histórico guarda o nome da entidade de origem em
-	 * {@code entity} e a chave primária do registro em {@code id}, então é esse par que identifica o
-	 * conjunto a expurgar.
-	 */
-	private CcpQueryShould addTheVersionsOfTheRecord(CcpQueryShould should, CcpJsonRepresentation json, String versionableEntityName) {
-
-		String entityName = json.getAsString(JnJsonCommonsFields.entity);
 		String versionableRecordId = json.getAsString(JnJsonCommonsFields.id);
 
-		CcpQueryBool boolToDeleteTheVersions = should
+		var query = CcpQueryOptions.INSTANCE
+				.startQuery();
+				var bool = query
 				.startBool();
-				CcpQueryMust mustWithTheHistoryTable = boolToDeleteTheVersions
+				var mustWithTheEntityName = bool
 				.startMust()
-				.term(CcpJsonCommonsFields._index, versionableEntityName);
-				CcpQueryMust mustWithTheEntityName = mustWithTheHistoryTable
-				.term(JnJsonCommonsFields.entity, entityName);
-				CcpQueryMust mustWithTheRecordId = mustWithTheEntityName
+				.terms(JnJsonCommonsFields.entity, entitiesOfTheRecord);
+				var mustWithTheRecordId = mustWithTheEntityName
 				.term(JnJsonCommonsFields.id, versionableRecordId);
-				CcpQueryBool boolWithTheRecordId = mustWithTheRecordId
+				var boolWithTheRecordId = mustWithTheRecordId
 				.endMustAndBackToBool();
+				var queryWithTheRecordId = boolWithTheRecordId
+				.endBoolAndBackToQuery();
 
-		CcpQueryShould shouldWithTheVersions = boolWithTheRecordId
-				.endBoolAndBackToShould();
+		CcpQueryOptions requestToDeleteTheHistory = queryWithTheRecordId
+				.endQueryAndBackToRequest();
 
-		return shouldWithTheVersions;
-	}
-
-	/**
-	 * Junta as tabelas de onde o registro em si sai com a tabela de histórico: é essa a lista de índices
-	 * enviada na chamada.
-	 */
-	private String[] getAllEntities(String[] entitiesToDelete, String versionableEntityName) {
-
-		List<String> entitiesOfTheRecord = Arrays.asList(entitiesToDelete);
-
-		List<String> allEntities = new ArrayList<>(entitiesOfTheRecord);
-		allEntities.add(versionableEntityName);
-
-		int size = allEntities.size();
-
-		String[] array = allEntities.toArray(new String[size]);
-
-		return array;
+		return requestToDeleteTheHistory;
 	}
 }

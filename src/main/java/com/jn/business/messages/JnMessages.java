@@ -7,14 +7,14 @@ import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault
 import com.jn.json.fields.validation.JnJsonCommonsFields;
 
 /**
- * Catálogo dos templates de mensagem enviados ao usuário e ao suporte. O nome de cada classe é usado
- * como tópico em {@code @JnEntitySendMessageToUserWhenWriteOperation} e em
+ * Catalog of the message templates sent to the user and to support. Each class name is used
+ * as the topic in {@code @JnEntitySendMessageToUserWhenWriteOperation} and in
  * {@code @JnEntitySendMessageToUserWhenTransferOperation}.
  *
- * <p>Cada template é um {@code CcpBusiness}: antes de compor e enviar a mensagem,
- * {@code JnSendMessageToUser.apply} instancia o tópico por reflexão e executa o seu {@code apply},
- * dando a cada template a chance de preparar o JSON que alimentará o corpo da mensagem. Quem não
- * precisa preparar nada devolve o JSON intacto.
+ * <p>Each template is a {@code CcpBusiness}: before composing and sending the message,
+ * {@code JnSendMessageToUser.apply} instantiates the topic via reflection and runs its {@code apply},
+ * giving each template the chance to prepare the JSON that will feed the message body. Templates
+ * that need no preparation return the JSON untouched.
  */
 public class JnMessages {
 
@@ -43,10 +43,10 @@ public class JnMessages {
 	}
 
 	/**
-	 * Mensagem que entrega o token de login ao usuário. Os transformadores de campo guardam os valores
-	 * em claro em {@code originalEmail} e {@code originalToken} e deixam o hash em {@code email} e
-	 * {@code token}, então aqui os campos são renomeados de volta: o corpo da mensagem precisa do
-	 * e-mail e do token legíveis, não dos hashes.
+	 * Message that delivers the login token to the user. The field transformers keep the plain values
+	 * in {@code originalEmail} and {@code originalToken} and leave the hash in {@code email} and
+	 * {@code token}, so here the fields are renamed back: the message body needs the readable
+	 * email and token, not the hashes.
 	 */
 	public static class JnNotifyUserAboutLoginToken implements CcpBusiness {
 		public CcpJsonRepresentation apply(CcpJsonRepresentation json) {

@@ -43,10 +43,10 @@ public class JnDisposableEntity extends CcpDefaultEntityDelegator<Object>{
 		Supplier<CcpJsonRepresentation> supplier = json.getJsonSupplier();
 		CcpJsonRepresentation primaryKeyValues = entityDetails.getPrimaryKeyValues(supplier);
 		String id = primaryKeyValues.asUgglyJson();
-		CcpJsonRepresentation put2 = CcpOtherConstants.EMPTY_JSON
+		CcpJsonRepresentation jsonWithEntityName = CcpOtherConstants.EMPTY_JSON
 				.put(JnJsonCommonsFields.entity, entityDetails.entityName);
 
-				CcpJsonRepresentation expurgableId = put2
+				CcpJsonRepresentation expurgableId = jsonWithEntityName
 				.put(JnJsonCommonsFields.id, id)
 				;
 		return expurgableId;
@@ -62,21 +62,21 @@ public class JnDisposableEntity extends CcpDefaultEntityDelegator<Object>{
 	private boolean isValidTimestamp(CcpJsonRepresentation requiredEntityRow) {
 		
 		String timeStampFieldName = JnJsonCommonsFields.timestamp.name();
-		CcpFieldName ccpFieldName = new CcpFieldName(timeStampFieldName);
-		boolean containsAllFields = requiredEntityRow.containsAllFields(ccpFieldName);
+		CcpFieldName timestampField = new CcpFieldName(timeStampFieldName);
+		boolean containsAllFields = requiredEntityRow.containsAllFields(timestampField);
 
 		boolean recordNotFound = false == containsAllFields;
 
 		if(recordNotFound) {
 			return false;
 		}
-		CcpFieldName ccpFieldName2 = new CcpFieldName(timeStampFieldName);
+		CcpFieldName timestampFieldToRead = new CcpFieldName(timeStampFieldName);
 
-		Long timeStamp = requiredEntityRow.getAsLongNumber(ccpFieldName2);
-		long currentTimeMillis2 = System.currentTimeMillis();
-		boolean timeStampMaior = timeStamp > currentTimeMillis2;
+		Long timeStamp = requiredEntityRow.getAsLongNumber(timestampFieldToRead);
+		long now = System.currentTimeMillis();
+		boolean isInTheFuture = timeStamp > now;
 
-		if(timeStampMaior) {
+		if(isInTheFuture) {
 			return true;
 		}
 		return false;
@@ -84,34 +84,34 @@ public class JnDisposableEntity extends CcpDefaultEntityDelegator<Object>{
 	private final CcpBulkItem getExpurgableToBulkOperation(CcpJsonRepresentation json, CcpBulkEntityOperationType operation) {
 		
 		CcpJsonRepresentation recordCopy = this.populateAnExpurgableFromJson(json);
-		String calculateId = JnEntityDisposableRecord.ENTITY.calculateId(recordCopy);
-		CcpBulkItem ccpBulkItem = new CcpBulkItem(recordCopy, operation, JnEntityDisposableRecord.ENTITY, calculateId);
+		String disposableRecordId = JnEntityDisposableRecord.ENTITY.calculateId(recordCopy);
+		CcpBulkItem disposableBulkItem = new CcpBulkItem(recordCopy, operation, JnEntityDisposableRecord.ENTITY, disposableRecordId);
 		
-		return ccpBulkItem;
+		return disposableBulkItem;
 	}
 	
 	private CcpJsonRepresentation populateAnExpurgableFromJson(CcpJsonRepresentation json) {
 		CcpJsonRepresentation expurgableId = this.getExpurgableId(json);
 		CcpEntityMetaData entityDetails = this.getEntityMetaData();
 		Supplier<CcpJsonRepresentation> jsonSupplier = json.getJsonSupplier();
-		CcpJsonRepresentation primaryKeyValues2 = entityDetails.getPrimaryKeyValues(jsonSupplier);
-		String id = primaryKeyValues2.asUgglyJson();
+		CcpJsonRepresentation primaryKeyValues = entityDetails.getPrimaryKeyValues(jsonSupplier);
+		String id = primaryKeyValues.asUgglyJson();
 		Long timestamp = json.getOrDefault(JnJsonCommonsFields.timestamp, () -> System.currentTimeMillis());
 		CcpJsonRepresentation onlyExistingFields = entityDetails.getOnlyExistingFields(json);
 		Long nextTimeStamp = this.timeOption.getNextTimeStamp(timestamp);
 		String nextDate = this.timeOption.getNextDate(timestamp);
-		CcpJsonRepresentation put3 = expurgableId
+		CcpJsonRepresentation jsonWithFormat = expurgableId
 				.put(JnEntityDisposableRecord.Fields.format, this.timeOption.format);
-				CcpJsonRepresentation put4 = put3
+				CcpJsonRepresentation jsonWithNextTimestamp = jsonWithFormat
 				.put(JnJsonCommonsFields.timestamp, nextTimeStamp);
-				CcpJsonRepresentation put5 = put4
+				CcpJsonRepresentation jsonWithTrueTimestamp = jsonWithNextTimestamp
 				.put(JnEntityDisposableRecord.Fields.trueTimestamp, timestamp);
-				CcpJsonRepresentation put6 = put5
+				CcpJsonRepresentation jsonWithOriginalJson = jsonWithTrueTimestamp
 				.put(JnJsonCommonsFields.json,onlyExistingFields);
-				CcpJsonRepresentation put7 = put6
+				CcpJsonRepresentation jsonWithDate = jsonWithOriginalJson
 				.put(JnJsonCommonsFields.date, nextDate);
 
-				CcpJsonRepresentation expurgable = put7
+				CcpJsonRepresentation expurgable = jsonWithDate
 				.put(JnJsonCommonsFields.id, id)
 				;
 		return expurgable;
@@ -120,18 +120,18 @@ public class JnDisposableEntity extends CcpDefaultEntityDelegator<Object>{
 	public String calculateId(CcpJsonRepresentation json) {
 
 		String formattedTimestamp = this.extractFormatedCurrentTimestamp(json);
-		String calculateId = this.entity.calculateId(json);
+		String entityId = this.entity.calculateId(json);
 
 		ArrayList<Object> onlyPrimaryKeysValues = new ArrayList<>();
 		onlyPrimaryKeysValues.add(formattedTimestamp);
-		onlyPrimaryKeysValues.add(calculateId);
-		String toString = onlyPrimaryKeysValues.toString();
-		String toStringReplace = toString.replace("[", "");
+		onlyPrimaryKeysValues.add(entityId);
+		String primaryKeysAsString = onlyPrimaryKeysValues.toString();
+		String withoutOpeningBracket = primaryKeysAsString.replace("[", "");
 
-		String replace = toStringReplace.replace("]", "");
-		CcpStringDecorator ccpStringDecorator = new CcpStringDecorator(replace);
-		CcpHashDecorator hash2 = ccpStringDecorator.hash();
-		String hash = hash2.asString(CcpHashAlgorithm.SHA1);
+		String joinedPrimaryKeys = withoutOpeningBracket.replace("]", "");
+		CcpStringDecorator joinedPrimaryKeysDecorator = new CcpStringDecorator(joinedPrimaryKeys);
+		CcpHashDecorator hashDecorator = joinedPrimaryKeysDecorator.hash();
+		String hash = hashDecorator.asString(CcpHashAlgorithm.SHA1);
 		return hash;
 	}
 
@@ -146,9 +146,9 @@ public class JnDisposableEntity extends CcpDefaultEntityDelegator<Object>{
 		if(isPresentInOriginalEntity) {
 			return true;
 		}
-		boolean presentInThisUnionAll2 = JnEntityDisposableRecord.ENTITY.isPresentInThisUnionAll(unionAll, expurgableId);
+		boolean isPresentInDisposable = JnEntityDisposableRecord.ENTITY.isPresentInThisUnionAll(unionAll, expurgableId);
 
-		boolean isNotPresentInCopyEntity = false == presentInThisUnionAll2;
+		boolean isNotPresentInCopyEntity = false == isPresentInDisposable;
 		
 		if(isNotPresentInCopyEntity) {
 			return false;
@@ -157,9 +157,9 @@ public class JnDisposableEntity extends CcpDefaultEntityDelegator<Object>{
 		Supplier<CcpJsonRepresentation> jsonSupplier = expurgableId.getJsonSupplier();
 		CcpJsonRepresentation requiredEntityRow = JnEntityDisposableRecord.ENTITY.getRecordFromUnionAll(unionAll, jsonSupplier);
 		Long timeStamp = requiredEntityRow.getAsLongNumber(JnJsonCommonsFields.timestamp);
-		long currentTimeMillis3 = System.currentTimeMillis();
+		long now = System.currentTimeMillis();
 
-		boolean obsoleteTimeStamp = timeStamp <= currentTimeMillis3;
+		boolean obsoleteTimeStamp = timeStamp <= now;
 		
 		if(obsoleteTimeStamp) {
 			return false;
@@ -187,9 +187,9 @@ public class JnDisposableEntity extends CcpDefaultEntityDelegator<Object>{
 			CcpJsonRepresentation requiredEntityRow = this.getRecordFromUnionAll(unionAll, allValuesTogether);
 			return requiredEntityRow;
 		}
-		boolean presentInThisUnionAll3 = JnEntityDisposableRecord.ENTITY.isPresentInThisUnionAll(unionAll, allValuesTogether);
+		boolean isPresentInDisposable = JnEntityDisposableRecord.ENTITY.isPresentInThisUnionAll(unionAll, allValuesTogether);
 
-		boolean isNotPresentInCopyEntity = false == presentInThisUnionAll3;
+		boolean isNotPresentInCopyEntity = false == isPresentInDisposable;
 
 		if(isNotPresentInCopyEntity) {
 			CcpJsonRepresentation oneById =  this.entity.getOneById(json);
@@ -199,9 +199,9 @@ public class JnDisposableEntity extends CcpDefaultEntityDelegator<Object>{
 		Supplier<CcpJsonRepresentation> jsonSupplier = allValuesTogether.getJsonSupplier();
 		CcpJsonRepresentation requiredEntityRow = JnEntityDisposableRecord.ENTITY.getRecordFromUnionAll(unionAll, jsonSupplier);
 		Long timeStamp = requiredEntityRow.getAsLongNumber(JnJsonCommonsFields.timestamp);
-		long currentTimeMillis4 = System.currentTimeMillis();
+		long now = System.currentTimeMillis();
 
-		boolean validTimeStamp = timeStamp > currentTimeMillis4;
+		boolean validTimeStamp = timeStamp > now;
 		
 		if(validTimeStamp) {
 			CcpJsonRepresentation innerJson = requiredEntityRow.getInnerJson(JnJsonCommonsFields.json);
@@ -222,11 +222,11 @@ public class JnDisposableEntity extends CcpDefaultEntityDelegator<Object>{
 	
 	private CcpJsonRepresentation replaceParameterToSearch(CcpJsonRepresentation parameterToSearch, CcpJsonRepresentation json) {
 
-		CcpDbRequester dependency = CcpDependencyInjection.getDependency(CcpDbRequester.class);
-		String fieldNameToEntity = dependency.getFieldNameToEntity();
-		CcpFieldName ccpFieldName3 = new CcpFieldName(fieldNameToEntity);
+		CcpDbRequester dbRequester = CcpDependencyInjection.getDependency(CcpDbRequester.class);
+		String fieldNameToEntity = dbRequester.getFieldNameToEntity();
+		CcpFieldName entityField = new CcpFieldName(fieldNameToEntity);
 
-		String entityName = parameterToSearch.getAsString(ccpFieldName3);
+		String entityName = parameterToSearch.getAsString(entityField);
 		
 		CcpEntityMetaData entityDetails = this.getEntityMetaData();
 		boolean entityNameEquals = entityName.equals(entityDetails.entityName);
@@ -236,21 +236,21 @@ public class JnDisposableEntity extends CcpDefaultEntityDelegator<Object>{
 			return parameterToSearch;
 		}
 		
-		String fieldNameToId = dependency.getFieldNameToId();
+		String fieldNameToId = dbRequester.getFieldNameToId();
 		String id = this.calculateId(json);
-		CcpFieldName ccpFieldName4 = new CcpFieldName(fieldNameToId);
-		CcpJsonRepresentation put = parameterToSearch.put(ccpFieldName4, id);
-		return put;
+		CcpFieldName idField = new CcpFieldName(fieldNameToId);
+		CcpJsonRepresentation parameterWithCalculatedId = parameterToSearch.put(idField, id);
+		return parameterWithCalculatedId;
 	}
 	
 	public List<CcpJsonRepresentation> getParametersToSearch(CcpJsonRepresentation json) {
 		List<CcpJsonRepresentation> parametersToSearch = this.entity.getParametersToSearch(json);
-		Stream<CcpJsonRepresentation> stream = parametersToSearch
+		Stream<CcpJsonRepresentation> parametersStream = parametersToSearch
 				.stream();
-				var streamMap = stream
+				var replacedParametersStream = parametersStream
 				.map(p -> this.replaceParameterToSearch(p, json));
 
-				List<CcpJsonRepresentation> mainParametersToSearch =  streamMap
+				List<CcpJsonRepresentation> mainParametersToSearch =  replacedParametersStream
 				.collect(Collectors.toList())
 				;
 		
@@ -303,17 +303,17 @@ public class JnDisposableEntity extends CcpDefaultEntityDelegator<Object>{
 		}
 		
 		CcpJsonRepresentation expurgableId = this.getExpurgableId(json);
-		boolean presentInThisUnionAll4 = JnEntityDisposableRecord.ENTITY.isPresentInThisUnionAll(unionAll, expurgableId);
+		boolean isPresentInDisposable = JnEntityDisposableRecord.ENTITY.isPresentInThisUnionAll(unionAll, expurgableId);
 
-		boolean notFoundInDisposable = false == presentInThisUnionAll4;
+		boolean notFoundInDisposable = false == isPresentInDisposable;
 		
 		if(notFoundInDisposable) {
 			return false;
 		}
 		
-		CcpJsonRepresentation mergeWithAnotherJson = expurgableId.mergeWithAnotherJson(json);
+		CcpJsonRepresentation expurgableIdWithJson = expurgableId.mergeWithAnotherJson(json);
 		
-		CcpJsonRepresentation requiredEntityRow = this.getRecordFromUnionAll(unionAll, mergeWithAnotherJson);
+		CcpJsonRepresentation requiredEntityRow = this.getRecordFromUnionAll(unionAll, expurgableIdWithJson);
 		
 		boolean valid = this.isValidTimestamp(requiredEntityRow);
 		
@@ -333,8 +333,8 @@ public class JnDisposableEntity extends CcpDefaultEntityDelegator<Object>{
 		
 		String id = this.calculateId(item.json);
 		CcpEntityMetaData entityMetaData = this.getEntityMetaData();
-		CcpBulkItem ccpBulkItem = new CcpBulkItem(item.json, item.operation, entityMetaData.entity, id);
-		return ccpBulkItem;
+		CcpBulkItem itemWithReplacedId = new CcpBulkItem(item.json, item.operation, entityMetaData.entity, id);
+		return itemWithReplacedId;
 		
 	}
 
@@ -347,8 +347,8 @@ public class JnDisposableEntity extends CcpDefaultEntityDelegator<Object>{
 		if(isThisEntity) {
 			return false;
 		}
-		CcpEntityMetaData entityMetaData2 = this.getEntityMetaData();
-		CcpEntity twinEntity = entityMetaData2.entity.getTwinEntity();
+		CcpEntityMetaData thisEntityMetaData = this.getEntityMetaData();
+		CcpEntity twinEntity = thisEntityMetaData.entity.getTwinEntity();
 
 		CcpEntityMetaData twinEntityDetails = twinEntity.getEntityMetaData();
 		boolean isTwinEntity = itemEntityDetails.entityName.equals(twinEntityDetails.entityName);
@@ -359,12 +359,12 @@ public class JnDisposableEntity extends CcpDefaultEntityDelegator<Object>{
 	}
 
 	public List<CcpBulkItem> toBulkItems(CcpJsonRepresentation json, CcpBulkEntityOperationType operation) {
-		List<CcpBulkItem> bulkItems2 = this.entity.toBulkItems(json, operation);
-		Stream<CcpBulkItem> stream2 = bulkItems2
+		List<CcpBulkItem> originalBulkItems = this.entity.toBulkItems(json, operation);
+		Stream<CcpBulkItem> originalBulkItemsStream = originalBulkItems
 				.stream();
-				var stream2Map = stream2
+				var bulkItemsWithReplacedIdStream = originalBulkItemsStream
 				.map(item -> this.replaceId(item));
-				List<CcpBulkItem> bulkItems = stream2Map
+				List<CcpBulkItem> bulkItems = bulkItemsWithReplacedIdStream
 				.collect(Collectors.toList())
 				;
 		ArrayList<CcpBulkItem> items = new ArrayList<>(bulkItems);
@@ -380,14 +380,14 @@ public class JnDisposableEntity extends CcpDefaultEntityDelegator<Object>{
 		CcpJsonRepresentation handledJson = entityDetails.entity.getHandledJson(json);
 		
 		Supplier<CcpJsonRepresentation> jsonSupplier = handledJson.getJsonSupplier();
-		CcpJsonRepresentation primaryKeyValues3 = entityDetails.getPrimaryKeyValues(jsonSupplier);
+		CcpJsonRepresentation primaryKeyValues = entityDetails.getPrimaryKeyValues(jsonSupplier);
 
-		String id = primaryKeyValues3.asUgglyJson();
-		CcpJsonRepresentation put8 = CcpOtherConstants
+		String id = primaryKeyValues.asUgglyJson();
+		CcpJsonRepresentation jsonWithId = CcpOtherConstants
 				.EMPTY_JSON
 				.put(JnJsonCommonsFields.id, id);
 
-				CcpJsonRepresentation idToSearch = put8
+				CcpJsonRepresentation idToSearch = jsonWithId
 				.put(JnJsonCommonsFields.entity, entityDetails.entityName)
 				;
 		return idToSearch;

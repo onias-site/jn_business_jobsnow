@@ -21,13 +21,14 @@ import com.ccp.json.validations.fields.annotations.CcpJsonCopyFieldValidationsFr
 import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidatorRequired;
 import com.jn.business.messages.JnMessages;
 import com.jn.entities.decorators.builders.JnEntityVersionableBuilder;
+import com.jn.entities.decorators.builders.JnEntityVersionablePurgeBuilder;
 import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
 import com.jn.json.fields.validation.JnJsonInstantMessengerFields;
 import com.jn.utils.JnLanguage;
 
 @CcpEntityCache(3600)
-@CcpEntityCustomDecorators(value = {@CcpEntityCustomDecorator(value = JnEntityVersionableBuilder.class, priority = 2),})
+@CcpEntityCustomDecorators(value = {@CcpEntityCustomDecorator(value = JnEntityVersionableBuilder.class, priority = 2),@CcpEntityCustomDecorator(value = JnEntityVersionablePurgeBuilder.class, priority = 5),})
 @JnEntityVersionable(JnVersionableEntity.class)
 @CcpEntityFieldsTransformer(classReferenceWithTheFields = JnJsonTransformersFieldsEntityDefault.class)
 @CcpEntityFieldsValidator(classReferenceWithTheFields = JnEntityInstantMessengerTemplateMessage.Fields.class)
@@ -44,7 +45,7 @@ public class JnEntityInstantMessengerTemplateMessage  implements CcpEntityConfig
 
 	public static enum Fields implements CcpJsonFieldName{
 		@CcpEntityFieldPrimaryKey
-		@CcpJsonCopyFieldValidationsFrom(JnJsonInstantMessengerFields.class)
+		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		templateId,
 		@CcpEntityFieldPrimaryKey
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
@@ -63,6 +64,16 @@ public class JnEntityInstantMessengerTemplateMessage  implements CcpEntityConfig
 				.put(JnJsonCommonsFields.templateId, name);
 
 				CcpJsonRepresentation notifyError = put2
+				.put(JnJsonCommonsFields.language, JnLanguage.portuguese)
+		;
+				CcpJsonRepresentation put7 = CcpOtherConstants.EMPTY_JSON
+						.put(JnJsonCommonsFields.message, "{type}\\n\\nWarning Description:\n {msg}\\n\\n{stackTrace}\\n\\nCaused by:\\n{cause}");
+				String warningTemplateId = JnMessages.JnNotifySupportAboutWaring.class.getName();
+
+				CcpJsonRepresentation put8 = put7
+				.put(JnJsonCommonsFields.templateId, warningTemplateId);
+
+				CcpJsonRepresentation notifyWarning = put8
 				.put(JnJsonCommonsFields.language, JnLanguage.portuguese)
 		;
 				
@@ -88,6 +99,7 @@ public class JnEntityInstantMessengerTemplateMessage  implements CcpEntityConfig
 		List<CcpBulkItem> createBulkItems = CcpEntityConfigurator.super.toCreateBulkItems(
 				ENTITY
 				, notifyError
+				, notifyWarning
 				, notifyAboutSolvedLockedToken
 				, notifyAboutSolvedResendToken				
 				);

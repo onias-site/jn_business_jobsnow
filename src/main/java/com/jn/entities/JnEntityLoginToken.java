@@ -1,6 +1,6 @@
 package com.jn.entities;
 
-import static com.jn.entities.decorators.enums.JnEntitySendMessageToUserWhenWriteOperationType.afterSaveFromMainEntitySendAnEmailMessageAndIfFailsThrowAnError;
+import static com.jn.entities.decorators.enums.JnEntitySendMessageToUserWhenWriteOperationType.afterInsertFromMainEntitySendAnEmailMessageAndIfFailsThrowAnError;
 
 import com.ccp.decorators.CcpJsonFieldName;
 import com.ccp.especifications.db.utils.entity.CcpEntity;
@@ -47,13 +47,13 @@ import com.jn.utils.JnDeleteKeysFromCache;
 })
 @JnEntitySendMessageToUserWhenWrite({
 		@JnEntitySendMessageToUserWhenWriteOperation(
-				operationType = afterSaveFromMainEntitySendAnEmailMessageAndIfFailsThrowAnError,
+				operationType = afterInsertFromMainEntitySendAnEmailMessageAndIfFailsThrowAnError,
 				messageTemplate = JnMessages.JnNotifyUserAboutLoginToken.class
 				)
 })
 @JnEntityAsyncWriter(JnAsyncWriterEntity.class)
 @CcpEntityTwin(
-		twinEntityName = "login_token_locked",
+		twinEntityName = "jn_login_token_locked",
 		bulkExecutorClass = JnExecuteBulkOperation.class,
 		functionToDeleteKeysInTheCacheClass = JnDeleteKeysFromCache.class
 		)
@@ -62,7 +62,7 @@ import com.jn.utils.JnDeleteKeysFromCache;
 @CcpEntityFieldsValidator(classReferenceWithTheFields = JnEntityLoginToken.Fields.class)
 /**
  * Armazena o token de acesso enviado por email ao usuário durante o onboarding ou recuperação de
- * senha. Expiração mensal. A twin {@code login_token_locked} indica token bloqueado após excesso
+ * senha. Expiração mensal. A twin {@code jn_login_token_locked} indica token bloqueado após excesso
  * de tentativas. Cache de 24 horas.
  */
 public class JnEntityLoginToken implements CcpEntityConfigurator {

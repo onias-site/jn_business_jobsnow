@@ -16,25 +16,26 @@ import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidatorRequired
 import com.jn.db.bulk.JnExecuteBulkOperation;
 import com.jn.entities.decorators.annotations.JnEntityVersionable;
 import com.jn.entities.decorators.builders.JnEntityVersionableBuilder;
+import com.jn.entities.decorators.builders.JnEntityVersionablePurgeBuilder;
 import com.jn.entities.decorators.engine.JnVersionableEntity;
 import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
 import com.jn.utils.JnDeleteKeysFromCache;
 
 @CcpEntityTwin(
-		twinEntityName = "login_password_locked",
+		twinEntityName = "jn_login_password_locked",
 		bulkExecutorClass = JnExecuteBulkOperation.class,
 		functionToDeleteKeysInTheCacheClass = JnDeleteKeysFromCache.class
 		)
 
-@CcpEntityCustomDecorators(value = {@CcpEntityCustomDecorator(value = JnEntityVersionableBuilder.class, priority = 2),})
+@CcpEntityCustomDecorators(value = {@CcpEntityCustomDecorator(value = JnEntityVersionableBuilder.class, priority = 2),@CcpEntityCustomDecorator(value = JnEntityVersionablePurgeBuilder.class, priority = 5),})
 @CcpEntityCache(3600)
 @JnEntityVersionable(JnVersionableEntity.class)
 @CcpEntityFieldsTransformer(classReferenceWithTheFields = JnJsonTransformersFieldsEntityDefault.class)
 @CcpEntityFieldsValidator(classReferenceWithTheFields = JnEntityLoginPassword.Fields.class)
 
 /**
- * Armazena o hash BCrypt da senha do usuário. A entidade twin {@code login_password_locked}
+ * Armazena o hash BCrypt da senha do usuário. A entidade twin {@code jn_login_password_locked}
  * representa o estado de senha bloqueada após múltiplas tentativas incorretas. Versionável,
  * cache de 1 hora.
  */

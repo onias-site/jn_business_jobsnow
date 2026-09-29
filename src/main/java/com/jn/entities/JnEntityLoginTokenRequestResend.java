@@ -1,7 +1,7 @@
 package com.jn.entities;
 
 import static com.jn.entities.decorators.enums.JnEntitySendMessageToUserWhenWriteOperationType.afterDeleteFromMainEntitySendAnInstantMessageAndIfFailsThrowAnError;
-import static com.jn.entities.decorators.enums.JnEntitySendMessageToUserWhenWriteOperationType.afterSaveFromMainEntitySendAnInstantMessageAndIfFailsThrowAnError;
+import static com.jn.entities.decorators.enums.JnEntitySendMessageToUserWhenWriteOperationType.afterInsertFromMainEntitySendAnInstantMessageAndIfFailsThrowAnError;
 
 import com.ccp.decorators.CcpJsonFieldName;
 import com.ccp.especifications.db.utils.entity.CcpEntity;
@@ -48,12 +48,12 @@ import com.jn.utils.JnDeleteKeysFromCache;
 			messageTemplate = JnMessages.JnNotifySupportAboutSolvedResendLoginToken.class
 			),
 	@JnEntitySendMessageToUserWhenWriteOperation(
-			operationType = afterSaveFromMainEntitySendAnInstantMessageAndIfFailsThrowAnError,
+			operationType = afterInsertFromMainEntitySendAnInstantMessageAndIfFailsThrowAnError,
 			messageTemplate = JnMessages.JnNotifySupportAboutPendingResendLoginToken.class
 			),
 })
 @CcpEntityTwin(
-		twinEntityName = "login_token_fulfilled_resend",
+		twinEntityName = "jn_login_token_fulfilled_resend",
 		bulkExecutorClass = JnExecuteBulkOperation.class,
 		functionToDeleteKeysInTheCacheClass = JnDeleteKeysFromCache.class
 		)

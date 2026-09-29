@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.function.Supplier;
 
 import com.ccp.business.CcpBusiness;
+import com.ccp.constants.CcpOtherConstants;
 import com.ccp.decorators.CcpFieldName;
 import com.ccp.decorators.CcpJsonFieldName;
 import com.ccp.decorators.CcpJsonRepresentation;
@@ -90,6 +91,55 @@ public class JnSendMessageToUser implements CcpBusiness{
 		return getMessage;
 	}
 
+	/**
+	 * Marca a thread que está entregando uma recusa ao handler. O handler {@code LENIENT}/{@code LOG}
+	 * grava um {@code JnEntityJobsnowWarning}, que por sua vez avisa o suporte; se esse aviso também
+	 * for recusado, entregá-lo ao handler gravaria outro warning, e assim por diante.
+	 */
+	private static final ThreadLocal<Boolean> handlingARefusal = ThreadLocal.withInitial(() -> false);
+
+	/**
+	 * Aplica as regras de "não enviar" ({@code JnMustNotSendMessage}) ao canal da posição informada e,
+	 * se o envio for recusado, entrega a recusa ao handler declarado para o canal — o mesmo que já
+	 * tratava as falhas do envio HTTP. {@code THROWS} relança a própria recusa (comportamento de antes);
+	 * {@code LENIENT} e {@code LOG} registram o warning e só aquele envio é pulado. A recusa ocorrida
+	 * enquanto outra recusa está sendo registrada não chega ao handler: fica só no log.
+	 *
+	 * @return {@code true} quando o envio foi recusado e deve ser pulado
+	 */
+	private boolean isRefused(CcpSelectUnionAll unionAll, CcpJsonRepresentation idToSearch, int index, JnBusinessSendHttpRequest messenger) {
+		try {
+			JnMustNotSendMessage[] values = JnMustNotSendMessage.values();
+
+			for (JnMustNotSendMessage value : values) {
+				value.validate(this, unionAll, idToSearch , index);
+			}
+			return false;
+		} catch (JnMustNotSendMessage.MessageDidNotSend refusal) {
+
+			boolean mustThrow = messenger.exceptionHandler == JnMessageSenderExceptionHandler.THROWS;
+
+			if(mustThrow) {
+				throw refusal;
+			}
+
+			boolean isAlreadyHandlingARefusal = handlingARefusal.get();
+
+			if(isAlreadyHandlingARefusal) {
+				refusal.printStackTrace();
+				return true;
+			}
+
+			handlingARefusal.set(true);
+			try {
+				messenger.exceptionHandler.apply(refusal);
+			} finally {
+				handlingARefusal.set(false);
+			}
+			return true;
+		}
+	}
+
 	CcpJsonRepresentation executeAllSteps(String templateId, CcpJsonRepresentation json) {
 		
 		List<CcpEntity> allEntitiesToSearch = new ArrayList<>();
@@ -114,24 +164,80 @@ public class JnSendMessageToUser implements CcpBusiness{
 
 		idToSearch = this.mergeSendingParameters(crud, idToSearch);
 
-		CcpSelectUnionAll unionAll = crud.unionAll(idToSearch, JnDeleteKeysFromCache.INSTANCE, entities);
+		CcpJsonRepresentation[] idsToSearchByChannel = this.getIdsToSearchByChannel(crud, idToSearch);
+
+		CcpSelectUnionAll unionAll = crud.unionAll(idsToSearchByChannel, JnDeleteKeysFromCache.INSTANCE, entities);
+
+		CcpJsonRepresentation resultsOfTheChannels = CcpOtherConstants.EMPTY_JSON;
 
 		for (int index = 0; index < this.alreadySentEntities.size(); index++) {
-			
-			JnMustNotSendMessage[] values = JnMustNotSendMessage.values();
-			
-			for (JnMustNotSendMessage value : values) {
-				value.validate(this, unionAll, idToSearch , index);
-			}
-			
+
 			JnBusinessSendHttpRequest messenger = this.messengers.get(index);
-			CcpJsonRepresentation result = this.sendMessage(unionAll, idToSearch, index);
+
+			CcpJsonRepresentation channelIdToSearch = idsToSearchByChannel[index].mergeWithAnotherJson(resultsOfTheChannels);
+
+			boolean refused = this.isRefused(unionAll, channelIdToSearch, index, messenger);
+
+			if(refused) {
+				continue;
+			}
+
+			CcpJsonRepresentation result = this.sendMessage(unionAll, channelIdToSearch, index);
 			Class<? extends CcpBusiness> class1 = messenger.processThatSendsHttpRequest.getClass();
 			String simpleName = class1.getSimpleName();
-			idToSearch = idToSearch.put(new CcpFieldName(simpleName), result);
+			resultsOfTheChannels = resultsOfTheChannels.put(new CcpFieldName(simpleName), result);
 		}
 
 		return json;
+	}
+
+	/**
+	 * One json per channel, each one with the {@code message} of its own template, resolved with the values of
+	 * this sending. {@link #mergeSendingParameters(CcpCrud, CcpJsonRepresentation)} puts the records of every
+	 * channel in a single json, where the {@code message} of the first channel prevails; up to 2026-09-28 that
+	 * text went to every channel, so a template sent by email and by instant message delivered the email body
+	 * (HTML) to the instant messenger too, and the "already sent" record of the instant message was keyed by the
+	 * email text. With a single channel the json is the one received, and nothing else is searched.
+	 */
+	private CcpJsonRepresentation[] getIdsToSearchByChannel(CcpCrud crud, CcpJsonRepresentation idToSearch) {
+
+		int channelsCount = this.messageEntities.size();
+		CcpJsonRepresentation[] idsToSearchByChannel = new CcpJsonRepresentation[channelsCount];
+
+		boolean singleChannel = channelsCount == 1;
+
+		if(singleChannel) {
+			idsToSearchByChannel[0] = idToSearch;
+			return idsToSearchByChannel;
+		}
+
+		CcpEntity[] messageEntitiesArray = this.messageEntities.toArray(new CcpEntity[channelsCount]);
+		CcpSelectUnionAll templates = crud.unionAll(idToSearch, JnDeleteKeysFromCache.INSTANCE, messageEntitiesArray);
+		Supplier<CcpJsonRepresentation> jsonSupplier = idToSearch.getJsonSupplier();
+
+		for (int index = 0; index < channelsCount; index++) {
+
+			idsToSearchByChannel[index] = idToSearch;
+			CcpEntity messageEntity = this.messageEntities.get(index);
+
+			try {
+				CcpJsonRepresentation template = messageEntity.getRecordFromUnionAll(templates, jsonSupplier);
+				boolean templateWithoutMessage = false == template.containsField(JnJsonCommonsFields.message);
+
+				if(templateWithoutMessage) {
+					continue;
+				}
+
+				CcpTextDecorator channelMessage = template.getAsTextDecorator(JnJsonCommonsFields.message);
+				CcpTextDecorator resolvedChannelMessage = channelMessage.resolveTemplate(idToSearch);
+				idsToSearchByChannel[index] = idToSearch.put(JnJsonCommonsFields.message, resolvedChannelMessage.content);
+
+			} catch (CcpErrorEntityPrimaryKeyIsMissing e) {
+				continue;
+			}
+		}
+
+		return idsToSearchByChannel;
 	}
 
 	/**

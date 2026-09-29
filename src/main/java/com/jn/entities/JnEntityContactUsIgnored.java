@@ -27,13 +27,13 @@ import com.jn.utils.JnDeleteKeysFromCache;
 @CcpEntityFieldsTransformer(classReferenceWithTheFields = JnJsonTransformersFieldsEntityDefault.class)
 @CcpEntityFieldsValidator(classReferenceWithTheFields = JnEntityContactUsIgnored.Fields.class)
 @CcpEntityTwin(
-		twinEntityName = "contact_us_reread",
+		twinEntityName = "jn_contact_us_reread",
 		bulkExecutorClass = JnExecuteBulkOperation.class,
 		functionToDeleteKeysInTheCacheClass = JnDeleteKeysFromCache.class
 		)
 /**
- * Registra contatos ignorados pelo suporte. Entidade descartável com expiração diária.
- * Possui twin contact_us_reread para reaproveitamento posterior.
+ * Records contacts ignored by support. Disposable entity with daily expiration.
+ * Has the twin jn_contact_us_reread for later reuse.
  */
 public class JnEntityContactUsIgnored implements CcpEntityConfigurator {
 	

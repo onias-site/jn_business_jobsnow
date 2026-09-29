@@ -1,91 +1,67 @@
 package com.jn.entities;
 
-import com.ccp.decorators.CcpFieldName;
 import com.ccp.decorators.CcpJsonFieldName;
-import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.especifications.db.utils.entity.CcpEntity;
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityCache;
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityCustomDecorator;
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityCustomDecorators;
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityFieldsTransformer;
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityFieldsValidator;
+import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityTwin;
 import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityFactory;
 import com.ccp.especifications.db.utils.entity.decorators.enums.CcpEntityExpurgableOptions;
 import com.ccp.especifications.db.utils.entity.decorators.interfaces.CcpEntityConfigurator;
 import com.ccp.especifications.db.utils.entity.fields.annotations.CcpEntityFieldPrimaryKey;
+import com.ccp.especifications.db.utils.entity.fields.annotations.CcpEntityFieldTransformer;
 import com.ccp.json.validations.fields.annotations.CcpJsonCopyFieldValidationsFrom;
-import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidatorRequired;
+import com.jn.db.bulk.JnExecuteBulkOperation;
 import com.jn.entities.decorators.annotations.JnEntityDisposable;
 import com.jn.entities.decorators.builders.JnEntityDisposableBuilder;
 import com.jn.entities.decorators.engine.JnDisposableEntity;
 import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault;
+import com.jn.entities.fields.transformers.JnJsonTransformersFieldEntityTokenHash;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
+import com.jn.utils.JnDeleteKeysFromCache;
 
 @CcpEntityCache(3600)
 @CcpEntityCustomDecorators(value = {@CcpEntityCustomDecorator(value = JnEntityDisposableBuilder.class, priority = 1),})
+@CcpEntityTwin(
+		twinEntityName = "jn_login_session_terminated",
+		bulkExecutorClass = JnExecuteBulkOperation.class,
+		functionToDeleteKeysInTheCacheClass = JnDeleteKeysFromCache.class
+		)
 @JnEntityDisposable(value = JnDisposableEntity.class, timeOption = CcpEntityExpurgableOptions.hourly)
 @CcpEntityFieldsTransformer(classReferenceWithTheFields = JnJsonTransformersFieldsEntityDefault.class)
-@CcpEntityFieldsValidator(classReferenceWithTheFields = JnEntityHttpApiRetrySendRequest.Fields.class)
-
+@CcpEntityFieldsValidator(classReferenceWithTheFields = JnEntityLoginSessionValidation.Fields.class)
 /**
- * Controls the number of resend attempts of an HTTP request that failed with a server error.
- * Each attempt produces a record with the same key plus the attempt number (1, 2, 3...).
- * Disposable hourly, 1-hour cache.
+ * Representa uma sessão de login ativa. A chave composta inclui email, token (hash SHA-1), IP e
+ * userAgent — cada sessão é única por combinação de contexto. A twin {@code login_session_terminated}
+ * recebe a sessão ao fazer logout. Descartável por hora, cache de 1 hora.
  */
-public class JnEntityHttpApiRetrySendRequest implements CcpEntityConfigurator {
+public class JnEntityLoginSessionValidation implements CcpEntityConfigurator {
 
-	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityHttpApiRetrySendRequest.class).entityInstance;
-	
-	public static boolean exceededTries(CcpJsonRepresentation json, String fieldName, int limit) {
-		
-		for(int attempt = 1; attempt <= limit; attempt++) {
-			CcpFieldName attemptsField = new CcpFieldName(fieldName);
-		
-			CcpJsonRepresentation jsonWithAttempt = json.put(attemptsField, attempt);
-			
-			boolean exists = ENTITY.exists(jsonWithAttempt);
-			boolean attemptNotRegisteredYet = false == exists;
-
-			if(attemptNotRegisteredYet) {
-				ENTITY.save(jsonWithAttempt);
-				return false;
-			}
-		}
-		return true;
-	}
-
+	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityLoginSessionValidation.class).entityInstance;
 	public static enum Fields implements CcpJsonFieldName{
 		@CcpEntityFieldPrimaryKey
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
-		url, 
+		email, 
+		
 		@CcpEntityFieldPrimaryKey
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
-		method, 
+		@CcpEntityFieldTransformer(JnJsonTransformersFieldEntityTokenHash.class)
+		token,
+		
 		@CcpEntityFieldPrimaryKey
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
-		headers, 
+		ip,
+		
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
-		request, 
+		coordinates, 
+		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
+		macAddress, 
 		@CcpEntityFieldPrimaryKey
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
-		apiName, 
-		@CcpEntityFieldPrimaryKey
-		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
-		attempts, 
-		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
-		response, 
-		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
-		httpStatus,
-		@CcpJsonFieldValidatorRequired
-		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
-		timestamp,
-		@CcpJsonFieldValidatorRequired
-		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
-		date,
-		@CcpJsonFieldValidatorRequired
-		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
-		details
+		userAgent
 		;
 	}
-
 }

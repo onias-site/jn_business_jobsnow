@@ -12,6 +12,7 @@ import com.ccp.especifications.db.utils.entity.decorators.interfaces.CcpEntityCo
 import com.ccp.especifications.db.utils.entity.fields.annotations.CcpEntityFieldNotUpdatable;
 import com.ccp.especifications.db.utils.entity.fields.annotations.CcpEntityFieldPrimaryKey;
 import com.ccp.json.validations.fields.annotations.CcpJsonCopyFieldValidationsFrom;
+import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeNumberUnsigned;
 import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidatorRequired;
 import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeString;
 import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault;
@@ -19,9 +20,9 @@ import com.jn.json.fields.validation.JnJsonCommonsFields;
 
 
 /**
- * Registro de expiração (disposable) de outras entidades. Armazena uma cópia do JSON de uma entidade
- * com timestamp de expiração. Usado por {@code JnDisposableEntity} para implementar TTL sem depender
- * de recurso nativo do Elasticsearch. Somente leitura — nunca gravado diretamente.
+ * Expiration (disposable) record of other entities. Stores a copy of an entity's JSON with an
+ * expiration timestamp. Used by {@code JnDisposableEntity} to implement TTL without relying on a
+ * native Elasticsearch feature. Read-only — never saved directly.
  */
 @CcpEntityOlyReadable
 @CcpEntityFieldsTransformer(classReferenceWithTheFields = JnJsonTransformersFieldsEntityDefault.class)
@@ -55,7 +56,7 @@ public class JnEntityDisposableRecord implements CcpEntityConfigurator {
 		id, 
 		@CcpEntityFieldNotUpdatable
 		@CcpJsonFieldValidatorRequired
-		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
+		@CcpJsonFieldTypeNumberUnsigned
 		trueTimestamp,
 		;
 	}
@@ -65,17 +66,17 @@ public class JnEntityDisposableRecord implements CcpEntityConfigurator {
 		Long trueTimestamp = jsonPiece.getAsLongNumber(Fields.trueTimestamp);
 		Long timestamp = jsonPiece.getAsLongNumber(JnJsonCommonsFields.timestamp);
 		String newFormat = "dd/MM/yyyy - HH:mm";
-		CcpTimeDecorator ccpTimeDecorator = new CcpTimeDecorator(trueTimestamp);
-		String dateItWasSaved = ccpTimeDecorator.getFormattedDateTime(newFormat);
-		CcpTimeDecorator ctd = new CcpTimeDecorator(timestamp);
-		String expirationDate = ctd.getFormattedDateTime(newFormat);
-		
+		CcpTimeDecorator savingTime = new CcpTimeDecorator(trueTimestamp);
+		String dateItWasSaved = savingTime.getFormattedDateTime(newFormat);
+		CcpTimeDecorator expirationTime = new CcpTimeDecorator(timestamp);
+		String expirationDate = expirationTime.getFormattedDateTime(newFormat);
+
 		CcpJsonRepresentation innerJson = oneById.getInnerJson(JnJsonCommonsFields.json);
-		CcpJsonRepresentation removeFields = jsonPiece.removeFields(JnJsonCommonsFields.json, Fields.format);
-		CcpJsonRepresentation renameField = removeFields.put(JnJsonCommonsFields.expirationDate, expirationDate);
-		CcpJsonRepresentation mergeWithAnotherJson = innerJson.mergeWithAnotherJson(renameField);
-		CcpJsonRepresentation put = mergeWithAnotherJson.put(JnJsonCommonsFields.dateItWasSaved, dateItWasSaved);
-		return put;
+		CcpJsonRepresentation timestamps = jsonPiece.removeFields(JnJsonCommonsFields.json, Fields.format);
+		CcpJsonRepresentation timestampsWithExpirationDate = timestamps.put(JnJsonCommonsFields.expirationDate, expirationDate);
+		CcpJsonRepresentation dataWithTimestamps = innerJson.mergeWithAnotherJson(timestampsWithExpirationDate);
+		CcpJsonRepresentation dataWithSavingDate = dataWithTimestamps.put(JnJsonCommonsFields.dateItWasSaved, dateItWasSaved);
+		return dataWithSavingDate;
 	}
 }
 

@@ -7,21 +7,21 @@ import com.ccp.especifications.db.utils.entity.decorators.engine.CcpCustomDecora
 import com.jn.entities.decorators.annotations.JnEntitySendMessageToUserWhenTransfer;
 
 /**
- * Constrói o decorator que envia as mensagens do fluxo {@code after} das transferências de dados.
- * Declare-o em {@code @CcpEntityCustomDecorators} com prioridade baixa, para que fique na parte
- * interna da cadeia e só dispare depois da transferência.
+ * Builds the decorator that sends the messages of the {@code after} flow of data transfers.
+ * Declare it in {@code @CcpEntityCustomDecorators} with a low priority, so that it stays in the
+ * inner part of the chain and only fires after the transfer.
  */
 public class JnEntitySendMessageToUserAfterTransferBuilder extends CcpCustomDecoratorEntity{
 
 	@SuppressWarnings("unchecked")
 	public CcpEntity getEntity(Class<?> configurationClass, CcpEntity entity) {
 		var annotation = configurationClass.getAnnotation(JnEntitySendMessageToUserWhenTransfer.class);
-		Class<CcpEntity> value = (Class<CcpEntity>) annotation.afterDecoratorClass();
+		Class<CcpEntity> decoratorClass = (Class<CcpEntity>) annotation.afterDecoratorClass();
 
 		try {
-			Constructor<CcpEntity> constructor = value.getConstructor(CcpEntity.class, JnEntitySendMessageToUserWhenTransfer.class);
-			CcpEntity newInstance = constructor.newInstance(entity, annotation);
-			return newInstance;
+			Constructor<CcpEntity> constructor = decoratorClass.getConstructor(CcpEntity.class, JnEntitySendMessageToUserWhenTransfer.class);
+			CcpEntity decoratedEntity = constructor.newInstance(entity, annotation);
+			return decoratedEntity;
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}

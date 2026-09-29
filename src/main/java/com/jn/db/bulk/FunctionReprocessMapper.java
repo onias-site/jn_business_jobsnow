@@ -12,9 +12,9 @@ import com.jn.json.fields.validation.JnJsonCommonsFields;
 import com.ccp.json.fields.validation.CcpJsonCommonsFields;
 
 /**
- * Função de mapeamento usada pelo JnExecuteBulkOperation para converter um resultado
- * de operação bulk com erro em um registro de reprocessamento (JnEntityRecordToReprocess).
- * Previne loops infinitos ao rejeitar itens que já pertencem à entidade de reprocessamento.
+ * Mapping function used by JnExecuteBulkOperation to convert a failed bulk operation
+ * result into a reprocessing record (JnEntityRecordToReprocess).
+ * Prevents infinite loops by rejecting items that already belong to the reprocessing entity.
  */
 class FunctionReprocessMapper implements Function<CcpBulkOperationResult, CcpJsonRepresentation>{
 
@@ -23,10 +23,10 @@ class FunctionReprocessMapper implements Function<CcpBulkOperationResult, CcpJso
 	private FunctionReprocessMapper() {}
 
 	/**
-	 * Extrai detalhes do item bulk com erro, adiciona timestamp atual, renomeia o campo
-	 * type para errorType e monta o JSON no formato de JnEntityRecordToReprocess.
-	 * Lança RuntimeException se o item for da própria entidade de reprocessamento
-	 * (prevenção de loop).
+	 * Extracts the details of the failed bulk item, adds the current timestamp, renames the
+	 * type field to errorType and builds the JSON in the JnEntityRecordToReprocess format.
+	 * Throws a RuntimeException if the item belongs to the reprocessing entity itself
+	 * (loop prevention).
 	 */
 	public CcpJsonRepresentation apply(CcpBulkOperationResult result) {
 		CcpBulkItem bulkItem = result.getBulkItem();
@@ -38,17 +38,17 @@ class FunctionReprocessMapper implements Function<CcpBulkOperationResult, CcpJso
 			throw jnErrorReprocessInfiniteLoopPrevented;
 		}
 		long currentTimeMillis = System.currentTimeMillis();
-		CcpJsonRepresentation put = CcpOtherConstants.EMPTY_JSON.put(JnJsonCommonsFields.timestamp, currentTimeMillis);
-		CcpJsonRepresentation putAll = put.mergeWithAnotherJson(bulkItem.json);
+		CcpJsonRepresentation jsonWithTimestamp = CcpOtherConstants.EMPTY_JSON.put(JnJsonCommonsFields.timestamp, currentTimeMillis);
+		CcpJsonRepresentation jsonWithItem = jsonWithTimestamp.mergeWithAnotherJson(bulkItem.json);
 		CcpJsonRepresentation errorDetails = result.getErrorDetails();
-		CcpJsonRepresentation putAll2 = putAll.mergeWithAnotherJson(errorDetails);
-		CcpJsonRepresentation renameKey = putAll2.renameField(CcpJsonCommonsFields.type, JnEntityRecordToReprocess.Fields.errorType);
-		CcpJsonRepresentation put2 = renameKey.put(JnJsonCommonsFields.id, bulkItem.id);
-		CcpJsonRepresentation put3 = put2.put(JnJsonCommonsFields.entity, entityDetails.entityName);
-		var fieldsValues = JnEntityRecordToReprocess.Fields.values();
-		CcpJsonRepresentation jsonPiece = put3
-		.getJsonPiece(fieldsValues);
-		return jsonPiece;
+		CcpJsonRepresentation jsonWithErrorDetails = jsonWithItem.mergeWithAnotherJson(errorDetails);
+		CcpJsonRepresentation jsonWithErrorType = jsonWithErrorDetails.renameField(CcpJsonCommonsFields.type, JnEntityRecordToReprocess.Fields.errorType);
+		CcpJsonRepresentation jsonWithId = jsonWithErrorType.put(JnJsonCommonsFields.id, bulkItem.id);
+		CcpJsonRepresentation jsonWithEntity = jsonWithId.put(JnJsonCommonsFields.entity, entityDetails.entityName);
+		var reprocessFields = JnEntityRecordToReprocess.Fields.values();
+		CcpJsonRepresentation recordToReprocess = jsonWithEntity
+		.getJsonPiece(reprocessFields);
+		return recordToReprocess;
 	}
 
 	@SuppressWarnings("serial")

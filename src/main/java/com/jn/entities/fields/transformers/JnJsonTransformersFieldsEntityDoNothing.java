@@ -4,10 +4,10 @@ import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.especifications.db.utils.entity.fields.CcpJsonTransformersDefaultEntityField;
 
 /**
- * Transformador nulo que não realiza nenhuma transformação no campo. Usado como
- * {@code @CcpEntityFieldTransformer} em campos que precisam explicitamente ignorar a transformação
- * padrão — por exemplo, o campo {@code email} em {@code JnEntityLoginTokenRequestResend}, que não
- * deve ser convertido em hash.
+ * Null transformer that performs no transformation at all on the field. Used as
+ * {@code @CcpEntityFieldTransformer} on fields that must explicitly skip the default transformation
+ * — for example, the {@code email} field in {@code JnEntityLoginTokenRequestResend}, which must not
+ * be converted into a hash.
  */
 public class JnJsonTransformersFieldsEntityDoNothing implements CcpJsonTransformersDefaultEntityField{
 

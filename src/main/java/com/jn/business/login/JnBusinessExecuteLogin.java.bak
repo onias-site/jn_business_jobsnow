@@ -17,10 +17,10 @@ import com.jn.entities.JnEntityLoginSessionValidation;
 import com.jn.utils.JnDeleteKeysFromCache;
 
 /**
- * Logs the user in after the password has been successfully validated. In an atomic bulk
- * operation: renames sessionToken to the session token field, invalidates the current password
- * (transferring it to the twin entity jn_login_password_locked), deletes the password attempts
- * record, and registers the login by creating the valid session and the possible session conflict.
+ * Executa o login do usuário após validação bem-sucedida da senha. Em operação bulk
+ * atômica: renomeia sessionToken para o campo token de sessão, invalida a senha atual
+ * (transferindo para entidade twin login_password_locked), apaga o registro de tentativas
+ * de senha, registra o login criando a sessão válida e o possível conflito de sessão.
  */
 public class JnBusinessExecuteLogin implements CcpBusiness {
 		
@@ -30,12 +30,12 @@ public class JnBusinessExecuteLogin implements CcpBusiness {
 	private JnBusinessExecuteLogin() {}
 	
 	/**
-	 * Orchestrates the login bulk operation (password unlock, attempts removal,
-	 * session registration) and returns an empty JSON when done.
+	 * Orquestra a operação bulk de login (unlock de senha, remoção de tentativas,
+	 * registro de sessão) e retorna JSON vazio ao concluir.
 	 */
 	@SuppressWarnings("unchecked")
 	public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
-		CcpJsonRepresentation jsonWithTokenField =json.renameField(CcpJsonCommonsFields.sessionToken, JnEntityLoginSessionValidation.Fields.token);
+		CcpJsonRepresentation renameField = json.renameField(CcpJsonCommonsFields.sessionToken, JnEntityLoginSessionValidation.Fields.token);
 		
 		CcpEntity twinEntity = JnEntityLoginPassword.ENTITY.getTwinEntity();
 		CcpEntityBulkHandlerTransferRecordToTwinEntity executeUnlock = new CcpEntityBulkHandlerTransferRecordToTwinEntity(twinEntity, x -> Arrays.asList());
@@ -45,7 +45,7 @@ public class JnBusinessExecuteLogin implements CcpBusiness {
 
 		JnExecuteBulkOperation.INSTANCE.
 		executeSelectUnionAllThenExecuteBulkOperation(
-				jsonWithTokenField
+				renameField 
 				,JnDeleteKeysFromCache.INSTANCE
 				, executeUnlock
 				, removeAttempts

@@ -20,20 +20,21 @@ import com.ccp.json.validations.fields.annotations.CcpJsonCopyFieldValidationsFr
 import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidatorRequired;
 import com.jn.business.messages.JnMessages;
 import com.jn.entities.decorators.builders.JnEntityVersionableBuilder;
+import com.jn.entities.decorators.builders.JnEntityVersionablePurgeBuilder;
 import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault;
 import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDoNothing;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
 
 @CcpEntityCache(3600)
-@CcpEntityCustomDecorators(value = {@CcpEntityCustomDecorator(value = JnEntityVersionableBuilder.class, priority = 2),})
+@CcpEntityCustomDecorators(value = {@CcpEntityCustomDecorator(value = JnEntityVersionableBuilder.class, priority = 2),@CcpEntityCustomDecorator(value = JnEntityVersionablePurgeBuilder.class, priority = 5),})
 @JnEntityVersionable(JnVersionableEntity.class)
 @CcpEntityFieldsTransformer(classReferenceWithTheFields = JnJsonTransformersFieldsEntityDefault.class)
 @CcpEntityFieldsValidator(classReferenceWithTheFields = JnEntityEmailParametersToSend.Fields.class)
 /**
- * Armazena parâmetros de configuração para envio de emails: remetente, templateId, tipo de assunto
- * e parâmetros adicionais. Versionável, cache de 1 hora. Possui registros iniciais para os
- * contextos de notificação de erro ({@code JnBusinessNotifyError}) e envio de token de login
- * ({@code JnNotifyUserAboutLoginToken}).
+ * Stores configuration parameters for sending emails: sender, templateId, subject type
+ * and additional parameters. Versionable, 1-hour cache. Has initial records for the
+ * error notification ({@code JnBusinessNotifyError}) and login token sending
+ * ({@code JnNotifyUserAboutLoginToken}) contexts.
  */
 public class JnEntityEmailParametersToSend implements CcpEntityConfigurator{
 
@@ -60,52 +61,52 @@ public class JnEntityEmailParametersToSend implements CcpEntityConfigurator{
 	}
 
 	public List<CcpBulkItem> getFirstRecordsToInsert() {
-		String valorMais = "{" + "	\"email\": \"devs.jobsnow@gmail.com\",";
-		String valorMaisMais = valorMais + "	\"sender\": \"devs.jobsnow@gmail.com\",";
-		String valorMaisMaisMais = valorMaisMais
+		String errorParametersWithEmail = "{" + "	\"email\": \"devs.jobsnow@gmail.com\",";
+		String errorParametersWithSender = errorParametersWithEmail + "	\"sender\": \"devs.jobsnow@gmail.com\",";
+		String errorParametersWithSubjectTypeKey = errorParametersWithSender
 						+ "	\"subjectType\": \"";
-						String name = JnMessages.JnNotifySupportAboutAnError.class.getName();
-						String valorMaisMaisMaisMais = valorMaisMaisMais
-						+ name;
-						String valorMaisMaisMaisMaisMais = valorMaisMaisMaisMais		
+						String errorSubjectType = JnMessages.JnNotifySupportAboutAnError.class.getName();
+						String errorParametersWithSubjectTypeValue = errorParametersWithSubjectTypeKey
+						+ errorSubjectType;
+						String errorParametersWithSubjectType = errorParametersWithSubjectTypeValue		
 						+ "\",";
-						String valorMaisMaisMaisMaisMaisMais = valorMaisMaisMaisMaisMais + "	\"templateId\": \"";
-						String name2 = JnMessages.JnNotifySupportAboutAnError.class.getName();
-						String valorMaisMaisMaisMaisMaisMaisMais = valorMaisMaisMaisMaisMaisMais
-						+ name2;
-						String valorMaisMaisMaisMaisMaisMaisMaisMais = valorMaisMaisMaisMaisMaisMaisMais		
+						String errorParametersWithTemplateIdKey = errorParametersWithSubjectType + "	\"templateId\": \"";
+						String errorTemplateId = JnMessages.JnNotifySupportAboutAnError.class.getName();
+						String errorParametersWithTemplateIdValue = errorParametersWithTemplateIdKey
+						+ errorTemplateId;
+						String errorParametersWithTemplateId = errorParametersWithTemplateIdValue		
 						+ "\"";
-						String valorMaisMaisMaisMaisMaisMaisMaisMaisMais = valorMaisMaisMaisMaisMaisMaisMaisMais + "}";
-						String valorMais2 = "{\"sender\": \"devs.jobsnow@gmail.com\"," + "	\"subjectType\": \"";
-						String name3 = JnMessages.JnNotifyUserAboutLoginToken.class.getName();
-						String valorMais2Mais = valorMais2
-						+ name3;
-						String valorMais2MaisMais = valorMais2Mais
+						String errorParameters = errorParametersWithTemplateId + "}";
+						String tokenParametersWithSubjectTypeKey = "{\"sender\": \"devs.jobsnow@gmail.com\"," + "	\"subjectType\": \"";
+						String tokenSubjectType = JnMessages.JnNotifyUserAboutLoginToken.class.getName();
+						String tokenParametersWithSubjectTypeValue = tokenParametersWithSubjectTypeKey
+						+ tokenSubjectType;
+						String tokenParametersWithSubjectType = tokenParametersWithSubjectTypeValue
 						+ "\",";
-						String valorMais2MaisMaisMais = valorMais2MaisMais
+						String tokenParametersWithTemplateIdKey = tokenParametersWithSubjectType
 						+ "	\"templateId\": \"";
-						String name4 = JnMessages.JnNotifyUserAboutLoginToken.class.getName();
-						String valorMais2MaisMaisMaisMais = valorMais2MaisMaisMais
-						+ name4;
-						String valorMais2MaisMaisMaisMaisMais = valorMais2MaisMaisMaisMais
+						String tokenTemplateId = JnMessages.JnNotifyUserAboutLoginToken.class.getName();
+						String tokenParametersWithTemplateIdValue = tokenParametersWithTemplateIdKey
+						+ tokenTemplateId;
+						String tokenParametersWithTemplateId = tokenParametersWithTemplateIdValue
 						+ "\",";
-						String valorMais2MaisMaisMaisMaisMaisMais = valorMais2MaisMaisMaisMaisMais + "	\"moreParameters\": {";
-						String valorMais2MaisMaisMaisMaisMaisMaisMais = valorMais2MaisMaisMaisMaisMaisMais
+						String tokenParametersWithMoreParametersKey = tokenParametersWithTemplateId + "	\"moreParameters\": {";
+						String tokenParametersWithLinkedinAddress = tokenParametersWithMoreParametersKey
 						+ "		\"linkedinAddress\": \"https://www.linkedin.com/in/onias85/\",";
-						String valorMais2MaisMaisMaisMaisMaisMaisMaisMais = valorMais2MaisMaisMaisMaisMaisMaisMais
+						String tokenParametersWithLinkedinName = tokenParametersWithLinkedinAddress
 						+ "		\"linkedinName\": \"Onias\",";
-						String valorMais2MaisMaisMaisMaisMaisMaisMaisMaisMais = valorMais2MaisMaisMaisMaisMaisMaisMaisMais
+						String tokenParametersWithAccessLink = tokenParametersWithLinkedinName
 						+ "		\"accessLink\": \"https://ccpjobsnow.com/#/tokenToSetPassword?email={email}&msgType=info&msgValue=newUser&token={token}\",";
-						String valorMais2MaisMaisMaisMaisMaisMaisMaisMaisMaisMais = valorMais2MaisMaisMaisMaisMaisMaisMaisMaisMais
+						String tokenParametersWithTelegramGroupLink = tokenParametersWithAccessLink
 						+ "		\"telegramGroupLink\": \"https://t.me/joinchat/q_PRgF_18n00NjEx\",";
-						String valorMais2MaisMaisMaisMaisMaisMaisMaisMaisMaisMaisMais = valorMais2MaisMaisMaisMaisMaisMaisMaisMaisMaisMais
+						String tokenParametersWithBotAddress = tokenParametersWithTelegramGroupLink
 						+ "		\"botAddress\": \"https://t.me/JnSuporteBot\"";
-						String valorMais2MaisMaisMaisMaisMaisMaisMaisMaisMaisMaisMaisMais = valorMais2MaisMaisMaisMaisMaisMaisMaisMaisMaisMaisMais + "	}";
-						String valorMais2MaisMaisMaisMaisMaisMaisMaisMaisMaisMaisMaisMaisMais = valorMais2MaisMaisMaisMaisMaisMaisMaisMaisMaisMaisMaisMais + "}";
+						String tokenParametersWithMoreParameters = tokenParametersWithBotAddress + "	}";
+						String tokenParameters = tokenParametersWithMoreParameters + "}";
 						List<CcpBulkItem> createBulkItems = CcpEntityConfigurator.super.toCreateBulkItems(ENTITY, 
-						valorMaisMaisMaisMaisMaisMaisMaisMaisMais
+						errorParameters
 						,
-						valorMais2MaisMaisMaisMaisMaisMaisMaisMaisMaisMaisMaisMaisMais
+						tokenParameters
 				
 				)
 				;

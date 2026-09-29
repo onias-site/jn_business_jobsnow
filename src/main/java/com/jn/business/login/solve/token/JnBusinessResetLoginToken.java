@@ -18,8 +18,8 @@ import com.jn.utils.JnDeleteKeysFromCache;
 import com.jn.utils.JnLanguage;
 
 /**
- * Reseta (exclui de todos os índices) o token de login de um usuário. Útil para
- * forçar a geração de um novo token, limpando o estado anterior.
+ * Resets (deletes from every index) a user's login token. Useful to force the
+ * generation of a new token, clearing the previous state.
  */
 public class JnBusinessResetLoginToken implements CcpBusiness{
 	
@@ -34,20 +34,20 @@ public class JnBusinessResetLoginToken implements CcpBusiness{
 	public static final JnBusinessResetLoginToken INSTANCE = new JnBusinessResetLoginToken();
 	
 	/**
-	 * Apaga, numa única ida ao banco, o token da entidade principal, o token da gêmea (onde ele fica
-	 * quando está bloqueado) e o registro que marca o email do token como já enviado — este último
-	 * porque ele recusaria como repetição o email do token novo.
+	 * Deletes, in a single round trip to the database, the token in the main entity, the token in
+	 * the twin (where it stays while locked) and the record that marks the token email as already
+	 * sent — the latter because it would reject the new token's email as a repetition.
 	 *
-	 * <p>As três exclusões vão juntas num bulk em vez de virarem três chamadas: o
-	 * {@code JnExecuteBulkOperation} monta os itens de cada entidade a partir do mesmo json e os envia
-	 * de uma vez. Apagar um registro que não está lá não atrapalha — o banco devolve o item como não
-	 * encontrado, sem erro, e é o caso normal aqui, já que o token ou está na principal ou está na
-	 * gêmea, nunca nas duas.
+	 * <p>The three deletions go together in one bulk instead of becoming three calls: the
+	 * {@code JnExecuteBulkOperation} builds each entity's items from the same json and sends them
+	 * at once. Deleting a record that is not there does no harm — the database returns the item as
+	 * not found, without error, and that is the normal case here, since the token is either in the
+	 * main entity or in the twin, never in both.
 	 *
-	 * <p>O json passa antes pelo transformador do email porque é ele que calcula o hash que compõe a
-	 * chave primária das duas entidades. A montagem dos itens de bulk não aplica transformador de campo
-	 * nenhum — isso fica a cargo de quem chama —, e sem o hash as chaves não bateriam com as dos
-	 * registros gravados.
+	 * <p>The json first goes through the email transformer because it is what computes the hash
+	 * that makes up the primary key of both entities. Building the bulk items applies no field
+	 * transformer at all — that is up to the caller —, and without the hash the keys would not
+	 * match those of the saved records.
 	 */
 	public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
 
@@ -68,14 +68,14 @@ public class JnBusinessResetLoginToken implements CcpBusiness{
 				JnEntityEmailMessageSent.ENTITY
 				);
 
-	//LATER LANGUAGE DO USUARIO DENTRO DE ANSWERS
-		CcpJsonRepresentation put = json.put(JnJsonCommonsFields.language, JnLanguage.portuguese);
-		return put;
+	//LATER USER LANGUAGE INSIDE ANSWERS
+		CcpJsonRepresentation jsonWithLanguage = json.put(JnJsonCommonsFields.language, JnLanguage.portuguese);
+		return jsonWithLanguage;
 	}
 
 
 	/**
-	 * Retorna JsonFieldNames.class.
+	 * Returns JsonFieldNames.class.
 	 */
 	public Class<?> getJsonValidationClass() {
 		return JsonFieldNames.class;

@@ -22,8 +22,8 @@ import com.jn.json.fields.validation.JnJsonCommonsFields;
 @CcpEntityFieldsTransformer(classReferenceWithTheFields = JnJsonTransformersFieldsEntityDefault.class)
 @CcpEntityFieldsValidator(classReferenceWithTheFields = JnEntityDisposableTest.Fields.class)
 /**
- * Entidade descartável de uso exclusivo para testes automatizados. Expira a cada hora, permitindo
- * verificar o comportamento do sistema de TTL sem impactar dados reais.
+ * Disposable entity used exclusively by automated tests. Expires every hour, allowing the
+ * TTL system behavior to be checked without affecting real data.
  */
 public class JnEntityDisposableTest implements CcpEntityConfigurator {
 	

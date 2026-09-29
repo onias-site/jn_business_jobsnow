@@ -14,12 +14,11 @@ import com.jn.entities.JnEntityHttpApiRetrySendRequest;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
 
 /**
- * Executa chamadas HTTP encapsulando um CcpHttpApiExecutor e aplica política de
- * retentativa automática para erros de servidor (5xx). Erros de cliente (4xx) são
- * registrados em JnEntityHttpApiErrorClient e relançados imediatamente; erros de
- * servidor disparam novas tentativas controladas, com sleep entre elas, até atingir
- * o limite máximo, quando então o erro é registrado em JnEntityHttpApiErrorServer e
- * relançado.
+ * Executes HTTP calls by wrapping a CcpHttpApiExecutor and applies an automatic
+ * retry policy to server errors (5xx). Client errors (4xx) are recorded in
+ * JnEntityHttpApiErrorClient and rethrown immediately; server errors trigger
+ * controlled retries, with a sleep between them, until the maximum limit is reached,
+ * at which point the error is recorded in JnEntityHttpApiErrorServer and rethrown.
  */
 public class JnBusinessSendHttpRequest implements CcpBusiness{
 	
@@ -32,31 +31,31 @@ public class JnBusinessSendHttpRequest implements CcpBusiness{
 	}
 
 	/**
-	 * Executa a requisição HTTP. Captura CcpErrorHttpClient para salvar o detalhe
-	 * do erro e relançar; captura CcpErrorHttpServer para iniciar a lógica de retry.
+	 * Executes the HTTP request. Catches CcpErrorHttpClient to save the error details
+	 * and rethrow them; catches CcpErrorHttpServer to start the retry logic.
 	 */
 	public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
 
 		try {
-			CcpJsonRepresentation apply = this.processThatSendsHttpRequest.execute(json);
-			return apply;
+			CcpJsonRepresentation response = this.processThatSendsHttpRequest.execute(json);
+			return response;
 		}catch (CcpErrorHttpServer e) {
 			String details = e.entity.asUgglyJson();
-			CcpJsonRepresentation mergeWithAnotherJson = e.entity.mergeWithAnotherJson(json);
-			CcpJsonRepresentation httpErrorDetails = mergeWithAnotherJson.put(JnJsonCommonsFields.details, details);
-			CcpJsonRepresentation retryToSendIntantMessage = this.retryToSendIntantMessage(e, json, httpErrorDetails);
-			return retryToSendIntantMessage;
+			CcpJsonRepresentation errorWithRequest = e.entity.mergeWithAnotherJson(json);
+			CcpJsonRepresentation httpErrorDetails = errorWithRequest.put(JnJsonCommonsFields.details, details);
+			CcpJsonRepresentation retryResponse = this.retryToSendIntantMessage(e, json, httpErrorDetails);
+			return retryResponse;
 		}catch (CcpErrorHttpClient e) {
 			String details = e.entity.asUgglyJson();
-			CcpJsonRepresentation mergeWithAnotherJson2 = e.entity.mergeWithAnotherJson(json);
-			CcpJsonRepresentation httpErrorDetails = mergeWithAnotherJson2.put(JnJsonCommonsFields.details, details);
+			CcpJsonRepresentation errorWithRequest = e.entity.mergeWithAnotherJson(json);
+			CcpJsonRepresentation httpErrorDetails = errorWithRequest.put(JnJsonCommonsFields.details, details);
 			String request = httpErrorDetails.getAsString(JnJsonCommonsFields.request);
 			httpErrorDetails = httpErrorDetails.put(JnJsonCommonsFields.request, request);
 			JnEntityHttpApiErrorClient.ENTITY.save(httpErrorDetails);
 			throw e;
 		}catch(Throwable e) {
-			CcpJsonRepresentation apply = this.exceptionHandler.apply(e);
-			return apply;
+			CcpJsonRepresentation handledError = this.exceptionHandler.apply(e);
+			return handledError;
 		}
 	}
 	
@@ -71,10 +70,10 @@ public class JnBusinessSendHttpRequest implements CcpBusiness{
 		}
 		
 		Integer sleep = this.processThatSendsHttpRequest.getSleepTimeToRetry();
-		CcpTimeDecorator ccpTimeDecorator = new CcpTimeDecorator();
-		ccpTimeDecorator.sleep(sleep);
-		CcpJsonRepresentation execute = this.execute(json);
-		return execute;
+		CcpTimeDecorator timer = new CcpTimeDecorator();
+		timer.sleep(sleep);
+		CcpJsonRepresentation retryResponse = this.execute(json);
+		return retryResponse;
 	}
 
 }

@@ -26,7 +26,7 @@ import com.jn.utils.JnDeleteKeysFromCache;
 @CcpEntityCache(3600)
 @CcpEntityCustomDecorators(value = {@CcpEntityCustomDecorator(value = JnEntityDisposableBuilder.class, priority = 1),})
 @CcpEntityTwin(
-		twinEntityName = "login_session_terminated",
+		twinEntityName = "jn_login_session_terminated",
 		bulkExecutorClass = JnExecuteBulkOperation.class,
 		functionToDeleteKeysInTheCacheClass = JnDeleteKeysFromCache.class
 		)
@@ -35,7 +35,7 @@ import com.jn.utils.JnDeleteKeysFromCache;
 @CcpEntityFieldsValidator(classReferenceWithTheFields = JnEntityLoginSessionValidation.Fields.class)
 /**
  * Representa uma sessão de login ativa. A chave composta inclui email, token (hash SHA-1), IP e
- * userAgent — cada sessão é única por combinação de contexto. A twin {@code login_session_terminated}
+ * userAgent — cada sessão é única por combinação de contexto. A twin {@code jn_login_session_terminated}
  * recebe a sessão ao fazer logout. Descartável por hora, cache de 1 hora.
  */
 public class JnEntityLoginSessionValidation implements CcpEntityConfigurator {

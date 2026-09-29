@@ -8,26 +8,26 @@ import com.jn.json.fields.validation.JnJsonCommonsFields;
 import com.ccp.decorators.CcpStringDecorator;
 
 /**
- * Transforma o campo {@code message} de {@code JnEntityInstantMessengerMessageSent} em seu hash SHA-1,
- * preservando o original em {@code originalMessage}. Permite deduplicação de mensagens — a mesma
- * mensagem para o mesmo destinatário na mesma hora não é reenviada.
+ * Transforms the {@code message} field of {@code JnEntityInstantMessengerMessageSent} into its SHA-1 hash,
+ * keeping the original in {@code originalMessage}. It allows message deduplication — the same
+ * message to the same recipient within the same hour is not sent again.
  */
 public class JnJsonTransformersFieldEntityMessageHash implements CcpJsonTransformersDefaultEntityField {
 	
 	public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
 		
-		String originalToken = json.getAsString(JnJsonCommonsFields.message);
-		CcpStringDecorator asStringDecorator = json.getAsStringDecorator(JnJsonCommonsFields.message);
-		var asStringDecoratorHash = asStringDecorator.hash();
+		String originalMessage = json.getAsString(JnJsonCommonsFields.message);
+		CcpStringDecorator messageDecorator = json.getAsStringDecorator(JnJsonCommonsFields.message);
+		var messageHashDecorator = messageDecorator.hash();
 
-		String token = asStringDecoratorHash.asString(CcpHashAlgorithm.SHA1);
-		CcpJsonRepresentation put2 = json
-				.put(JnJsonCommonsFields.message, token);
+		String hashedMessage = messageHashDecorator.asString(CcpHashAlgorithm.SHA1);
+		CcpJsonRepresentation jsonWithHashedMessage = json
+				.put(JnJsonCommonsFields.message, hashedMessage);
 
-				CcpJsonRepresentation put = put2
-				.put(JsonFieldNames.originalMessage, originalToken)
+				CcpJsonRepresentation jsonWithOriginalMessage = jsonWithHashedMessage
+				.put(JsonFieldNames.originalMessage, originalMessage)
 				;
-		return put;
+		return jsonWithOriginalMessage;
 	}
 
 	public boolean canBePrimaryKey() {

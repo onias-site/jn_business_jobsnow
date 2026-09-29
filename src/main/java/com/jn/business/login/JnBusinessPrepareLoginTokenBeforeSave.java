@@ -8,27 +8,27 @@ import com.jn.json.fields.validation.JnJsonCommonsFields;
 import com.jn.json.fields.validation.JnJsonInstantMessengerFields;
 
 /**
- * Prepara o JSON do token de login antes da gravação na entidade principal. Traz o conteúdo do
- * json interno {@code request} para o nível raiz, aplica o transformador de {@code token} (que
- * gera o token aleatório e guarda o original em {@code originalToken}) e replica os valores
- * originais: o {@code originalEmail} para {@code email} e {@code chatId}, e o
- * {@code originalToken} para {@code token}.
+ * Prepares the login token JSON before it is saved in the main entity. Brings the content of the
+ * inner {@code request} json up to the root level, applies the {@code token} transformer (which
+ * generates the random token and keeps the original in {@code originalToken}) and copies the
+ * original values: {@code originalEmail} to {@code email} and {@code chatId}, and
+ * {@code originalToken} to {@code token}.
  */
 public class JnBusinessPrepareLoginTokenBeforeSave implements CcpBusiness {
 
 	public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
 
 		CcpJsonRepresentation request = json.getInnerJson(JnJsonCommonsFields.request);
-		CcpJsonRepresentation mergeWithAnotherJson = request.mergeWithAnotherJson(json);
-		CcpJsonRepresentation transformedJson2 = mergeWithAnotherJson
+		CcpJsonRepresentation requestMergedWithJson = request.mergeWithAnotherJson(json);
+		CcpJsonRepresentation jsonWithGeneratedToken = requestMergedWithJson
 				.getTransformedJson(JnJsonTransformersFieldsEntityDefault.token);
-		CcpJsonRepresentation duplicateValueFromField = transformedJson2
+		CcpJsonRepresentation jsonWithOriginalEmailCopied = jsonWithGeneratedToken
 				.duplicateValueFromField(JsonFieldNames.originalEmail, JnJsonCommonsFields.email,
 						JnJsonInstantMessengerFields.chatId);
-		CcpJsonRepresentation transformedJson = duplicateValueFromField
+		CcpJsonRepresentation preparedJson = jsonWithOriginalEmailCopied
 				.duplicateValueFromField(JnJsonCommonsFields.originalToken, JnJsonTransformersFieldsEntityDefault.token)
 				;
-		return transformedJson;
+		return preparedJson;
 	}
 
 }

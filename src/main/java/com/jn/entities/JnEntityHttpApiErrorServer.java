@@ -25,9 +25,9 @@ import com.jn.json.fields.validation.JnJsonCommonsFields;
 @CcpEntityFieldsTransformer(classReferenceWithTheFields = JnJsonTransformersFieldsEntityDefault.class)
 @CcpEntityFieldsValidator(classReferenceWithTheFields = JnEntityHttpApiErrorServer.Fields.class)
 /**
- * Registra erros HTTP de servidor (5xx) ocorridos após esgotar todas as tentativas de retry ao
- * chamar APIs externas. Estruturalmente idêntico a {@code JnEntityHttpApiErrorClient}, mas com
- * {@code httpStatus}, {@code timestamp} e {@code date} obrigatórios. Descartável por hora.
+ * Records HTTP server errors (5xx) that occurred after all retry attempts were exhausted while
+ * calling external APIs. Structurally identical to {@code JnEntityHttpApiErrorClient}, but with
+ * {@code httpStatus}, {@code timestamp} and {@code date} required. Disposable hourly.
  */
 public class JnEntityHttpApiErrorServer implements CcpEntityConfigurator {
 	
