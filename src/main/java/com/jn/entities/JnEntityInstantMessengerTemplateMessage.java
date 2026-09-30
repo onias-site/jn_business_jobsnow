@@ -57,7 +57,9 @@ public class JnEntityInstantMessengerTemplateMessage  implements CcpEntityConfig
 	}
 	public List<CcpBulkItem> getFirstRecordsToInsert() {
 		CcpJsonRepresentation put = CcpOtherConstants.EMPTY_JSON
-				.put(JnJsonCommonsFields.message, "{type}\\n\\nError Description:\n {msg}\\n\\n{stackTrace}\\n\\nCaused by:\\n{cause}");
+				// sent as a file (JnInstantMessageType.file), so the line breaks are real ones, and the stack trace is the
+				// complete one, one frame per line (see JnMessages.JnNotifySupportAboutAnError)
+				.put(JnJsonCommonsFields.message, "{type}\n\nError Description:\n{msg}\n\n{completeStackTrace}\n\nCaused by:\n{cause}");
 				String name = JnMessages.JnNotifySupportAboutAnError.class.getName();
 				
 				CcpJsonRepresentation put2 = put
@@ -67,7 +69,7 @@ public class JnEntityInstantMessengerTemplateMessage  implements CcpEntityConfig
 				.put(JnJsonCommonsFields.language, JnLanguage.portuguese)
 		;
 				CcpJsonRepresentation put7 = CcpOtherConstants.EMPTY_JSON
-						.put(JnJsonCommonsFields.message, "{type}\\n\\nWarning Description:\n {msg}\\n\\n{stackTrace}\\n\\nCaused by:\\n{cause}");
+						.put(JnJsonCommonsFields.message, "{type}\n\nWarning Description:\n{msg}\n\n{completeStackTrace}\n\nCaused by:\n{cause}");
 				String warningTemplateId = JnMessages.JnNotifySupportAboutWaring.class.getName();
 
 				CcpJsonRepresentation put8 = put7

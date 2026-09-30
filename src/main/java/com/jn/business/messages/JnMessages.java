@@ -1,6 +1,9 @@
 package com.jn.business.messages;
 
+import java.util.List;
+
 import com.ccp.business.CcpBusiness;
+import com.ccp.decorators.CcpJsonFieldName;
 import com.ccp.decorators.CcpJsonRepresentation;
 import com.jn.entities.JnEntityLoginToken;
 import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault;
@@ -58,15 +61,51 @@ public class JnMessages {
 		}
 	}
 
+	/**
+	 * Error notice sent to support as a file. See {@link #toSupportNotice(CcpJsonRepresentation)}.
+	 */
 	public static class JnNotifySupportAboutAnError implements CcpBusiness {
 		public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
-			return json;
+			CcpJsonRepresentation supportNotice = toSupportNotice(json);
+			return supportNotice;
 		}
 	}
 
+	/**
+	 * Warning notice sent to support as a file. See {@link #toSupportNotice(CcpJsonRepresentation)}.
+	 */
 	public static class JnNotifySupportAboutWaring implements CcpBusiness {
 		public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
-			return json;
+			CcpJsonRepresentation supportNotice = toSupportNotice(json);
+			return supportNotice;
 		}
+	}
+
+	enum JsonFieldNames implements CcpJsonFieldName {
+		msg
+	}
+
+	/**
+	 * Prepares the error/warning JSON for the support notice template, whose {@code message} is
+	 * {@code {type} ... {msg} ... {completeStackTrace} ... {cause}}.
+	 * <ul>
+	 * <li>The exception text goes from {@code message} to {@code msg}: the JSON of the sending prevails over the
+	 * template when both are merged, so an exception text left in {@code message} took the place of the template
+	 * and the file delivered to support carried only that text (the copy to {@code msg} was lost when
+	 * {@code JnBusinessNotifySupport} was deleted, on 2026-08-14).</li>
+	 * <li>The complete stack trace becomes one frame per line, falling back to the stack trace filtered down to the
+	 * domain lines when the complete one is absent (the warnings only record the filtered one).</li>
+	 * </ul>
+	 */
+	private static CcpJsonRepresentation toSupportNotice(CcpJsonRepresentation json) {
+		CcpJsonRepresentation jsonWithMsg = json.renameField(CcpJsonRepresentation.CcpStackTraceFields.message, JsonFieldNames.msg);
+
+		boolean hasCompleteStackTrace = jsonWithMsg.containsField(CcpJsonRepresentation.CcpStackTraceFields.completeStackTrace);
+		CcpJsonFieldName stackTraceField = hasCompleteStackTrace ? CcpJsonRepresentation.CcpStackTraceFields.completeStackTrace : CcpJsonRepresentation.CcpStackTraceFields.stackTrace;
+		List<String> stackTraceFrames = jsonWithMsg.getAsStringList(stackTraceField);
+		String stackTraceOneFramePerLine = String.join("\n", stackTraceFrames);
+
+		CcpJsonRepresentation supportNotice = jsonWithMsg.put(CcpJsonRepresentation.CcpStackTraceFields.completeStackTrace, stackTraceOneFramePerLine);
+		return supportNotice;
 	}
 }
