@@ -66,6 +66,16 @@ public abstract class JnSendMessageToUserEntityOnTransfer extends CcpEntityDeleg
 			return json;
 		}
 
+		// same criterion as CcpEntityDecoratorTransferType: up to 2026-09-30 the target was not checked, so a
+		// transfer fired the message of every target (a rejected request emailed the user as approved as well)
+		CcpEntityMetaData targetEntityDetails = targetEntity.getEntityMetaData();
+		Class<?> configuredTargetEntity = configuredOperation.targetEntity();
+		boolean wrongTarget = false == targetEntityDetails.configurationClass.equals(configuredTargetEntity);
+
+		if(wrongTarget) {
+			return json;
+		}
+
 		CcpEntityPhase entityPhase = operationType.entityPhase;
 		CcpEntityMetaData entityDetails = entity.getEntityMetaData();
 		String phaseEntityName = entityPhase.extractEntityName(entityDetails.configurationClass);

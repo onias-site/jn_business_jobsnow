@@ -85,6 +85,13 @@ public class JnFunctionMensageriaSender implements CcpBusiness {
 		return topicClass2Name;
 	}
 	
+	/**
+	 * The message is the json plus the envelope ({@code operation}, {@code messageId}, {@code topic},
+	 * {@code started}, {@code data}, {@code request}), and the envelope prevails. Up to 2026-09-30 the json
+	 * prevailed: a json that carried the envelope of an earlier message (a record read from the cache, which
+	 * kept the whole message of the save) turned a {@code delete} into a {@code save} with the old
+	 * {@code messageId}, so withdrawing a request saved it again instead of deleting it.
+	 */
 	private CcpJsonRepresentation getMessageDetails(CcpJsonRepresentation json) {
 		CcpTimeDecorator ccpTimeDecorator = new CcpTimeDecorator();
 		String formattedCurrentDateTime = ccpTimeDecorator.getFormattedDateTime(CcpEntityExpurgableOptions.second.format);
@@ -104,8 +111,8 @@ public class JnFunctionMensageriaSender implements CcpBusiness {
 				CcpJsonRepresentation put9 = put8
 				.put(JnEntityAsyncTask.Fields.topic, this.topic);
 
-				CcpJsonRepresentation messageDetails = put9
-				.mergeWithAnotherJson(json)
+				CcpJsonRepresentation messageDetails = json
+				.mergeWithAnotherJson(put9)
 				;
 		return messageDetails;
 	}

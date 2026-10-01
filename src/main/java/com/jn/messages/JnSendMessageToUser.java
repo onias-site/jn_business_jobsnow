@@ -107,11 +107,17 @@ public class JnSendMessageToUser implements CcpBusiness{
 	 *
 	 * @return {@code true} quando o envio foi recusado e deve ser pulado
 	 */
-	private boolean isRefused(CcpSelectUnionAll unionAll, CcpJsonRepresentation idToSearch, int index, JnBusinessSendHttpRequest messenger) {
+	private boolean isRefused(CcpSelectUnionAll unionAll, CcpJsonRepresentation idToSearch, int index, JnBusinessSendHttpRequest messenger, boolean repeatable) {
 		try {
 			JnMustNotSendMessage[] values = JnMustNotSendMessage.values();
 
 			for (JnMustNotSendMessage value : values) {
+				boolean repetitionIsAllowed = repeatable && JnMustNotSendMessage.alreadySentEntities == value;
+
+				if(repetitionIsAllowed) {
+					continue;
+				}
+
 				value.validate(this, unionAll, idToSearch , index);
 			}
 			return false;
@@ -170,13 +176,15 @@ public class JnSendMessageToUser implements CcpBusiness{
 
 		CcpJsonRepresentation resultsOfTheChannels = CcpOtherConstants.EMPTY_JSON;
 
+		boolean repeatable = JnRepeatableMessage.isRepeatable(templateId);
+
 		for (int index = 0; index < this.alreadySentEntities.size(); index++) {
 
 			JnBusinessSendHttpRequest messenger = this.messengers.get(index);
 
 			CcpJsonRepresentation channelIdToSearch = idsToSearchByChannel[index].mergeWithAnotherJson(resultsOfTheChannels);
 
-			boolean refused = this.isRefused(unionAll, channelIdToSearch, index, messenger);
+			boolean refused = this.isRefused(unionAll, channelIdToSearch, index, messenger, repeatable);
 
 			if(refused) {
 				continue;
