@@ -27,7 +27,7 @@ import com.jn.utils.JnDeleteKeysFromCache;
 @CcpEntityFieldsTransformer(classReferenceWithTheFields = JnJsonTransformersFieldsEntityDefault.class)
 @CcpEntityFieldsValidator(classReferenceWithTheFields = JnEntityContactUs.Fields.class)
 /**
- * Represents a contact request received through the "Contact Us" form.
+ * Represents a contact request received through the "Contact Us" form. 
  * Has the twin entity jn_contact_us_solved for when the contact is solved.
  * 1-hour cache.
  */

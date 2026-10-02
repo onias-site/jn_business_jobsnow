@@ -28,7 +28,7 @@ public class JnEntityAsyncTask implements CcpEntityConfigurator {
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityAsyncTask.class).entityInstance;
 
 	public static enum Fields implements CcpJsonFieldName{
-		@CcpJsonFieldValidatorRequired
+		@CcpJsonFieldValidatorRequired  
 		@CcpJsonFieldTypeNumber
 		started, 
 		@CcpJsonFieldTypeNumber

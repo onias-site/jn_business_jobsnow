@@ -18,7 +18,7 @@ public enum JnJsonInstantMessengerFields implements CcpJsonFieldName{
 	
 	@CcpJsonFieldTypeNumber
 	chatId, 
-	
+	 
 	@CcpJsonFieldTypeNestedJson
 	moreParameters,
 	
