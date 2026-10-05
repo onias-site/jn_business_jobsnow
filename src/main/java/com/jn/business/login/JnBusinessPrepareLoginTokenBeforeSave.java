@@ -16,6 +16,11 @@ import com.jn.json.fields.validation.JnJsonInstantMessengerFields;
  */
 public class JnBusinessPrepareLoginTokenBeforeSave implements CcpBusiness {
 
+	/**
+	 * Prepares the token record (see the class description).
+	 * @param json the record, with the original request under {@code request}
+	 * @return the prepared record
+	 */
 	public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
 
 		CcpJsonRepresentation request = json.getInnerJson(JnJsonCommonsFields.request);

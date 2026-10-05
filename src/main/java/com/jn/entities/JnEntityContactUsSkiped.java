@@ -18,21 +18,33 @@ import com.jn.entities.decorators.engine.JnDisposableEntity;
 import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
 
+/**
+ * Contacts of the "Contact Us" form skipped by support during triage.
+ * <p>
+ * Configuration:
+ * <ul>
+ * <li>index {@code jn_contact_us_skiped}</li>
+ * <li>records cached for 86400 seconds</li>
+ * <li>disposable: records expire by the {@code daily} granularity</li>
+ * </ul>
+ */
 @CcpEntityCustomDecorators(value = {@CcpEntityCustomDecorator(value = JnEntityDisposableBuilder.class, priority = 1),})
 @CcpEntityCache(86400)
 @JnEntityDisposable(value = JnDisposableEntity.class, timeOption = CcpEntityExpurgableOptions.daily)
 @CcpEntityFieldsTransformer(classReferenceWithTheFields = JnJsonTransformersFieldsEntityDefault.class)
 @CcpEntityFieldsValidator(classReferenceWithTheFields = JnEntityContactUsSkiped.Fields.class)
-/**
- * Records contacts skipped by support while triaging the "Contact Us" form.
- * Disposable daily, with a 24-hour cache.
- */
 public class JnEntityContactUsSkiped implements CcpEntityConfigurator {
 
+	/** The entity {@code jn_contact_us_skiped}, with every decorator of this configuration. */
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityContactUsSkiped.class).entityInstance;
 	
 	
+	/**
+	 * The fields of the entity, with their validation rules (this enum is the class named by
+	 * {@code @CcpEntityFieldsValidator}).
+	 */
 	public static enum Fields implements CcpJsonFieldName{
+		/** The {@code email} field: part of the primary key, validated as in {@code JnJsonCommonsFields}. */
 		@CcpEntityFieldPrimaryKey
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		email

@@ -17,21 +17,22 @@ import com.jn.entities.JnEntityLoginSessionValidation;
 import com.jn.utils.JnDeleteKeysFromCache;
 
 /**
- * Logs the user in after the password has been successfully validated. In an atomic bulk
- * operation: renames sessionToken to the session token field, invalidates the current password
- * (transferring it to the twin entity jn_login_password_locked), deletes the password attempts
- * record, and registers the login by creating the valid session and the possible session conflict.
+ * Logs the user in after the password was validated, in one bulk operation: moves a locked password back from the twin
+ * (unlock), deletes the wrong password attempts and registers the session (see {@code JnBulkHandlerRegisterLogin}).
  */
 public class JnBusinessExecuteLogin implements CcpBusiness {
 		
 
+	/** The single instance. */
 	public static final JnBusinessExecuteLogin INSTANCE = new JnBusinessExecuteLogin();
 	
+	/** Singleton; use {@link #INSTANCE}. */
 	private JnBusinessExecuteLogin() {}
 	
 	/**
-	 * Orchestrates the login bulk operation (password unlock, attempts removal,
-	 * session registration) and returns an empty JSON when done.
+	 * Runs the login bulk operation; {@code sessionToken} becomes the {@code token} of the session.
+	 * @param json the login request
+	 * @return an empty JSON
 	 */
 	@SuppressWarnings("unchecked")
 	public CcpJsonRepresentation apply(CcpJsonRepresentation json) {

@@ -29,8 +29,15 @@ import com.ccp.json.fields.validation.CcpJsonCommonsFields;
  * {@code tokenHash} computes the SHA-1 hash of the session token.
  */
 public enum JnJsonTransformersFieldsEntityDefault implements CcpJsonTransformersDefaultEntityField, CcpJsonFieldName {
+	/** Validates the e-mail and replaces it with its SHA-1 hash, keeping the original in {@code originalEmail}. */
 	email(true) {
 
+		/**
+		 * Transforms the e-mail.
+		 * @param json the record
+		 * @return the record with the hash and the original e-mail
+		 * @throws JnErrorIsNotAnEmail when the value is not a valid e-mail
+		 */
 		public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
 			CcpJsonFieldName oldField = JnJsonCommonsFields.email;
 			CcpJsonFieldName newField = JsonFieldNames.originalEmail;
@@ -53,7 +60,13 @@ public enum JnJsonTransformersFieldsEntityDefault implements CcpJsonTransformers
 			return jsonWithOriginalEmail;
 		}
 	},
+	/** Replaces the password with its BCrypt hash, once ({@code passwordAlreadyCalculated} marks it as done). */
 	password(false) {
+		/**
+		 * Transforms the password.
+		 * @param json the record
+		 * @return the record with the hash, or the input when it was already transformed
+		 */
 		public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
 			
 			boolean passwordAlreadyCalculated = json.containsAllFields(JsonFieldNames.passwordAlreadyCalculated);
@@ -75,7 +88,16 @@ public enum JnJsonTransformersFieldsEntityDefault implements CcpJsonTransformers
 			return jsonWithPasswordFlag;
 		}
 	},
+	/**
+	 * Replaces the login token with its BCrypt hash, keeping the original in {@code originalToken}; a new token is
+	 * generated when {@code originalToken} is absent.
+	 */
 	token(false) {
+		/**
+		 * Transforms the token.
+		 * @param json the record
+		 * @return the record with the hash and the original token
+		 */
 		public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
 
 			String originalToken = json.getOrDefault(JnJsonCommonsFields.originalToken, () -> super.getOriginalToken());
@@ -94,7 +116,13 @@ public enum JnJsonTransformersFieldsEntityDefault implements CcpJsonTransformers
 		}
 
 	},
+	/** Adds the current {@code timestamp} and {@code date} (to the millisecond), unless there is a timestamp already. */
 	timestamp(true) {
+		/**
+		 * Adds the current time.
+		 * @param json the record
+		 * @return the record with the time
+		 */
 		public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
 			String timestampFieldName = CcpEntityField.TIMESTAMP.name();
 			CcpFieldName timestampField = new CcpFieldName(timestampFieldName);
@@ -117,8 +145,17 @@ public enum JnJsonTransformersFieldsEntityDefault implements CcpJsonTransformers
 
 	},
 	
+	/**
+	 * Replaces the {@code token} of the session with its SHA-1 hash, keeping the original in {@code originalToken}; a new
+	 * token is generated when there is none.
+	 */
 	tokenHash(true){
 
+		/**
+		 * Transforms the token.
+		 * @param json the record
+		 * @return the record with the hash and the original token
+		 */
 		public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
 			
 			String originalToken = json.getOrDefault(CcpJsonCommonsFields.token, () -> super.getOriginalToken());
@@ -138,23 +175,50 @@ public enum JnJsonTransformersFieldsEntityDefault implements CcpJsonTransformers
 	;
 	
 	
+	/**
+	 * Associates the transformer with whether it can be part of a primary key.
+	 * @param canBePrimaryKey whether the result can be part of a primary key
+	 */
 	private JnJsonTransformersFieldsEntityDefault(boolean canBePrimaryKey) {
 			this.canBePrimaryKey = canBePrimaryKey;
 		}
 
+	/** Whether the result can be part of a primary key (BCrypt hashes can not: they change on each run). */
 	private final boolean canBePrimaryKey;
 	
 	
+	/**
+	 * Generates a new random token of 8 letters and numbers.
+	 * @return the token
+	 */
 	public static String getOriginalToken() {
 		CcpTextDecorator lettersAndNumbers = CcpOtherConstants.LETTERS_AND_NUMBERS.text();
 		CcpTextDecorator generatedToken = lettersAndNumbers.generateToken(8);
 		String originalToken = generatedToken.content;
 		return originalToken;
 	}
+	/** Fields written by the transformers. */
 	public static enum JsonFieldNames implements CcpJsonFieldName{
 		// originalToken and token remain declared because the test project references them
-		originalEmail, originalToken, token, passwordAlreadyCalculated, tokenHash, originalMessage, messageHash
+		/** The {@code originalEmail} field. */
+		originalEmail,
+		/** The {@code originalToken} field. */
+		originalToken,
+		/** The {@code token} field. */
+		token,
+		/** The {@code passwordAlreadyCalculated} field. */
+		passwordAlreadyCalculated,
+		/** The {@code tokenHash} field. */
+		tokenHash,
+		/** The {@code originalMessage} field. */
+		originalMessage,
+		/** The {@code messageHash} field. */
+		messageHash
 	}
+	/**
+	 * Tells whether the result can be part of a primary key.
+	 * @return {@code true} for a deterministic transformer
+	 */
 	public boolean canBePrimaryKey() {
 		return canBePrimaryKey;
 	}

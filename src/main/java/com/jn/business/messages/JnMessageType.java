@@ -24,9 +24,20 @@ import com.jn.utils.JnSystemProperties;
 
 import com.ccp.json.fields.validation.CcpJsonCommonsFields;
 
+/**
+ * Channels of the messages sent to the user (and to the support team): each one knows its default step of
+ * {@link JnSendMessageToUser}, the parameters it adds to the keys of the sending and how to deliver a message.
+ */
 public enum JnMessageType implements CcpHttpApiExecutor{
+	/** E-mail, through {@code CcpEmailSender}. */
 	email{
 
+		/**
+		 * Adds the e-mail step.
+		 * @param sender the sender
+		 * @param exceptionHandler what happens when the sending fails
+		 * @return the next part of the fluent API
+		 */
 		public JnAddDefaultStep addDefaultProcessToSendMessage(JnSendMessageToUser sender, JnMessageSenderExceptionHandler exceptionHandler) {
 			JnAddDefaultStep defaultProcess = sender.addDefaultProcessToEmailSending(exceptionHandler);
 			return defaultProcess;
@@ -75,19 +86,31 @@ public enum JnMessageType implements CcpHttpApiExecutor{
 		}
 
 	},
+	/** Instant message, through the bot named by {@code botName} ({@code support} by default). */
 	instantMessenger{
 
+		/**
+		 * Adds the instant message step.
+		 * @param sender the sender
+		 * @param exceptionHandler what happens when the sending fails
+		 * @return the next part of the fluent API
+		 */
 		public JnAddDefaultStep addDefaultProcessToSendMessage(JnSendMessageToUser sender, JnMessageSenderExceptionHandler exceptionHandler) {
 			JnAddDefaultStep defaultProcess = sender.addDefaultStepToInstantMessageSending(exceptionHandler);
 			return defaultProcess;
 		}
 		
+		/**
+		 * Validates the input with {@code InstantMessengerJsonValidator}.
+		 * @return the validation class
+		 */
 		public Class<?> getJsonValidationClass() {
 			return InstantMessengerJsonValidator.class;
 		}
 		/**
 		 * Gets the bot token via JnSystemProperties, determines the message type, tries to
-		 * send it and handles rate-limit and blocked-bot exceptions.
+		 * send it and handles rate-limit and blocked-bot exceptions. A command delivered to the support bot
+		 * becomes a pending ticket of the operator ({@link JnBusinessRegisterSupportPendingCommand}).
 		 */
 		public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
 		
@@ -105,6 +128,7 @@ public enum JnMessageType implements CcpHttpApiExecutor{
 				CcpJsonRepresentation instantMessengerData = instantMessenger.execute(jsonWithBotToken);
 				CcpJsonRepresentation instantMessageSent = jsonWithBotToken.mergeWithAnotherJson(instantMessengerData);
 				JnEntityInstantMessengerMessageSent.ENTITY.save(instantMessageSent);
+				JnBusinessRegisterSupportPendingCommand.INSTANCE.execute(jsonWithBotToken);
 				return jsonWithBotToken;
 			} catch (CcpHttpTooManyRequests e) {
 				CcpJsonRepresentation retryResponse = this.retryToSendMessage(jsonWithBotToken);
@@ -116,6 +140,12 @@ public enum JnMessageType implements CcpHttpApiExecutor{
 			}
 		}
 
+		/**
+		 * Retries a message refused for too many requests: after the maximum tries it raises
+		 * {@link JnErrorUnableToSendInstantMessage}; otherwise it sleeps and sends again with one more try.
+		 * @param json the message
+		 * @return the result of a later try
+		 */
 		private CcpJsonRepresentation retryToSendMessage(CcpJsonRepresentation json) {
 			
 			Integer maxTriesToSendMessage = this.getMaxTries();
@@ -137,12 +167,23 @@ public enum JnMessageType implements CcpHttpApiExecutor{
 			return retryResponse;
 		}
 
+		/**
+		 * Records in {@code jn_instant_messenger_bot_locked} that the user blocked the bot.
+		 * @param json the message
+		 * @param botName the bot blocked
+		 * @return the message (nothing is recorded as sent)
+		 */
 		private CcpJsonRepresentation saveBlockedBot(CcpJsonRepresentation json, String botName) {
 			CcpJsonRepresentation blockedBotRecord = json.put(JnJsonInstantMessengerFields.botName, botName);
 			JnEntityInstantMessengerBotLocked.ENTITY.save(blockedBotRecord);
 			return json;
 		}
 
+		/**
+		 * Adds the parameters of the bot named in {@code botName} ({@code support} when absent).
+		 * @param json the keys of the sending
+		 * @return the keys plus the parameters of the bot
+		 */
 		public CcpJsonRepresentation getParameters(CcpJsonRepresentation json) {
 			
 			String botName = json.getOrDefault(JnJsonInstantMessengerFields.botName, () -> JnBotType.support.name());
@@ -159,13 +200,23 @@ public enum JnMessageType implements CcpHttpApiExecutor{
 
 
 	
+	/** Fields of the instant message sending. */
 	public static enum InstantMessengerApiFields implements CcpJsonFieldName{
+		/** The {@code triesToSendMessage} field. */
 		triesToSendMessage, 
+		/** The {@code bots} field. */
 		bots
 	}
 	
+	/** The bots of the platform. */
 	public static enum JnBotType implements CcpJsonFieldName{
+		/** The support bot: messages go in the language configured for the support team. */
 		support {
+			/**
+			 * Adds the bot name and the support language.
+			 * @param json the keys of the sending
+			 * @return the keys plus the parameters
+			 */
 			CcpJsonRepresentation getParameters(CcpJsonRepresentation json) {
 				String supportLanguage =  JnSystemProperties.INSTANCE.supportLanguage();
 
@@ -174,7 +225,13 @@ public enum JnMessageType implements CcpHttpApiExecutor{
 						.put(JnJsonCommonsFields.language, supportLanguage);
 			}
 		},
+		/** The bot that talks to the users. */
 		user {
+			/**
+			 * Adds the bot name.
+			 * @param json the keys of the sending
+			 * @return the keys plus the parameters
+			 */
 			CcpJsonRepresentation getParameters(CcpJsonRepresentation json) {
 				return json
 						.put(JnJsonInstantMessengerFields.botName, this.name())
@@ -182,30 +239,55 @@ public enum JnMessageType implements CcpHttpApiExecutor{
 			}
 		},
 		;
+		/**
+		 * Adds the parameters of the bot to the keys of the sending.
+		 * @param json the keys of the sending
+		 * @return the keys plus the parameters
+		 */
 		abstract CcpJsonRepresentation getParameters(CcpJsonRepresentation json);
 	
 	}
 	
 	
 
+	/** Input rules of an instant message. */
 	private static enum InstantMessengerJsonValidator implements CcpJsonFieldName{
+		/** The {@code botName} field: part of the primary key, validated as in {@code JnJsonInstantMessengerFields}. */
 		@CcpEntityFieldPrimaryKey
 		@CcpJsonCopyFieldValidationsFrom(JnJsonInstantMessengerFields.class)
 		botName, 
+		/** The {@code chatId} field: part of the primary key, validated as in {@code JnJsonInstantMessengerFields}. */
 		@CcpEntityFieldPrimaryKey
 		@CcpJsonCopyFieldValidationsFrom(JnJsonInstantMessengerFields.class)
 		chatId, 
+		/** The {@code instantMessageType} field: required, validated as in {@code JnJsonInstantMessengerFields}. */
 		@CcpJsonFieldValidatorRequired
 		@CcpJsonCopyFieldValidationsFrom(JnJsonInstantMessengerFields.class)
 		instantMessageType, 
 	}
 
+	/** Raised when an instant message is still refused for too many requests after the maximum tries. */
 	@SuppressWarnings("serial")
 	public static class JnErrorUnableToSendInstantMessage extends RuntimeException {
+		/**
+		 * Builds the error with the message.
+		 * @param json the message
+		 */
 		private JnErrorUnableToSendInstantMessage(CcpJsonRepresentation json) {
 			super("This message couldn't be sent. Details: " + json);
 		}
 	}
+	/**
+	 * Adds the parameters of the channel to the keys of the sending.
+	 * @param json the keys of the sending
+	 * @return the keys plus the parameters
+	 */
 	public abstract CcpJsonRepresentation getParameters(CcpJsonRepresentation json);
+	/**
+	 * Adds the default step of the channel.
+	 * @param sender the sender
+	 * @param exceptionHandler what happens when the sending fails
+	 * @return the next part of the fluent API
+	 */
 	public abstract JnAddDefaultStep addDefaultProcessToSendMessage(JnSendMessageToUser sender, JnMessageSenderExceptionHandler exceptionHandler);
 }

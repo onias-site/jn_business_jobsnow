@@ -27,15 +27,33 @@ import com.jn.entities.JnEntityDisposableRecord;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
 import com.jn.utils.JnDeleteKeysFromCache;
 
+/**
+ * Expiration decorator ({@code @JnEntityDisposable}). The id of a record is the SHA-1 of the current period (formatted by
+ * the granularity) plus the original id, so each period has its own document; every write also writes, in
+ * {@code jn_disposable_record}, a copy of the record keyed by entity and primary key with the expiration timestamp
+ * (see finding: the expiration is computed from the current time). A record counts as present when the document of the
+ * current period exists, or when the copy exists and has not expired.
+ */
 public class JnDisposableEntity extends CcpDefaultEntityDelegator<Object>{
 	
+	/** The expiration granularity. */
 	private final CcpEntityExpurgableOptions timeOption;
 
+	/**
+	 * Wraps the entity.
+	 * @param entity the entity decorated so far
+	 * @param timeOption the expiration granularity
+	 */
 	public JnDisposableEntity(CcpEntity entity, CcpEntityExpurgableOptions timeOption) {
 		super(entity, JnExecuteBulkOperation.INSTANCE, JnDeleteKeysFromCache.INSTANCE);
 		this.timeOption = timeOption;
 	}
 	
+	/**
+	 * Returns the key of the copy: {@code entity} (name) and {@code id} (the primary key values as compact JSON).
+	 * @param json the record
+	 * @return the key of the copy
+	 */
 	private CcpJsonRepresentation getExpurgableId(CcpJsonRepresentation json) {
 		
 		CcpEntityMetaData entityDetails = this.getEntityMetaData();
@@ -52,6 +70,11 @@ public class JnDisposableEntity extends CcpDefaultEntityDelegator<Object>{
 		return expurgableId;
 	}
 	
+	/**
+	 * Formats the current time by the granularity.
+	 * @param json unused
+	 * @return the current period
+	 */
 	private String extractFormatedCurrentTimestamp(CcpJsonRepresentation json) {
 		long currentTimeMillis = System.currentTimeMillis();
 		String formattedTimestamp = this.timeOption.getFormattedDate(currentTimeMillis);
@@ -59,6 +82,11 @@ public class JnDisposableEntity extends CcpDefaultEntityDelegator<Object>{
 	}
 	
 	
+	/**
+	 * Tells whether the copy has a {@code timestamp} in the future.
+	 * @param requiredEntityRow the copy
+	 * @return {@code true} for a copy not expired yet
+	 */
 	private boolean isValidTimestamp(CcpJsonRepresentation requiredEntityRow) {
 		
 		String timeStampFieldName = JnJsonCommonsFields.timestamp.name();
@@ -81,6 +109,12 @@ public class JnDisposableEntity extends CcpDefaultEntityDelegator<Object>{
 		}
 		return false;
 	}
+	/**
+	 * Builds the bulk item of the copy in {@code jn_disposable_record}.
+	 * @param json the record
+	 * @param operation the bulk operation
+	 * @return the bulk item of the copy
+	 */
 	private final CcpBulkItem getExpurgableToBulkOperation(CcpJsonRepresentation json, CcpBulkEntityOperationType operation) {
 		
 		CcpJsonRepresentation recordCopy = this.populateAnExpurgableFromJson(json);
@@ -90,6 +124,12 @@ public class JnDisposableEntity extends CcpDefaultEntityDelegator<Object>{
 		return disposableBulkItem;
 	}
 	
+	/**
+	 * Builds the copy: key, {@code format}, {@code timestamp} (expiration), {@code trueTimestamp} (when it was written),
+	 * {@code json} (the record fields), {@code date} (expiration date) and {@code id}.
+	 * @param json the record
+	 * @return the copy
+	 */
 	private CcpJsonRepresentation populateAnExpurgableFromJson(CcpJsonRepresentation json) {
 		CcpJsonRepresentation expurgableId = this.getExpurgableId(json);
 		CcpEntityMetaData entityDetails = this.getEntityMetaData();
@@ -117,6 +157,11 @@ public class JnDisposableEntity extends CcpDefaultEntityDelegator<Object>{
 		return expurgable;
 	}
 
+	/**
+	 * Computes the id of the document of the current period: SHA-1 of the formatted period and the original id.
+	 * @param json the record
+	 * @return the id
+	 */
 	public String calculateId(CcpJsonRepresentation json) {
 
 		String formattedTimestamp = this.extractFormatedCurrentTimestamp(json);
@@ -135,6 +180,11 @@ public class JnDisposableEntity extends CcpDefaultEntityDelegator<Object>{
 		return hash;
 	}
 
+	/**
+	 * Tells whether the record exists in the current period, or has a copy not expired yet.
+	 * @param json the record
+	 * @return {@code true} when the record is valid
+	 */
 	public boolean exists(CcpJsonRepresentation json) {
 		CcpJsonRepresentation expurgableId = this.getExpurgableId(json);
 		CcpCrud crud = CcpDependencyInjection.getDependency(CcpCrud.class);
@@ -167,6 +217,10 @@ public class JnDisposableEntity extends CcpDefaultEntityDelegator<Object>{
 		return true;
 	}
 	
+	/**
+	 * The associated entities of the wrapped entity plus {@code jn_disposable_record}.
+	 * @return the associated entities
+	 */
 	public List<CcpEntity> getAssociatedEntities() {
 		List<CcpEntity> associatedEntities = this.entity.getAssociatedEntities();
 		ArrayList<CcpEntity> result = new ArrayList<CcpEntity>(associatedEntities);
@@ -174,6 +228,12 @@ public class JnDisposableEntity extends CcpDefaultEntityDelegator<Object>{
 		return result;
 	}
 	
+	/**
+	 * Returns the document of the current period; otherwise the record kept in a copy not expired yet; otherwise
+	 * delegates inward (which raises the not-found error).
+	 * @param json the record
+	 * @return the record
+	 */
 	public CcpJsonRepresentation getOneById(CcpJsonRepresentation json) {
 		
 		CcpCrud crud = CcpDependencyInjection.getDependency(CcpCrud.class);
@@ -212,6 +272,11 @@ public class JnDisposableEntity extends CcpDefaultEntityDelegator<Object>{
 		return oneById;
 	}
 	
+	/**
+	 * Searches every associated entity, the copy included.
+	 * @param json the record
+	 * @return the records by entity
+	 */
 	public CcpJsonRepresentation getOneByIdAnyWhere(CcpJsonRepresentation json) {
 		CcpJsonRepresentation expurgableId = this.getExpurgableId(json);
 		CcpJsonRepresentation allValuesTogether = expurgableId.mergeWithAnotherJson(json);
@@ -220,6 +285,12 @@ public class JnDisposableEntity extends CcpDefaultEntityDelegator<Object>{
 		return result;
 	}
 	
+	/**
+	 * Replaces the id of the search parameter of this entity with the id of the current period.
+	 * @param parameterToSearch the search parameter
+	 * @param json the record
+	 * @return the adjusted parameter
+	 */
 	private CcpJsonRepresentation replaceParameterToSearch(CcpJsonRepresentation parameterToSearch, CcpJsonRepresentation json) {
 
 		CcpDbRequester dbRequester = CcpDependencyInjection.getDependency(CcpDbRequester.class);
@@ -243,6 +314,11 @@ public class JnDisposableEntity extends CcpDefaultEntityDelegator<Object>{
 		return parameterWithCalculatedId;
 	}
 	
+	/**
+	 * The search parameters of the copy plus the ones of the entity with the id of the current period.
+	 * @param json the record
+	 * @return the search parameters
+	 */
 	public List<CcpJsonRepresentation> getParametersToSearch(CcpJsonRepresentation json) {
 		List<CcpJsonRepresentation> parametersToSearch = this.entity.getParametersToSearch(json);
 		Stream<CcpJsonRepresentation> parametersStream = parametersToSearch
@@ -262,6 +338,13 @@ public class JnDisposableEntity extends CcpDefaultEntityDelegator<Object>{
 		return result;
 	}
 
+	/**
+	 * Returns the document of the current period from the search result; otherwise the record kept in a copy not expired
+	 * yet; otherwise an empty JSON.
+	 * @param unionAll the search result
+	 * @param json the record
+	 * @return the record
+	 */
 	public CcpJsonRepresentation getRecordFromUnionAll(CcpSelectUnionAll unionAll, CcpJsonRepresentation json) {
 
 		String id = this.calculateId(json);
@@ -290,6 +373,12 @@ public class JnDisposableEntity extends CcpDefaultEntityDelegator<Object>{
 		return innerJson;
 	}
 	
+	/**
+	 * Tells whether the search found the document of the current period or a copy not expired yet.
+	 * @param unionAll the search result
+	 * @param json the record
+	 * @return {@code true} when the record is valid
+	 */
 	public boolean isPresentInThisUnionAll(CcpSelectUnionAll unionAll, CcpJsonRepresentation json) {
 
 		String id = this.calculateId(json);
@@ -323,6 +412,11 @@ public class JnDisposableEntity extends CcpDefaultEntityDelegator<Object>{
 		return false;
 	}
 
+	/**
+	 * Gives the bulk item of this entity (or of its twin) the id of the current period; items of other entities are kept.
+	 * @param item the bulk item
+	 * @return the adjusted item
+	 */
 	private CcpBulkItem replaceId(CcpBulkItem item) {
 		
 		boolean isAnotherEntity = this.isAnotherEntity(item);
@@ -338,6 +432,11 @@ public class JnDisposableEntity extends CcpDefaultEntityDelegator<Object>{
 		
 	}
 
+	/**
+	 * Tells whether the item belongs to neither this entity nor its twin.
+	 * @param item the bulk item
+	 * @return {@code true} for another entity
+	 */
 	private boolean isAnotherEntity(CcpBulkItem item) {
 		
 		CcpEntityMetaData thisEntityDetails = this.getEntityMetaData();
@@ -358,6 +457,12 @@ public class JnDisposableEntity extends CcpDefaultEntityDelegator<Object>{
 		return true;
 	}
 
+	/**
+	 * The items of the wrapped entity, with the id of the current period, plus the item of the copy.
+	 * @param json the record
+	 * @param operation the bulk operation
+	 * @return the bulk items
+	 */
 	public List<CcpBulkItem> toBulkItems(CcpJsonRepresentation json, CcpBulkEntityOperationType operation) {
 		List<CcpBulkItem> originalBulkItems = this.entity.toBulkItems(json, operation);
 		Stream<CcpBulkItem> originalBulkItemsStream = originalBulkItems
@@ -373,6 +478,11 @@ public class JnDisposableEntity extends CcpDefaultEntityDelegator<Object>{
 		return items;
 	}
 
+	/**
+	 * Returns the key of the copy of the record ({@code id} and {@code entity}), after the field transformers.
+	 * @param json the record
+	 * @return the key of the copy
+	 */
 	public CcpJsonRepresentation getIdToSearchDisposableRecord(CcpJsonRepresentation json) {
 		
 		CcpEntityMetaData entityDetails = this.getEntityMetaData();
@@ -393,6 +503,12 @@ public class JnDisposableEntity extends CcpDefaultEntityDelegator<Object>{
 		return idToSearch;
 	}
 	
+	/**
+	 * Returns the document of the current period from the search result.
+	 * @param unionAll the search result
+	 * @param jsonSupplier supplies the record
+	 * @return the document, or an empty JSON
+	 */
 	public CcpJsonRepresentation getRecordFromUnionAll(CcpSelectUnionAll unionAll, Supplier<CcpJsonRepresentation> jsonSupplier) {
  
 		CcpJsonRepresentation json = jsonSupplier.get();

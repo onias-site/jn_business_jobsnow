@@ -21,20 +21,22 @@ import com.jn.utils.JnDeleteKeysFromCache;
 import com.ccp.json.fields.validation.CcpJsonCommonsFields;
 
 /**
- * Saves (or changes) the user's password. In an atomic bulk operation: invalidates the
- * current session, saves the new password, "unlocks" the password by transferring it to the
- * twin entity, removes the failed password attempts, registers a new login and solves the
- * session conflict if there is one.
+ * Saves (or changes) the password of the user, in one bulk operation: saves the new password, moves a locked password
+ * back from the twin, deletes the wrong password attempts, terminates the current session, registers a new session and
+ * solves the session conflict.
  */
 public class JnBusinessSavePassword implements CcpBusiness {
  
+	/** The single instance. */
 	public static final JnBusinessSavePassword INSTANCE = new JnBusinessSavePassword();
 	
+	/** Singleton; use {@link #INSTANCE}. */
 	private JnBusinessSavePassword() {}
 
 	/**
-	 * Executes all password and session update operations in a single bulk.
-	 * Returns an empty JSON.
+	 * Runs the password bulk operation; {@code sessionToken} becomes the {@code token} of the session.
+	 * @param json the request
+	 * @return an empty JSON
 	 */
 	@SuppressWarnings("unchecked")
 	public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
@@ -63,7 +65,8 @@ public class JnBusinessSavePassword implements CcpBusiness {
 	}
 
 	/**
-	 * Returns the JSON validation class defined in JnServiceLogin.SavePassword.
+	 * Validates the input with the rules of the {@code SavePassword} service.
+	 * @return the validation class of {@code JnServiceLogin.SavePassword}
 	 */
 	public Class<?> getJsonValidationClass() {
 		var jsonValidationClass = JnServiceLogin.SavePassword.getJsonValidationClass();

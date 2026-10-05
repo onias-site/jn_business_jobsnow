@@ -18,19 +18,31 @@ import com.jn.entities.decorators.engine.JnDisposableEntity;
 import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
 
+/**
+ * Session conflicts: an e-mail tried to log in while another session was active.
+ * <p>
+ * Configuration:
+ * <ul>
+ * <li>index {@code jn_login_session_conflict}</li>
+ * <li>records cached for 3600 seconds</li>
+ * <li>disposable: records expire by the {@code hourly} granularity</li>
+ * </ul>
+ */
 @CcpEntityCache(3600)
 @CcpEntityCustomDecorators(value = {@CcpEntityCustomDecorator(value = JnEntityDisposableBuilder.class, priority = 1),})
 @JnEntityDisposable(value = JnDisposableEntity.class, timeOption = CcpEntityExpurgableOptions.hourly)
 @CcpEntityFieldsTransformer(classReferenceWithTheFields = JnJsonTransformersFieldsEntityDefault.class)
 @CcpEntityFieldsValidator(classReferenceWithTheFields = JnEntityLoginSessionConflict.Fields.class)
-/**
- * Registra conflito de sessão para um email: quando um usuário tenta logar enquanto já existe uma
- * sessão ativa de outro dispositivo/IP. Descartável por hora, cache de 1 hora.
- */
 public class JnEntityLoginSessionConflict implements CcpEntityConfigurator {
 
+	/** The entity {@code jn_login_session_conflict}, with every decorator of this configuration. */
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityLoginSessionConflict.class).entityInstance;
+	/**
+	 * The fields of the entity, with their validation rules (this enum is the class named by
+	 * {@code @CcpEntityFieldsValidator}).
+	 */
 	public static enum Fields implements CcpJsonFieldName{
+		/** The {@code email} field: part of the primary key, validated as in {@code JnJsonCommonsFields}. */
 		@CcpEntityFieldPrimaryKey
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		email;

@@ -19,31 +19,45 @@ import com.jn.entities.decorators.engine.JnDisposableEntity;
 import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
 
+/**
+ * E-mails sent by the platform, keyed by subject type and recipient, so the same kind of message is not sent twice to the same recipient while the record lives.
+ * <p>
+ * Configuration:
+ * <ul>
+ * <li>index {@code jn_email_message_sent}</li>
+ * <li>disposable: records expire by the {@code daily} granularity</li>
+ * <li>records cached for 3600 seconds</li>
+ * </ul>
+ */
 @CcpEntityCustomDecorators(value = {@CcpEntityCustomDecorator(value = JnEntityDisposableBuilder.class, priority = 1),})
 @JnEntityDisposable(value = JnDisposableEntity.class, timeOption = CcpEntityExpurgableOptions.daily)
 @CcpEntityFieldsTransformer(classReferenceWithTheFields = JnJsonTransformersFieldsEntityDefault.class)
 @CcpEntityFieldsValidator(classReferenceWithTheFields = JnEntityEmailMessageSent.Fields.class)
 @CcpEntityCache(3600)
 
-/**
- * Records the emails sent by the platform to prevent duplicate resending. The composite key
- * ({@code subjectType} + {@code email}) ensures that the same message type is not sent twice
- * to the same recipient on the same day. Disposable daily, 1-hour cache.
- */
 public class JnEntityEmailMessageSent implements CcpEntityConfigurator {
 	
+	/** The entity {@code jn_email_message_sent}, with every decorator of this configuration. */
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityEmailMessageSent.class).entityInstance;
 
+	/**
+	 * The fields of the entity, with their validation rules (this enum is the class named by
+	 * {@code @CcpEntityFieldsValidator}).
+	 */
 	public static enum Fields implements CcpJsonFieldName{
+		/** The {@code subjectType} field: part of the primary key, validated as in {@code JnJsonCommonsFields}. */
 		@CcpEntityFieldPrimaryKey
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		subjectType, 
+		/** The {@code email} field: part of the primary key, validated as in {@code JnJsonCommonsFields}. */
 		@CcpEntityFieldPrimaryKey
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		email, 
+		/** The {@code subject} field: required, validated as in {@code JnJsonCommonsFields}. */
 		@CcpJsonFieldValidatorRequired
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		subject, 
+		/** The {@code sender} field: required, validated as in {@code JnJsonCommonsFields}. */
 		@CcpJsonFieldValidatorRequired
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		sender

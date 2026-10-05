@@ -11,20 +11,41 @@ import com.ccp.especifications.db.utils.entity.decorators.engine.CcpErrorEntityP
 import com.jn.entities.JnEntityMessageDidNotSent;
 import com.jn.entities.JnEntityMessageDidNotSent.JnReasonDetails;
 
+/**
+ * The "do not send" rules of {@link JnSendMessageToUser}, one per list of entities of the sender (same name). Each rule
+ * checks the entity of the channel in the search result: a rule marked "when present" refuses the sending when the
+ * record exists, the others refuse it when the record is missing. A refusal is recorded in
+ * {@code jn_message_did_not_sent} (when the message has a receiver) and raised as {@link MessageDidNotSend}.
+ */
 public enum JnMustNotSendMessage{
 
+	/** Refuses when the same message was already sent within the window of the entity. */
 	alreadySentEntities(true),
+	/** Refuses when the channel has no sending parameters. */
 	parameterEntities(false),
+	/** Refuses when the channel has no template. */
 	messageEntities(false),
+	/** Refuses when the receiver blocked the channel (spam report, bot locked). */
 	blockEntities(true)
 	;
+	/** Whether the rule refuses when the record exists ({@code true}) or when it is missing ({@code false}). */
 	final boolean whenPresentInUnionAll;
 	
 	
+	/**
+	 * Associates the rule with its condition.
+	 * @param whenPresentInThisUnionAll whether the rule refuses when the record exists
+	 */
 	private JnMustNotSendMessage(boolean whenPresentInThisUnionAll) {
 		this.whenPresentInUnionAll = whenPresentInThisUnionAll;
 	}
 	
+	/**
+	 * Reads, by reflection, the list of entities of the sender with the name of this rule.
+	 * @param obj the sender
+	 * @return the entities by channel
+	 * @throws JnErrorMessageEntitiesNotAccessible when the list can not be read
+	 */
 	@SuppressWarnings("unchecked")
 	protected List<CcpEntity> getEntities(JnSendMessageToUser obj){
 		try {
@@ -42,21 +63,32 @@ public enum JnMustNotSendMessage{
 	}
 
 	/**
-	 * Exceção lançada quando a lista de entidades correspondente a este item não pode ser lida por reflexão
-	 * em {@code JnSendMessageToUser}, o que indica que o campo foi renomeado ou removido.
+	 * Raised when the list of entities of a rule can not be read by reflection from {@code JnSendMessageToUser}, which means
+	 * the field was renamed or removed.
 	 */
 	@SuppressWarnings("serial")
 	public static class JnErrorMessageEntitiesNotAccessible extends RuntimeException {
 		/**
-		 * Monta a mensagem informando qual campo não pôde ser lido e encadeia a exceção original como causa.
-		 * @param field o item cujo campo homônimo era esperado em {@code JnSendMessageToUser}
-		 * @param cause a exceção original de reflexão
+		 * Names the field that could not be read and chains the reflection error.
+		 * @param field the rule whose field of the same name was expected in {@code JnSendMessageToUser}
+		 * @param cause the reflection error
 		 */
 		private JnErrorMessageEntitiesNotAccessible(JnMustNotSendMessage field, Throwable cause) {
 			super("The field '" + field + "' could not be read from JnSendMessageToUser", cause);
 		}
 	}
 	
+	/**
+	 * Records the refusal (reason details, the checked entity as the reason type, the rule as the reason description and the
+	 * reason message) and raises it.
+	 * @param obj the sender
+	 * @param unionAll the search result
+	 * @param json the keys of the channel
+	 * @param index the position of the channel
+	 * @param reasonDetails the details of the reason
+	 * @param reasonMessage the message of the reason, empty when there is none
+	 * @throws MessageDidNotSend always
+	 */
 	private void saveMessageNotSent(JnSendMessageToUser obj, CcpSelectUnionAll unionAll, 
 			CcpJsonRepresentation json, Integer index, 
 			JnReasonDetails reasonDetails, String reasonMessage) {
@@ -76,10 +108,11 @@ public enum JnMustNotSendMessage{
 	}
 
 	/**
-	 * O diagnóstico é indexado pelo destinatário: {@code email} faz parte da chave primária de
-	 * {@code JnEntityMessageDidNotSent}. Aviso ao suporte não tem e-mail de destinatário: tentar gravá-lo
-	 * fazia a validação da entidade estourar e trocava a recusa, que é esperada, por um erro de
-	 * validação. Sem destinatário não há a quem o diagnóstico sirva, e a recusa segue sendo lançada.
+	 * The diagnosis is keyed by the receiver: {@code email} is part of the primary key of {@code JnEntityMessageDidNotSent}.
+	 * A notice to the support team has no receiver e-mail: saving it made the validation of the entity fail and replaced the
+	 * expected refusal with a validation error. Without a receiver nobody needs the diagnosis, and the refusal is still
+	 * raised.
+	 * @param jsonToSave the diagnosis
 	 */
 	private void saveDiagnosticWhenItHasARecipient(CcpJsonRepresentation jsonToSave) {
 
@@ -95,9 +128,12 @@ public enum JnMustNotSendMessage{
 	}
 
 	/**
-	 * O campo é opcional na entidade, que por outro lado não aceita string vazia. Quando o motivo não
-	 * traz mensagem — caso do registro simplesmente ausente no union-all — o campo é retirado do json,
-	 * para que a gravação do diagnóstico não seja recusada pela validação.
+	 * The field is optional in the entity, which on the other hand rejects an empty text. When the reason has no message
+	 * (a record simply missing from the search), the field is removed from the JSON, so the validation does not reject the
+	 * diagnosis.
+	 * @param json the diagnosis
+	 * @param reasonMessage the message of the reason
+	 * @return the diagnosis with or without the message
 	 */
 	private CcpJsonRepresentation putReasonMessage(CcpJsonRepresentation json, String reasonMessage) {
 
@@ -112,13 +148,27 @@ public enum JnMustNotSendMessage{
 		return put;
 	}
 	
+	/** Raised when a rule refuses the sending; the message is the recorded diagnosis. */
 	@SuppressWarnings("serial")
 	static class MessageDidNotSend extends RuntimeException{
+		/**
+		 * Builds the refusal.
+		 * @param json the diagnosis
+		 */
 		protected MessageDidNotSend(CcpJsonRepresentation json) {
 			super(json.toString());
 		}
 	}
 	
+	/**
+	 * Applies the rule to the channel. When the primary key of the checked entity can not be computed, the sending is
+	 * refused with {@code missingFieldsToPrimaryKey}.
+	 * @param obj the sender
+	 * @param unionAll the search result
+	 * @param json the keys of the channel
+	 * @param index the position of the channel
+	 * @throws MessageDidNotSend when the sending is refused
+	 */
 	public void validate(JnSendMessageToUser obj, CcpSelectUnionAll unionAll, CcpJsonRepresentation json, Integer index) {
 		
 		JnReasonDetails reasonDetails = JnReasonDetails.isNotPresentInThisUnionAll;

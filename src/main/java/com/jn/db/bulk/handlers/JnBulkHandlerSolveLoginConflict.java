@@ -15,12 +15,17 @@ import com.jn.entities.JnEntityLoginSessionConflict;
  * email, it produces a bulk item to delete it; otherwise, it does nothing.
  */
 public class JnBulkHandlerSolveLoginConflict implements CcpHandleWithSearchResultsInTheEntity<List<CcpBulkItem>>{
+	/** Singleton; use {@link #INSTANCE}. */
 	private JnBulkHandlerSolveLoginConflict() {}
 
+	/** The single instance. */
 	public static final JnBulkHandlerSolveLoginConflict INSTANCE = new JnBulkHandlerSolveLoginConflict();
 
 	/**
 	 * Produces the bulk item that deletes the existing session conflict.
+	 * @param json the session
+	 * @param recordFound the session conflict
+	 * @return the bulk items
 	 */
 	public List<CcpBulkItem> whenRecordWasFoundInTheEntitySearch(CcpJsonRepresentation json, CcpJsonRepresentation recordFound) {
 
@@ -31,14 +36,17 @@ public class JnBulkHandlerSolveLoginConflict implements CcpHandleWithSearchResul
 	}
 
 	/**
-	 * Returns an empty list (no conflict to solve).
+	 * Returns no item: there is no conflict to solve.
+	 * @param json the session
+	 * @return an empty list
 	 */
 	public List<CcpBulkItem> whenRecordWasNotFoundInTheEntitySearch(CcpJsonRepresentation json) {
 		return new ArrayList<>();
 	}
 
 	/**
-	 * Returns JnEntityLoginSessionConflict.ENTITY.
+	 * The entity searched: {@code jn_login_session_conflict}.
+	 * @return the entity
 	 */
 	public CcpEntity getEntityToSearch() {
 		return JnEntityLoginSessionConflict.ENTITY;

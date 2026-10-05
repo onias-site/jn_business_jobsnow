@@ -14,10 +14,21 @@ import com.jn.entities.decorators.annotations.JnEntitySendMessageToUserWhenTrans
  */
 public class JnSendMessageToUserEntityAfterTransfer extends JnSendMessageToUserEntityOnTransfer {
 
+	/**
+	 * Wraps the entity.
+	 * @param entity the entity decorated so far
+	 * @param annotation the messages configured for the entity
+	 */
 	public JnSendMessageToUserEntityAfterTransfer(CcpEntity entity, JnEntitySendMessageToUserWhenTransfer annotation) {
 		super(entity, annotation);
 	}
 
+	/**
+	 * Copies and, when there was a source record, sends the {@code after copy} messages.
+	 * @param json the record
+	 * @param targetEntity the target entity
+	 * @return whether the record existed in the source
+	 */
 	public boolean copyDataTo(CcpJsonRepresentation json, CcpEntity targetEntity) {
 		boolean copied = this.entity.copyDataTo(json, targetEntity);
 
@@ -31,6 +42,12 @@ public class JnSendMessageToUserEntityAfterTransfer extends JnSendMessageToUserE
 		return copied;
 	}
 
+	/**
+	 * Transfers and, when there was a source record, sends the {@code after transfer} messages.
+	 * @param json the record
+	 * @param targetEntity the target entity
+	 * @return whether the record existed in the source
+	 */
 	public boolean transferDataTo(CcpJsonRepresentation json, CcpEntity targetEntity) {
 		boolean transfered = this.entity.transferDataTo(json, targetEntity);
 

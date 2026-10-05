@@ -7,8 +7,15 @@ import com.ccp.especifications.db.utils.entity.decorators.engine.CcpCustomDecora
 import com.ccp.especifications.db.utils.entity.decorators.enums.CcpEntityExpurgableOptions;
 import com.jn.entities.decorators.annotations.JnEntityDisposable;
 
+/** Builds the expiration decorator named by {@code @JnEntityDisposable}. */
 public class JnEntityDisposableBuilder extends CcpCustomDecoratorEntity{
 
+	/**
+	 * Wraps the entity with the decorator class of {@code @JnEntityDisposable}, giving it the granularity.
+	 * @param configurationClass the configurator class
+	 * @param entity the entity decorated so far
+	 * @return the decorated entity
+	 */
 	@SuppressWarnings("unchecked")
 	public CcpEntity getEntity(Class<?> configurationClass, CcpEntity entity) {
 		var annotation = configurationClass.getAnnotation(JnEntityDisposable.class);

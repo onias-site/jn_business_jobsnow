@@ -23,6 +23,17 @@ import com.jn.entities.fields.transformers.JnJsonTransformersFieldEntityTokenHas
 import com.jn.json.fields.validation.JnJsonCommonsFields;
 import com.jn.utils.JnDeleteKeysFromCache;
 
+/**
+ * An active login session, keyed by e-mail, token hash, IP and user agent; the twin receives the session at logout.
+ * <p>
+ * Configuration:
+ * <ul>
+ * <li>index {@code jn_login_session_validation}</li>
+ * <li>records cached for 3600 seconds</li>
+ * <li>twin entity {@code jn_login_session_terminated}</li>
+ * <li>disposable: records expire by the {@code hourly} granularity</li>
+ * </ul>
+ */
 @CcpEntityCache(3600)
 @CcpEntityCustomDecorators(value = {@CcpEntityCustomDecorator(value = JnEntityDisposableBuilder.class, priority = 1),})
 @CcpEntityTwin(
@@ -33,32 +44,38 @@ import com.jn.utils.JnDeleteKeysFromCache;
 @JnEntityDisposable(value = JnDisposableEntity.class, timeOption = CcpEntityExpurgableOptions.hourly)
 @CcpEntityFieldsTransformer(classReferenceWithTheFields = JnJsonTransformersFieldsEntityDefault.class)
 @CcpEntityFieldsValidator(classReferenceWithTheFields = JnEntityLoginSessionValidation.Fields.class)
-/**
- * Representa uma sessão de login ativa. A chave composta inclui email, token (hash SHA-1), IP e
- * userAgent — cada sessão é única por combinação de contexto. A twin {@code jn_login_session_terminated}
- * recebe a sessão ao fazer logout. Descartável por hora, cache de 1 hora.
- */
 public class JnEntityLoginSessionValidation implements CcpEntityConfigurator {
 
+	/** The entity {@code jn_login_session_validation}, with every decorator of this configuration. */
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityLoginSessionValidation.class).entityInstance;
+	/**
+	 * The fields of the entity, with their validation rules (this enum is the class named by
+	 * {@code @CcpEntityFieldsValidator}).
+	 */
 	public static enum Fields implements CcpJsonFieldName{
+		/** The {@code email} field: part of the primary key, validated as in {@code JnJsonCommonsFields}. */
 		@CcpEntityFieldPrimaryKey
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		email, 
 		
+		/** The {@code token} field: part of the primary key, validated as in {@code JnJsonCommonsFields}, transformed by {@code JnJsonTransformersFieldEntityTokenHash}. */
 		@CcpEntityFieldPrimaryKey
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		@CcpEntityFieldTransformer(JnJsonTransformersFieldEntityTokenHash.class)
 		token,
 		
+		/** The {@code ip} field: part of the primary key, validated as in {@code JnJsonCommonsFields}. */
 		@CcpEntityFieldPrimaryKey
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		ip,
 		
+		/** The {@code coordinates} field: validated as in {@code JnJsonCommonsFields}. */
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		coordinates, 
+		/** The {@code macAddress} field: validated as in {@code JnJsonCommonsFields}. */
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		macAddress, 
+		/** The {@code userAgent} field: part of the primary key, validated as in {@code JnJsonCommonsFields}. */
 		@CcpEntityFieldPrimaryKey
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		userAgent

@@ -4,13 +4,17 @@ import com.ccp.json.validations.fields.annotations.CcpJsonCopyFieldValidationsFr
 import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidatorRequired;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
 
+/** Input rules of the {@code CreateLoginEmail} service (see {@code JnServiceLogin}); each field takes the rules of the class it names. */
 class CreateLoginEmail{
+	/** The {@code userAgent} field: required, validated as in {@code JnJsonCommonsFields}. */
 	@CcpJsonFieldValidatorRequired
 	@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 	Object userAgent;
+	/** The {@code ip} field: required, validated as in {@code JnJsonCommonsFields}. */
 	@CcpJsonFieldValidatorRequired
 	@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 	Object ip;
+	/** The {@code email} field: required, validated as in {@code JnJsonCommonsFields}. */
 	@CcpJsonFieldValidatorRequired
 	@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 	Object email;

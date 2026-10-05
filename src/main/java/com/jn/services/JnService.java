@@ -4,17 +4,18 @@ import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.service.CcpService;
 
 /**
- * Interface base para todos os serviços do JobsNow. Fornece método default que carrega
- * automaticamente a classe de validação JSON pelo nome do valor do enum.
- *
- * Convenção: cada valor do enum tem um tipo homônimo <b>top-level</b> no mesmo pacote,
- * normalmente declarado como tipo secundário no próprio arquivo do serviço (ver
- * {@code ValidateLogin} em {@code JnServiceLogin.java}). Declarar esse tipo como classe
- * <i>interna</i> não funciona: {@code Class.forName} resolveria
- * {@code pacote.NomeDoServico$NomeDoValor}, e não {@code pacote.NomeDoValor}, resultando
- * em {@code JnErrorServiceValidationClassNotFound} em tempo de execução.
+ * Base of the services. By convention each item of the service enum has a top-level type with the same name in the same
+ * package (usually declared as a secondary type in the service file, see {@code ValidateLogin} in
+ * {@code JnServiceLogin.java}) holding its input rules. A nested type does not work: {@code Class.forName} would look
+ * for {@code package.ServiceName$ItemName}, not {@code package.ItemName}, and fail with
+ * {@link JnErrorServiceValidationClassNotFound}.
  */
 public interface JnService extends CcpService { 
+	/**
+	 * Loads the input rules class named after the item.
+	 * @return the class
+	 * @throws JnErrorServiceValidationClassNotFound when there is no such class
+	 */
 	default Class<?> getJsonValidationClass() {
 		
 		Class<?> forName;
@@ -26,6 +27,11 @@ public interface JnService extends CcpService {
 		return forName;
 	}
 
+	/**
+	 * Runs the service (see {@code CcpService}).
+	 * @param json the request
+	 * @return the response
+	 */
 	default CcpJsonRepresentation execute(CcpJsonRepresentation json) {
 		CcpJsonRepresentation execute = CcpService.super.execute(json);
 		return execute;

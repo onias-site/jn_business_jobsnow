@@ -11,26 +11,29 @@ import com.ccp.especifications.cache.CcpCacheDecorator;
 import com.ccp.business.CcpBusiness;
 import com.ccp.constants.CcpOtherConstants;
 /**
- * Utilitário Singleton para exclusão de chaves do cache (GCP Memcache). Implementa tanto
- * {@code CcpBusiness} (aceita JSON com lista de chaves) quanto {@code Consumer<String[]>}
- * (aceita array de chaves), sendo usado como callback de limpeza de cache após operações bulk.
+ * Deletes keys from the cache. It works both as a business (a JSON with the list of keys) and as a consumer of an array
+ * of keys, used as the cache cleanup callback of the database operations.
  */
 public class JnDeleteKeysFromCache implements  CcpBusiness, Consumer<String[]> {
 		
+	/** Fields read by the cleanup. */
 	enum JsonFieldNames implements CcpJsonFieldName{
+		/** The {@code keysToDeleteInCache} field. */
 		keysToDeleteInCache
 	}
 
+	/** The single instance. */
 	public static final JnDeleteKeysFromCache INSTANCE = new JnDeleteKeysFromCache();
 	
+	/** Singleton; use {@link #INSTANCE}. */
 	private JnDeleteKeysFromCache() {}
 	
 	/**
-	 * Apaga todas as chaves numa só conversa com o servidor de cache.
-	 *
-	 * <p>Antes daqui saía um laço que apagava chave por chave, e como
-	 * {@code CcpCrud.deleteKeysInCache} dispara esta limpeza antes de <b>toda</b> busca — inclusive as
-	 * de leitura pura — uma consulta que tocava nove entidades virava nove idas à rede.</p>
+	 * Deletes every key in a single round trip to the cache server. A loop that deleted one key at a time was replaced,
+	 * because {@code CcpCrud.deleteKeysInCache} triggers this cleanup before every search, including the read-only ones, so a
+	 * query touching nine entities became nine network calls.
+	 * @param json {@code keysToDeleteInCache}: the keys to delete
+	 * @return the same JSON
 	 */
 	public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
 
@@ -41,6 +44,10 @@ public class JnDeleteKeysFromCache implements  CcpBusiness, Consumer<String[]> {
 		return json;
 	}
 
+	/**
+	 * Deletes the given keys.
+	 * @param keysToDeleteInCache the keys to delete
+	 */
 	public void accept(String[] keysToDeleteInCache) {
 		List<String> asList = Arrays.asList(keysToDeleteInCache);
 		CcpJsonRepresentation json = CcpOtherConstants.EMPTY_JSON.put(JsonFieldNames.keysToDeleteInCache, asList);

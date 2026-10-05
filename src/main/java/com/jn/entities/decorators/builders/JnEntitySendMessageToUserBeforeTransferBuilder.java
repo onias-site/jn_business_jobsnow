@@ -13,6 +13,12 @@ import com.jn.entities.decorators.annotations.JnEntitySendMessageToUserWhenTrans
  */
 public class JnEntitySendMessageToUserBeforeTransferBuilder extends CcpCustomDecoratorEntity{
 
+	/**
+	 * Wraps the entity with the {@code beforeDecoratorClass} of {@code @JnEntitySendMessageToUserWhenTransfer}.
+	 * @param configurationClass the configurator class
+	 * @param entity the entity decorated so far
+	 * @return the decorated entity
+	 */
 	@SuppressWarnings("unchecked")
 	public CcpEntity getEntity(Class<?> configurationClass, CcpEntity entity) {
 		var annotation = configurationClass.getAnnotation(JnEntitySendMessageToUserWhenTransfer.class);

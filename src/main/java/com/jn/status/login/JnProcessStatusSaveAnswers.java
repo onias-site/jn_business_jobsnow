@@ -2,30 +2,41 @@ package com.jn.status.login;
 
 import com.ccp.process.CcpProcessStatus;
 
-/**
- * Statuses do processo de salvamento das respostas do questionário de onboarding:
- * {@code invalidEmail} (400), {@code lockedToken} (403), {@code missingToken} (404),
- * {@code lockedPassword} (427), {@code loginConflict} (409), {@code missingPassword} (202),
- * {@code expectedStatus} (200).
- */
+/** Statuses of the saving of the onboarding answers. */
 public enum JnProcessStatusSaveAnswers implements CcpProcessStatus{
+	/** Status 400: the e-mail is invalid. */
 	invalidEmail(400),
+	/** Status 403: the login token is locked. */
 	lockedToken(403),
+	/** Status 404: the user has no login token. */
 	missingToken(404),
+	/** Status 427: the password is locked. */
 	lockedPassword(427),
+	/** Status 409: the user already has an open session. */
 	loginConflict(409),
+	/** Status 202: the user has not defined a password yet. */
 	missingPassword(202),
+	/** Status 200: success. */
 	expectedStatus(200),
 	;
 
+	/** The HTTP status code. */
 	public final int status;
 	
 	
 	
+	/**
+	 * Associates the HTTP status code.
+	 * @param status the HTTP status code
+	 */
 	private JnProcessStatusSaveAnswers(int status) {
 		this.status = status;
 	}
 
+	/**
+	 * Returns the HTTP status code.
+	 * @return the status code
+	 */
 	public int asNumber() {
 		return status;
 	}

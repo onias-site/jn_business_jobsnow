@@ -20,40 +20,56 @@ import com.jn.json.fields.validation.JnJsonCommonsFields;
 
 
 /**
- * Expiration (disposable) record of other entities. Stores a copy of an entity's JSON with an
- * expiration timestamp. Used by {@code JnDisposableEntity} to implement TTL without relying on a
- * native Elasticsearch feature. Read-only — never saved directly.
+ * Expiration copy of the records of the disposable entities: the record JSON plus the expiration timestamp, written by {@code JnDisposableEntity} to implement a time to live without a native Elasticsearch feature. Never saved directly.
+ * <p>
+ * Configuration:
+ * <ul>
+ * <li>index {@code jn_disposable_record}</li>
+ * <li>read-only: save, delete and transfer do nothing</li>
+ * </ul>
  */
 @CcpEntityOlyReadable
 @CcpEntityFieldsTransformer(classReferenceWithTheFields = JnJsonTransformersFieldsEntityDefault.class)
 @CcpEntityFieldsValidator(classReferenceWithTheFields = JnEntityDisposableRecord.Fields.class)
 public class JnEntityDisposableRecord implements CcpEntityConfigurator {
 
+	/** The entity {@code jn_disposable_record}, with every decorator of this configuration. */
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityDisposableRecord.class).entityInstance;
 
+	/**
+	 * The fields of the entity, with their validation rules (this enum is the class named by
+	 * {@code @CcpEntityFieldsValidator}).
+	 */
 	public static enum Fields implements CcpJsonFieldName{
 	
+		/** The {@code timestamp} field: not updatable, required, validated as in {@code JnJsonCommonsFields}. */
 		@CcpEntityFieldNotUpdatable
 		@CcpJsonFieldValidatorRequired
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		timestamp,
+		/** The {@code format} field: not updatable, required, text. */
 		@CcpEntityFieldNotUpdatable
 		@CcpJsonFieldValidatorRequired
 		@CcpJsonFieldTypeString(minLength = 4, maxLength = 100)
 		format,
+		/** The {@code entity} field: part of the primary key, validated as in {@code JnJsonCommonsFields}. */
 		@CcpEntityFieldPrimaryKey
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		entity, 
+		/** The {@code date} field: not updatable, required, validated as in {@code JnJsonCommonsFields}. */
 		@CcpEntityFieldNotUpdatable
 		@CcpJsonFieldValidatorRequired
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		date,
+		/** The {@code json} field: required, validated as in {@code JnJsonCommonsFields}. */
 		@CcpJsonFieldValidatorRequired
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		json,
+		/** The {@code id} field: part of the primary key, validated as in {@code JnJsonCommonsFields}. */
 		@CcpEntityFieldPrimaryKey
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		id, 
+		/** The {@code trueTimestamp} field: not updatable, required, non-negative integer. */
 		@CcpEntityFieldNotUpdatable
 		@CcpJsonFieldValidatorRequired
 		@CcpJsonFieldTypeNumberUnsigned
@@ -61,6 +77,12 @@ public class JnEntityDisposableRecord implements CcpEntityConfigurator {
 		;
 	}
 	
+	/**
+	 * Returns the original record kept in the expiration copy plus {@code dateItWasSaved} and {@code expirationDate}
+	 * (both as {@code dd/MM/yyyy - HH:mm}) and the timestamps of the copy.
+	 * @param oneById the expiration copy
+	 * @return the original record with the dates
+	 */
 	public static CcpJsonRepresentation getDataWithTimeStamp(CcpJsonRepresentation oneById) {
 		CcpJsonRepresentation jsonPiece = oneById.getJsonPiece(JnJsonCommonsFields.json, JnJsonCommonsFields.timestamp, Fields.trueTimestamp);
 		Long trueTimestamp = jsonPiece.getAsLongNumber(Fields.trueTimestamp);

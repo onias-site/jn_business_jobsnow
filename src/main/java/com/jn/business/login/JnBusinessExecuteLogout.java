@@ -19,13 +19,16 @@ import com.jn.utils.JnDeleteKeysFromCache;
 public class JnBusinessExecuteLogout implements CcpBusiness{
 		
 
+	/** The single instance. */
 	public static final JnBusinessExecuteLogout INSTANCE = new JnBusinessExecuteLogout();
 	
+	/** Singleton; use {@link #INSTANCE}. */
 	private JnBusinessExecuteLogout() {}
 	
 	/**
-	 * Performs the logout via bulk, invalidating the session and clearing the cache.
-	 * Returns an empty JSON.
+	 * Moves the session to the twin (terminated) and deletes the session conflict, in one bulk operation.
+	 * @param json the session
+	 * @return the same JSON
 	 */
 	@SuppressWarnings("unchecked")
 	public CcpJsonRepresentation apply(CcpJsonRepresentation json) {

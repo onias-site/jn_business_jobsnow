@@ -19,43 +19,64 @@ import com.jn.entities.decorators.engine.JnDisposableEntity;
 import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
 
+/**
+ * Client errors (4xx) of calls to external APIs, kept for diagnosis.
+ * <p>
+ * Configuration:
+ * <ul>
+ * <li>index {@code jn_http_api_error_client}</li>
+ * <li>records cached for 3600 seconds</li>
+ * <li>disposable: records expire by the {@code hourly} granularity</li>
+ * </ul>
+ */
 @CcpEntityCache(3600)
 @CcpEntityCustomDecorators(value = {@CcpEntityCustomDecorator(value = JnEntityDisposableBuilder.class, priority = 1),})
 @JnEntityDisposable(value = JnDisposableEntity.class, timeOption = CcpEntityExpurgableOptions.hourly)
 @CcpEntityFieldsTransformer(classReferenceWithTheFields = JnJsonTransformersFieldsEntityDefault.class)
 @CcpEntityFieldsValidator(classReferenceWithTheFields = JnEntityHttpApiErrorClient.Fields.class)
-/**
- * Records HTTP client errors (4xx) that occurred while calling external APIs. Disposable
- * every hour (temporary records for diagnosis), 1-hour cache.
- */
 public class JnEntityHttpApiErrorClient implements CcpEntityConfigurator {
 	
+	/** The entity {@code jn_http_api_error_client}, with every decorator of this configuration. */
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityHttpApiErrorClient.class).entityInstance;
 
+	/**
+	 * The fields of the entity, with their validation rules (this enum is the class named by
+	 * {@code @CcpEntityFieldsValidator}).
+	 */
 	public static enum Fields implements CcpJsonFieldName{
+		/** The {@code url} field: part of the primary key, validated as in {@code JnJsonCommonsFields}. */
 		@CcpEntityFieldPrimaryKey
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		url, 
+		/** The {@code method} field: part of the primary key, validated as in {@code JnJsonCommonsFields}. */
 		@CcpEntityFieldPrimaryKey
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		method, 
+		/** The {@code headers} field: part of the primary key, validated as in {@code JnJsonCommonsFields}. */
 		@CcpEntityFieldPrimaryKey
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		headers, 
+		/** The {@code request} field: validated as in {@code JnJsonCommonsFields}. */
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		request, 
+		/** The {@code apiName} field: part of the primary key, validated as in {@code JnJsonCommonsFields}. */
 		@CcpEntityFieldPrimaryKey
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		apiName,
+		/** The {@code details} field: part of the primary key, validated as in {@code JnJsonCommonsFields}. */
 		@CcpEntityFieldPrimaryKey
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		details, 
+		/** The {@code response} field: validated as in {@code JnJsonCommonsFields}. */
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		response, 
+		/** The {@code httpStatus} field: validated as in {@code JnJsonCommonsFields}. */
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		httpStatus,
+		/** The {@code date} field: validated as in {@code JnJsonCommonsFields}. */
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		date,
+		/** The {@code timestamp} field: required, validated as in {@code JnJsonCommonsFields}. */
 		@CcpJsonFieldValidatorRequired
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		timestamp

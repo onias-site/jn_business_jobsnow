@@ -9,10 +9,17 @@ import com.ccp.decorators.CcpJsonRepresentation;
  */
 public class JnBulkCreateResult {
 
+	/** The JSON sent. */
 	public final CcpJsonRepresentation json;
 
+	/** Whether every record derived from the JSON was created. */
 	public final boolean created;
 
+	/**
+	 * Pairs the JSON with its outcome.
+	 * @param json the JSON sent
+	 * @param created whether it was created
+	 */
 	JnBulkCreateResult(CcpJsonRepresentation json, boolean created) {
 		this.json = json;
 		this.created = created;

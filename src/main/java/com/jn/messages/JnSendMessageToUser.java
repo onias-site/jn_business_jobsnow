@@ -35,23 +35,44 @@ import com.jn.utils.JnDeleteKeysFromCache;
 
 import com.ccp.json.fields.validation.CcpJsonCommonsFields;
 
+/**
+ * Sends a message to the user through one or more channels (steps): e-mail, instant message, or both. Each step names
+ * the HTTP sender, the entity of the sending parameters, the entity of the template, the entity that blocks the sending
+ * and the entity that records the messages already sent. The steps are added through a fluent API that starts at
+ * {@link #createStep()} or at one of the default steps, and ends at {@code sendAllMessages()}; each addition returns a
+ * new sender, so a configured sender can be reused.
+ */
 public class JnSendMessageToUser implements CcpBusiness{
 	
 
+	/** The HTTP sender of each step. */
 	private final List<JnBusinessSendHttpRequest> messengers = new ArrayList<>();
 
+	/** The entity that records the messages already sent, by step. */
 	private final List<CcpEntity> alreadySentEntities = new ArrayList<>();
 
+	/** The entity of the sending parameters, by step. */
 	private final List<CcpEntity> parameterEntities = new ArrayList<>();
 
+	/** The entity of the template, by step. */
 	private final List<CcpEntity> messageEntities = new ArrayList<>();
 
+	/** The entity that blocks the sending, by step. */
 	private final List<CcpEntity> blockEntities = new ArrayList<>();
 
+	/**
+	 * Starts a custom step.
+	 * @return the next part of the fluent API
+	 */
 	public JnCreateStep createStep() {
 		return new JnCreateStep(this);
 	}
 
+	/**
+	 * Adds the e-mail step, with the e-mail entities (spam report as the block).
+	 * @param exceptionHandler what happens when the sending fails
+	 * @return the next part of the fluent API
+	 */
 	public JnAddDefaultStep addDefaultProcessToEmailSending(JnMessageSenderExceptionHandler exceptionHandler) {
 		JnBusinessSendHttpRequest httpRequester = new JnBusinessSendHttpRequest(JnMessageType.email, exceptionHandler);
 		JnSendMessageToUser addOneStep = this.addOneStep(
@@ -64,6 +85,11 @@ public class JnSendMessageToUser implements CcpBusiness{
 		return new JnAddDefaultStep(addOneStep);
 	}
 
+	/**
+	 * Adds the instant message step, with the instant messenger entities (bot locked by the user as the block).
+	 * @param exceptionHandler what happens when the sending fails
+	 * @return the next part of the fluent API
+	 */
 	public JnAddDefaultStep addDefaultStepToInstantMessageSending(JnMessageSenderExceptionHandler exceptionHandler) {
 		JnBusinessSendHttpRequest httpRequester = new JnBusinessSendHttpRequest(JnMessageType.instantMessenger, exceptionHandler);
 		JnSendMessageToUser addOneStep = this.addOneStep(
@@ -76,6 +102,15 @@ public class JnSendMessageToUser implements CcpBusiness{
 		return new JnAddDefaultStep(addOneStep);
 	}
 
+	/**
+	 * Returns a new sender with the steps of this one plus the given one.
+	 * @param messenger the HTTP sender
+	 * @param parameterEntity the entity of the sending parameters
+	 * @param messageEntity the entity of the template
+	 * @param blockEntity the entity that blocks the sending
+	 * @param alreadySentEntity the entity that records the messages already sent
+	 * @return the new sender
+	 */
 	JnSendMessageToUser addOneStep(JnBusinessSendHttpRequest messenger, CcpEntity parameterEntity, CcpEntity messageEntity, CcpEntity blockEntity, CcpEntity alreadySentEntity) {
 		JnSendMessageToUser getMessage = new JnSendMessageToUser();
 		getMessage.alreadySentEntities.addAll(this.alreadySentEntities);
@@ -92,20 +127,24 @@ public class JnSendMessageToUser implements CcpBusiness{
 	}
 
 	/**
-	 * Marca a thread que está entregando uma recusa ao handler. O handler {@code LENIENT}/{@code LOG}
-	 * grava um {@code JnEntityJobsnowWarning}, que por sua vez avisa o suporte; se esse aviso também
-	 * for recusado, entregá-lo ao handler gravaria outro warning, e assim por diante.
+	 * Marks the thread that is handing a refusal to the exception handler. The {@code LENIENT} and {@code LOG} handlers save
+	 * a {@code JnEntityJobsnowWarning}, which notifies the support team; if that notice were refused too, handing it to the
+	 * handler would save another warning, and so on.
 	 */
 	private static final ThreadLocal<Boolean> handlingARefusal = ThreadLocal.withInitial(() -> false);
 
 	/**
-	 * Aplica as regras de "não enviar" ({@code JnMustNotSendMessage}) ao canal da posição informada e,
-	 * se o envio for recusado, entrega a recusa ao handler declarado para o canal — o mesmo que já
-	 * tratava as falhas do envio HTTP. {@code THROWS} relança a própria recusa (comportamento de antes);
-	 * {@code LENIENT} e {@code LOG} registram o warning e só aquele envio é pulado. A recusa ocorrida
-	 * enquanto outra recusa está sendo registrada não chega ao handler: fica só no log.
-	 *
-	 * @return {@code true} quando o envio foi recusado e deve ser pulado
+	 * Applies the "do not send" rules ({@code JnMustNotSendMessage}) to the channel of the given position and, when the
+	 * sending is refused, hands the refusal to the exception handler of the channel, the same one that handles the failures
+	 * of the HTTP call. {@code THROWS} rethrows the refusal; {@code LENIENT} and {@code LOG} record the warning and only that
+	 * sending is skipped. A refusal that happens while another refusal is being recorded does not reach the handler: it is
+	 * only logged. A repeatable template skips the "already sent" rule.
+	 * @param unionAll the search result
+	 * @param idToSearch the keys of the channel
+	 * @param index the position of the channel
+	 * @param messenger the HTTP sender of the channel
+	 * @param repeatable whether the template may be sent again
+	 * @return {@code true} when the sending was refused and must be skipped
 	 */
 	private boolean isRefused(CcpSelectUnionAll unionAll, CcpJsonRepresentation idToSearch, int index, JnBusinessSendHttpRequest messenger, boolean repeatable) {
 		try {
@@ -146,6 +185,14 @@ public class JnSendMessageToUser implements CcpBusiness{
 		}
 	}
 
+	/**
+	 * Sends the message through every step: completes the keys with the parameters of each message type and with the
+	 * sending parameters, searches every entity of every step at once, and then, channel by channel, applies the "do not
+	 * send" rules and sends. The result of each channel is visible to the next ones, under the simple name of its sender.
+	 * @param templateId the template
+	 * @param json the values of the message
+	 * @return the same JSON
+	 */
 	CcpJsonRepresentation executeAllSteps(String templateId, CcpJsonRepresentation json) {
 		
 		List<CcpEntity> allEntitiesToSearch = new ArrayList<>();
@@ -200,12 +247,15 @@ public class JnSendMessageToUser implements CcpBusiness{
 	}
 
 	/**
-	 * One json per channel, each one with the {@code message} of its own template, resolved with the values of
-	 * this sending. {@link #mergeSendingParameters(CcpCrud, CcpJsonRepresentation)} puts the records of every
-	 * channel in a single json, where the {@code message} of the first channel prevails; up to 2026-09-28 that
-	 * text went to every channel, so a template sent by email and by instant message delivered the email body
-	 * (HTML) to the instant messenger too, and the "already sent" record of the instant message was keyed by the
-	 * email text. With a single channel the json is the one received, and nothing else is searched.
+	 * Returns one JSON per channel, each one with the {@code message} of its own template resolved with the values of this
+	 * sending. {@link #mergeSendingParameters(CcpCrud, CcpJsonRepresentation)} puts the records of every channel in a single
+	 * JSON, where the {@code message} of the first channel prevails; up to 2026-09-28 that text went to every channel, so a
+	 * template sent by e-mail and by instant message delivered the e-mail body (HTML) to the instant messenger too, and the
+	 * "already sent" record of the instant message was keyed by the e-mail text. With a single channel the JSON is the one
+	 * received, and nothing else is searched.
+	 * @param crud the database
+	 * @param idToSearch the keys of the sending
+	 * @return the keys by channel
 	 */
 	private CcpJsonRepresentation[] getIdsToSearchByChannel(CcpCrud crud, CcpJsonRepresentation idToSearch) {
 
@@ -249,13 +299,15 @@ public class JnSendMessageToUser implements CcpBusiness{
 	}
 
 	/**
-	 * Resolve, antes da busca condensada que alimenta as validações, os registros que guardam os
-	 * parâmetros e o texto de cada envio. Campos como o chatId do destinatário e a mensagem do template
-	 * só existem nesses registros, e sem eles as chaves primárias das demais entidades pesquisadas no
-	 * union-all ficam incompletas: a entidade não chega a ser consultada e a validação a reporta como
-	 * chave primária faltante. Os valores já presentes no json continuam tendo precedência sobre os
-	 * recuperados, como acontece na montagem da mensagem. Quando a própria chave primária do registro de
-	 * parâmetros não pode ser calculada, nada é mesclado e o diagnóstico fica a cargo das validações.
+	 * Before the search that feeds the "do not send" rules, reads the records that hold the parameters and the text of
+	 * each sending. Fields such as the chat id of the receiver and the message of the template exist only in those records,
+	 * and without them the primary keys of the other entities of the search are incomplete: the entity is not searched and
+	 * the rule reports a missing primary key. The values already in the JSON prevail over the ones read, as in the assembly
+	 * of the message. When the primary key of the parameters record itself can not be computed, nothing is merged and the
+	 * diagnosis is left to the rules.
+	 * @param crud the database
+	 * @param json the keys of the sending
+	 * @return the keys plus the sending parameters, with the message resolved
 	 */
 	private CcpJsonRepresentation mergeSendingParameters(CcpCrud crud, CcpJsonRepresentation json) {
 
@@ -290,9 +342,11 @@ public class JnSendMessageToUser implements CcpBusiness{
 	}
 
 	/**
-	 * Os parâmetros extras do envio ficam num json interno, mas o texto da mensagem os referencia pelo
-	 * nome simples, então eles também precisam estar na raiz — é o mesmo desempacotamento que a montagem
-	 * da mensagem faz. O json interno é preservado.
+	 * The extra parameters of the sending are in an inner JSON, but the text of the message refers to them by their simple
+	 * names, so they also have to be at the root (the same unpacking done when the message is assembled). The inner JSON is
+	 * kept.
+	 * @param record the parameters record
+	 * @return the record with the extra parameters also at the root
 	 */
 	private CcpJsonRepresentation flattenMoreParameters(CcpJsonRepresentation record) {
 
@@ -302,10 +356,11 @@ public class JnSendMessageToUser implements CcpBusiness{
 	}
 
 	/**
-	 * Troca o texto do template pelo texto já resolvido com os valores deste envio. O texto resolvido é o
-	 * que identifica a mensagem: ele compõe a chave primária da entidade que registra os envios já feitos,
-	 * e é pelo template cru que mensagens destinadas a usuários diferentes acabariam com a mesma chave —
-	 * a segunda delas recusada como se fosse repetição da primeira.
+	 * Replaces the text of the template with the text resolved with the values of this sending. The resolved text identifies
+	 * the message: it is part of the primary key of the entity that records the messages already sent, and with the raw
+	 * template, messages to different users would get the same key and the second one would be refused as a repetition.
+	 * @param json the keys of the sending
+	 * @return the JSON with the message resolved, or the input when there is no message
 	 */
 	private CcpJsonRepresentation resolveMessageTemplate(CcpJsonRepresentation json) {
 
@@ -322,16 +377,18 @@ public class JnSendMessageToUser implements CcpBusiness{
 	}
 
 	/**
-	 * Monta a mensagem deste canal com os parâmetros e o template recuperados do union-all e a entrega
-	 * ao mensageiro.
-	 *
-	 * <p>Quem registra o envio em {@code alreadySentEntities} é o próprio {@link JnMessageType}, e não
-	 * este método. Só o tipo de mensagem sabe se a entrega de fato aconteceu e o que o provedor
-	 * respondeu: o {@code instantMessenger} grava o json já mesclado com a resposta do mensageiro — que
-	 * traz o identificador da mensagem — e <b>não</b> grava nada quando o bot foi bloqueado pelo
-	 * destinatário ou quando o provedor recusou por excesso de requisições, casos em que ele devolve o
-	 * json normalmente. Gravar aqui, a partir do retorno, registrava o envio duas vezes no caminho
-	 * feliz e registrava como enviada uma mensagem que nunca saiu nos dois caminhos de exceção.</p>
+	 * Assembles the message of this channel with the parameters and the template read from the search, and hands it to the
+	 * HTTP sender.
+	 * <p>Recording the sending in {@code alreadySentEntities} is up to {@link JnMessageType}, not this method. Only the
+	 * message type knows whether the delivery happened and what the provider answered: {@code instantMessenger} records the
+	 * JSON merged with the answer of the provider, which carries the id of the message, and records <b>nothing</b> when the
+	 * bot was blocked by the receiver or the provider refused for too many requests, cases where it returns the JSON
+	 * normally. Recording here, from the result, recorded the sending twice in the happy path and recorded as sent a message
+	 * that never left in both exception paths.</p>
+	 * @param unionAll the search result
+	 * @param json the keys of the channel
+	 * @param index the position of the channel
+	 * @return the result of the HTTP sender, or the input when the channel has no template
 	 */
 	private CcpJsonRepresentation sendMessage(CcpSelectUnionAll unionAll, CcpJsonRepresentation json, int index) {
 
@@ -360,6 +417,12 @@ public class JnSendMessageToUser implements CcpBusiness{
 		return result;
 	}
 
+	/**
+	 * Sends a message described by the JSON: runs the business named by {@code topic} on the JSON, adds the default step of
+	 * each message type and sends with the template named by the topic.
+	 * @param json the message, with {@code topic}, {@code messageTypes} and {@code exceptionHandler}
+	 * @return the JSON handled by the topic business
+	 */
 	public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
 
 		JnSendMessageToUser sender = new JnSendMessageToUser();
@@ -387,6 +450,14 @@ public class JnSendMessageToUser implements CcpBusiness{
 		return result;
 	}
 
+	/**
+	 * Sends a message through the given message types.
+	 * @param json the values of the message
+	 * @param topic the business that prepares the values; its class name is also the template id
+	 * @param messageTypes the channels
+	 * @param exceptionHandler what happens when the sending fails
+	 * @return the JSON handled by the topic business
+	 */
 	public CcpJsonRepresentation sendAllMessages(CcpJsonRepresentation json, String topic, JnMessageType[] messageTypes, JnMessageSenderExceptionHandler exceptionHandler) {
 		CcpJsonRepresentation message = json
 		.put(CcpJsonCommonsFields.topic, topic)
@@ -397,19 +468,27 @@ public class JnSendMessageToUser implements CcpBusiness{
 		return execute;
 	}
 
+	/**
+	 * Validates the input with {@link JsonFields}.
+	 * @return the validation class
+	 */
 	public Class<?> getJsonValidationClass() {
 		return JsonFields.class;
 	}
+	/** Input fields of {@link #apply(CcpJsonRepresentation)}. */
 	static enum JsonFields implements CcpJsonFieldName{
+		/** The {@code messageTypes} field: text, list, required. */
 		@CcpJsonFieldTypeString(allowedValuesEnum = JnMessageType.class)
 		@CcpJsonFieldValidatorArray(minSize = 1)
 		@CcpJsonFieldValidatorRequired
 		messageTypes,
 		
+		/** The {@code exceptionHandler} field: text, required. */
 		@CcpJsonFieldTypeString(allowedValuesEnum = JnMessageSenderExceptionHandler.class)
 		@CcpJsonFieldValidatorRequired
 		exceptionHandler,
 		
+		/** The {@code topic} field: required, text. */
 		@CcpJsonFieldValidatorRequired
 		@CcpJsonFieldTypeString
 		topic

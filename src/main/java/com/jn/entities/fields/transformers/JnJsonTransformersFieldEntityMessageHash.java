@@ -14,6 +14,11 @@ import com.ccp.decorators.CcpStringDecorator;
  */
 public class JnJsonTransformersFieldEntityMessageHash implements CcpJsonTransformersDefaultEntityField {
 	
+	/**
+	 * Replaces {@code message} with its SHA-1 hash and keeps the original in {@code originalMessage}.
+	 * @param json the record
+	 * @return the record with the hash and the original message
+	 */
 	public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
 		
 		String originalMessage = json.getAsString(JnJsonCommonsFields.message);
@@ -30,10 +35,18 @@ public class JnJsonTransformersFieldEntityMessageHash implements CcpJsonTransfor
 		return jsonWithOriginalMessage;
 	}
 
+	/**
+	 * The hash can be part of a primary key.
+	 * @return {@code true}
+	 */
 	public boolean canBePrimaryKey() {
 		return true;
 	}
 
+	/**
+	 * Returns the name of the transformer.
+	 * @return {@code messageHash}
+	 */
 	public String name() {
 		String messageHashName = JsonFieldNames.messageHash.name();
 		return messageHashName;

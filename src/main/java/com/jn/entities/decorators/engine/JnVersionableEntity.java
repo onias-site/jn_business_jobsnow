@@ -21,16 +21,26 @@ import com.jn.utils.JnDeleteKeysFromCache;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
 
 /**
- * Decorator that adds versioning/auditing to entities marked with {@code @CcpEntityVersionable}.
- * On every bulk operation, it automatically produces a history record in {@code JnEntityVersionable}
- * with the previous state of the JSON, the operation performed, date and time.
+ * Versioning decorator ({@code @JnEntityVersionable}): every bulk write of the record also creates a history row in
+ * {@code jn_versionable} with the state of the record before the write (the stored record, or the given fields when it
+ * does not exist yet), the operation, the date and time, the entity name and the serialized primary key.
  */
 public class JnVersionableEntity extends CcpDefaultEntityDelegator<Object>{
 	
+	/**
+	 * Wraps the entity.
+	 * @param entity the entity decorated so far
+	 */
 	public JnVersionableEntity(CcpEntity entity) {
 		super(entity, JnExecuteBulkOperation.INSTANCE, JnDeleteKeysFromCache.INSTANCE);
 	}
 
+	/**
+	 * Builds the {@code create} bulk item of the history row.
+	 * @param json the record
+	 * @param operation the bulk operation being recorded
+	 * @return the bulk item of the history row
+	 */
 	private final CcpBulkItem getVersionableToBulkOperationToBulkOperation(CcpJsonRepresentation json, CcpBulkEntityOperationType operation) {
 		
 		CcpJsonRepresentation versionable = this.getVersionableRecord(json, operation);
@@ -73,6 +83,13 @@ public class JnVersionableEntity extends CcpDefaultEntityDelegator<Object>{
 		return id;
 	}
 
+	/**
+	 * Builds the history row: {@code id}, {@code json} (the record as text), {@code operation}, {@code date},
+	 * {@code entity} and {@code timestamp}.
+	 * @param json the record
+	 * @param operation the bulk operation being recorded
+	 * @return the history row
+	 */
 	private CcpJsonRepresentation getVersionableRecord(CcpJsonRepresentation json, CcpBulkEntityOperationType operation) {
 
 		CcpEntityMetaData entityDetails = this.entity.getEntityMetaData();
@@ -159,6 +176,10 @@ public class JnVersionableEntity extends CcpDefaultEntityDelegator<Object>{
 		return entitiesToDeleteArray;
 	}
 	
+	/**
+	 * The associated entities of the wrapped entity plus {@code jn_versionable}.
+	 * @return the associated entities
+	 */
 	public List<CcpEntity> getAssociatedEntities() {
 		List<CcpEntity> associatedEntities = this.entity.getAssociatedEntities();
 		ArrayList<CcpEntity> result = new ArrayList<CcpEntity>(associatedEntities);
@@ -166,12 +187,24 @@ public class JnVersionableEntity extends CcpDefaultEntityDelegator<Object>{
 		return result;
 	}
 	
+	/**
+	 * Not supported on this decorator.
+	 * @param json the record
+	 * @return never returns
+	 * @throws UnsupportedOperationException always
+	 */
 	public CcpJsonRepresentation getOneByIdAnyWhere(CcpJsonRepresentation json) {
 		Object throwException = this.throwException();
 		return (CcpJsonRepresentation)throwException;
 	}
 	
 
+	/**
+	 * The items of the wrapped entity plus the history row.
+	 * @param json the record
+	 * @param operation the bulk operation
+	 * @return the bulk items
+	 */
 	public List<CcpBulkItem> toBulkItems(CcpJsonRepresentation json, CcpBulkEntityOperationType operation) {
 		List<CcpBulkItem> bulkItems = this.entity.toBulkItems(json, operation);
 		List<CcpBulkItem> bulkItemsWithHistory = new ArrayList<>(bulkItems);

@@ -16,10 +16,20 @@ import com.jn.entities.decorators.annotations.JnEntitySendMessageToUserWhenWrite
  */
 public class JnSendMessageToUserEntityAfterWrite extends JnSendMessageToUserEntityOnWrite {
 
+	/**
+	 * Wraps the entity.
+	 * @param entity the entity decorated so far
+	 * @param annotation the messages configured for the entity
+	 */
 	public JnSendMessageToUserEntityAfterWrite(CcpEntity entity, JnEntitySendMessageToUserWhenWrite annotation) {
 		super(entity, annotation);
 	}
 
+	/**
+	 * Deletes and, when a record was deleted, sends the {@code after delete} messages.
+	 * @param json the record
+	 * @return whether the record existed
+	 */
 	public boolean delete(CcpJsonRepresentation json) {
 		boolean deleted = this.entity.delete(json);
 
@@ -33,6 +43,11 @@ public class JnSendMessageToUserEntityAfterWrite extends JnSendMessageToUserEnti
 		return deleted;
 	}
 
+	/**
+	 * Deletes everywhere and, when a record was deleted, sends the {@code after deleteAnyWhere} messages.
+	 * @param json the record
+	 * @return whether the record existed
+	 */
 	public boolean deleteAnyWhere(CcpJsonRepresentation json) {
 		boolean deleted = this.entity.deleteAnyWhere(json);
 
@@ -46,6 +61,11 @@ public class JnSendMessageToUserEntityAfterWrite extends JnSendMessageToUserEnti
 		return deleted;
 	}
 
+	/**
+	 * Saves and sends the messages of the outcome ({@code insert} or {@code update}, plus {@code save}).
+	 * @param json the record
+	 * @return whether the record was inserted
+	 */
 	public boolean save(CcpJsonRepresentation json) {
 		boolean inserted = this.entity.save(json);
 

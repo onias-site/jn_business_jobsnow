@@ -35,6 +35,20 @@ import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault
 import com.jn.json.fields.validation.JnJsonCommonsFields;
 import com.jn.utils.JnDeleteKeysFromCache;
 
+/**
+ * The token e-mailed to the user to define the password (onboarding or recovery); the twin holds the tokens locked after too many wrong attempts.
+ * <p>
+ * Configuration:
+ * <ul>
+ * <li>index {@code jn_login_token}</li>
+ * <li>records cached for 86400 seconds</li>
+ * <li>on {@code beforeSaveFromMainEntity} runs {@code JnBusinessPrepareLoginTokenBeforeSave}</li>
+ * <li>on {@code afterInsertFromMainEntitySendAnEmailMessageAndIfFailsThrowAnError} sends {@code JnNotifyUserAboutLoginToken}</li>
+ * <li>written asynchronously, through messaging</li>
+ * <li>twin entity {@code jn_login_token_locked}</li>
+ * <li>disposable: records expire by the {@code monthly} granularity</li>
+ * </ul>
+ */
 @CcpEntityCache(86400)
 @CcpEntityCustomDecorators(value = {
 		@CcpEntityCustomDecorator(value = JnEntityAsyncWriterBuilder.class, priority = 8),
@@ -60,19 +74,21 @@ import com.jn.utils.JnDeleteKeysFromCache;
 @JnEntityDisposable(value = JnDisposableEntity.class, timeOption = CcpEntityExpurgableOptions.monthly)
 @CcpEntityFieldsTransformer(classReferenceWithTheFields = JnJsonTransformersFieldsEntityDefault.class)
 @CcpEntityFieldsValidator(classReferenceWithTheFields = JnEntityLoginToken.Fields.class)
-/**
- * Armazena o token de acesso enviado por email ao usuário durante o onboarding ou recuperação de
- * senha. Expiração mensal. A twin {@code jn_login_token_locked} indica token bloqueado após excesso
- * de tentativas. Cache de 24 horas.
- */
 public class JnEntityLoginToken implements CcpEntityConfigurator {
 	
+	/** The entity {@code jn_login_token}, with every decorator of this configuration. */
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityLoginToken.class).entityInstance;
 
+	/**
+	 * The fields of the entity, with their validation rules (this enum is the class named by
+	 * {@code @CcpEntityFieldsValidator}).
+	 */
 	public static enum Fields implements CcpJsonFieldName{
+		/** The {@code email} field: part of the primary key, validated as in {@code JnJsonCommonsFields}. */
 		@CcpEntityFieldPrimaryKey 
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		email,  
+		/** The {@code token} field: validated as in {@code JnJsonCommonsFields}. */
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		token
 		;

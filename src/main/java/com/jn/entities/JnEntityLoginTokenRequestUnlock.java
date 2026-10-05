@@ -34,6 +34,20 @@ import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDoNothi
 import com.jn.json.fields.validation.JnJsonCommonsFields;
 import com.jn.json.fields.validation.JnJsonInstantMessengerFields;
 import com.jn.utils.JnDeleteKeysFromCache;
+/**
+ * A request of the user to unlock the login token: like {@code JnEntityLoginTokenRequestResend}, with the unlock notifications; the twin keeps the fulfilled requests.
+ * <p>
+ * Configuration:
+ * <ul>
+ * <li>index {@code jn_login_token_request_unlock}</li>
+ * <li>on {@code afterDeleteFromMainEntitySendAnInstantMessageAndIfFailsThrowAnError} sends {@code JnNotifySupportAboutSolvedLockedLoginToken}</li>
+ * <li>on {@code afterInsertFromMainEntitySendAnInstantMessageAndIfFailsThrowAnError} sends {@code JnNotifySupportAboutPendingLockedLoginToken}</li>
+ * <li>twin entity {@code jn_login_token_fulfilled_unlock}</li>
+ * <li>records cached for 3600 seconds</li>
+ * <li>written asynchronously, through messaging</li>
+ * <li>disposable: records expire by the {@code daily} granularity</li>
+ * </ul>
+ */
 @CcpEntityCustomDecorators(value = {
 		@CcpEntityCustomDecorator(value = JnEntityDisposableBuilder.class, priority = 1)
 		,@CcpEntityCustomDecorator(value = JnEntityAsyncWriterBuilder.class, priority = 8)
@@ -63,21 +77,23 @@ import com.jn.utils.JnDeleteKeysFromCache;
 @CcpEntityFieldsValidator(classReferenceWithTheFields = JnEntityLoginTokenRequestUnlock.Fields.class)
 
 
-/**
- * Registra a solicitação de desbloqueio de token de login feita pelo usuário. Comportamento
- * idêntico a {@code JnEntityLoginTokenRequestResend}, mas notifica o suporte via
- * {@code NotifySupportAboutPendingUnlockLoginToken}. Escrita assíncrona, descartável diariamente.
- */
 public class JnEntityLoginTokenRequestUnlock implements CcpEntityConfigurator {
 	
+	/** The entity {@code jn_login_token_request_unlock}, with every decorator of this configuration. */
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityLoginTokenRequestUnlock.class).entityInstance;
 	 
+	/**
+	 * The fields of the entity, with their validation rules (this enum is the class named by
+	 * {@code @CcpEntityFieldsValidator}).
+	 */
 	public static enum Fields implements CcpJsonFieldName{
+		/** The {@code email} field: part of the primary key, validated as in {@code JnJsonCommonsFields}, transformed by {@code JnJsonTransformersFieldsEntityDoNothing}. */
 		@CcpEntityFieldPrimaryKey
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		@CcpEntityFieldTransformer(JnJsonTransformersFieldsEntityDoNothing.class)
 		email,
 		
+		/** The {@code chatId} field: validated as in {@code JnJsonInstantMessengerFields}. */
 		@CcpJsonCopyFieldValidationsFrom(JnJsonInstantMessengerFields.class)
 		chatId
 		;

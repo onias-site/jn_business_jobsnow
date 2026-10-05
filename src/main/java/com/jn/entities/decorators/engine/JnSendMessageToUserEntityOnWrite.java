@@ -22,8 +22,14 @@ import com.jn.messages.JnSendMessageToUser;
  */
 public abstract class JnSendMessageToUserEntityOnWrite extends CcpEntityDelegator {
 
+	/** The messages configured for the entity. */
 	private final JnEntitySendMessageToUserWhenWrite annotation;
 
+	/**
+	 * Wraps the entity.
+	 * @param entity the entity decorated so far
+	 * @param annotation the messages configured for the entity
+	 */
 	protected JnSendMessageToUserEntityOnWrite(CcpEntity entity, JnEntitySendMessageToUserWhenWrite annotation) {
 		super(entity);
 		this.annotation = annotation;
@@ -47,6 +53,15 @@ public abstract class JnSendMessageToUserEntityOnWrite extends CcpEntityDelegato
 
 	}
 
+	/**
+	 * Sends the configured message when its phase, operation (by {@code covers}) and entity side match, with the error
+	 * policy of the item.
+	 * @param json the record
+	 * @param when the current phase
+	 * @param operation the operation (or outcome) that happens
+	 * @param configuredOperation the configured message
+	 * @return the JSON after the sending, or the input when the item does not match
+	 */
 	private CcpJsonRepresentation executeOperation(CcpJsonRepresentation json, CcpEntityOperationPhase when, CcpEntityDecoratorOperationType operation, JnEntitySendMessageToUserWhenWriteOperation configuredOperation) {
 
 		JnEntitySendMessageToUserWhenWriteOperationType configuredOperationType = configuredOperation.operationType();

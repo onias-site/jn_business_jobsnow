@@ -16,36 +16,53 @@ import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeString;
 import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeTimeBefore;
 import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault;
 
+/**
+ * Login statistics of the user: balance, last access, access count, opened and closed tickets and balance transactions count.
+ * <p>
+ * Configuration:
+ * <ul>
+ * <li>index {@code jn_login_stats}</li>
+ * <li>records cached for 3600 seconds</li>
+ * </ul>
+ */
 @CcpEntityCache(3600)
 @CcpEntityFieldsTransformer(classReferenceWithTheFields = JnJsonTransformersFieldsEntityDefault.class)
 @CcpEntityFieldsValidator(classReferenceWithTheFields = JnEntityLoginStats.Fields.class)
-/**
- * Armazena estatísticas de login do usuário: balanço financeiro, último acesso, contagem de acessos,
- * tickets abertos e fechados e contagem de transações de saldo. Cache de 1 hora.
- */
 public class JnEntityLoginStats implements CcpEntityConfigurator {
 	
+	/** The entity {@code jn_login_stats}, with every decorator of this configuration. */
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityLoginStats.class).entityInstance;
 	
+	/**
+	 * The fields of the entity, with their validation rules (this enum is the class named by
+	 * {@code @CcpEntityFieldsValidator}).
+	 */
 	public static enum Fields implements CcpJsonFieldName{
+		/** The {@code email} field: part of the primary key, text. */
 		@CcpEntityFieldPrimaryKey
 		@CcpJsonFieldTypeString(minLength = 35, maxLength = 50)
 		email, 
+		/** The {@code balance} field: required, decimal number. */
 		@CcpJsonFieldValidatorRequired
 		@CcpJsonFieldTypeNumber(minValue = -1_000_000, maxValue = 1_000_000)
 		balance, 
+		/** The {@code lastAccess} field: required, past timestamp. */
 		@CcpJsonFieldValidatorRequired
 		@CcpJsonFieldTypeTimeBefore(intervalType = CcpEntityExpurgableOptions.yearly, maxValue = 100, minValue = 0)
 		lastAccess, 
+		/** The {@code countAccess} field: required, non-negative integer. */
 		@CcpJsonFieldValidatorRequired
 		@CcpJsonFieldTypeNumberUnsigned(maxValue = 1000)
 		countAccess,
+		/** The {@code openedTickets} field: required, non-negative integer. */
 		@CcpJsonFieldValidatorRequired
 		@CcpJsonFieldTypeNumberUnsigned(maxValue = 1000)
 		openedTickets, 
+		/** The {@code closedTickets} field: required, non-negative integer. */
 		@CcpJsonFieldValidatorRequired
 		@CcpJsonFieldTypeNumberUnsigned(maxValue = 1000)
 		closedTickets, 
+		/** The {@code balanceTransacionsCount} field: required, non-negative integer. */
 		@CcpJsonFieldValidatorRequired
 		@CcpJsonFieldTypeNumberUnsigned(maxValue = 1000)
 		balanceTransacionsCount

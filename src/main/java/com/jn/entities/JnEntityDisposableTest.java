@@ -17,19 +17,30 @@ import com.jn.entities.decorators.engine.JnDisposableEntity;
 import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
 
+/**
+ * Disposable entity used only by the automated tests, to check the expiration behavior without touching real data.
+ * <p>
+ * Configuration:
+ * <ul>
+ * <li>index {@code jn_disposable_test}</li>
+ * <li>disposable: records expire by the {@code hourly} granularity</li>
+ * </ul>
+ */
 @CcpEntityCustomDecorators(value = {@CcpEntityCustomDecorator(value = JnEntityDisposableBuilder.class, priority = 1),})
 @JnEntityDisposable(value = JnDisposableEntity.class, timeOption = CcpEntityExpurgableOptions.hourly)
 @CcpEntityFieldsTransformer(classReferenceWithTheFields = JnJsonTransformersFieldsEntityDefault.class)
 @CcpEntityFieldsValidator(classReferenceWithTheFields = JnEntityDisposableTest.Fields.class)
-/**
- * Disposable entity used exclusively by automated tests. Expires every hour, allowing the
- * TTL system behavior to be checked without affecting real data.
- */
 public class JnEntityDisposableTest implements CcpEntityConfigurator {
 	
+	/** The entity {@code jn_disposable_test}, with every decorator of this configuration. */
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityDisposableTest.class).entityInstance;
 
+	/**
+	 * The fields of the entity, with their validation rules (this enum is the class named by
+	 * {@code @CcpEntityFieldsValidator}).
+	 */
 	public static enum Fields implements CcpJsonFieldName{
+		/** The {@code email} field: part of the primary key, validated as in {@code JnJsonCommonsFields}. */
 		@CcpEntityFieldPrimaryKey
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		email

@@ -14,8 +14,10 @@ package com.jn.messages;
 public interface JnRepeatableMessage {
 
 	/**
-	 * Whether the template id (the name of the class that prepares the message) is a repeatable message.
-	 * A template id that is not a class name is not repeatable.
+	 * Whether the template id (the name of the class that prepares the message) is a repeatable message. A template id that
+	 * is not a class name is not repeatable.
+	 * @param templateId the template id
+	 * @return {@code true} for a repeatable message
 	 */
 	static boolean isRepeatable(String templateId) {
 		try {

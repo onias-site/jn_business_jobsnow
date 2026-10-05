@@ -38,14 +38,25 @@ import com.jn.mensageria.JnBusinessSendToMensageria;
  */
 public class JnBusinessDeleteVersionableRecords implements JnBusinessSendToMensageria {
 
+	/** The single instance. */
 	public static final JnBusinessDeleteVersionableRecords INSTANCE = new JnBusinessDeleteVersionableRecords();
 
+	/** Singleton; use {@link #INSTANCE}. */
 	private JnBusinessDeleteVersionableRecords() {}
 
+	/** Fields of the purge request and of its result. */
 	public static enum JsonFieldNames implements CcpJsonFieldName {
-		entitiesToDelete, deleted
+		/** The {@code entitiesToDelete} field. */
+		entitiesToDelete,
+		/** The {@code deleted} field. */
+		deleted
 	}
 
+	/**
+	 * Deletes, by query, every history row of the record.
+	 * @param json {@code entitiesToDelete} (the entity names of the record) and {@code id} (its serialized primary key)
+	 * @return {@code deleted}: how many rows were deleted
+	 */
 	public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
 
 		CcpQueryOptions request = this.getRequestToDeleteTheHistory(json);

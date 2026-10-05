@@ -27,34 +27,50 @@ import com.jn.json.fields.validation.JnJsonCommonsFields;
 import com.jn.json.fields.validation.JnJsonInstantMessengerFields;
 import com.jn.utils.JnLanguage;
 
+/**
+ * Instant message templates by language and template id; the {@code message} supports template variables. Seeded for the error notification and for the pending and solved requests of token resend and unlock (sending is refused when the template does not exist).
+ * <p>
+ * Configuration:
+ * <ul>
+ * <li>index {@code jn_instant_messenger_template_message}</li>
+ * <li>records cached for 3600 seconds</li>
+ * <li>versionable: every write keeps the previous state in {@code jn_versionable}</li>
+ * </ul>
+ */
 @CcpEntityCache(3600)
 @CcpEntityCustomDecorators(value = {@CcpEntityCustomDecorator(value = JnEntityVersionableBuilder.class, priority = 2),@CcpEntityCustomDecorator(value = JnEntityVersionablePurgeBuilder.class, priority = 5),})
 @JnEntityVersionable(JnVersionableEntity.class)
 @CcpEntityFieldsTransformer(classReferenceWithTheFields = JnJsonTransformersFieldsEntityDefault.class)
 @CcpEntityFieldsValidator(classReferenceWithTheFields = JnEntityInstantMessengerTemplateMessage.Fields.class)
-/**
- * Armazena templates de mensagens instantâneas por idioma e {@code templateId}. O campo
- * {@code message} suporta variáveis de template. Versionável, cache de 1 hora. Possui registros
- * iniciais em português para a notificação de erro e para os pedidos de reenvio e de desbloqueio de
- * token, tanto pendentes quanto atendidos — cada um deles precisa do template correspondente, pois o
- * envio é recusado quando o template não existe.
- */
 public class JnEntityInstantMessengerTemplateMessage  implements CcpEntityConfigurator {
 
+	/** The entity {@code jn_instant_messenger_template_message}, with every decorator of this configuration. */
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityInstantMessengerTemplateMessage.class).entityInstance;
 
+	/**
+	 * The fields of the entity, with their validation rules (this enum is the class named by
+	 * {@code @CcpEntityFieldsValidator}).
+	 */
 	public static enum Fields implements CcpJsonFieldName{
+		/** The {@code templateId} field: part of the primary key, validated as in {@code JnJsonCommonsFields}. */
 		@CcpEntityFieldPrimaryKey
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		templateId,
+		/** The {@code language} field: part of the primary key, validated as in {@code JnJsonCommonsFields}. */
 		@CcpEntityFieldPrimaryKey
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		language, 
+		/** The {@code message} field: required, validated as in {@code JnJsonInstantMessengerFields}. */
 		@CcpJsonFieldValidatorRequired
 		@CcpJsonCopyFieldValidationsFrom(JnJsonInstantMessengerFields.class)
 		message
 		;
 	}
+	/**
+	 * Seeds, in Portuguese only, the templates of the error and warning notifications (full stack trace, one frame per line,
+	 * since they are sent as files) and of the solved token unlock and resend requests.
+	 * @return the seed records
+	 */
 	public List<CcpBulkItem> getFirstRecordsToInsert() {
 		CcpJsonRepresentation put = CcpOtherConstants.EMPTY_JSON
 				// sent as a file (JnInstantMessageType.file), so the line breaks are real ones, and the stack trace is the

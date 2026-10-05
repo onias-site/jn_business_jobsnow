@@ -2,32 +2,45 @@ package com.jn.status.login;
 
 import com.ccp.process.CcpProcessStatus;
 
-/**
- * Statuses do processo de definição/atualização de senha (usando o token de acesso):
- * {@code invalidEmail} (400), {@code lockedToken} (403), {@code missingEmail} (404),
- * {@code missingToken} (404), {@code wrongToken} (427), {@code invalidJson} (422),
- * {@code tokenLockedRecently} (429), {@code expectedStatus} (200).
- */
+/** Statuses of the definition (or change) of the password with the login token. */
 public enum JnProcessStatusUpdatePassword implements CcpProcessStatus{
+	/** Status 400: the e-mail is invalid. */
 	invalidEmail(400),
+	/** Status 403: the login token is locked. */
 	lockedToken(403),
+	/** Status 404: the e-mail has no login token yet. */
 	missingEmail(404),
+	/** Status 404: the user has no login token. */
 	missingToken(404),
+	/** Status 427: the token is wrong. */
 	wrongToken(427),
+	/** Status 422: the request is invalid. */
 	invalidJson(422),
+	/** Status 429: the token was locked by this attempt. */
 	tokenLockedRecently(429),
+	/** Status 200: success. */
 	expectedStatus(200),
+	/** Status 409: the token was already sent. */
 	tokenAlreadySent(409),
 	;
 
+	/** The HTTP status code. */
 	public final int status;
 	
 	
 	
+	/**
+	 * Associates the HTTP status code.
+	 * @param status the HTTP status code
+	 */
 	private JnProcessStatusUpdatePassword(int status) {
 		this.status = status;
 	}
 
+	/**
+	 * Returns the HTTP status code.
+	 * @return the status code
+	 */
 	public int asNumber() {
 		return status;
 	}

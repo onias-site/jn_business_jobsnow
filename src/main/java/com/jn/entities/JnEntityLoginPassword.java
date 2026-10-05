@@ -22,6 +22,17 @@ import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault
 import com.jn.json.fields.validation.JnJsonCommonsFields;
 import com.jn.utils.JnDeleteKeysFromCache;
 
+/**
+ * The BCrypt hash of the password of the user; the twin holds the passwords locked after too many wrong attempts.
+ * <p>
+ * Configuration:
+ * <ul>
+ * <li>index {@code jn_login_password}</li>
+ * <li>twin entity {@code jn_login_password_locked}</li>
+ * <li>records cached for 3600 seconds</li>
+ * <li>versionable: every write keeps the previous state in {@code jn_versionable}</li>
+ * </ul>
+ */
 @CcpEntityTwin(
 		twinEntityName = "jn_login_password_locked",
 		bulkExecutorClass = JnExecuteBulkOperation.class,
@@ -34,19 +45,21 @@ import com.jn.utils.JnDeleteKeysFromCache;
 @CcpEntityFieldsTransformer(classReferenceWithTheFields = JnJsonTransformersFieldsEntityDefault.class)
 @CcpEntityFieldsValidator(classReferenceWithTheFields = JnEntityLoginPassword.Fields.class)
 
-/**
- * Armazena o hash BCrypt da senha do usuário. A entidade twin {@code jn_login_password_locked}
- * representa o estado de senha bloqueada após múltiplas tentativas incorretas. Versionável,
- * cache de 1 hora.
- */
 public class JnEntityLoginPassword implements CcpEntityConfigurator {
 	
+	/** The entity {@code jn_login_password}, with every decorator of this configuration. */
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityLoginPassword.class).entityInstance;
 	 
+	/**
+	 * The fields of the entity, with their validation rules (this enum is the class named by
+	 * {@code @CcpEntityFieldsValidator}).
+	 */
 	public static enum Fields implements CcpJsonFieldName{
+		/** The {@code email} field: part of the primary key, validated as in {@code JnJsonCommonsFields}. */
 		@CcpEntityFieldPrimaryKey
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		email, 
+		/** The {@code password} field: required, validated as in {@code JnJsonCommonsFields}. */
 		@CcpJsonFieldValidatorRequired
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		password

@@ -32,12 +32,18 @@ import java.util.stream.Stream;
  */
 public class JnExecuteBulkOperation implements CcpExecuteBulkOperation{
 
+	/** The single instance. */
 	public static final JnExecuteBulkOperation INSTANCE = new JnExecuteBulkOperation();
 
+	/** Singleton; use {@link #INSTANCE}. */
 	private JnExecuteBulkOperation() {}
 
 	/**
-	 * Sanitizes the items, executes the bulk and processes errors/cache.
+	 * Sanitizes the items, runs the bulk, turns the failures into records to reprocess (in another bulk) and deletes the
+	 * cache keys of the items that succeeded.
+	 * @param bulkItems the items
+	 * @param functionToDeleteKeysInTheCache the cache cleanup
+	 * @return this instance
 	 */
 	public JnExecuteBulkOperation executeBulk(Collection<CcpBulkItem> bulkItems,  Consumer<String[]> functionToDeleteKeysInTheCache) {
 		
@@ -58,6 +64,12 @@ public class JnExecuteBulkOperation implements CcpExecuteBulkOperation{
 		return result;
 	}
 
+	/**
+	 * Removes the items with no priority and keeps a single item per document: between two items of the same document the
+	 * one whose operation has the higher priority wins, and on a tie the later one.
+	 * @param bulkItems the items
+	 * @return the sanitized items
+	 */
 	private HashSet<CcpBulkItem> sanitizeItems(Collection<CcpBulkItem> bulkItems) {
 		HashSet<CcpBulkItem> items = new HashSet<>();
 		
@@ -92,6 +104,12 @@ public class JnExecuteBulkOperation implements CcpExecuteBulkOperation{
 		return items;
 	}
 	
+	/**
+	 * Runs the bulk, sends the failures to reprocessing and cleans the cache.
+	 * @param dbBulkExecutor the bulk with the items
+	 * @param functionToDeleteKeysInTheCache the cache cleanup
+	 * @return this instance
+	 */
 	private JnExecuteBulkOperation commitAndSaveErrorsAndDeleteRecordsFromCache(CcpBulkExecutor dbBulkExecutor, Consumer<String[]> functionToDeleteKeysInTheCache) {
 
 		List<CcpBulkOperationResult> allResults = dbBulkExecutor.getBulkOperationResult();
@@ -106,6 +124,11 @@ public class JnExecuteBulkOperation implements CcpExecuteBulkOperation{
 		return resultAfterCacheCleanup; 
 	}
 
+	/**
+	 * Deletes from the cache the keys of the items that succeeded.
+	 * @param allResults the bulk results
+	 * @return this instance
+	 */
 	private JnExecuteBulkOperation deleteKeysFromCache(List<CcpBulkOperationResult> allResults) {
 		var resultsStream = new ArrayList<>(allResults).stream();
 		var successfulResultsStream = resultsStream
@@ -122,13 +145,17 @@ public class JnExecuteBulkOperation implements CcpExecuteBulkOperation{
 	}
 	
 	/**
-	 * Creates each json as a new record of the entity in a single bulk, without turning a conflict into
-	 * an update. Returns one {@link JnBulkCreateResult} per json, in the same order, pairing the json with
-	 * whether every record derived from it was created (status 201).
-	 * A json comes back with {@code created = false}, and is not written, when its record already exists in
-	 * any of {@code entitiesThatPreventCreation} (checked in a single union all before the bulk) or in the
-	 * entity itself (status 409). Any other failure goes to the usual reprocessing and also comes back with
+	 * Creates each JSON as a new record of the entity in a single bulk, without turning a conflict into an update. Returns
+	 * one {@link JnBulkCreateResult} per JSON, in the same order, pairing the JSON with whether every record derived from it
+	 * was created (status 201). A JSON comes back with {@code created = false}, and is not written, when its record already
+	 * exists in any of {@code entitiesThatPreventCreation} (checked in a single union all before the bulk) or in the entity
+	 * itself (status 409). Any other failure goes to the usual reprocessing and also comes back with
 	 * {@code created = false}.
+	 * @param entity the entity
+	 * @param entitiesThatPreventCreation entities where an existing record prevents the creation
+	 * @param functionToDeleteKeysInTheCache the cache cleanup
+	 * @param jsons the records
+	 * @return the outcome of each JSON
 	 */
 	public List<JnBulkCreateResult> executeCreateBulk(CcpEntity entity, CcpEntity[] entitiesThatPreventCreation, Consumer<String[]> functionToDeleteKeysInTheCache, CcpJsonRepresentation... jsons) {
 
@@ -190,8 +217,12 @@ public class JnExecuteBulkOperation implements CcpExecuteBulkOperation{
 	}
 
 	/**
-	 * Converts the entities into CcpBulkItem from the given JSON and operation,
-	 * and delegates to the executeBulk(Collection, Consumer) method.
+	 * Converts the JSON into the bulk items of each entity for the operation and runs them as one bulk.
+	 * @param json the record
+	 * @param operation the bulk operation
+	 * @param functionToDeleteKeysInTheCache the cache cleanup
+	 * @param entities the entities
+	 * @return this instance
 	 */
 	public JnExecuteBulkOperation executeBulk(CcpJsonRepresentation json, CcpBulkEntityOperationType operation,  Consumer<String[]> functionToDeleteKeysInTheCache, CcpEntity...entities) {
 		

@@ -24,6 +24,17 @@ import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault
 import com.jn.json.fields.validation.JnJsonCommonsFields;
 import com.jn.utils.JnDeleteKeysFromCache;
 
+/**
+ * Errors waiting to be solved by support; unlike {@code JnEntityJobsnowError} it is versionable and moves to the twin when solved, tracking the life cycle of the error.
+ * <p>
+ * Configuration:
+ * <ul>
+ * <li>index {@code jn_jobsnow_pendding_error}</li>
+ * <li>twin entity {@code jn_jobsnow_solved_error}</li>
+ * <li>records cached for 3600 seconds</li>
+ * <li>versionable: every write keeps the previous state in {@code jn_versionable}</li>
+ * </ul>
+ */
 @CcpEntityTwin(
 		twinEntityName = "jn_jobsnow_solved_error",
 		bulkExecutorClass = JnExecuteBulkOperation.class,
@@ -34,33 +45,40 @@ import com.jn.utils.JnDeleteKeysFromCache;
 @JnEntityVersionable(JnVersionableEntity.class)
 @CcpEntityFieldsTransformer(classReferenceWithTheFields = JnJsonTransformersFieldsEntityDefault.class)
 @CcpEntityFieldsValidator(classReferenceWithTheFields = JnEntityJobsnowPenddingError.Fields.class)
-/**
- * Registra erros pendentes de resolução pela equipe de suporte. Diferente de
- * {@code JnEntityJobsnowError} (efêmero), este possui versionamento e entidade twin
- * {@code jn_jobsnow_solved_error}, permitindo rastrear o ciclo de vida do erro até sua resolução.
- */
 public class JnEntityJobsnowPenddingError implements CcpEntityConfigurator {
 
+	/** The entity {@code jn_jobsnow_pendding_error}, with every decorator of this configuration. */
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityJobsnowPenddingError.class).entityInstance;
 	
+	/**
+	 * The fields of the entity, with their validation rules (this enum is the class named by
+	 * {@code @CcpEntityFieldsValidator}).
+	 */
 	public static enum Fields implements CcpJsonFieldName{
+		/** The {@code cause} field: list, validated as in {@code JnJsonCommonsFields}. */
 		@CcpJsonFieldValidatorArray(nonRepeatedItems = false)
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		cause, 
+		/** The {@code stackTrace} field: list, validated as in {@code JnJsonCommonsFields}. */
 		@CcpJsonFieldValidatorArray(nonRepeatedItems = false)
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		stackTrace, 
+		/** The {@code stackTraceHash} field: part of the primary key, text. */
 		@CcpEntityFieldPrimaryKey
 		@CcpJsonFieldTypeString
 		stackTraceHash,
+		/** The {@code type} field: part of the primary key, validated as in {@code JnJsonCommonsFields}. */
 		@CcpEntityFieldPrimaryKey
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		type, 
+		/** The {@code message} field: required, validated as in {@code JnJsonCommonsFields}. */
 		@CcpJsonFieldValidatorRequired
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		message, 
+		/** The {@code timestamp} field: validated as in {@code JnJsonCommonsFields}. */
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		timestamp, 
+		/** The {@code date} field: validated as in {@code JnJsonCommonsFields}. */
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		date
 		;

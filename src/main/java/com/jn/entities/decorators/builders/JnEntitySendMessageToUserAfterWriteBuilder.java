@@ -13,6 +13,12 @@ import com.jn.entities.decorators.annotations.JnEntitySendMessageToUserWhenWrite
  */
 public class JnEntitySendMessageToUserAfterWriteBuilder extends CcpCustomDecoratorEntity{
 
+	/**
+	 * Wraps the entity with the {@code afterDecoratorClass} of {@code @JnEntitySendMessageToUserWhenWrite}.
+	 * @param configurationClass the configurator class
+	 * @param entity the entity decorated so far
+	 * @return the decorated entity
+	 */
 	@SuppressWarnings("unchecked")
 	public CcpEntity getEntity(Class<?> configurationClass, CcpEntity entity) {
 		var annotation = configurationClass.getAnnotation(JnEntitySendMessageToUserWhenWrite.class);

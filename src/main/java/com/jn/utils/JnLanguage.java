@@ -2,14 +2,13 @@ package com.jn.utils;
 
 import com.ccp.decorators.CcpJsonFieldName;
 
-/**
- * Define os idiomas suportados pela plataforma JobsNow ({@code portuguese}, {@code english},
- * {@code spanish}). Usado como valor do campo {@code language} em entidades de template de email
- * e mensagem instantânea.
- */
+/** Languages supported by the platform; the value of the {@code language} field of the message templates. */
 public enum JnLanguage implements CcpJsonFieldName{
 
+	/** Portuguese. */
 	portuguese,
+	/** English. */
 	english, 
+	/** Spanish. */
 	spanish
 }

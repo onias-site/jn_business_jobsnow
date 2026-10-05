@@ -35,45 +35,68 @@ import com.jn.json.fields.validation.JnJsonCommonsFields;
 import com.jn.json.fields.validation.JnJsonInstantMessengerFields;
 
 
+/**
+ * Settings for sending each kind of instant message: bot, template id, chat and maximum attempts. Seeded with the support bot settings that send error notifications and support tickets.
+ * <p>
+ * Configuration:
+ * <ul>
+ * <li>index {@code jn_instant_messenger_parameters_to_send}</li>
+ * <li>records cached for 3600 seconds</li>
+ * <li>versionable: every write keeps the previous state in {@code jn_versionable}</li>
+ * </ul>
+ */
 @CcpEntityCache(3600)
 @CcpEntityCustomDecorators(value = {@CcpEntityCustomDecorator(value = JnEntityVersionableBuilder.class, priority = 2),@CcpEntityCustomDecorator(value = JnEntityVersionablePurgeBuilder.class, priority = 5),})
 @JnEntityVersionable(JnVersionableEntity.class)
 @CcpEntityFieldsTransformer(classReferenceWithTheFields = JnJsonTransformersFieldsEntityDefault.class)
 @CcpEntityFieldsValidator(classReferenceWithTheFields = JnEntityInstantMessengerParametersToSend.Fields.class)
-/**
- * Armazena parâmetros de configuração para envio de mensagens instantâneas: bot, templateId, chatId
- * e número máximo de tentativas. Versionável, cache de 1 hora. Possui registro inicial configurando
- * o bot de suporte para envio de notificações de erro como arquivo texto.
- */
 public class JnEntityInstantMessengerParametersToSend implements CcpEntityConfigurator {
 	
+	/** The entity {@code jn_instant_messenger_parameters_to_send}, with every decorator of this configuration. */
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityInstantMessengerParametersToSend.class).entityInstance;
 
 	
 	
+	/**
+	 * The fields of the entity, with their validation rules (this enum is the class named by
+	 * {@code @CcpEntityFieldsValidator}).
+	 */
 	public static enum Fields implements CcpJsonFieldName{
+		/** The {@code botName} field: part of the primary key, validated as in {@code JnJsonInstantMessengerFields}. */
 		@CcpEntityFieldPrimaryKey
 		@CcpJsonCopyFieldValidationsFrom(JnJsonInstantMessengerFields.class)
 		botName, 
+		/** The {@code templateId} field: part of the primary key, validated as in {@code JnJsonCommonsFields}. */
 		@CcpEntityFieldPrimaryKey
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		templateId, 
+		/** The {@code chatId} field: required, validated as in {@code JnJsonInstantMessengerFields}. */
 		@CcpJsonFieldValidatorRequired
 		@CcpJsonCopyFieldValidationsFrom(JnJsonInstantMessengerFields.class)
 		chatId, 
+		/** The {@code instantMessageType} field: required, validated as in {@code JnJsonInstantMessengerFields}. */
 		@CcpJsonFieldValidatorRequired
 		@CcpJsonCopyFieldValidationsFrom(JnJsonInstantMessengerFields.class)
 		instantMessageType,
+		/** The {@code caption} field: validated as in {@code JnJsonInstantMessengerFields}. */
 		@CcpJsonCopyFieldValidationsFrom(JnJsonInstantMessengerFields.class)
 		caption,
+		/** The {@code contentType} field: validated as in {@code JnJsonCommonsFields}. */
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		contentType,
+		/** The {@code fileName} field: validated as in {@code JnJsonInstantMessengerFields}. */
 		@CcpJsonCopyFieldValidationsFrom(JnJsonInstantMessengerFields.class)
 		fileName,
+		/** The {@code moreParameters} field: validated as in {@code JnJsonInstantMessengerFields}. */
 		@CcpJsonCopyFieldValidationsFrom(JnJsonInstantMessengerFields.class)
 		moreParameters
 		;
 	}
+	/**
+	 * Seeds the support bot settings: errors and warnings sent as a text file (caption with the error type), and the
+	 * pending requests of token unlock and resend sent as text, all to the support chat with 10 attempts 3 seconds apart.
+	 * @return the seed records
+	 */
 	public List<CcpBulkItem> getFirstRecordsToInsert() {
 		CcpJsonRepresentation errorJsonWithInstantMessageType = CcpOtherConstants.EMPTY_JSON
 		.put(JnJsonInstantMessengerFields.instantMessageType, JnInstantMessageType.file);
@@ -99,8 +122,8 @@ public class JnEntityInstantMessengerParametersToSend implements CcpEntityConfig
 		CcpJsonRepresentation notifyError = errorJsonWithChatId
 		.put(JnJsonInstantMessengerFields.caption, "{type}")
 		;
-		// o aviso de warning sai pelo mesmo canal do aviso de erro; sem este registro todo save de
-		// JnEntityJobsnowWarning é recusado por falta de chatId
+		// the warning notice goes through the same channel as the error notice; without this record every save of
+		// JnEntityJobsnowWarning is refused for lack of a chatId
 		String warningTemplateId = JnMessages.JnNotifySupportAboutWaring.class.getName();
 		CcpJsonRepresentation notifyWarning = notifyError
 		.put(JnJsonCommonsFields.templateId, warningTemplateId)

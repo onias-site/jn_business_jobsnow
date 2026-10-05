@@ -3,12 +3,15 @@ package com.jn.services;
 import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.decorators.CcpJsonFieldName;
 
-/**
- * Serviço de operações sobre tarefas assíncronas. Contém o valor {@code GetAsyncTaskStatusById}
- * (implementação pendente — retorna o JSON de entrada sem alteração).
- */
+/** Services about asynchronous tasks. */
 public enum JnServiceAsyncTask implements JnService {
+	/** Returns the status of an asynchronous task (not implemented yet: it returns the request). */
 	GetAsyncTaskStatusById{
+		/**
+		 * Not implemented yet.
+		 * @param json the request
+		 * @return the same request
+		 */
 		public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
 			//LATER
 
@@ -19,11 +22,14 @@ public enum JnServiceAsyncTask implements JnService {
 		}
 	},
 	;
+	/** Fields of the request. */
 	public static enum JsonFieldNames implements CcpJsonFieldName{
+		/** The {@code asyncTaskId} field. */
 		asyncTaskId
 	}
 }
 
+/** Input rules of the {@code GetAsyncTaskStatusById} service (none yet). */
 enum GetAsyncTaskStatusById implements CcpJsonFieldName{
 
 }

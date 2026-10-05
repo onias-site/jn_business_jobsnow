@@ -22,17 +22,26 @@ import com.jn.json.fields.validation.JnJsonCommonsFields;
  */
 public class JnBusinessSendHttpRequest implements CcpBusiness{
 	
+	/** Turns any other failure into the result. */
 	public final Function<Throwable, CcpJsonRepresentation> exceptionHandler;
+	/** The call to the external API, with its retry policy. */
 	public final CcpHttpApiExecutor processThatSendsHttpRequest;
 
+	/**
+	 * Wraps the call.
+	 * @param processThatSendsHttpRequest the call to the external API
+	 * @param exceptionHandler turns any other failure into the result
+	 */
 	public JnBusinessSendHttpRequest(CcpHttpApiExecutor processThatSendsHttpRequest, Function<Throwable, CcpJsonRepresentation> exceptionHandler) {
 		this.processThatSendsHttpRequest = processThatSendsHttpRequest;
 		this.exceptionHandler = exceptionHandler;
 	}
 
 	/**
-	 * Executes the HTTP request. Catches CcpErrorHttpClient to save the error details
-	 * and rethrow them; catches CcpErrorHttpServer to start the retry logic.
+	 * Runs the call. A client error (4xx) is recorded in {@code jn_http_api_error_client} and rethrown; a server error
+	 * (5xx) is retried (see {@code retryToSendIntantMessage}); any other failure goes to the exception handler.
+	 * @param json the request
+	 * @return the response, or the result of the exception handler
 	 */
 	public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
 
@@ -59,6 +68,14 @@ public class JnBusinessSendHttpRequest implements CcpBusiness{
 		}
 	}
 	
+	/**
+	 * Registers one more attempt of the request; when every attempt was used, records the error in
+	 * {@code jn_http_api_error_server} and rethrows it, otherwise sleeps and runs the call again.
+	 * @param e the server error
+	 * @param json the request
+	 * @param httpErrorDetails the error details plus the request
+	 * @return the response of a later attempt
+	 */
 	private CcpJsonRepresentation retryToSendIntantMessage(CcpErrorHttp e, CcpJsonRepresentation json, CcpJsonRepresentation httpErrorDetails) {
 		Integer maxTries = this.processThatSendsHttpRequest.getMaxTries();
 		String attemptsName = JnJsonCommonsFields.attempts.name();

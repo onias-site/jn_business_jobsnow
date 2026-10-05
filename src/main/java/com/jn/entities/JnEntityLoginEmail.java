@@ -12,18 +12,29 @@ import com.ccp.json.validations.fields.annotations.CcpJsonCopyFieldValidationsFr
 import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
 
+/**
+ * The e-mails registered as users of the platform; permanent.
+ * <p>
+ * Configuration:
+ * <ul>
+ * <li>index {@code jn_login_email}</li>
+ * <li>records cached for 3600 seconds</li>
+ * </ul>
+ */
 @CcpEntityCache(3600)
 @CcpEntityFieldsTransformer(classReferenceWithTheFields = JnJsonTransformersFieldsEntityDefault.class)
 @CcpEntityFieldsValidator(classReferenceWithTheFields = JnEntityLoginEmail.Fields.class)
-/**
- * Representa o cadastro de email do usuário na plataforma. Confirma a existência do email como
- * usuário registrado. Sem versionamento nem expiração — o email é permanente. Cache de 1 hora.
- */
 public class JnEntityLoginEmail implements CcpEntityConfigurator {
 	
+	/** The entity {@code jn_login_email}, with every decorator of this configuration. */
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityLoginEmail.class).entityInstance;
 
+	/**
+	 * The fields of the entity, with their validation rules (this enum is the class named by
+	 * {@code @CcpEntityFieldsValidator}).
+	 */
 	public static enum Fields implements CcpJsonFieldName{
+		/** The {@code email} field: part of the primary key, validated as in {@code JnJsonCommonsFields}. */
 		@CcpEntityFieldPrimaryKey
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		email

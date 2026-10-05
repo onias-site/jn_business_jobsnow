@@ -18,23 +18,36 @@ import com.jn.entities.decorators.engine.JnDisposableEntity;
 import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
 
+/**
+ * Daily counter of wrong passwords per user; its expiration resets the counter every day.
+ * <p>
+ * Configuration:
+ * <ul>
+ * <li>index {@code jn_login_password_attempts}</li>
+ * <li>records cached for 86400 seconds</li>
+ * <li>disposable: records expire by the {@code daily} granularity</li>
+ * </ul>
+ */
 @CcpEntityCache(86400)
 @CcpEntityCustomDecorators(value = {@CcpEntityCustomDecorator(value = JnEntityDisposableBuilder.class, priority = 1),})
 @JnEntityDisposable(value = JnDisposableEntity.class, timeOption = CcpEntityExpurgableOptions.daily)
 @CcpEntityFieldsTransformer(classReferenceWithTheFields = JnJsonTransformersFieldsEntityDefault.class)
 @CcpEntityFieldsValidator(classReferenceWithTheFields = JnEntityLoginPasswordAttempts.Fields.class)
-/**
- * Contador diário de tentativas incorretas de senha por usuário. Expiração diária garante que o
- * bloqueio por tentativas seja resetado automaticamente a cada dia. Cache de 24 horas.
- */
 public class JnEntityLoginPasswordAttempts implements CcpEntityConfigurator {
 
+	/** The entity {@code jn_login_password_attempts}, with every decorator of this configuration. */
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityLoginPasswordAttempts.class).entityInstance;
 	
+	/**
+	 * The fields of the entity, with their validation rules (this enum is the class named by
+	 * {@code @CcpEntityFieldsValidator}).
+	 */
 	public static enum Fields implements CcpJsonFieldName{
+		/** The {@code email} field: part of the primary key, validated as in {@code JnJsonCommonsFields}. */
 		@CcpEntityFieldPrimaryKey
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		email,
+		/** The {@code attempts} field: validated as in {@code JnJsonCommonsFields}. */
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		attempts
 		;

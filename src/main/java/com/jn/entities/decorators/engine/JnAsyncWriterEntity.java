@@ -13,31 +13,62 @@ import com.jn.mensageria.JnFunctionMensageriaSender;
  */
 public class JnAsyncWriterEntity extends CcpEntityDelegator  {
 
+	/**
+	 * Wraps the entity.
+	 * @param entity the entity decorated so far (what the consumer will run)
+	 */
 	public JnAsyncWriterEntity(CcpEntity entity) {
 		super(entity);
 	}
 
+	/**
+	 * Publishes the delete to messaging.
+	 * @param json the record
+	 * @return whether the message was accepted (not whether the record existed)
+	 */
 	public boolean delete(CcpJsonRepresentation json) {
 		boolean sent = this.sendToMensageria(json, CcpEntityOperationType.delete);
 		return sent;
 	}
 
+	/**
+	 * Publishes the deleteAnyWhere to messaging.
+	 * @param json the record
+	 * @return whether the message was accepted
+	 */
 	public boolean deleteAnyWhere(CcpJsonRepresentation json) {
 		boolean sent = this.sendToMensageria(json, CcpEntityOperationType.deleteAnyWhere);
 		return sent;
 	}
 
+	/**
+	 * Publishes the save to messaging.
+	 * @param json the record
+	 * @return whether the message was accepted (not whether it inserted)
+	 */
 	public boolean save(CcpJsonRepresentation json) {
 		boolean sent = this.sendToMensageria(json, CcpEntityOperationType.save);
 		return sent;
 	}
 
+	/**
+	 * Publishes the transfer to messaging, with the target entity in the message.
+	 * @param json the record
+	 * @param targetEntity the target entity
+	 * @return whether the message was accepted
+	 */
 	public boolean transferDataTo(CcpJsonRepresentation json, CcpEntity targetEntity) {
 		CcpJsonRepresentation jsonWithTargetEntity = CcpEntityOperationType.putEntityToTransfer(json, targetEntity);
 		boolean sent = this.sendToMensageria(jsonWithTargetEntity, CcpEntityOperationType.transferDataTo);
 		return sent;
 	}
 
+	/**
+	 * Publishes the copy to messaging, with the target entity in the message.
+	 * @param json the record
+	 * @param targetEntity the target entity
+	 * @return whether the message was accepted
+	 */
 	public boolean copyDataTo(CcpJsonRepresentation json, CcpEntity targetEntity) {
 		CcpJsonRepresentation jsonWithTargetEntity = CcpEntityOperationType.putEntityToTransfer(json, targetEntity);
 		boolean sent = this.sendToMensageria(jsonWithTargetEntity, CcpEntityOperationType.copyDataTo);

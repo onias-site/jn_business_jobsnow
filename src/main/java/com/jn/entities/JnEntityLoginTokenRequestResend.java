@@ -35,6 +35,20 @@ import com.jn.json.fields.validation.JnJsonCommonsFields;
 import com.jn.json.fields.validation.JnJsonInstantMessengerFields;
 import com.jn.utils.JnDeleteKeysFromCache;
 
+/**
+ * A request of the user to receive the login token again: its insertion notifies support of the pending request and its deletion (when support fulfills it) notifies the solution; the twin keeps the fulfilled requests.
+ * <p>
+ * Configuration:
+ * <ul>
+ * <li>index {@code jn_login_token_request_resend}</li>
+ * <li>on {@code afterDeleteFromMainEntitySendAnInstantMessageAndIfFailsThrowAnError} sends {@code JnNotifySupportAboutSolvedResendLoginToken}</li>
+ * <li>on {@code afterInsertFromMainEntitySendAnInstantMessageAndIfFailsThrowAnError} sends {@code JnNotifySupportAboutPendingResendLoginToken}</li>
+ * <li>twin entity {@code jn_login_token_fulfilled_resend}</li>
+ * <li>records cached for 3600 seconds</li>
+ * <li>written asynchronously, through messaging</li>
+ * <li>disposable: records expire by the {@code daily} granularity</li>
+ * </ul>
+ */
 @CcpEntityCustomDecorators(value = {
 		@CcpEntityCustomDecorator(value = JnEntityDisposableBuilder.class, priority = 1)
 		,@CcpEntityCustomDecorator(value = JnEntityAsyncWriterBuilder.class, priority = 8)
@@ -63,20 +77,22 @@ import com.jn.utils.JnDeleteKeysFromCache;
 @JnEntityDisposable(value = JnDisposableEntity.class, timeOption = CcpEntityExpurgableOptions.daily)
 @CcpEntityFieldsTransformer(classReferenceWithTheFields = JnJsonTransformersFieldsEntityDefault.class)
 @CcpEntityFieldsValidator(classReferenceWithTheFields = JnEntityLoginTokenRequestResend.Fields.class)
-/**
- * Registra a solicitação de reenvio de token de login feita pelo usuário. Ao ser salvo,
- * automaticamente reseta e reenvia o token new CcpFieldName(x) da operação, e notifica o suporte _after.
- * Escrita assíncrona via mensageria, descartável diariamente, cache de 1 hora.
- */
 public class JnEntityLoginTokenRequestResend implements CcpEntityConfigurator {
 	
+	/** The entity {@code jn_login_token_request_resend}, with every decorator of this configuration. */
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityLoginTokenRequestResend.class).entityInstance;
+	/**
+	 * The fields of the entity, with their validation rules (this enum is the class named by
+	 * {@code @CcpEntityFieldsValidator}).
+	 */
 	public static enum Fields implements CcpJsonFieldName{
+		/** The {@code email} field: part of the primary key, validated as in {@code JnJsonCommonsFields}, transformed by {@code JnJsonTransformersFieldsEntityDoNothing}. */
 		@CcpEntityFieldPrimaryKey
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		@CcpEntityFieldTransformer(JnJsonTransformersFieldsEntityDoNothing.class)
 		email, 
 
+		/** The {@code chatId} field: validated as in {@code JnJsonInstantMessengerFields}. */
 		@CcpJsonCopyFieldValidationsFrom(JnJsonInstantMessengerFields.class)
 		chatId
 		;

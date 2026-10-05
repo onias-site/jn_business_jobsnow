@@ -23,10 +23,19 @@ import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityDelega
  */
 public class JnVersionablePurgeEntity extends CcpEntityDelegator {
 
+	/**
+	 * Wraps the entity.
+	 * @param entity the entity decorated so far
+	 */
 	public JnVersionablePurgeEntity(CcpEntity entity) {
 		super(entity);
 	}
 
+	/**
+	 * Deletes the record everywhere and then enqueues the purge of its history.
+	 * @param json the record
+	 * @return whether the record existed before the deletion
+	 */
 	public boolean deleteAnyWhere(CcpJsonRepresentation json) {
 
 		CcpJsonRepresentation deletionRequest = JnVersionableEntity.getDeletionRequest(this.entity, json);

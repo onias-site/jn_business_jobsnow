@@ -24,20 +24,29 @@ import com.jn.json.fields.validation.JnJsonCommonsFields;
 import com.jn.utils.JnDeleteKeysFromCache;
 
 /**
- * Responsável por enviar mensagens/tarefas para a fila de mensageria (PubSub). Cria um registro em
- * {@code JnEntityAsyncTask} com os detalhes da mensagem antes de publicar. Suporta dois modos:
- * envio de um {@code CcpBusiness} (tópico = nome da classe) ou envio de uma operação de entidade.
+ * Publishes a task to messaging (Pub/Sub), after recording it in {@code jn_async_task}. The task is either a business
+ * (the topic is the name of its class) or an operation on an entity (the topic is the configurator class of the entity,
+ * plus the entity name and the operation); {@link JnMensageriaReceiver} runs it on the consumer side.
  */
 public class JnFunctionMensageriaSender implements CcpBusiness {
 	
 	
+	/** The messaging client. */
 	private final CcpMensageriaSender mensageriaSender = CcpDependencyInjection.getDependency(CcpMensageriaSender.class);
 	
+	/** The input rules of the task. */
 	private final Class<?> jsonValidationClass;
+	/** The entity name, for an entity operation; empty for a business. */
 	private final String entityName;
+	/** The operation, for an entity operation; empty for a business. */
 	private final String operation;
+	/** The topic: the class name of the business or of the configurator of the entity. */
 	private final String topic;
 	
+	/**
+	 * Prepares the sending of a business.
+	 * @param topic the business
+	 */
 	public JnFunctionMensageriaSender(CcpBusiness topic) {
 		this.jsonValidationClass = topic.getJsonValidationClass();
 		var topicClass = topic.getClass();
@@ -46,6 +55,11 @@ public class JnFunctionMensageriaSender implements CcpBusiness {
 		this.operation = "";
 	}
 
+	/**
+	 * Prepares the sending of an entity operation.
+	 * @param entity the entity
+	 * @param operation the operation
+	 */
 	public JnFunctionMensageriaSender(CcpEntity entity, CcpEntityOperationType operation) {
 		this.jsonValidationClass = operation.getJsonValidationClass(entity);
 		CcpEntityMetaData entityMetadata = entity.getEntityMetaData();
@@ -54,12 +68,22 @@ public class JnFunctionMensageriaSender implements CcpBusiness {
 		this.operation = operation.name();
 	}
 
+	/**
+	 * Map variant of {@link #apply(CcpJsonRepresentation)}.
+	 * @param map the input of the task
+	 * @return the details of the message
+	 */
 	public Map<String, Object> apply(Map<String, Object> map) {
 		CcpJsonRepresentation json = new CcpJsonRepresentation(map);
 		CcpJsonRepresentation response = this.execute(json);
 		return response.content;
 	} 
 	
+	/**
+	 * Records the task in {@code jn_async_task} and publishes it, naming the receiver and the entity.
+	 * @param json the input of the task
+	 * @return the details of the message
+	 */
 	public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
 
 		CcpJsonRepresentation put = json.put(JnEntityAsyncTask.Fields.topic, this.topic); 
@@ -79,6 +103,10 @@ public class JnFunctionMensageriaSender implements CcpBusiness {
 		return messageDetails; 
 	}
 	
+	/**
+	 * Returns the name of the class of the topic (see finding: always {@code java.lang.String}, since the topic is a text).
+	 * @return the class name
+	 */
 	public String toString() {
 		var topicClass2 = this.topic.getClass();
 		var topicClass2Name = topicClass2.getName();
@@ -86,11 +114,13 @@ public class JnFunctionMensageriaSender implements CcpBusiness {
 	}
 	
 	/**
-	 * The message is the json plus the envelope ({@code operation}, {@code messageId}, {@code topic},
-	 * {@code started}, {@code data}, {@code request}), and the envelope prevails. Up to 2026-09-30 the json
-	 * prevailed: a json that carried the envelope of an earlier message (a record read from the cache, which
-	 * kept the whole message of the save) turned a {@code delete} into a {@code save} with the old
-	 * {@code messageId}, so withdrawing a request saved it again instead of deleting it.
+	 * The message is the JSON plus the envelope ({@code operation}, {@code messageId}, {@code topic}, {@code started},
+	 * {@code data}, {@code request}), and the envelope prevails. Up to 2026-09-30 the JSON prevailed: a JSON that carried
+	 * the envelope of an earlier message (a record read from the cache, which kept the whole message of the save) turned a
+	 * {@code delete} into a {@code save} with the old {@code messageId}, so withdrawing a request saved it again instead of
+	 * deleting it.
+	 * @param json the input of the task
+	 * @return the message
 	 */
 	private CcpJsonRepresentation getMessageDetails(CcpJsonRepresentation json) {
 		CcpTimeDecorator ccpTimeDecorator = new CcpTimeDecorator();
@@ -117,6 +147,11 @@ public class JnFunctionMensageriaSender implements CcpBusiness {
 		return messageDetails;
 	}
 	
+	/**
+	 * Tells whether the task may be recorded as an asynchronous task.
+	 * @param x the message
+	 * @return what the business answers, {@code true} when it is not a business
+	 */
 	private boolean canSave(CcpJsonRepresentation x) {
 		CcpBusiness process = JnMensageriaReceiver.INSTANCE.getProcess(this.topic, x);
 		if(process instanceof CcpBusiness topic) {
@@ -126,6 +161,12 @@ public class JnFunctionMensageriaSender implements CcpBusiness {
 		return true;
 	}
 	
+	/**
+	 * Records the messages that may be recorded in the entity (one bulk) and publishes them.
+	 * @param entity the entity of the asynchronous tasks
+	 * @param messages the inputs of the task
+	 * @return this instance
+	 */
 	private JnFunctionMensageriaSender sendToMensageria(CcpEntity entity, CcpJsonRepresentation... messages) {
 		
 		List<CcpBulkItem> bulkItems = new ArrayList<>();
@@ -149,6 +190,11 @@ public class JnFunctionMensageriaSender implements CcpBusiness {
 		return this;
 	}
 
+	/**
+	 * Records and publishes several messages of the task.
+	 * @param messages the inputs of the task
+	 * @return this instance
+	 */
 	public JnFunctionMensageriaSender sendToMensageria(List<CcpJsonRepresentation> messages) {
 		
 		int size = messages.size();
@@ -158,6 +204,11 @@ public class JnFunctionMensageriaSender implements CcpBusiness {
 		return send;
 	}
 
+	/**
+	 * Records and publishes several messages of the task.
+	 * @param messages the inputs of the task
+	 * @return an empty JSON
+	 */
 	public CcpJsonRepresentation sendToMensageria(CcpJsonRepresentation... messages) {
 		this.sendToMensageria(JnEntityAsyncTask.ENTITY, messages);
 		return CcpOtherConstants.EMPTY_JSON;

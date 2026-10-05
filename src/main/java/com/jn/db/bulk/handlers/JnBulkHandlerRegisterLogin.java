@@ -14,19 +14,23 @@ import com.jn.entities.JnEntityLoginTokenRequestResend;
 import com.jn.entities.JnEntityLoginTokenRequestUnlock;
 
 /**
- * Bulk handler responsible for registering the user's login. Whether or not there is an
- * existing session conflict, it creates bulk items to save a new record in
- * JnEntityLoginSessionConflict and in JnEntityLoginSessionValidation.
+ * Bulk handler that registers the login: whether or not there was a session conflict, it creates the session conflict
+ * record and the session record, and deletes the pending requests to resend and to unlock the login token.
  */
 public class JnBulkHandlerRegisterLogin implements CcpHandleWithSearchResultsInTheEntity<List<CcpBulkItem>>{
 
 	
+	/** Singleton; use {@link #INSTANCE}. */
 	private JnBulkHandlerRegisterLogin() {}
 	
+	/** The single instance. */
 	public static final JnBulkHandlerRegisterLogin INSTANCE = new JnBulkHandlerRegisterLogin();
 	
 	/**
-	 * Returns the bulk items to create the session and the conflict when a record already existed.
+	 * Returns the items that register the login.
+	 * @param json the login
+	 * @param recordFound the existing session conflict
+	 * @return the bulk items
 	 */
 	public List<CcpBulkItem> whenRecordWasFoundInTheEntitySearch(CcpJsonRepresentation json, CcpJsonRepresentation recordFound) {
 
@@ -34,6 +38,11 @@ public class JnBulkHandlerRegisterLogin implements CcpHandleWithSearchResultsInT
 		return bulkItems;
 	}
 
+	/**
+	 * Builds the items that create the session conflict and the session, and delete the pending token requests.
+	 * @param json the login
+	 * @return the bulk items
+	 */
 	private List<CcpBulkItem> getBulkItems(CcpJsonRepresentation json) {
 		CcpJsonRepresentation session = JnEntityLoginSessionConflict.ENTITY.getHandledJson(json);
 		var newSession = JnEntityLoginSessionConflict.ENTITY.toBulkItems(session, CcpBulkEntityOperationType.create);
@@ -50,6 +59,13 @@ public class JnBulkHandlerRegisterLogin implements CcpHandleWithSearchResultsInT
 		return allBulkItems;
 	} 
 	
+	/**
+	 * Builds the items of the operation in each entity.
+	 * @param json the record
+	 * @param operation the bulk operation
+	 * @param entities the entities
+	 * @return the bulk items
+	 */
 	private List<CcpBulkItem> getOtherBulkItems(CcpJsonRepresentation json, CcpBulkEntityOperationType operation, CcpEntity... entities){
 		List<CcpBulkItem> response = new ArrayList<CcpBulkItem>();
 		for (CcpEntity entity : entities) {
@@ -60,7 +76,9 @@ public class JnBulkHandlerRegisterLogin implements CcpHandleWithSearchResultsInT
 	}
 
 	/**
-	 * Returns the same bulk items when there was no previous record.
+	 * Returns the items that register the login.
+	 * @param json the login
+	 * @return the bulk items
 	 */
 	public List<CcpBulkItem> whenRecordWasNotFoundInTheEntitySearch(CcpJsonRepresentation json) {
 		List<CcpBulkItem> bulkItems = this.getBulkItems(json);
@@ -68,7 +86,8 @@ public class JnBulkHandlerRegisterLogin implements CcpHandleWithSearchResultsInT
 	}
 
 	/**
-	 * Returns JnEntityLoginSessionConflict.ENTITY as the entity to search.
+	 * The entity searched: {@code jn_login_session_conflict}.
+	 * @return the entity
 	 */
 	public CcpEntity getEntityToSearch() {
 		return JnEntityLoginSessionConflict.ENTITY;

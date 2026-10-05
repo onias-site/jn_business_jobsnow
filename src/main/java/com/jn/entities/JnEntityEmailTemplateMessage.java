@@ -24,37 +24,54 @@ import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault
 import com.jn.json.fields.validation.JnJsonCommonsFields;
 import com.jn.utils.JnLanguage;
 
+/**
+ * E-mail templates by language and template id; the {@code message} supports variables such as {@code {token}} and {@code {email}}, resolved at sending time. Seeded in Portuguese and English for the login token and the error notification.
+ * <p>
+ * Configuration:
+ * <ul>
+ * <li>index {@code jn_email_template_message}</li>
+ * <li>records cached for 3600 seconds</li>
+ * <li>versionable: every write keeps the previous state in {@code jn_versionable}</li>
+ * </ul>
+ */
 @CcpEntityCache(3600)
 @CcpEntityCustomDecorators(value = {@CcpEntityCustomDecorator(value = JnEntityVersionableBuilder.class, priority = 2),@CcpEntityCustomDecorator(value = JnEntityVersionablePurgeBuilder.class, priority = 5),})
 @JnEntityVersionable(JnVersionableEntity.class)
 @CcpEntityFieldsTransformer(classReferenceWithTheFields = JnJsonTransformersFieldsEntityDefault.class)
 @CcpEntityFieldsValidator(classReferenceWithTheFields = JnEntityEmailTemplateMessage.Fields.class)
-/**
- * Stores email templates by language and {@code templateId}. The {@code message} field supports
- * template variables (e.g. {@code {token}}, {@code {email}}) resolved at sending time.
- * Versionable, 1-hour cache. Has initial records (in Portuguese and English) for the login token
- * and the error notification.
- */
 public class JnEntityEmailTemplateMessage  implements CcpEntityConfigurator{
 
+	/** The entity {@code jn_email_template_message}, with every decorator of this configuration. */
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityEmailTemplateMessage.class).entityInstance;
 
+	/**
+	 * The fields of the entity, with their validation rules (this enum is the class named by
+	 * {@code @CcpEntityFieldsValidator}).
+	 */
 	public static enum Fields implements CcpJsonFieldName{ 
+		/** The {@code templateId} field: part of the primary key, validated as in {@code JnJsonCommonsFields}. */
 		@CcpEntityFieldPrimaryKey
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		templateId,
+		/** The {@code language} field: part of the primary key, validated as in {@code JnJsonCommonsFields}. */
 		@CcpEntityFieldPrimaryKey
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		language, 
+		/** The {@code subject} field: required, validated as in {@code JnJsonCommonsFields}. */
 		@CcpJsonFieldValidatorRequired
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		subject, 
+		/** The {@code message} field: required, validated as in {@code JnJsonCommonsFields}. */
 		@CcpJsonFieldValidatorRequired
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		message
 		;
 	}
 
+	/**
+	 * Seeds, in Portuguese and English, the HTML template of the login token e-mail and the template of the error e-mail.
+	 * @return the seed records
+	 */
 	public List<CcpBulkItem> getFirstRecordsToInsert() {
 		String tokenTemplateWithLanguageKey = "{"
 				+ "	\"language\": \"";

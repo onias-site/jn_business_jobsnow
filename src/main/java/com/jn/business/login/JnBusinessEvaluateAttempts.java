@@ -12,38 +12,52 @@ import com.ccp.process.CcpProcessStatus;
 import com.jn.utils.JnSystemProperties;
 
 /**
- * Evaluates authentication attempts (password or token) by comparing the value supplied
- * by the user with the one stored in the database, via CcpPasswordHandler.matches. If it
- * matches, delegates to the success business. Otherwise, increments the attempt counter;
- * after 3 wrong attempts, triggers the lock business and throws CcpErrorFlowDisturb with
- * the "exceeded attempts" status; before that, throws the "wrong type" status with the
- * current number of attempts.
+ * Evaluates a secret typed by the user (password or token) against the stored one, both read from the JSON (the stored
+ * one and the attempts under {@code _entities}). A right secret runs the success business. A wrong one counts one more
+ * attempt: when the count reaches {@code JnSystemProperties.maxAttempts()} the lock business runs and the "exceeded
+ * attempts" status is thrown; otherwise the counter is saved and the "wrong" status is thrown with the attempts.
  */
 public class JnBusinessEvaluateAttempts implements CcpBusiness{ 
+	/** Fields read by the evaluator. */
 	enum JsonFieldNames implements CcpJsonFieldName{
+		/** The {@code entities} field. */
 		entities
 	}
 
+	/** The entity of the stored secret. */
 	private final CcpEntity entityToGetTheSecret;
 	 
+	/** The entity of the attempts counter. */
 	private final CcpEntity entityToGetTheAttempts;
 
+	/** The field of the secret typed by the user. */
 	private final CcpJsonFieldName userFieldName;
 	
+	/** The field of the stored secret. */
 	private final CcpJsonFieldName databaseFieldName;
 
+	/** Status thrown on a wrong secret. */
 	private final CcpProcessStatus statusToReturnWhenWrongType;
 	
+	/** Status thrown when the attempts are exceeded. */
 	private final CcpProcessStatus statusToReturnWhenExceedAttempts;
 	
+	/** Business run when the secret is right. */
 	private final CcpBusiness topicToRegisterSuccess;
 
+	/** Business that locks the secret when the attempts are exceeded. */
 	private final CcpBusiness topicToCreateTheLockWhenExceedTries;
 	
+	/** The attempts field. */
 	private final CcpJsonFieldName fieldAttempsName;
 	
+	/** The e-mail field. */
 	private final CcpJsonFieldName fieldEmailName;
 
+	/**
+	 * Builds the evaluator from the builder.
+	 * @param builder the builder
+	 */
 	JnBusinessEvaluateAttempts(Builder builder) {
 		this.entityToGetTheAttempts             = builder.entityToGetTheAttempts;
 		this.entityToGetTheSecret               = builder.entityToGetTheSecret;
@@ -57,6 +71,10 @@ public class JnBusinessEvaluateAttempts implements CcpBusiness{
 		this.fieldEmailName                     = builder.fieldEmailName;
 	}
 
+	/**
+	 * Starts building an evaluator.
+	 * @return a new builder
+	 */
 	public static Builder builder() {
 		Builder builder = new Builder();
 		return builder;
@@ -65,8 +83,12 @@ public class JnBusinessEvaluateAttempts implements CcpBusiness{
 
 
 	/**
-	 * Fetches the secret from the database, compares it with the user's value using
-	 * CcpPasswordHandler, and drives the success/lock/attempts flow.
+	 * Compares the typed secret with the stored hash through {@code CcpPasswordHandler.matches}.
+	 * @param json the request plus the records under {@code _entities}
+	 * @return the JSON without {@code entities}, when the secret is right
+	 * @throws CcpErrorFlowDisturb with the "wrong" status (and the attempts) or the "exceeded attempts" status
+	 * @throws JnErrorSecretFromDatabaseIsEmpty when there is no stored secret
+	 * @throws JnErrorSecretFromUserIsEmpty when the user typed nothing
 	 */
 	public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
 
@@ -125,10 +147,12 @@ public class JnBusinessEvaluateAttempts implements CcpBusiness{
 		throw wrongSecretError;
 	}
 
+	/** Raised when there is no stored secret to compare with. */
 	@SuppressWarnings("serial")
 	private static class JnErrorSecretFromDatabaseIsEmpty extends RuntimeException {
 	}
 
+	/** Raised when the user typed no secret. */
 	@SuppressWarnings("serial")
 	private static class JnErrorSecretFromUserIsEmpty extends RuntimeException {
 	}

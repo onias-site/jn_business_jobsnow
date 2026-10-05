@@ -22,37 +22,54 @@ import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault
 import com.jn.json.fields.validation.JnJsonCommonsFields;
 import com.jn.json.fields.validation.JnJsonInstantMessengerFields;
 
+/**
+ * Instant messages sent successfully; the {@code message} is part of the key (as a SHA-1), so the same message is not sent twice to the same chat while the record lives.
+ * <p>
+ * Configuration:
+ * <ul>
+ * <li>index {@code jn_instant_messenger_message_sent}</li>
+ * <li>records cached for 3600 seconds</li>
+ * <li>disposable: records expire by the {@code hourly} granularity</li>
+ * </ul>
+ */
 @CcpEntityCache(3600)
 @CcpEntityCustomDecorators(value = {@CcpEntityCustomDecorator(value = JnEntityDisposableBuilder.class, priority = 1),})
 @JnEntityDisposable(value = JnDisposableEntity.class, timeOption = CcpEntityExpurgableOptions.hourly)
 @CcpEntityFieldsTransformer(classReferenceWithTheFields = JnJsonTransformersFieldsEntityDefault.class)
 @CcpEntityFieldsValidator(classReferenceWithTheFields = JnEntityInstantMessengerMessageSent.Fields.class)
-/**
- * Records instant messages sent successfully. The {@code message} field is stored as a SHA-1
- * hash to work as the primary key and prevent the same message from being resent to the same
- * recipient within the same hour. Disposable hourly, 1-hour cache.
- */
 public class JnEntityInstantMessengerMessageSent implements CcpEntityConfigurator {
 	
+	/** The entity {@code jn_instant_messenger_message_sent}, with every decorator of this configuration. */
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityInstantMessengerMessageSent.class).entityInstance;
 
 	
+	/**
+	 * The fields of the entity, with their validation rules (this enum is the class named by
+	 * {@code @CcpEntityFieldsValidator}).
+	 */
 	public static enum Fields implements CcpJsonFieldName{
+		/** The {@code botName} field: part of the primary key, validated as in {@code JnJsonInstantMessengerFields}. */
 		@CcpEntityFieldPrimaryKey
 		@CcpJsonCopyFieldValidationsFrom(JnJsonInstantMessengerFields.class)
 		botName, 
+		/** The {@code chatId} field: part of the primary key, validated as in {@code JnJsonInstantMessengerFields}. */
 		@CcpEntityFieldPrimaryKey
 		@CcpJsonCopyFieldValidationsFrom(JnJsonInstantMessengerFields.class)
 		chatId, 
+		/** The {@code instantMessageType} field: required, validated as in {@code JnJsonInstantMessengerFields}. */
 		@CcpJsonFieldValidatorRequired
 		@CcpJsonCopyFieldValidationsFrom(JnJsonInstantMessengerFields.class)
 		instantMessageType,
+		/** The {@code caption} field: validated as in {@code JnJsonInstantMessengerFields}. */
 		@CcpJsonCopyFieldValidationsFrom(JnJsonInstantMessengerFields.class)
 		caption,
+		/** The {@code contentType} field: validated as in {@code JnJsonCommonsFields}. */
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		contentType,
+		/** The {@code fileName} field: validated as in {@code JnJsonInstantMessengerFields}. */
 		@CcpJsonCopyFieldValidationsFrom(JnJsonInstantMessengerFields.class)
 		fileName,
+		/** The {@code message} field: part of the primary key, transformed by {@code JnJsonTransformersFieldEntityMessageHash}. */
 		@CcpEntityFieldPrimaryKey
 		@CcpEntityFieldTransformer(JnJsonTransformersFieldEntityMessageHash.class)
 		message,

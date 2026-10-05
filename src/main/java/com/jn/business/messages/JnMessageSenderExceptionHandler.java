@@ -8,17 +8,31 @@ import com.ccp.decorators.CcpJsonRepresentation;
 import com.jn.entities.JnEntityJobsnowWarning;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
 
+/** What happens when a message can not be sent (or is refused by a "do not send" rule). */
 public enum JnMessageSenderExceptionHandler implements Function<Throwable, CcpJsonRepresentation> {
+	/** Rethrows the failure. */
 	THROWS{
 
+		/**
+		 * Rethrows the failure.
+		 * @param e the failure
+		 * @return never returns
+		 * @throws JnErrorMessageSenderFailed always
+		 */
 		public CcpJsonRepresentation apply(Throwable e) {
 			JnErrorMessageSenderFailed jnErrorMessageSenderFailed = new JnErrorMessageSenderFailed(e);
 			throw jnErrorMessageSenderFailed;
 		}
 
 	},
+	/** Records the failure as a warning in {@code jn_jobsnow_warning} and goes on. */
 	LENIENT{
 
+		/**
+		 * Records the failure as a warning.
+		 * @param e the failure
+		 * @return the warning
+		 */
 		public CcpJsonRepresentation apply(Throwable e) {
 			CcpJsonRepresentation errorDetails = getWarning(e);
 			JnEntityJobsnowWarning.ENTITY.save(errorDetails);
@@ -27,8 +41,14 @@ public enum JnMessageSenderExceptionHandler implements Function<Throwable, CcpJs
 		}
 
 	},
+	/** Records the failure as a warning in {@code jn_jobsnow_warning}, prints its stack trace and goes on. */
 	LOG{
 
+		/**
+		 * Records the failure as a warning and prints its stack trace.
+		 * @param e the failure
+		 * @return the warning
+		 */
 		public CcpJsonRepresentation apply(Throwable e) {
 			CcpJsonRepresentation errorDetails = getWarning(e);
 			JnEntityJobsnowWarning.ENTITY.save(errorDetails);

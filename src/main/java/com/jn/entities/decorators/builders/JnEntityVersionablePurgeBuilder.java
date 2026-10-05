@@ -11,6 +11,12 @@ import com.jn.entities.decorators.engine.JnVersionablePurgeEntity;
  */
 public class JnEntityVersionablePurgeBuilder extends CcpCustomDecoratorEntity{
 
+	/**
+	 * Wraps the entity with {@code JnVersionablePurgeEntity}.
+	 * @param configurationClass the configurator class (unused)
+	 * @param entity the entity decorated so far
+	 * @return the decorated entity
+	 */
 	public CcpEntity getEntity(Class<?> configurationClass, CcpEntity entity) {
 		JnVersionablePurgeEntity purge = new JnVersionablePurgeEntity(entity);
 		return purge;

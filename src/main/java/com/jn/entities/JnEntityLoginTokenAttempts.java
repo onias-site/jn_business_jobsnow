@@ -13,21 +13,33 @@ import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidatorRequired
 import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
 
+/**
+ * Counter of wrong login tokens per user, used to lock the token.
+ * <p>
+ * Configuration:
+ * <ul>
+ * <li>index {@code jn_login_token_attempts}</li>
+ * <li>records cached for 3600 seconds</li>
+ * </ul>
+ */
 @CcpEntityCache(3600)
 @CcpEntityFieldsTransformer(classReferenceWithTheFields = JnJsonTransformersFieldsEntityDefault.class)
 @CcpEntityFieldsValidator(classReferenceWithTheFields = JnEntityLoginTokenAttempts.Fields.class)
-/**
- * Contador de tentativas de uso incorreto do token de login (durante o fluxo de definição de senha).
- * Usado por {@code JnBusinessEvaluateAttempts} para controlar o bloqueio do token. Cache de 1 hora.
- */
 public class JnEntityLoginTokenAttempts implements CcpEntityConfigurator {
 
+	/** The entity {@code jn_login_token_attempts}, with every decorator of this configuration. */
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityLoginTokenAttempts.class).entityInstance;
 
+	/**
+	 * The fields of the entity, with their validation rules (this enum is the class named by
+	 * {@code @CcpEntityFieldsValidator}).
+	 */
 	public static enum Fields implements CcpJsonFieldName{
+		/** The {@code email} field: part of the primary key, validated as in {@code JnJsonCommonsFields}. */
 		@CcpEntityFieldPrimaryKey
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		email, 
+		/** The {@code attempts} field: required, validated as in {@code JnJsonCommonsFields}. */
 		@CcpJsonFieldValidatorRequired
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		attempts

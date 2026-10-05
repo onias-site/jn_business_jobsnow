@@ -6,12 +6,21 @@ import com.ccp.especifications.db.utils.entity.CcpEntity;
 import com.ccp.especifications.db.utils.entity.decorators.engine.CcpCustomDecoratorEntity;
 import com.jn.entities.decorators.annotations.JnEntityAsyncWriter;
 
+/** Builds the asynchronous writer named by {@code @JnEntityAsyncWriter}. */
 public class JnEntityAsyncWriterBuilder extends CcpCustomDecoratorEntity{
 
+	/** The single instance. */
 	public final static JnEntityAsyncWriterBuilder INSTANCE = new JnEntityAsyncWriterBuilder();
 	
+	/** Builds the builder; instantiated by reflection by the entity factory. */
 	private JnEntityAsyncWriterBuilder() {}
 	
+	/**
+	 * Wraps the entity with the decorator class of {@code @JnEntityAsyncWriter}.
+	 * @param configurationClass the configurator class
+	 * @param entity the entity decorated so far
+	 * @return the decorated entity
+	 */
 	@SuppressWarnings("unchecked")
 	public CcpEntity getEntity(Class<?> configurationClass, CcpEntity entity) {
 		var annotation = configurationClass.getAnnotation(JnEntityAsyncWriter.class);

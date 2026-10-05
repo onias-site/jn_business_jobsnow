@@ -17,37 +17,31 @@ import com.jn.json.fields.validation.JnJsonCommonsFields;
 import com.jn.utils.JnDeleteKeysFromCache;
 import com.jn.utils.JnLanguage;
 
-/**
- * Resets (deletes from every index) a user's login token. Useful to force the
- * generation of a new token, clearing the previous state.
- */
+/** Resets the login token of a user, deleting it from every index, so a new token can be generated. */
 public class JnBusinessResetLoginToken implements CcpBusiness{
 	
+	/** Input fields. */
 	enum JsonFieldNames implements CcpJsonFieldName{
+		/** The {@code email} field: validated as in {@code JnJsonCommonsFields}, required. */
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		@CcpJsonFieldValidatorRequired
 		email,
 	}
 	
+	/** Singleton; use {@link #INSTANCE}. */
 	private JnBusinessResetLoginToken(){}
 	
+	/** The single instance. */
 	public static final JnBusinessResetLoginToken INSTANCE = new JnBusinessResetLoginToken();
 	
 	/**
-	 * Deletes, in a single round trip to the database, the token in the main entity, the token in
-	 * the twin (where it stays while locked) and the record that marks the token email as already
-	 * sent — the latter because it would reject the new token's email as a repetition.
-	 *
-	 * <p>The three deletions go together in one bulk instead of becoming three calls: the
-	 * {@code JnExecuteBulkOperation} builds each entity's items from the same json and sends them
-	 * at once. Deleting a record that is not there does no harm — the database returns the item as
-	 * not found, without error, and that is the normal case here, since the token is either in the
-	 * main entity or in the twin, never in both.
-	 *
-	 * <p>The json first goes through the email transformer because it is what computes the hash
-	 * that makes up the primary key of both entities. Building the bulk items applies no field
-	 * transformer at all — that is up to the caller —, and without the hash the keys would not
-	 * match those of the saved records.
+	 * Deletes, in a single round trip to the database, the token in the main entity, the token in the twin (where it stays
+	 * while locked) and the record that marks the token e-mail as already sent (it would reject the e-mail of the new token
+	 * as a repetition). Deleting a record that is not there does no harm: the token is either in the main entity or in the
+	 * twin, never in both. The JSON first goes through the e-mail transformer, which computes the hash used by the primary
+	 * keys.
+	 * @param json the request with {@code email}
+	 * @return the request plus {@code language} fixed as Portuguese
 	 */
 	public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
 
@@ -75,7 +69,8 @@ public class JnBusinessResetLoginToken implements CcpBusiness{
 
 
 	/**
-	 * Returns JsonFieldNames.class.
+	 * Validates the input with {@link JsonFieldNames}.
+	 * @return the validation class
 	 */
 	public Class<?> getJsonValidationClass() {
 		return JsonFieldNames.class;

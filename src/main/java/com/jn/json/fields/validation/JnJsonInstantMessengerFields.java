@@ -8,39 +8,49 @@ import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeString;
 import com.jn.business.messages.JnInstantMessageType;
 
 /**
- * Centraliza as definições de validação dos campos JSON específicos de mensagens instantâneas
- * (Telegram). Referenciado via {@code @CcpJsonCopyFieldValidationsFrom(JnJsonInstantMessengerFields.class)}.
+ * Validation rules of the JSON fields of the instant messages; a field takes them through
+ * {@code @CcpJsonCopyFieldValidationsFrom(JnJsonInstantMessengerFields.class)}.
  */
 public enum JnJsonInstantMessengerFields implements CcpJsonFieldName{
 	
+	/** The {@code message} field: text. */
 	@CcpJsonFieldTypeString
 	message, 
 	
+	/** The {@code chatId} field: decimal number. */
 	@CcpJsonFieldTypeNumber
 	chatId, 
 	 
+	/** The {@code moreParameters} field: nested JSON. */
 	@CcpJsonFieldTypeNestedJson
 	moreParameters,
 	
+	/** The {@code caption} field: text. */
 	@CcpJsonFieldTypeString
 	caption,
 
+	/** The {@code fileName} field: text, has a default value. */
 	@CcpJsonFieldTypeString
 	@CcpJsonFieldDefaultValue(defaultStrings = "{file}")
 	fileName,
 	
+	/** The {@code instantMessageType} field: text. */
 	@CcpJsonFieldTypeString(allowedValuesEnum = JnInstantMessageType.class)
 	instantMessageType,
 
+	/** The {@code commandName} field: text. */
 	@CcpJsonFieldTypeString
 	commandName,
 
+	/** The {@code botName} field: text. */
 	@CcpJsonFieldTypeString
 	botName,
 
+	/** The {@code stepName} field: text. */
 	@CcpJsonFieldTypeString
 	stepName,
 	
+	/** The {@code botToken} field: text. */
 	@CcpJsonFieldTypeString
 	botToken,
 

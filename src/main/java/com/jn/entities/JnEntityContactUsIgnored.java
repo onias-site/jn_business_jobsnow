@@ -21,6 +21,17 @@ import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault
 import com.jn.json.fields.validation.JnJsonCommonsFields;
 import com.jn.utils.JnDeleteKeysFromCache;
 
+/**
+ * Contacts of the "Contact Us" form ignored by support; the twin keeps the ones read again.
+ * <p>
+ * Configuration:
+ * <ul>
+ * <li>index {@code jn_contact_us_ignored}</li>
+ * <li>records cached for 86400 seconds</li>
+ * <li>disposable: records expire by the {@code daily} granularity</li>
+ * <li>twin entity {@code jn_contact_us_reread}</li>
+ * </ul>
+ */
 @CcpEntityCustomDecorators(value = {@CcpEntityCustomDecorator(value = JnEntityDisposableBuilder.class, priority = 1),})
 @CcpEntityCache(86400)
 @JnEntityDisposable(value = JnDisposableEntity.class, timeOption = CcpEntityExpurgableOptions.daily)
@@ -31,15 +42,17 @@ import com.jn.utils.JnDeleteKeysFromCache;
 		bulkExecutorClass = JnExecuteBulkOperation.class,
 		functionToDeleteKeysInTheCacheClass = JnDeleteKeysFromCache.class
 		)
-/**
- * Records contacts ignored by support. Disposable entity with daily expiration.
- * Has the twin jn_contact_us_reread for later reuse.
- */
 public class JnEntityContactUsIgnored implements CcpEntityConfigurator {
 	
+	/** The entity {@code jn_contact_us_ignored}, with every decorator of this configuration. */
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityContactUsIgnored.class).entityInstance;
 	
+	/**
+	 * The fields of the entity, with their validation rules (this enum is the class named by
+	 * {@code @CcpEntityFieldsValidator}).
+	 */
 	public static enum Fields implements CcpJsonFieldName{
+		/** The {@code email} field: part of the primary key, validated as in {@code JnJsonCommonsFields}. */
 		@CcpEntityFieldPrimaryKey
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		email

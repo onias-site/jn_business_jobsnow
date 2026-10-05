@@ -21,25 +21,49 @@ import com.jn.json.fields.validation.JnJsonCommonsFields;
  */
 public class JnMessages {
 
+	/** Notice to the support team about a new request to unlock a login token. */
 	public static class JnNotifySupportAboutPendingLockedLoginToken implements CcpBusiness {
+		/**
+		 * Needs no preparation.
+		 * @param json the values of the message
+		 * @return the same JSON
+		 */
 		public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
 			return json;
 		}
 	}
 
+	/** Notice to the support team about a new request to resend a login token. */
 	public static class JnNotifySupportAboutPendingResendLoginToken implements CcpBusiness {
+		/**
+		 * Needs no preparation.
+		 * @param json the values of the message
+		 * @return the same JSON
+		 */
 		public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
 			return json;
 		}
 	}
 
+	/** Notice to the support team that a request to unlock a login token was solved. */
 	public static class JnNotifySupportAboutSolvedLockedLoginToken implements CcpBusiness {
+		/**
+		 * Needs no preparation.
+		 * @param json the values of the message
+		 * @return the same JSON
+		 */
 		public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
 			return json;
 		}
 	}
 
+	/** Notice to the support team that a request to resend a login token was solved. */
 	public static class JnNotifySupportAboutSolvedResendLoginToken implements CcpBusiness {
+		/**
+		 * Needs no preparation.
+		 * @param json the values of the message
+		 * @return the same JSON
+		 */
 		public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
 			return json;
 		}
@@ -52,6 +76,11 @@ public class JnMessages {
 	 * email and token, not the hashes.
 	 */
 	public static class JnNotifyUserAboutLoginToken implements CcpBusiness {
+		/**
+		 * Renames the plain e-mail and token back to {@code email} and {@code token}.
+		 * @param json the values of the message
+		 * @return the values with the readable e-mail and token
+		 */
 		public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
 			CcpJsonRepresentation withOriginalEmail = json
 					.renameField(JnJsonTransformersFieldsEntityDefault.JsonFieldNames.originalEmail, JnJsonCommonsFields.email);
@@ -65,6 +94,11 @@ public class JnMessages {
 	 * Error notice sent to support as a file. See {@link #toSupportNotice(CcpJsonRepresentation)}.
 	 */
 	public static class JnNotifySupportAboutAnError implements CcpBusiness {
+		/**
+		 * Prepares the support notice.
+		 * @param json the error
+		 * @return the notice
+		 */
 		public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
 			CcpJsonRepresentation supportNotice = toSupportNotice(json);
 			return supportNotice;
@@ -75,13 +109,20 @@ public class JnMessages {
 	 * Warning notice sent to support as a file. See {@link #toSupportNotice(CcpJsonRepresentation)}.
 	 */
 	public static class JnNotifySupportAboutWaring implements CcpBusiness {
+		/**
+		 * Prepares the support notice.
+		 * @param json the warning
+		 * @return the notice
+		 */
 		public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
 			CcpJsonRepresentation supportNotice = toSupportNotice(json);
 			return supportNotice;
 		}
 	}
 
+	/** Fields of the support notice. */
 	enum JsonFieldNames implements CcpJsonFieldName {
+		/** The {@code msg} field. */
 		msg
 	}
 

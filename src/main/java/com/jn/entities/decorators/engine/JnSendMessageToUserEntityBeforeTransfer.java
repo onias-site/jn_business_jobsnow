@@ -14,16 +14,33 @@ import com.jn.entities.decorators.annotations.JnEntitySendMessageToUserWhenTrans
  */
 public class JnSendMessageToUserEntityBeforeTransfer extends JnSendMessageToUserEntityOnTransfer {
 
+	/**
+	 * Wraps the entity.
+	 * @param entity the entity decorated so far
+	 * @param annotation the messages configured for the entity
+	 */
 	public JnSendMessageToUserEntityBeforeTransfer(CcpEntity entity, JnEntitySendMessageToUserWhenTransfer annotation) {
 		super(entity, annotation);
 	}
 
+	/**
+	 * Sends the {@code before copy} messages and copies the resulting JSON.
+	 * @param json the record
+	 * @param targetEntity the target entity
+	 * @return whether the record existed in the source
+	 */
 	public boolean copyDataTo(CcpJsonRepresentation json, CcpEntity targetEntity) {
 		CcpJsonRepresentation preparedJson = this.executeFlow(json, CcpEntityOperationPhase._before, CcpEntityDecoratorTransferType.copyDataTo, targetEntity);
 		boolean copied = this.entity.copyDataTo(preparedJson, targetEntity);
 		return copied;
 	}
 
+	/**
+	 * Sends the {@code before transfer} messages and transfers the resulting JSON.
+	 * @param json the record
+	 * @param targetEntity the target entity
+	 * @return whether the record existed in the source
+	 */
 	public boolean transferDataTo(CcpJsonRepresentation json, CcpEntity targetEntity) {
 		CcpJsonRepresentation preparedJson = this.executeFlow(json, CcpEntityOperationPhase._before, CcpEntityDecoratorTransferType.transferDataTo, targetEntity);
 		boolean transfered = this.entity.transferDataTo(preparedJson, targetEntity);

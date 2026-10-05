@@ -25,41 +25,61 @@ import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault
 import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDoNothing;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
 
+/**
+ * Settings for sending each kind of e-mail: sender, template id, subject type and extra parameters. Seeded with the settings of the error notification and of the login token e-mail.
+ * <p>
+ * Configuration:
+ * <ul>
+ * <li>index {@code jn_email_parameters_to_send}</li>
+ * <li>records cached for 3600 seconds</li>
+ * <li>versionable: every write keeps the previous state in {@code jn_versionable}</li>
+ * </ul>
+ */
 @CcpEntityCache(3600)
 @CcpEntityCustomDecorators(value = {@CcpEntityCustomDecorator(value = JnEntityVersionableBuilder.class, priority = 2),@CcpEntityCustomDecorator(value = JnEntityVersionablePurgeBuilder.class, priority = 5),})
 @JnEntityVersionable(JnVersionableEntity.class)
 @CcpEntityFieldsTransformer(classReferenceWithTheFields = JnJsonTransformersFieldsEntityDefault.class)
 @CcpEntityFieldsValidator(classReferenceWithTheFields = JnEntityEmailParametersToSend.Fields.class)
-/**
- * Stores configuration parameters for sending emails: sender, templateId, subject type
- * and additional parameters. Versionable, 1-hour cache. Has initial records for the
- * error notification ({@code JnBusinessNotifyError}) and login token sending
- * ({@code JnNotifyUserAboutLoginToken}) contexts.
- */
 public class JnEntityEmailParametersToSend implements CcpEntityConfigurator{
 
+	/** The entity {@code jn_email_parameters_to_send}, with every decorator of this configuration. */
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityEmailParametersToSend.class).entityInstance;
  
+	/**
+	 * The fields of the entity, with their validation rules (this enum is the class named by
+	 * {@code @CcpEntityFieldsValidator}).
+	 */
 	public static enum Fields implements CcpJsonFieldName{
+		/** The {@code email} field: validated as in {@code JnJsonCommonsFields}, transformed by {@code JnJsonTransformersFieldsEntityDoNothing}. */
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		@CcpEntityFieldTransformer(JnJsonTransformersFieldsEntityDoNothing.class)
 		email, 
+		/** The {@code sender} field: required, validated as in {@code JnJsonCommonsFields}. */
 		@CcpJsonFieldValidatorRequired
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		sender, 
+		/** The {@code templateId} field: part of the primary key, validated as in {@code JnJsonCommonsFields}. */
 		@CcpEntityFieldPrimaryKey
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		templateId, 
+		/** The {@code subjectType} field: required, validated as in {@code JnJsonCommonsFields}. */
 		@CcpJsonFieldValidatorRequired
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		subjectType, 
+		/** The {@code moreParameters} field: validated as in {@code JnJsonCommonsFields}. */
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		moreParameters, 
+		/** The {@code contentType} field: validated as in {@code JnJsonCommonsFields}. */
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		contentType
 		;
 	}
 
+	/**
+	 * Seeds the e-mail settings of the error notification to the developers and of the login token e-mail (with the links
+	 * and names used by its template).
+	 * @return the seed records
+	 */
 	public List<CcpBulkItem> getFirstRecordsToInsert() {
 		String errorParametersWithEmail = "{" + "	\"email\": \"devs.jobsnow@gmail.com\",";
 		String errorParametersWithSender = errorParametersWithEmail + "	\"sender\": \"devs.jobsnow@gmail.com\",";

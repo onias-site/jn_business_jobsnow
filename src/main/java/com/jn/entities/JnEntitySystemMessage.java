@@ -22,24 +22,37 @@ import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault
 import com.jn.json.fields.validation.JnJsonCommonsFields;
 import com.jn.utils.JnLanguage;
 
+/**
+ * Fixed messages of the platform by name and language (internationalization). Seeded with the list of non-professional e-mail domains.
+ * <p>
+ * Configuration:
+ * <ul>
+ * <li>index {@code jn_system_message}</li>
+ * <li>records cached for 3600 seconds</li>
+ * </ul>
+ */
 @CcpEntityCache(3600)
 @CcpEntityFieldsTransformer(classReferenceWithTheFields = JnJsonTransformersFieldsEntityDefault.class)
 @CcpEntityFieldsValidator(classReferenceWithTheFields = JnEntitySystemMessage.Fields.class)
-/**
- * Armazena mensagens do sistema exibidas na interface, indexadas por {@code systemMessageName} e
- * {@code language}. Permite internacionalização de mensagens fixas da plataforma. Cache de 1 hora.
- */
 public class JnEntitySystemMessage implements CcpEntityConfigurator {
 
+	/** The entity {@code jn_system_message}, with every decorator of this configuration. */
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntitySystemMessage.class).entityInstance;
 	
+	/**
+	 * The fields of the entity, with their validation rules (this enum is the class named by
+	 * {@code @CcpEntityFieldsValidator}).
+	 */
 	public static enum Fields implements CcpJsonFieldName{
+		/** The {@code systemMessageName} field: part of the primary key, text. */
 		@CcpEntityFieldPrimaryKey
 		@CcpJsonFieldTypeString
 		systemMessageName, 
+		/** The {@code language} field: part of the primary key, validated as in {@code JnJsonCommonsFields}. */
 		@CcpEntityFieldPrimaryKey
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		language,
+		/** The {@code message} field: required, list, text. */
 		@CcpJsonFieldValidatorRequired
 		@CcpJsonFieldValidatorArray
 		@CcpJsonFieldTypeString
@@ -48,14 +61,12 @@ public class JnEntitySystemMessage implements CcpEntityConfigurator {
 
 	}
 
-	/** Nome da mensagem de sistema que guarda os domínios de e-mail não corporativos. */
+	/** Name of the system message that lists the non-professional e-mail domains. */
 	public static final String NON_PROFESSIONAL_DOMAINS = "NONPROFESSIONALDOMAINS";
 
 	/**
-	 * Carga inicial da entidade: o registro com a lista de domínios de e-mail não corporativos
-	 * (provedores gratuitos e de webmail), que serve para distinguir um e-mail pessoal de um e-mail
-	 * de empresa. A lista tem como semente os domínios que estavam fixos em
-	 * {@code CcpEmailDecorator} e que passam a morar no banco.
+	 * Seeds, in Portuguese, the list of non-professional e-mail domains (public webmail providers).
+	 * @return the seed records
 	 */
 	public List<CcpBulkItem> getFirstRecordsToInsert() {
 

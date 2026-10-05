@@ -18,15 +18,19 @@ import com.ccp.json.fields.validation.CcpJsonCommonsFields;
  */
 class FunctionReprocessMapper implements Function<CcpBulkOperationResult, CcpJsonRepresentation>{
 
+	/** The single instance. */
 	public static final FunctionReprocessMapper INSTANCE = new FunctionReprocessMapper();
 	
+	/** Singleton; use {@link #INSTANCE}. */
 	private FunctionReprocessMapper() {}
 
 	/**
-	 * Extracts the details of the failed bulk item, adds the current timestamp, renames the
-	 * type field to errorType and builds the JSON in the JnEntityRecordToReprocess format.
-	 * Throws a RuntimeException if the item belongs to the reprocessing entity itself
-	 * (loop prevention).
+	 * Converts a failed bulk item into a {@code jn_record_to_reprocess} record: the item fields, the current
+	 * {@code timestamp}, the error details (with {@code type} renamed to {@code errorType}), the {@code id} of the item and
+	 * the name of its entity, reduced to the fields of the entity.
+	 * @param result the failed result
+	 * @return the record to reprocess
+	 * @throws JnErrorReprocessInfiniteLoopPrevented when the failed item is itself a record to reprocess
 	 */
 	public CcpJsonRepresentation apply(CcpBulkOperationResult result) {
 		CcpBulkItem bulkItem = result.getBulkItem();
@@ -51,6 +55,7 @@ class FunctionReprocessMapper implements Function<CcpBulkOperationResult, CcpJso
 		return recordToReprocess;
 	}
 
+	/** Raised when a record to reprocess fails, so it is not turned into another record to reprocess forever. */
 	@SuppressWarnings("serial")
 	private static class JnErrorReprocessInfiniteLoopPrevented extends RuntimeException {
 	}

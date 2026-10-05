@@ -24,6 +24,10 @@ public @interface JnEntitySendMessageToUserWhenTransferOperation {
 	 */
 	JnEntitySendMessageToUserWhenTransferOperationType operationType();
 
+	/**
+	 * The message (a {@code JnMessages} class) whose template and parameters are sent.
+	 * @return the message class
+	 */
 	Class<?> messageTemplate();
 
 	/**

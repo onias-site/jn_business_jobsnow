@@ -14,36 +14,51 @@ import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidatorRequired
 import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
 
+/**
+ * Version history of the versionable entities: each write keeps the previous JSON of the record with the operation, date and time. Written only by {@code JnVersionableEntity}.
+ * <p>
+ * Configuration:
+ * <ul>
+ * <li>index {@code jn_versionable}</li>
+ * <li>read-only: save, delete and transfer do nothing</li>
+ * </ul>
+ */
 @CcpEntityOlyReadable
 @CcpEntityFieldsTransformer(classReferenceWithTheFields = JnJsonTransformersFieldsEntityDefault.class)
 @CcpEntityFieldsValidator(classReferenceWithTheFields = JnEntityVersionable.Fields.class)
 
-/**
- * Tabela de auditoria/histórico de versões. Registra cada operação (save, delete, etc.) realizada
- * sobre entidades versionáveis, armazenando o estado anterior do JSON, a operação, data e hora.
- * Somente leitura — gravada exclusivamente por {@code JnVersionableEntity}.
- */
 public class JnEntityVersionable implements CcpEntityConfigurator {
 
+	/** The entity {@code jn_versionable}, with every decorator of this configuration. */
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityVersionable.class).entityInstance;
 
+	/**
+	 * The fields of the entity, with their validation rules (this enum is the class named by
+	 * {@code @CcpEntityFieldsValidator}).
+	 */
 	public static enum Fields implements CcpJsonFieldName{
+		/** The {@code timestamp} field: part of the primary key, validated as in {@code JnJsonCommonsFields}. */
 		@CcpEntityFieldPrimaryKey
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		timestamp, 
+		/** The {@code operation} field: required, validated as in {@code JnJsonCommonsFields}. */
 		@CcpJsonFieldValidatorRequired
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		operation,
+		/** The {@code date} field: not updatable, required, validated as in {@code JnJsonCommonsFields}. */
 		@CcpEntityFieldNotUpdatable
 		@CcpJsonFieldValidatorRequired
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		date,
+		/** The {@code entity} field: part of the primary key, validated as in {@code JnJsonCommonsFields}. */
 		@CcpEntityFieldPrimaryKey
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		entity, 
+		/** The {@code id} field: part of the primary key, validated as in {@code JnJsonCommonsFields}. */
 		@CcpEntityFieldPrimaryKey
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		id,
+		/** The {@code json} field: validated as in {@code JnJsonCommonsFields}. */
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		json
 		;

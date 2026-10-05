@@ -2,32 +2,45 @@ package com.jn.status.login;
 
 import com.ccp.process.CcpProcessStatus;
 
-/**
- * Statuses da verificação de existência do email de login e completude do cadastro:
- * {@code invalidEmail} (400), {@code lockedToken} (403), {@code missingEmail} (404),
- * {@code lockedPassword} (427), {@code loginConflict} (409), {@code missingPassword} (202),
- * {@code missingAnswers} (201), {@code expectedStatus} (200 — cadastro completo).
- */
+/** Statuses of the check of the login e-mail: whether it exists and how complete the registration is. */
 public enum JnProcessStatusExistsLoginEmail implements CcpProcessStatus{
+	/** Status 400: the e-mail is invalid. */
 	invalidEmail(400),
+	/** Status 403: the login token is locked. */
 	lockedToken(403),
+	/** Status 404: the e-mail has no login token yet. */
 	missingEmail(404),
+	/** Status 427: the password is locked. */
 	lockedPassword(427),
+	/** Status 422: the request is invalid. */
 	invalidJson(422),
+	/** Status 409: the user already has an open session. */
 	loginConflict(409),
+	/** Status 202: the user has not defined a password yet. */
 	missingPassword(202),
+	/** Status 201: the user has not answered the onboarding questions yet. */
 	missingAnswers(201),
+	/** Status 200: success. */
 	expectedStatus(200),
 	;
 
+	/** The HTTP status code. */
 	public final int status;
 	
 	
 	
+	/**
+	 * Associates the HTTP status code.
+	 * @param status the HTTP status code
+	 */
 	private JnProcessStatusExistsLoginEmail(int status) {
 		this.status = status;
 	}
 
+	/**
+	 * Returns the HTTP status code.
+	 * @return the status code
+	 */
 	public int asNumber() {
 		return status;
 	}

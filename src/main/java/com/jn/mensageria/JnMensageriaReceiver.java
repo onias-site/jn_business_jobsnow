@@ -16,18 +16,27 @@ import com.jn.json.fields.validation.JnJsonCommonsFields;
 import com.jn.utils.JnDeleteKeysFromCache;
 
 /**
- * Receptor Singleton de mensagens do PubSub. Roteia cada mensagem recebida para o {@code CcpBusiness}
- * correto com base no campo {@code operation} ou no nome do tópico. Registra o resultado da execução
- * (sucesso ou erro) de volta em {@code JnEntityAsyncTask}, incluindo tempo decorrido e resposta.
+ * Receives the messages of messaging and runs, for each one, the business or the entity operation named by the topic
+ * (and the {@code operation} field); the outcome (success or error, response, end time and elapsed time) is recorded
+ * back in {@code jn_async_task}.
  */
 public class JnMensageriaReceiver extends CcpMensageriaReceiver{
 	
+	/** Singleton; use {@link #INSTANCE}. The operation is read from the {@code operation} field. */
 	private JnMensageriaReceiver() {
 		super(JnJsonCommonsFields.operation.name());
 	}
 	
+	/** The single instance. */
 	public static final JnMensageriaReceiver INSTANCE = new JnMensageriaReceiver();
 	
+	/**
+	 * Records a failed outcome.
+	 * @param entity the entity of the asynchronous tasks
+	 * @param messageDetails the message
+	 * @param e the failure
+	 * @return this instance
+	 */
 	private JnMensageriaReceiver saveResult(
 			CcpEntity entity, 
 			CcpJsonRepresentation messageDetails, 
@@ -39,6 +48,13 @@ public class JnMensageriaReceiver extends CcpMensageriaReceiver{
 		
 	}
 
+	/**
+	 * Records a successful outcome.
+	 * @param entity the entity of the asynchronous tasks
+	 * @param messageDetails the message
+	 * @param response the response of the task
+	 * @return this instance
+	 */
 	private JnMensageriaReceiver saveResult(CcpEntity entity, CcpJsonRepresentation messageDetails, CcpJsonRepresentation response) {
 		JnMensageriaReceiver saveResult = this.saveResult(entity, messageDetails, response, true);
 		return saveResult;
@@ -46,6 +62,13 @@ public class JnMensageriaReceiver extends CcpMensageriaReceiver{
 	
 	
 	
+	/**
+	 * Runs the task and records its outcome; a failure is recorded, not rethrown.
+	 * @param entity the entity of the asynchronous tasks
+	 * @param processName the topic
+	 * @param json the message
+	 * @return this instance
+	 */
 	public JnMensageriaReceiver executeProcess(
 			CcpEntity entity,
 			String processName, 
@@ -63,13 +86,15 @@ public class JnMensageriaReceiver extends CcpMensageriaReceiver{
 	}
 	
 	/**
-	 * Registra o desfecho do processamento na tarefa assíncrona.
-	 *
-	 * <p>O instante de início vem da própria mensagem, e não de uma consulta ao banco:
-	 * {@code JnFunctionMensageriaSender.getMessageDetails} grava {@code started} no json <b>antes</b>
-	 * de publicá-lo, então o campo chega aqui junto com a mensagem. Buscar o registro só para reler
-	 * esse número custava uma ida ao banco por mensagem consumida, em todo fluxo assíncrono do
-	 * sistema.</p>
+	 * Records the outcome of the processing in the asynchronous task.
+	 * <p>The start comes from the message itself, not from a database query: {@code JnFunctionMensageriaSender} writes
+	 * {@code started} in the JSON <b>before</b> publishing it, so the field arrives with the message. Reading the record
+	 * just to get that number cost one database call per message consumed, in every asynchronous flow of the system.</p>
+	 * @param entity the entity of the asynchronous tasks
+	 * @param messageDetails the message
+	 * @param response the response or the error
+	 * @param success whether the task succeeded
+	 * @return this instance
 	 */
 	private JnMensageriaReceiver saveResult(CcpEntity entity, CcpJsonRepresentation messageDetails, CcpJsonRepresentation response, boolean success) {
 		Long finished = System.currentTimeMillis();
@@ -87,20 +112,38 @@ public class JnMensageriaReceiver extends CcpMensageriaReceiver{
 		return this;
 	}
 
+	/**
+	 * The bulk executor of the jn cost center.
+	 * @return {@link JnExecuteBulkOperation#INSTANCE}
+	 */
 	public CcpExecuteBulkOperation getExecuteBulkOperation() {
 		return JnExecuteBulkOperation.INSTANCE;
 	}
 
+	/**
+	 * The cache cleanup of the jn cost center.
+	 * @return {@link JnDeleteKeysFromCache#INSTANCE}
+	 */
 	public Consumer<String[]> getFunctionToDeleteKeysInTheCache() {
 		return JnDeleteKeysFromCache.INSTANCE;
 	}
 	
+	/**
+	 * Builds the entity of the configurator without the asynchronous writer, so the consumer writes for real.
+	 * @param newInstance the configurator
+	 * @return the entity
+	 */
 	protected CcpEntity getCustomEntity(Object newInstance) {
 		CcpEntityConfigurator configurator = (CcpEntityConfigurator)newInstance;
 		CcpEntity entity = CcpEntityFactory.getCustomEntity(configurator, JnEntityAsyncWriterBuilder.INSTANCE);
 		return entity;
 	}
 
+	/**
+	 * Returns the twin of the entity without the asynchronous writer.
+	 * @param entity the entity
+	 * @return the twin
+	 */
 	protected CcpEntity getTwinEntity(CcpEntity entity) {
 		CcpEntity twinEntity = entity.getTwinEntity(JnEntityAsyncWriterBuilder.INSTANCE);
 		return twinEntity;
