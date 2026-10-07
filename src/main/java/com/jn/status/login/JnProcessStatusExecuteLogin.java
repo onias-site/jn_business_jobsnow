@@ -12,6 +12,8 @@ public enum JnProcessStatusExecuteLogin implements CcpProcessStatus{
 	missingSessionToken(401),
 	/** Status 202: the user has not defined a password yet. */
 	missingSavePassword(202),
+	/** Status 201: the user has not answered the pre-registration yet. */
+	missingSaveAnswers(201),
 	/** Status 423: the password is locked. */
 	lockedPassword(423),
 	/** Status 200: success. */

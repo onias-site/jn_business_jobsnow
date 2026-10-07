@@ -43,6 +43,7 @@ import com.jn.status.login.JnProcessStatusSaveAnswers;
 import com.jn.status.login.JnProcessStatusUnlockLoginToken;
 import com.jn.status.login.JnProcessStatusUpdatePassword;
 import com.jn.utils.JnDeleteKeysFromCache;
+import com.jn.utils.JnSystemProperties;
 
 import com.ccp.json.fields.validation.CcpJsonCommonsFields;
 
@@ -80,7 +81,7 @@ public enum JnServiceLogin implements JnService {
 				.ifThisIdIsPresentInEntity(JnEntityLoginPassword.ENTITY.getTwinEntity()).returnStatus(JnProcessStatusExecuteLogin.lockedPassword).and()
 				.ifThisIdIsPresentInEntity(JnEntityLoginSessionConflict.ENTITY).returnStatus(JnProcessStatusExecuteLogin.loginConflict).and()
 				.ifThisIdIsNotPresentInEntity(JnEntityLoginPassword.ENTITY).returnStatus(JnProcessStatusExecuteLogin.missingSavePassword).and()
-				.ifThisIdIsNotPresentInEntity(JnEntityLoginAnswers.ENTITY).returnStatus(JnProcessStatusCreateLoginEmail.missingSaveAnswers).and()
+				.ifThisIdIsNotPresentInEntity(JnEntityLoginAnswers.ENTITY).returnStatus(JnProcessStatusExecuteLogin.missingSaveAnswers).and()
 				.ifThisIdIsPresentInEntity(JnEntityLoginPassword.ENTITY).executeAction(functionToEvaluatePasswordAttempts).andFinallyReturningTheseFields(
 						JnJsonCommonsFields.userAgent,
 						JnJsonCommonsFields.attempts,
@@ -118,7 +119,9 @@ public enum JnServiceLogin implements JnService {
 
 			CcpBusiness lockPassword = CcpEntityOperationType.delete.getOperationCallback(JnEntityLoginPassword.ENTITY);
 
-			CcpBusiness incrementAttempts = JnEntityLoginSessionTokenAttempts.incrementAttempts(3, lockPassword);
+			// the configured limit, the same one of the wrong passwords and tokens (until 2026-10-06 it was a fixed 3)
+			int maxAttempts = JnSystemProperties.INSTANCE.maxAttempts();
+			CcpBusiness incrementAttempts = JnEntityLoginSessionTokenAttempts.incrementAttempts(maxAttempts, lockPassword);
 
 			CcpBusiness resetAttempts = JnEntityLoginSessionTokenAttempts.resetAttempts();
 
@@ -257,8 +260,8 @@ public enum JnServiceLogin implements JnService {
 			.toBeginProcedureAnd()
 				.ifThisIdIsPresentInEntity(JnEntityLoginToken.ENTITY.getTwinEntity()).returnStatus(JnProcessStatusCreateLoginToken.statusLockedToken).and()
 				.ifThisIdIsPresentInEntity(JnEntityMessageDidNotSent.ENTITY).returnStatus(JnProcessStatusCreateLoginToken.statusCanNotSendThisMessage).and()
-				.ifThisIdIsPresentInEntity(JnEntityDisposableRecord.ENTITY).returnStatus(JnProcessStatusUpdatePassword.tokenAlreadySent).and()
-				.ifThisIdIsNotPresentInEntity(JnEntityLoginEmail.ENTITY).returnStatus(JnProcessStatusUpdatePassword.missingEmail).and()
+				.ifThisIdIsPresentInEntity(JnEntityDisposableRecord.ENTITY).returnStatus(JnProcessStatusCreateLoginToken.statusAlreadySentToken).and()
+				.ifThisIdIsNotPresentInEntity(JnEntityLoginEmail.ENTITY).returnStatus(JnProcessStatusCreateLoginToken.statusMissingEmail).and()
 				.ifThisIdIsNotPresentInEntity(JnEntityLoginToken.ENTITY).executeAction(sendUserToken)
 				.andFinallyReturningTheseFields(
 						JnJsonCommonsFields.userAgent,
@@ -299,7 +302,7 @@ public enum JnServiceLogin implements JnService {
 			.loadThisIdFromEntity(JnEntityDisposableRecord.ENTITY).and()
 				.loadThisIdFromEntity(JnEntityLoginTokenAttempts.ENTITY).and()
 				.ifThisIdIsPresentInEntity(JnEntityLoginToken.ENTITY.getTwinEntity()).returnStatus(JnProcessStatusUpdatePassword.lockedToken).and()
-				.ifThisIdIsNotPresentInEntity(JnEntityLoginAnswers.ENTITY).returnStatus(JnProcessStatusCreateLoginEmail.missingSaveAnswers).and()
+				.ifThisIdIsNotPresentInEntity(JnEntityLoginAnswers.ENTITY).returnStatus(JnProcessStatusUpdatePassword.missingSaveAnswers).and()
 				.ifThisIdIsNotPresentInEntity(JnEntityLoginEmail.ENTITY).returnStatus(JnProcessStatusUpdatePassword.missingEmail).and()
 				.ifThisIdIsNotPresentInEntity(JnEntityLoginToken.ENTITY).returnStatus(JnProcessStatusUpdatePassword.missingToken).and()
 				.executeAction(functionToEvaluateTokenAttempts).andFinallyReturningTheseFields(

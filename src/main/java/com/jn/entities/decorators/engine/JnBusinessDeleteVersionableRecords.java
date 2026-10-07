@@ -49,13 +49,21 @@ public class JnBusinessDeleteVersionableRecords implements JnBusinessSendToMensa
 		/** The {@code entitiesToDelete} field. */
 		entitiesToDelete,
 		/** The {@code deleted} field. */
-		deleted
+		deleted,
+		/** The {@code version_conflicts} field of the {@code _delete_by_query} response. */
+		version_conflicts
 	}
 
+	/** Rounds of the purge while rows keep being skipped by version conflicts. */
+	static final int MAX_PURGE_ROUNDS = 3;
+
 	/**
-	 * Deletes, by query, every history row of the record.
+	 * Deletes, by query, every history row of the record. The deletion skips the rows changed while it runs (Elasticsearch
+	 * reports them in {@code version_conflicts}) instead of failing, and is run again, up to {@value #MAX_PURGE_ROUNDS}
+	 * rounds in all, while some row was skipped. Until 2026-10-06 one concurrent write on the history aborted the purge
+	 * with 409.
 	 * @param json {@code entitiesToDelete} (the entity names of the record) and {@code id} (its serialized primary key)
-	 * @return {@code deleted}: how many rows were deleted
+	 * @return {@code deleted}: how many rows were deleted, in all the rounds
 	 */
 	public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
 
@@ -65,16 +73,37 @@ public class JnBusinessDeleteVersionableRecords implements JnBusinessSendToMensa
 
 		CcpQueryExecutorDecorator historyToDelete = request.selectFrom(versionableMetaData.entityName);
 
-		CcpJsonRepresentation response = historyToDelete.delete();
+		long deleted = 0;
 
-		Object noneWasDeleted = 0;
-
-		Object deleted = response.getValueFromPath(noneWasDeleted, JsonFieldNames.deleted);
+		for (int round = 1; round <= MAX_PURGE_ROUNDS; round++) {
+			CcpJsonRepresentation response = historyToDelete.delete();
+			deleted += this.getCount(response, JsonFieldNames.deleted);
+			long versionConflicts = this.getCount(response, JsonFieldNames.version_conflicts);
+			boolean nothingWasSkipped = versionConflicts == 0;
+			if(nothingWasSkipped) {
+				break;
+			}
+		}
 
 		CcpJsonRepresentation result = CcpOtherConstants.EMPTY_JSON
 				.put(JsonFieldNames.deleted, deleted);
 
 		return result;
+	}
+
+	/**
+	 * Reads a counter of the {@code _delete_by_query} response, 0 when absent.
+	 * @param response the response
+	 * @param field the counter
+	 * @return the value
+	 */
+	private long getCount(CcpJsonRepresentation response, JsonFieldNames field) {
+		boolean absent = false == response.containsAllFields(field);
+		if(absent) {
+			return 0;
+		}
+		Long count = response.getAsLongNumber(field);
+		return count;
 	}
 
 	/**

@@ -72,10 +72,9 @@ public class JnDisposableEntity extends CcpDefaultEntityDelegator<Object>{
 	
 	/**
 	 * Formats the current time by the granularity.
-	 * @param json unused
 	 * @return the current period
 	 */
-	private String extractFormatedCurrentTimestamp(CcpJsonRepresentation json) {
+	private String extractFormatedCurrentTimestamp() {
 		long currentTimeMillis = System.currentTimeMillis();
 		String formattedTimestamp = this.timeOption.getFormattedDate(currentTimeMillis);
 		return formattedTimestamp;
@@ -164,7 +163,7 @@ public class JnDisposableEntity extends CcpDefaultEntityDelegator<Object>{
 	 */
 	public String calculateId(CcpJsonRepresentation json) {
 
-		String formattedTimestamp = this.extractFormatedCurrentTimestamp(json);
+		String formattedTimestamp = this.extractFormatedCurrentTimestamp();
 		String entityId = this.entity.calculateId(json);
 
 		ArrayList<Object> onlyPrimaryKeysValues = new ArrayList<>();

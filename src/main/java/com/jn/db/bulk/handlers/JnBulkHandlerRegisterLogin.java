@@ -50,7 +50,6 @@ public class JnBulkHandlerRegisterLogin implements CcpHandleWithSearchResultsInT
 		CcpJsonRepresentation login = JnEntityLoginSessionValidation.ENTITY.getHandledJson(jsonCopy);
 		var newLogin = JnEntityLoginSessionValidation.ENTITY.toBulkItems(login, CcpBulkEntityOperationType.create);
 
-		JnEntityLoginTokenRequestResend.ENTITY.getHandledJson(json);
 		var allBulkItems = new ArrayList<CcpBulkItem>();
 		allBulkItems.addAll(newSession);
 		allBulkItems.addAll(newLogin);

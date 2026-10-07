@@ -36,8 +36,8 @@ public enum JnJsonCommonsFields implements CcpJsonFieldName{
 	@CcpJsonFieldTypeString(allowsEmptyString = true)
 	operation,
 	
-	/** The {@code response} field: text. */
-	@CcpJsonFieldTypeString(maxLength = 500)
+	/** The {@code response} field: text, with no length limit (it holds whole responses and errors, like {@code request}). */
+	@CcpJsonFieldTypeString
 	response,
 	
 	/** The {@code timestamp} field: non-negative integer. */

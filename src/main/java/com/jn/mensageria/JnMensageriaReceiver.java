@@ -90,6 +90,8 @@ public class JnMensageriaReceiver extends CcpMensageriaReceiver{
 	 * <p>The start comes from the message itself, not from a database query: {@code JnFunctionMensageriaSender} writes
 	 * {@code started} in the JSON <b>before</b> publishing it, so the field arrives with the message. Reading the record
 	 * just to get that number cost one database call per message consumed, in every asynchronous flow of the system.</p>
+	 * <p>The response is recorded as JSON text, like {@code request}: the field is {@code text} in {@code jn_async_task},
+	 * and Elasticsearch refuses an object there.</p>
 	 * @param entity the entity of the asynchronous tasks
 	 * @param messageDetails the message
 	 * @param response the response or the error
@@ -98,12 +100,15 @@ public class JnMensageriaReceiver extends CcpMensageriaReceiver{
 	 */
 	private JnMensageriaReceiver saveResult(CcpEntity entity, CcpJsonRepresentation messageDetails, CcpJsonRepresentation response, boolean success) {
 		Long finished = System.currentTimeMillis();
-		Long started = messageDetails.getOrDefault(JnEntityAsyncTask.Fields.started, () -> finished);
+		boolean hasStarted = messageDetails.containsAllFields(JnEntityAsyncTask.Fields.started);
+		// read as a number, not cast: a message that came through JSON (Pub/Sub push or pull) brings started as a double
+		Long started = hasStarted ? messageDetails.getAsLongNumber(JnEntityAsyncTask.Fields.started) : finished;
 		Long enlapsedTime = finished - started;
+		String responseAsText = response.asUgglyJson();
 		CcpJsonRepresentation put = messageDetails
 				.put(JnEntityAsyncTask.Fields.enlapsedTime, enlapsedTime);
 				CcpJsonRepresentation put2 = put
-				.put(JnJsonCommonsFields.response, response);
+				.put(JnJsonCommonsFields.response, responseAsText);
 				CcpJsonRepresentation put3 = put2
 				.put(JnEntityAsyncTask.Fields.finished, finished);
 				CcpJsonRepresentation processResult = put3

@@ -6,11 +6,13 @@ import com.ccp.especifications.http.CcpErrorHttp;
 import com.ccp.especifications.http.CcpErrorHttpClient;
 import com.ccp.especifications.http.CcpErrorHttpServer;
 import com.ccp.especifications.http.CcpHttpApiExecutor;
+import com.ccp.especifications.http.CcpHttpRequester;
 import java.util.function.Function;
 import com.ccp.business.CcpBusiness;
 import com.jn.entities.JnEntityHttpApiErrorClient;
 import com.jn.entities.JnEntityHttpApiErrorServer;
 import com.jn.entities.JnEntityHttpApiRetrySendRequest;
+import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
 
 /**
@@ -49,17 +51,11 @@ public class JnBusinessSendHttpRequest implements CcpBusiness{
 			CcpJsonRepresentation response = this.processThatSendsHttpRequest.execute(json);
 			return response;
 		}catch (CcpErrorHttpServer e) {
-			String details = e.entity.asUgglyJson();
-			CcpJsonRepresentation errorWithRequest = e.entity.mergeWithAnotherJson(json);
-			CcpJsonRepresentation httpErrorDetails = errorWithRequest.put(JnJsonCommonsFields.details, details);
+			CcpJsonRepresentation httpErrorDetails = this.getHttpErrorDetails(e, json);
 			CcpJsonRepresentation retryResponse = this.retryToSendIntantMessage(e, json, httpErrorDetails);
 			return retryResponse;
 		}catch (CcpErrorHttpClient e) {
-			String details = e.entity.asUgglyJson();
-			CcpJsonRepresentation errorWithRequest = e.entity.mergeWithAnotherJson(json);
-			CcpJsonRepresentation httpErrorDetails = errorWithRequest.put(JnJsonCommonsFields.details, details);
-			String request = httpErrorDetails.getAsString(JnJsonCommonsFields.request);
-			httpErrorDetails = httpErrorDetails.put(JnJsonCommonsFields.request, request);
+			CcpJsonRepresentation httpErrorDetails = this.getHttpErrorDetails(e, json);
 			JnEntityHttpApiErrorClient.ENTITY.save(httpErrorDetails);
 			throw e;
 		}catch(Throwable e) {
@@ -67,7 +63,28 @@ public class JnBusinessSendHttpRequest implements CcpBusiness{
 			return handledError;
 		}
 	}
-	
+
+	/**
+	 * Builds the record of an HTTP failure, as the {@code jn_http_api_*} entities require it: the error plus the request,
+	 * the whole error as {@code details}, the {@code request} as text and the returned {@code status} as {@code httpStatus}.
+	 * <p>The {@code timestamp} and {@code date} are filled here, through the same transformer the entities declare: the
+	 * validator of the entity runs before its transformer, so the required fields have to arrive already filled.</p>
+	 * @param e the HTTP error
+	 * @param json the request
+	 * @return the record of the failure
+	 */
+	private CcpJsonRepresentation getHttpErrorDetails(CcpErrorHttp e, CcpJsonRepresentation json) {
+		String details = e.entity.asUgglyJson();
+		CcpJsonRepresentation errorWithRequest = e.entity.mergeWithAnotherJson(json);
+		String request = errorWithRequest.getAsString(JnJsonCommonsFields.request);
+		Integer httpStatus = e.entity.getAsIntegerNumber(CcpHttpRequester.JsonFieldNames.status);
+		CcpJsonRepresentation jsonWithDetails = errorWithRequest.put(JnJsonCommonsFields.details, details);
+		CcpJsonRepresentation jsonWithRequest = jsonWithDetails.put(JnJsonCommonsFields.request, request);
+		CcpJsonRepresentation jsonWithHttpStatus = jsonWithRequest.put(JnJsonCommonsFields.httpStatus, httpStatus);
+		CcpJsonRepresentation httpErrorDetails = JnJsonTransformersFieldsEntityDefault.timestamp.execute(jsonWithHttpStatus);
+		return httpErrorDetails;
+	}
+
 	/**
 	 * Registers one more attempt of the request; when every attempt was used, records the error in
 	 * {@code jn_http_api_error_server} and rethrows it, otherwise sleeps and runs the call again.

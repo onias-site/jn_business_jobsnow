@@ -12,6 +12,8 @@ public enum JnProcessStatusUpdatePassword implements CcpProcessStatus{
 	missingEmail(404),
 	/** Status 404: the user has no login token. */
 	missingToken(404),
+	/** Status 201: the user has not answered the pre-registration yet. */
+	missingSaveAnswers(201),
 	/** Status 427: the token is wrong. */
 	wrongToken(427),
 	/** Status 422: the request is invalid. */
@@ -20,8 +22,6 @@ public enum JnProcessStatusUpdatePassword implements CcpProcessStatus{
 	tokenLockedRecently(429),
 	/** Status 200: success. */
 	expectedStatus(200),
-	/** Status 409: the token was already sent. */
-	tokenAlreadySent(409),
 	;
 
 	/** The HTTP status code. */

@@ -33,7 +33,7 @@ public enum JnInstantMessageType implements CcpBusiness{
 			String message = super.getMessage(json, messageFields, JnJsonCommonsFields.message);
 			String botToken = json.getAsString(JnJsonInstantMessengerFields.botToken);
 			Long chatId = json.getAsLongNumber(JnJsonInstantMessengerFields.chatId);
-			Long replyTo = Double.valueOf(json.getOrDefault(CcpJsonCommonsFields.replyTo, () -> (Object)"0").toString()).longValue();
+			Long replyTo = super.getReplyTo(json);
 			CcpStringDecorator botNameDecorator = json.getAsStringDecorator(JnJsonInstantMessengerFields.botName);
 			CcpJsonFieldName botName = botNameDecorator.jsonFieldName();
 			CcpJsonRepresentation result = instantMessenger.sendTextMessage(botName, botToken, chatId, replyTo, message);
@@ -55,7 +55,7 @@ public enum JnInstantMessageType implements CcpBusiness{
 			
 			String botToken = json.getAsString(JnJsonInstantMessengerFields.botToken) ;
 			Long chatId = json.getAsLongNumber(JnJsonInstantMessengerFields.chatId);
-			Long replyTo = json.getOrDefault(CcpJsonCommonsFields.replyTo, () -> 0L);
+			Long replyTo = super.getReplyTo(json);
 			
 			String message = super.getMessage(json, messageFields, JnJsonCommonsFields.message);
 			String caption = super.getMessage(json, messageFields, JnJsonInstantMessengerFields.caption);
@@ -89,6 +89,24 @@ public enum JnInstantMessageType implements CcpBusiness{
 	private JnInstantMessageType(Class<?> jsonValidationClass) {
 		this.jsonValidationClass = jsonValidationClass;
 	}
+	/**
+	 * Returns the message this one answers, or 0 when it answers none. Read as a number, never cast: after going through
+	 * JSON (Gson, the database, Pub/Sub) the value comes back as a double. Until 2026-10-06 the file sending cast it to
+	 * {@code Long} and failed with {@code ClassCastException}.
+	 * @param json the values of the message
+	 * @return the id of the message answered, or 0
+	 */
+	protected Long getReplyTo(CcpJsonRepresentation json) {
+		boolean answersNoMessage = false == json.containsAllFields(CcpJsonCommonsFields.replyTo);
+
+		if(answersNoMessage) {
+			return 0L;
+		}
+
+		Long replyTo = json.getAsLongNumber(CcpJsonCommonsFields.replyTo);
+		return replyTo;
+	}
+
 	/**
 	 * Resolves the template of a field with the values of the JSON.
 	 * @param json the values

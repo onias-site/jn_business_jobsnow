@@ -29,6 +29,18 @@ import java.util.stream.Stream;
  * by solving conflicts by priority, executes the bulk via CcpBulkExecutor, processes the
  * error results by recursively creating reprocessing records, and invalidates the cache
  * keys of the items that were processed successfully.
+ * <p>
+ * A refused item does <b>not</b> fail the save or the delete of the caller, on purpose: the bulk is self-healing, and
+ * what cannot be healed is kept to be reprocessed later. Per item and status (see {@code CcpBulkEntityOperationType}):
+ * <ul>
+ * <li>{@code create} answered 409 (the record already exists) is sent again as {@code update};</li>
+ * <li>{@code update} answered 404 (the record does not exist) is sent again as {@code create};</li>
+ * <li>{@code delete} answered 404 is silent: Elasticsearch answers {@code "result": "not_found"} without an
+ * {@code error} object, so the item does not count as a failure (deleting what does not exist is done);</li>
+ * <li>any other failure becomes a record of {@code jn_record_to_reprocess}, written by this same bulk mechanism, to be
+ * reprocessed asynchronously.</li>
+ * </ul>
+ * Confirmed against Elasticsearch on 2026-10-06 (bug 52 of the coverage campaign was closed as intended behavior).
  */
 public class JnExecuteBulkOperation implements CcpExecuteBulkOperation{
 

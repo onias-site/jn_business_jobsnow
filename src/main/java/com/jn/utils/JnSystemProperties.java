@@ -165,7 +165,23 @@ public class JnSystemProperties {
 	 * @return the {@code maxAttempts} property, 3 by default
 	 */
 	public int maxAttempts() {
-		Integer asIntegerNumber = this.systemProperties.getOrDefault(Fields.maxAttempts, () -> 3);
+		int maxAttempts = maxAttempts(this.systemProperties);
+		return maxAttempts;
+	}
+
+	/**
+	 * Reads {@code maxAttempts} from the given properties, 3 when it is not there.
+	 * @param properties the system properties
+	 * @return the limit of attempts
+	 */
+	static int maxAttempts(CcpJsonRepresentation properties) {
+		boolean isNotConfigured = false == properties.containsAllFields(Fields.maxAttempts);
+
+		if(isNotConfigured) {
+			return 3;
+		}
+		// read as a number, not cast: a property comes as text
+		Integer asIntegerNumber = properties.getAsIntegerNumber(Fields.maxAttempts);
 		return asIntegerNumber;
 	}
 }

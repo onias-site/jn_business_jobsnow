@@ -15,6 +15,7 @@ import com.ccp.especifications.db.bulk.CcpBulkItem;
 import com.ccp.especifications.db.utils.entity.CcpEntity;
 import com.ccp.especifications.db.utils.entity.decorators.engine.CcpDefaultEntityDelegator;
 import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityMetaData;
+import com.ccp.especifications.db.utils.entity.decorators.enums.CcpEntityExpurgableOptions;
 import com.jn.db.bulk.JnExecuteBulkOperation;
 import com.jn.entities.JnEntityVersionable;
 import com.jn.utils.JnDeleteKeysFromCache;
@@ -99,7 +100,7 @@ public class JnVersionableEntity extends CcpDefaultEntityDelegator<Object>{
 		String id = getVersionableRecordId(entityDetails, recordToAudit);
 		CcpTimeDecorator currentTime = new CcpTimeDecorator();
 
-		String formattedDateTime = currentTime.getFormattedDateTime("dd/MM/yyyy HH:mm:ss.SSS");
+		String formattedDateTime = currentTime.getFormattedDateTime(CcpEntityExpurgableOptions.millisecond.format);
 		CcpJsonRepresentation jsonWithId = CcpOtherConstants.EMPTY_JSON
 				.put(JnJsonCommonsFields.id, id);
 				String recordAsText = "" + recordToAudit;
@@ -188,7 +189,9 @@ public class JnVersionableEntity extends CcpDefaultEntityDelegator<Object>{
 	}
 	
 	/**
-	 * Not supported on this decorator.
+	 * Not supported on this decorator, on purpose: finding a record in {@code jn_versionable} needs a query (by
+	 * {@code entity} and {@code id}, ordered by {@code timestamp}), and online reads (the ones coming from the front end)
+	 * are always get by id; queries run only in queue listeners, asynchronous processes or schedulers. Do not "fix" it.
 	 * @param json the record
 	 * @return never returns
 	 * @throws UnsupportedOperationException always
