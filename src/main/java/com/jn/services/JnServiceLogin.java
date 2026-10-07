@@ -254,7 +254,19 @@ public enum JnServiceLogin implements JnService {
 
 			CcpJsonRepresentation[] parametersToSearchInAllEntities = this.createParametersToSearchInAllEntities(jsonWithSubjectType);
 
-			CcpBusiness sendUserToken = CcpEntityOperationType.save.getOperationCallback(JnEntityLoginToken.ENTITY);
+			CcpBusiness saveTheToken = CcpEntityOperationType.save.getOperationCallback(JnEntityLoginToken.ENTITY);
+
+			CcpBusiness saveTheLoginEmail = CcpEntityOperationType.save.getOperationCallback(JnEntityLoginEmail.ENTITY);
+
+			// the language comes only in the URL of this request; the login e-mail keeps it for the token reset by the support
+			CcpBusiness sendUserToken = new CcpBusiness() {
+				public CcpJsonRepresentation apply(CcpJsonRepresentation tokenRequest) {
+					CcpJsonRepresentation emailAndLanguage = tokenRequest.getJsonPiece(JnJsonCommonsFields.email, JnJsonCommonsFields.language);
+					saveTheLoginEmail.execute(emailAndLanguage);
+					CcpJsonRepresentation savedToken = saveTheToken.execute(tokenRequest);
+					return savedToken;
+				}
+			};
 
 			CcpJsonRepresentation result = new CcpGetEntityId(parametersToSearchInAllEntities)
 			.toBeginProcedureAnd()

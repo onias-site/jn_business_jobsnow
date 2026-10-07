@@ -91,26 +91,43 @@ public class JnFunctionMensageriaSender implements CcpBusiness {
 		CcpJsonRepresentation messageDetails = this.getMessageDetails(put); 
 		
 		JnEntityAsyncTask.ENTITY.save(messageDetails);
-		
-		String receiverName = JnMensageriaReceiver.class.getName();
-		CcpJsonRepresentation put3 = messageDetails
-				.put(CcpMensageriaReceiver.JsonFieldNames.mensageriaReceiver, receiverName);
-				CcpJsonRepresentation put2 = put3
-				.put(CcpMensageriaReceiver.JsonFieldNames.entityName, this.entityName)
-				;
-		this.mensageriaSender.sendToMensageria(this.topic, this.jsonValidationClass, put2);
 
-		return messageDetails; 
+		CcpJsonRepresentation messageWithReceiver = this.getMessageWithReceiver(messageDetails);
+		this.mensageriaSender.sendToMensageria(this.topic, this.jsonValidationClass, messageWithReceiver);
+
+		return messageDetails;
+	}
+
+	/**
+	 * The message as published: the details plus the receiver ({@code mensageriaReceiver}) and the target entity
+	 * ({@code entityName}), which the consumer needs to find who runs it. Both the single and the batch sending publish
+	 * through here; up to 2026-10-07 the batch published the bare details and no message of a batch ran.
+	 * @param messageDetails the details of the message
+	 * @return the message to publish
+	 */
+	private CcpJsonRepresentation getMessageWithReceiver(CcpJsonRepresentation messageDetails) {
+		String receiverName = JnMensageriaReceiver.class.getName();
+		CcpJsonRepresentation messageWithReceiverName = messageDetails
+				.put(CcpMensageriaReceiver.JsonFieldNames.mensageriaReceiver, receiverName);
+		CcpJsonRepresentation messageWithReceiver = messageWithReceiverName
+				.put(CcpMensageriaReceiver.JsonFieldNames.entityName, this.entityName);
+		return messageWithReceiver;
 	}
 	
 	/**
-	 * Returns the name of the class of the topic (see finding: always {@code java.lang.String}, since the topic is a text).
-	 * @return the class name
+	 * Describes the task: the topic (the class of the business or of the configurator of the entity) and, for an entity
+	 * operation, the operation and the entity, e.g. {@code com.jn.entities.JnEntityLoginToken (save, jn_login_token)}.
+	 * Until 2026-10-07 it returned the class of the topic text, so every sender described itself as
+	 * {@code java.lang.String}.
+	 * @return the description
 	 */
 	public String toString() {
-		var topicClass2 = this.topic.getClass();
-		var topicClass2Name = topicClass2.getName();
-		return topicClass2Name;
+		boolean isBusiness = this.operation.isEmpty();
+		if(isBusiness) {
+			return this.topic;
+		}
+		String description = this.topic + " (" + this.operation + ", " + this.entityName + ")";
+		return description;
 	}
 	
 	/**
@@ -148,41 +165,25 @@ public class JnFunctionMensageriaSender implements CcpBusiness {
 	}
 	
 	/**
-	 * Tells whether the task may be recorded as an asynchronous task.
-	 * @param x the message
-	 * @return what the business answers, {@code true} when it is not a business
-	 */
-	private boolean canSave(CcpJsonRepresentation x) {
-		CcpBusiness process = JnMensageriaReceiver.INSTANCE.getProcess(this.topic, x);
-		if(process instanceof CcpBusiness topic) {
-			boolean canSave = topic.canBeSavedAsAsyncTask();
-			return canSave;
-		}
-		return true;
-	}
-	
-	/**
-	 * Records the messages that may be recorded in the entity (one bulk) and publishes them.
+	 * Records the messages in the entity (one bulk) and publishes them, each one exactly as {@link #apply} does: every
+	 * message is recorded and published, whatever {@link CcpBusiness#canBeSavedAsAsyncTask()} answers. Up to 2026-10-07
+	 * the batch skipped (neither recorded nor published) the messages of a business that answered {@code false}, while the
+	 * single sending ran them; the consumer records the outcome in {@code jn_async_task} anyway.
 	 * @param entity the entity of the asynchronous tasks
 	 * @param messages the inputs of the task
 	 * @return this instance
 	 */
 	private JnFunctionMensageriaSender sendToMensageria(CcpEntity entity, CcpJsonRepresentation... messages) {
-		
+
 		List<CcpBulkItem> bulkItems = new ArrayList<>();
 		List<CcpJsonRepresentation> msgs = new ArrayList<>();
-		
+
 		for (CcpJsonRepresentation json : messages) {
 			CcpJsonRepresentation messageDetails = this.getMessageDetails(json);
-			boolean canSave2 = this.canSave(messageDetails);
-
-			boolean canNotSave = false == canSave2;
-			if(canNotSave) {
-				continue;
-			}
-			List<CcpBulkItem> bulkItemsList = entity.toBulkItems(messageDetails, CcpBulkEntityOperationType.create);	
+			List<CcpBulkItem> bulkItemsList = entity.toBulkItems(messageDetails, CcpBulkEntityOperationType.create);
 			bulkItems.addAll(bulkItemsList);
-			msgs.add(messageDetails);
+			CcpJsonRepresentation messageWithReceiver = this.getMessageWithReceiver(messageDetails);
+			msgs.add(messageWithReceiver);
 		}
 		
 		JnExecuteBulkOperation.INSTANCE.executeBulk(bulkItems, JnDeleteKeysFromCache.INSTANCE);

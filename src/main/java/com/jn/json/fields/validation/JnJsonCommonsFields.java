@@ -1,5 +1,6 @@
 package com.jn.json.fields.validation;
 
+import com.ccp.decorators.CcpPasswordDecorator;
 import com.ccp.decorators.CcpEmailDecorator;
 import com.ccp.decorators.CcpJsonFieldName;
 import com.ccp.especifications.http.CcpHttpContentType;
@@ -19,8 +20,8 @@ public enum JnJsonCommonsFields implements CcpJsonFieldName{
 	@CcpJsonFieldTypeString
 	request, 
 
-	/** The {@code password} field: text. */
-	@CcpJsonFieldTypeString(regexValidation = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[^A-Za-z0-9]).{8,}$")
+	/** The {@code password} field: text, a strong password ({@code CcpPasswordDecorator.STRONG_PASSWORD_REGEX}). */
+	@CcpJsonFieldTypeString(regexValidation = CcpPasswordDecorator.STRONG_PASSWORD_REGEX)
 	password,
 	
 	/** The {@code description} field: text. */
@@ -138,8 +139,8 @@ public enum JnJsonCommonsFields implements CcpJsonFieldName{
 	@CcpJsonFieldTypeNumberUnsigned
 	attempts,
 	
-	/** The {@code ip} field: text. */
-	@CcpJsonFieldTypeString(minLength = 7, maxLength = 15)
+	/** The {@code ip} field: text, the IPv4 or IPv6 address of the client (up to 45 characters). */
+	@CcpJsonFieldTypeString(minLength = 7, maxLength = 45)
 	ip,
 	
 	/** The {@code coordinates} field: text. */

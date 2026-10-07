@@ -37,7 +37,14 @@ public class JnEntityLoginEmail implements CcpEntityConfigurator {
 		/** The {@code email} field: part of the primary key, validated as in {@code JnJsonCommonsFields}. */
 		@CcpEntityFieldPrimaryKey
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
-		email
+		email,
+		/**
+		 * The language of the user, recorded on each request of a login token (it comes in the URL of that request). Read
+		 * when the support resets the token, so the new token goes in the language of the user; a record from before
+		 * 2026-10-07 has none, and the message falls back to the language of the system.
+		 */
+		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
+		language
 		;
 	}
 }
