@@ -60,7 +60,10 @@ public enum JnJsonTransformersFieldsEntityDefault implements CcpJsonTransformers
 			return jsonWithOriginalEmail;
 		}
 	},
-	/** Replaces the password with its BCrypt hash, once ({@code passwordAlreadyCalculated} marks it as done). */
+	/**
+	 * Replaces the password with its BCrypt hash, once ({@code passwordAlreadyCalculated} marks it as done); a json with
+	 * no password is returned as is.
+	 */
 	password(false) {
 		/**
 		 * Transforms the password.
@@ -74,7 +77,15 @@ public enum JnJsonTransformersFieldsEntityDefault implements CcpJsonTransformers
 			if(passwordAlreadyCalculated) {
 				return json;
 			}
-			
+
+			// every read of an entity with this field runs the transformers, even with no password in the json: without
+			// this, each read paid a BCrypt hash (cost 12, about 250 ms) of an empty text (until 2026-10-08, ~2.5 s per request)
+			boolean noPassword = false == json.containsAllFields(JnJsonCommonsFields.password);
+
+			if(noPassword) {
+				return json;
+			}
+
 			String plainPassword = json.getAsString(JnJsonCommonsFields.password);
 			
 			CcpPasswordHandler passwordHandler = CcpDependencyInjection.getDependency(CcpPasswordHandler.class);

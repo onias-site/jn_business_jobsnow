@@ -15,6 +15,7 @@ import com.jn.db.bulk.handlers.JnBulkHandlerRegisterLogin;
 import com.jn.db.bulk.handlers.JnBulkHandlerSolveLoginConflict;
 import com.jn.entities.JnEntityLoginPassword;
 import com.jn.entities.JnEntityLoginPasswordAttempts;
+import com.jn.entities.JnEntityLoginTokenAttempts;
 import com.jn.entities.JnEntityLoginSessionValidation;
 import com.jn.services.JnServiceLogin;
 import com.jn.utils.JnDeleteKeysFromCache;
@@ -46,6 +47,9 @@ public class JnBusinessSavePassword implements CcpBusiness {
 		CcpEntity twinEntity = JnEntityLoginPassword.ENTITY.getTwinEntity();
 		CcpEntityBulkHandlerTransferRecordToTwinEntity registerPasswordUnlock = new CcpEntityBulkHandlerTransferRecordToTwinEntity(twinEntity, x -> Arrays.asList());
 		CcpBulkHandlerDelete removePasswordAttempts = new CcpBulkHandlerDelete(JnEntityLoginPasswordAttempts.ENTITY);
+		// the token was right: its wrong attempts start over (until 2026-10-08 they were kept, and after a successful use
+		// one more wrong token was enough to lock it again)
+		CcpBulkHandlerDelete removeTokenAttempts = new CcpBulkHandlerDelete(JnEntityLoginTokenAttempts.ENTITY);
 
 		CcpJsonRepresentation jsonWithTokenField = json.renameField(CcpJsonCommonsFields.sessionToken, JnEntityLoginSessionValidation.Fields.token);
 		CcpBulkHandlerSave updatePassword = new CcpBulkHandlerSave(JnEntityLoginPassword.ENTITY);
@@ -56,6 +60,7 @@ public class JnBusinessSavePassword implements CcpBusiness {
 				, updatePassword
 				, registerPasswordUnlock
 				, removePasswordAttempts
+				, removeTokenAttempts
 				, executeLogout
 				, JnBulkHandlerRegisterLogin.INSTANCE
 				, JnBulkHandlerSolveLoginConflict.INSTANCE

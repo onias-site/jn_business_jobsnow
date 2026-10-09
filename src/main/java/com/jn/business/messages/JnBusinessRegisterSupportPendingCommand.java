@@ -4,6 +4,7 @@ import com.ccp.business.CcpBusiness;
 import com.ccp.constants.CcpOtherConstants;
 import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.decorators.CcpTextDecorator;
+import com.jn.entities.JnEntitySupportCancelledCommand;
 import com.jn.entities.JnEntitySupportPendingCommand;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
 import com.jn.json.fields.validation.JnJsonInstantMessengerFields;
@@ -59,6 +60,9 @@ public class JnBusinessRegisterSupportPendingCommand implements CcpBusiness{
 		CcpJsonRepresentation pendingCommand = pendingCommandWithCommand.put(JnEntitySupportPendingCommand.Fields.timestamp, now);
 
 		JnEntitySupportPendingCommand.ENTITY.save(pendingCommand);
+		// sent again after the user gave it up and before the operator listed the tickets: the cancellation is older
+		// than this ticket and must not delete it
+		JnEntitySupportCancelledCommand.ENTITY.delete(pendingCommand);
 		return json;
 	}
 }

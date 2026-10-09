@@ -13,6 +13,7 @@ import com.jn.db.bulk.JnExecuteBulkOperation;
 import com.jn.entities.JnEntityEmailMessageSent;
 import com.jn.entities.JnEntityLoginEmail;
 import com.jn.entities.JnEntityLoginToken;
+import com.jn.entities.JnEntityLoginTokenAttempts;
 import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
 import com.jn.utils.JnDeleteKeysFromCache;
@@ -64,7 +65,10 @@ public class JnBusinessResetLoginToken implements CcpBusiness{
 				JnDeleteKeysFromCache.INSTANCE,
 				JnEntityLoginToken.ENTITY,
 				lockedToken,
-				JnEntityEmailMessageSent.ENTITY
+				JnEntityEmailMessageSent.ENTITY,
+				// the new token starts with no wrong attempts (until 2026-10-08 the ones that locked the old token were
+				// kept, and one more wrong token locked the new one right away)
+				JnEntityLoginTokenAttempts.ENTITY
 				);
 
 		String userLanguage = this.getUserLanguage(json);
