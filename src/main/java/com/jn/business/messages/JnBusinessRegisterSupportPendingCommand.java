@@ -10,10 +10,11 @@ import com.jn.json.fields.validation.JnJsonCommonsFields;
 import com.jn.json.fields.validation.JnJsonInstantMessengerFields;
 
 /**
- * Called by the instant message sending right after a message is delivered: when it went to the support bot and
+ * Called by the instant message sending right before a message is delivered: when it goes to the support bot and
  * its text is a bot command, the operator has a ticket to solve, and the command is recorded in
- * {@link JnEntitySupportPendingCommand}. Any other message (to the user bot, or a notice to support that is not a
- * command, like the error files) is left alone.
+ * {@link JnEntitySupportPendingCommand}. Recording it before the delivery keeps the ticket even when the provider
+ * fails. Any other message (to the user bot, or a notice to support that is not a command, like the error files) is
+ * left alone.
  *
  * <p>The text recorded is the one the operator received: the template of the message resolved with the values of
  * this sending, the same resolution {@link JnInstantMessageType} applies before delivering it.
@@ -28,7 +29,7 @@ public class JnBusinessRegisterSupportPendingCommand implements CcpBusiness{
 
 	/**
 	 * Records the command sent to the support bot (normalized, with the chat id and the current time) as pending.
-	 * @param json the instant message just delivered
+	 * @param json the instant message about to be delivered
 	 * @return the same JSON
 	 */
 	public CcpJsonRepresentation apply(CcpJsonRepresentation json) {

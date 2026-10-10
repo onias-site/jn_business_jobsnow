@@ -1,4 +1,4 @@
-﻿package com.jn.business.messages;
+package com.jn.business.messages;
 
 import java.util.function.Supplier;
 

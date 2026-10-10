@@ -478,15 +478,16 @@ public class JnDisposableEntity extends CcpDefaultEntityDelegator<Object>{
 	}
 
 	/**
-	 * Returns the key of the copy of the record ({@code id} and {@code entity}), after the field transformers.
+	 * Returns the key of the copy of the record ({@code id} and {@code entity}), after the transformers of the primary key
+	 * fields.
 	 * @param json the record
 	 * @return the key of the copy
 	 */
 	public CcpJsonRepresentation getIdToSearchDisposableRecord(CcpJsonRepresentation json) {
-		
+
 		CcpEntityMetaData entityDetails = this.getEntityMetaData();
-		
-		CcpJsonRepresentation handledJson = entityDetails.entity.getHandledJson(json);
+
+		CcpJsonRepresentation handledJson = entityDetails.entity.getJsonWithHandledPrimaryKey(json);
 		
 		Supplier<CcpJsonRepresentation> jsonSupplier = handledJson.getJsonSupplier();
 		CcpJsonRepresentation primaryKeyValues = entityDetails.getPrimaryKeyValues(jsonSupplier);
@@ -513,9 +514,9 @@ public class JnDisposableEntity extends CcpDefaultEntityDelegator<Object>{
 		CcpJsonRepresentation json = jsonSupplier.get();
 
 		CcpEntityMetaData entityDetails = this.getEntityMetaData();
-		
-		CcpJsonRepresentation handledJson = entityDetails.entity.getHandledJson(json);
-		
+
+		CcpJsonRepresentation handledJson = entityDetails.entity.getJsonWithHandledPrimaryKey(json);
+
 		String id = this.calculateId(handledJson);
 		
 		CcpJsonRepresentation jsonValue = unionAll.getEntityRow(entityDetails.entityName, id);

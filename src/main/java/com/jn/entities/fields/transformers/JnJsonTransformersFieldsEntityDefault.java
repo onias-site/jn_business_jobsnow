@@ -100,8 +100,8 @@ public enum JnJsonTransformersFieldsEntityDefault implements CcpJsonTransformers
 		}
 	},
 	/**
-	 * Replaces the login token with its BCrypt hash, keeping the original in {@code originalToken}; a new token is
-	 * generated when {@code originalToken} is absent.
+	 * Replaces the login token with its BCrypt hash, keeping the original in {@code originalToken}; a json with no
+	 * {@code originalToken} is returned as is.
 	 */
 	token(false) {
 		/**
@@ -111,8 +111,17 @@ public enum JnJsonTransformersFieldsEntityDefault implements CcpJsonTransformers
 		 */
 		public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
 
-			String originalToken = json.getOrDefault(JnJsonCommonsFields.originalToken, () -> super.getOriginalToken());
-			 
+			// every read of the token entity runs the transformers: generating and hashing a token there (BCrypt, cost
+			// 12, about 250 ms) produced a value nobody used. The token is generated where it is born,
+			// JnBusinessPrepareLoginTokenBeforeSave (until 2026-10-08 it was generated here when absent)
+			boolean noToken = false == json.containsAllFields(JnJsonCommonsFields.originalToken);
+
+			if(noToken) {
+				return json;
+			}
+
+			String originalToken = json.getAsString(JnJsonCommonsFields.originalToken);
+
 			CcpPasswordHandler passwordHandler = CcpDependencyInjection.getDependency(CcpPasswordHandler.class);
 			
 			String hashedToken = passwordHandler.getHash(originalToken);

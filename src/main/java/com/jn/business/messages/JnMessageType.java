@@ -109,8 +109,11 @@ public enum JnMessageType implements CcpHttpApiExecutor{
 		}
 		/**
 		 * Gets the bot token via JnSystemProperties, determines the message type, tries to
-		 * send it and handles rate-limit and blocked-bot exceptions. A command delivered to the support bot
-		 * becomes a pending ticket of the operator ({@link JnBusinessRegisterSupportPendingCommand}).
+		 * send it and handles rate-limit and blocked-bot exceptions. A command addressed to the support bot
+		 * becomes a pending ticket of the operator ({@link JnBusinessRegisterSupportPendingCommand}) before the
+		 * sending is tried: until 2026-10-10 the ticket was recorded only after a successful delivery, so a failure of
+		 * the provider (a dropped connection, for instance) left the user's request pending with no ticket, and the
+		 * operator never learned about it. Now the operator still finds it in {@code /pendingTickets}.
 		 */
 		public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
 		
@@ -123,12 +126,12 @@ public enum JnMessageType implements CcpHttpApiExecutor{
 			CcpJsonRepresentation jsonWithBotToken = json.put(JnJsonInstantMessengerFields.botToken, botToken);
 			String messageType = jsonWithBotToken.getAsString(JnJsonInstantMessengerFields.instantMessageType);
 			JnInstantMessageType instantMessenger = JnInstantMessageType.valueOf(messageType);
-			
+			JnBusinessRegisterSupportPendingCommand.INSTANCE.execute(jsonWithBotToken);
+
 			try {
 				CcpJsonRepresentation instantMessengerData = instantMessenger.execute(jsonWithBotToken);
 				CcpJsonRepresentation instantMessageSent = jsonWithBotToken.mergeWithAnotherJson(instantMessengerData);
 				JnEntityInstantMessengerMessageSent.ENTITY.save(instantMessageSent);
-				JnBusinessRegisterSupportPendingCommand.INSTANCE.execute(jsonWithBotToken);
 				return jsonWithBotToken;
 			} catch (CcpHttpTooManyRequests e) {
 				CcpJsonRepresentation retryResponse = this.retryToSendMessage(jsonWithBotToken);

@@ -25,7 +25,10 @@ public class JnBusinessPrepareLoginTokenBeforeSave implements CcpBusiness {
 
 		CcpJsonRepresentation request = json.getInnerJson(JnJsonCommonsFields.request);
 		CcpJsonRepresentation requestMergedWithJson = request.mergeWithAnotherJson(json);
-		CcpJsonRepresentation jsonWithGeneratedToken = requestMergedWithJson
+		// the token is born here: the transformer only hashes a token it is given
+		String originalToken = requestMergedWithJson.getOrDefault(JnJsonCommonsFields.originalToken, () -> JnJsonTransformersFieldsEntityDefault.getOriginalToken());
+		CcpJsonRepresentation jsonWithOriginalToken = requestMergedWithJson.put(JnJsonCommonsFields.originalToken, originalToken);
+		CcpJsonRepresentation jsonWithGeneratedToken = jsonWithOriginalToken
 				.getTransformedJson(JnJsonTransformersFieldsEntityDefault.token);
 		CcpJsonRepresentation jsonWithOriginalEmailCopied = jsonWithGeneratedToken
 				.duplicateValueFromField(JsonFieldNames.originalEmail, JnJsonCommonsFields.email,

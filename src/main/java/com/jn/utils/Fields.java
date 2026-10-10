@@ -10,7 +10,7 @@ public enum Fields implements CcpJsonFieldName{
 		public String getValue() {
 			return "database.address";
 		}
-	},
+	}, 
 	/** The {@code database.secret} property: the credential of the database. */
 	databaseSecret{
 		/** @return the dotted property name */
