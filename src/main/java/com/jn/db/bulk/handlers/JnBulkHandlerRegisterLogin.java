@@ -9,6 +9,7 @@ import com.ccp.especifications.db.bulk.CcpBulkItem;
 import com.ccp.especifications.db.crud.CcpHandleWithSearchResultsInTheEntity;
 import com.ccp.especifications.db.utils.entity.CcpEntity;
 import com.jn.entities.JnEntityLoginSessionConflict;
+import com.jn.entities.fields.transformers.JnJsonTransformersFieldEntityTokenHash;
 import com.jn.entities.JnEntityLoginSessionValidation;
 import com.jn.entities.JnEntityLoginTokenRequestResend;
 import com.jn.entities.JnEntityLoginTokenRequestUnlock;
@@ -44,7 +45,14 @@ public class JnBulkHandlerRegisterLogin implements CcpHandleWithSearchResultsInT
 	 * @return the bulk items
 	 */
 	private List<CcpBulkItem> getBulkItems(CcpJsonRepresentation json) {
-		CcpJsonRepresentation session = JnEntityLoginSessionConflict.ENTITY.getHandledJson(json);
+		// the current session record keeps the hash of the session token, computed here and not by a field transformer: this
+		// json comes already transformed by JnEntityLoginSessionConflict (the entity searched), and a transformer there
+		// would hand the session below a token already hashed, to be hashed again
+		JnJsonTransformersFieldEntityTokenHash tokenHash = new JnJsonTransformersFieldEntityTokenHash();
+		CcpJsonRepresentation jsonWithTokenHash = tokenHash.execute(json);
+		String sessionTokenHash = jsonWithTokenHash.getAsString(JnEntityLoginSessionValidation.Fields.token);
+		CcpJsonRepresentation jsonWithTheCurrentSession = json.put(JnEntityLoginSessionConflict.Fields.currentSessionTokenHash, sessionTokenHash);
+		CcpJsonRepresentation session = JnEntityLoginSessionConflict.ENTITY.getHandledJson(jsonWithTheCurrentSession);
 		var newSession = JnEntityLoginSessionConflict.ENTITY.toBulkItems(session, CcpBulkEntityOperationType.create);
 		CcpJsonRepresentation jsonCopy = new CcpJsonRepresentation(json.content);
 		CcpJsonRepresentation login = JnEntityLoginSessionValidation.ENTITY.getHandledJson(jsonCopy);

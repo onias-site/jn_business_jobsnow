@@ -12,7 +12,6 @@ import com.ccp.business.CcpBusiness;
 import com.ccp.constants.CcpOtherConstants;
 import com.jn.db.bulk.JnExecuteBulkOperation;
 import com.jn.db.bulk.handlers.JnBulkHandlerRegisterLogin;
-import com.jn.db.bulk.handlers.JnBulkHandlerSolveLoginConflict;
 import com.jn.entities.JnEntityLoginPassword;
 import com.jn.entities.JnEntityLoginPasswordAttempts;
 import com.jn.entities.JnEntityLoginTokenAttempts;
@@ -23,8 +22,8 @@ import com.ccp.json.fields.validation.CcpJsonCommonsFields;
 
 /**
  * Saves (or changes) the password of the user, in one bulk operation: saves the new password, moves a locked password
- * back from the twin, deletes the wrong password attempts, terminates the current session, registers a new session and
- * solves the session conflict.
+ * back from the twin, deletes the wrong password attempts and registers a new session as the current one of the e-mail,
+ * which ends every other session of it (see {@code JnBusinessCheckCurrentSession}).
  */
 public class JnBusinessSavePassword implements CcpBusiness {
  
@@ -62,8 +61,10 @@ public class JnBusinessSavePassword implements CcpBusiness {
 				, removePasswordAttempts
 				, removeTokenAttempts
 				, executeLogout
+				// registers the new session as the current one of the e-mail (the create becomes an update when there is
+				// one), which ends every older session; until 2026-10-11 JnBulkHandlerSolveLoginConflict came next and
+				// deleted that record, so a session opened here was not a current login and a second login got in without 409
 				, JnBulkHandlerRegisterLogin.INSTANCE
-				, JnBulkHandlerSolveLoginConflict.INSTANCE
 				);
 		
 		return CcpOtherConstants.EMPTY_JSON;

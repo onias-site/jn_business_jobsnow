@@ -12,6 +12,7 @@ import com.ccp.especifications.db.utils.entity.decorators.enums.CcpEntityExpurga
 import com.ccp.especifications.db.utils.entity.decorators.interfaces.CcpEntityConfigurator;
 import com.ccp.especifications.db.utils.entity.fields.annotations.CcpEntityFieldPrimaryKey;
 import com.ccp.json.validations.fields.annotations.CcpJsonCopyFieldValidationsFrom;
+import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeString;
 import com.jn.entities.decorators.annotations.JnEntityDisposable;
 import com.jn.entities.decorators.builders.JnEntityDisposableBuilder;
 import com.jn.entities.decorators.engine.JnDisposableEntity;
@@ -19,7 +20,8 @@ import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault
 import com.jn.json.fields.validation.JnJsonCommonsFields;
 
 /**
- * Session conflicts: an e-mail tried to log in while another session was active.
+ * The current login session of each e-mail (one per e-mail): while it exists, a new login with the password is refused
+ * as a conflict (409), and only the session whose token hash is stored here is valid.
  * <p>
  * Configuration:
  * <ul>
@@ -45,6 +47,15 @@ public class JnEntityLoginSessionConflict implements CcpEntityConfigurator {
 		/** The {@code email} field: part of the primary key, validated as in {@code JnJsonCommonsFields}. */
 		@CcpEntityFieldPrimaryKey
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
-		email;
+		email,
+		/**
+		 * The {@code currentSessionTokenHash} field: the hash of the token of the current session of the e-mail, computed by
+		 * {@code JnBulkHandlerRegisterLogin} (not by a field transformer, see there why; the name is out of the default
+		 * transformer catalog on purpose, where {@code token} would get BCrypt). Only this session is valid: a login or a
+		 * password save replaces it, and with it every other session of the e-mail stops being accepted (until 2026-10-11 the
+		 * old sessions stayed valid).
+		 */
+		@CcpJsonFieldTypeString
+		currentSessionTokenHash;
 	}
 }

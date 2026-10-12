@@ -11,6 +11,7 @@ import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityMetaDa
 import com.ccp.json.validations.fields.annotations.CcpJsonCopyFieldValidationsFrom;
 import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidatorRequired;
 import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeString;
+import com.jn.business.login.JnBusinessCheckCurrentSession;
 import com.jn.business.login.JnBusinessEvaluateAttempts;
 import com.jn.business.login.JnBusinessExecuteLogin;
 import com.jn.business.login.JnBusinessExecuteLogout;
@@ -97,9 +98,10 @@ public enum JnServiceLogin implements JnService {
 		}
 	},
 	/**
-	 * Validates the session: the {@code sessionToken} must be present (401) and match an open session (401). Every
-	 * invalid session token counts one attempt; the third one deletes (locks) the password, and a valid one resets the
-	 * counter.
+	 * Validates the session: the {@code sessionToken} must be present (401), match an open session (401) and be the current
+	 * session of the e-mail (401, see {@code JnBusinessCheckCurrentSession}). Every token of no open session counts one
+	 * attempt; the third one deletes (locks) the password, and a valid one resets the counter. A session replaced by a
+	 * newer one does not count an attempt.
 	 */
 	ValidateLogin{
 
@@ -128,7 +130,10 @@ public enum JnServiceLogin implements JnService {
 			new CcpGetEntityId(duplicateValueFromField)
 			.toBeginProcedureAnd()
 			.loadThisIdFromEntity(JnEntityLoginSessionTokenAttempts.ENTITY).and()
-				.ifThisIdIsNotPresentInEntity(JnEntityLoginSessionValidation.ENTITY).returnStatus(JnProcessStatusExecuteLogin.invalidSession)
+			.loadThisIdFromEntity(JnEntityLoginSessionConflict.ENTITY).and()
+				.ifThisIdIsNotPresentInEntity(JnEntityLoginSessionValidation.ENTITY).returnStatus(JnProcessStatusExecuteLogin.invalidSession).and()
+				// a session replaced by a newer one of the same e-mail is refused without counting an attempt
+				.executeAction(JnBusinessCheckCurrentSession.TO_VALIDATE_LOGIN)
 				.andFinallyReturningTheseFields(JsonFieldNames.inexistentField)
 			.endThisProcedure(this, incrementAttempts, resetAttempts, JnDeleteKeysFromCache.INSTANCE);
 			return json;
@@ -188,7 +193,10 @@ public enum JnServiceLogin implements JnService {
 			 return json;
 		}
 	},
-	/** Logs out: without an open session (404); otherwise the logout runs asynchronously. */
+	/**
+	 * Logs out: without an open session, or with a session replaced by a newer one of the same e-mail (404); otherwise the
+	 * logout runs asynchronously.
+	 */
 	ExecuteLogout {
 		/**
 		 * Runs the logout checks.
@@ -199,7 +207,10 @@ public enum JnServiceLogin implements JnService {
 			CcpBusiness action = new JnFunctionMensageriaSender(JnBusinessExecuteLogout.INSTANCE);
 			new CcpGetEntityId(json)
 			.toBeginProcedureAnd()
+			.loadThisIdFromEntity(JnEntityLoginSessionConflict.ENTITY).and()
 				.ifThisIdIsNotPresentInEntity(JnEntityLoginSessionValidation.ENTITY).returnStatus(JnProcessStatusExecuteLogout.missingLogin).and()
+				// the logout of a replaced session would delete the record of the current one
+				.executeAction(JnBusinessCheckCurrentSession.TO_EXECUTE_LOGOUT).and()
 				.executeAction(action)
 				.andFinallyReturningTheseFields(JsonFieldNames.inexistentField)
 			.endThisProcedure(this, CcpOtherConstants.DO_NOTHING, CcpOtherConstants.DO_NOTHING, JnDeleteKeysFromCache.INSTANCE)
