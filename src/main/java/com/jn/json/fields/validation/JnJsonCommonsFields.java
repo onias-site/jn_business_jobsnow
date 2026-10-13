@@ -5,6 +5,7 @@ import com.ccp.decorators.CcpEmailDecorator;
 import com.ccp.decorators.CcpJsonFieldName;
 import com.ccp.especifications.http.CcpHttpContentType;
 import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeNestedJson;
+import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeNumber;
 import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeNumberUnsigned;
 import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeString;
 import com.jn.utils.JnLanguage;
@@ -36,7 +37,47 @@ public enum JnJsonCommonsFields implements CcpJsonFieldName{
 	/** The {@code operation} field: text. */
 	@CcpJsonFieldTypeString(allowsEmptyString = true)
 	operation,
-	
+
+	/** The {@code parentId} field: text, the id of the parent of a group (in the resumes, one of their hashes). */
+	@CcpJsonFieldTypeString(minLength = 1, maxLength = 100)
+	parentId,
+
+	/** The {@code parentName} field: text, the kind of the group (for example, {@code resumesGrouping}). */
+	@CcpJsonFieldTypeString(minLength = 2, maxLength = 50)
+	parentName,
+
+	/** The {@code parentJson} field: nested JSON, the values the {@code parentId} was calculated from. */
+	@CcpJsonFieldTypeNestedJson
+	parentJson,
+
+	/** The {@code childName} field: text, the name of the entity of the children of a group (for example, {@code vis_resume}). */
+	@CcpJsonFieldTypeString(minLength = 2, maxLength = 50)
+	childName,
+
+	/** The {@code childJson} field: nested JSON, one child of a group with all of its data. */
+	@CcpJsonFieldTypeNestedJson
+	childJson,
+
+	/** The {@code childPage} field: non-negative integer, the page of a group that holds a share of its children. */
+	@CcpJsonFieldTypeNumberUnsigned
+	childPage,
+
+	/** The {@code childCount} field: non-negative integer, the size of the {@code childJson} list. */
+	@CcpJsonFieldTypeNumberUnsigned
+	childCount,
+
+	/** The {@code btc} field: number from 1,000 to 100,000 (the claim in bitcoin, as its value in reais). */
+	@CcpJsonFieldTypeNumber(minValue = 1_000, maxValue = 100_000)
+	btc,
+
+	/** The {@code clt} field: number from 1,000 to 100,000 (the monthly salary claim as an employee). */
+	@CcpJsonFieldTypeNumber(minValue = 1_000, maxValue = 100_000)
+	clt,
+
+	/** The {@code pj} field: number from 1,000 to 100,000 (the monthly claim as a contractor). */
+	@CcpJsonFieldTypeNumber(minValue = 1_000, maxValue = 100_000)
+	pj,
+
 	/** The {@code response} field: text, with no length limit (it holds whole responses and errors, like {@code request}). */
 	@CcpJsonFieldTypeString
 	response,
