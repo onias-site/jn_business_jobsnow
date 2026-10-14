@@ -399,16 +399,12 @@ public class JnDisposableEntity extends CcpDefaultEntityDelegator<Object>{
 			return false;
 		}
 		
-		CcpJsonRepresentation expurgableIdWithJson = expurgableId.mergeWithAnotherJson(json);
-		
-		CcpJsonRepresentation requiredEntityRow = this.getRecordFromUnionAll(unionAll, expurgableIdWithJson);
-		
-		boolean valid = this.isValidTimestamp(requiredEntityRow);
-		
-		if(valid) {
-			return true;
-		}
-		return false;
+		// the deadline is in the copy itself; until 2026-10-13 it was looked for in the record kept inside the copy, which
+		// has none, so a record read through a union all (the login session, for one) lasted only until the turn of the period
+		Supplier<CcpJsonRepresentation> jsonSupplier = expurgableId.getJsonSupplier();
+		CcpJsonRepresentation disposableCopy = JnEntityDisposableRecord.ENTITY.getRecordFromUnionAll(unionAll, jsonSupplier);
+		boolean valid = this.isValidTimestamp(disposableCopy);
+		return valid;
 	}
 
 	/**

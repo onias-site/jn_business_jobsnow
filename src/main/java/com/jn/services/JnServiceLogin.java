@@ -15,6 +15,7 @@ import com.jn.business.login.JnBusinessCheckCurrentSession;
 import com.jn.business.login.JnBusinessEvaluateAttempts;
 import com.jn.business.login.JnBusinessExecuteLogin;
 import com.jn.business.login.JnBusinessExecuteLogout;
+import com.jn.business.login.JnBusinessRefuseExpiredSession;
 import com.jn.business.login.JnBusinessSavePassword;
 import com.jn.business.messages.JnMessages;
 import com.jn.entities.JnEntityDisposableRecord;
@@ -99,9 +100,9 @@ public enum JnServiceLogin implements JnService {
 	},
 	/**
 	 * Validates the session: the {@code sessionToken} must be present (401), match an open session (401) and be the current
-	 * session of the e-mail (401, see {@code JnBusinessCheckCurrentSession}). Every token of no open session counts one
+	 * session of the e-mail (401, see {@code JnBusinessCheckCurrentSession}). Every token of no session at all counts one
 	 * attempt; the third one deletes (locks) the password, and a valid one resets the counter. A session replaced by a
-	 * newer one does not count an attempt.
+	 * newer one, or one that expired ({@code JnBusinessRefuseExpiredSession}), does not count an attempt.
 	 */
 	ValidateLogin{
 
@@ -131,6 +132,8 @@ public enum JnServiceLogin implements JnService {
 			.toBeginProcedureAnd()
 			.loadThisIdFromEntity(JnEntityLoginSessionTokenAttempts.ENTITY).and()
 			.loadThisIdFromEntity(JnEntityLoginSessionConflict.ENTITY).and()
+				// an expired session is refused without counting an attempt; only a token of no session at all counts one
+				.ifThisIdIsNotPresentInEntity(JnEntityLoginSessionValidation.ENTITY).executeAction(JnBusinessRefuseExpiredSession.INSTANCE).and()
 				.ifThisIdIsNotPresentInEntity(JnEntityLoginSessionValidation.ENTITY).returnStatus(JnProcessStatusExecuteLogin.invalidSession).and()
 				// a session replaced by a newer one of the same e-mail is refused without counting an attempt
 				.executeAction(JnBusinessCheckCurrentSession.TO_VALIDATE_LOGIN)

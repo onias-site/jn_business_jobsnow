@@ -42,7 +42,7 @@ public enum JnJsonCommonsFields implements CcpJsonFieldName{
 	@CcpJsonFieldTypeString(minLength = 1, maxLength = 100)
 	parentId,
 
-	/** The {@code parentName} field: text, the kind of the group (for example, {@code resumesGrouping}). */
+	/** The {@code parentName} field: text, the kind of the group: the name of the entity that calculates its parent id (for example, {@code vis_virtual_hash_grouper}). */
 	@CcpJsonFieldTypeString(minLength = 2, maxLength = 50)
 	parentName,
 
@@ -54,15 +54,11 @@ public enum JnJsonCommonsFields implements CcpJsonFieldName{
 	@CcpJsonFieldTypeString(minLength = 2, maxLength = 50)
 	childName,
 
-	/** The {@code childJson} field: nested JSON, one child of a group with all of its data. */
-	@CcpJsonFieldTypeNestedJson
-	childJson,
+	/** The {@code child} field: text, the id of a record of the entity named by {@code childName} that belongs to a group. */
+	@CcpJsonFieldTypeString(minLength = 1, maxLength = 100)
+	child,
 
-	/** The {@code childPage} field: non-negative integer, the page of a group that holds a share of its children. */
-	@CcpJsonFieldTypeNumberUnsigned
-	childPage,
-
-	/** The {@code childCount} field: non-negative integer, the size of the {@code childJson} list. */
+	/** The {@code childCount} field: non-negative integer, the size of the {@code child} list. */
 	@CcpJsonFieldTypeNumberUnsigned
 	childCount,
 
