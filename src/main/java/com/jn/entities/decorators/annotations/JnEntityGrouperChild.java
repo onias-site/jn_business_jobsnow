@@ -5,7 +5,6 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
-import java.util.function.Function;
 
 import com.jn.entities.decorators.engine.JnGrouperChildEntityAfterWrite;
 import com.jn.entities.decorators.engine.JnGrouperChildEntityBeforeWrite;
@@ -19,9 +18,10 @@ import com.jn.entities.decorators.engine.JnGrouperChildEntityBeforeWrite;
  * <li>delete on the twin side (reactivation): leaves the twin groups and enters the main groups;</li>
  * <li>deleteAnyWhere: leaves the groups of both sides.</li>
  * </ul>
- * The parents of a record are the combinations {@link #parentsCombinations} produces from it, each one identified by the
- * id {@link #parentIdEntity} calculates for it, and the name of that entity is the kind of group ({@code parentName});
- * the record keeps those ids in {@link #storedParentIdsField}, which tells the groups it must leave. An entity without twin keeps only the main groups, and its delete leaves them. Declare both
+ * The parents of a record are the combinations produced from it by the class of {@code @JnStoredParentIdsField}, each
+ * one identified by the id {@link #value} calculates for it, and the name of that entity is the kind of group
+ * ({@code parentName}); the record keeps those ids in the list field annotated with {@code @JnStoredParentIdsField},
+ * which tells the groups it must leave. An entity without twin keeps only the main groups, and its delete leaves them. Declare both
  * builders in {@code @CcpEntityCustomDecorators}: {@code JnEntityGrouperChildBeforeWriteBuilder} with priority 7 (it
  * reads the stored record before it changes) and {@code JnEntityGrouperChildAfterWriteBuilder} with priority 5 (inside
  * the field transformers, after the write).
@@ -31,20 +31,10 @@ import com.jn.entities.decorators.engine.JnGrouperChildEntityBeforeWrite;
 public @interface JnEntityGrouperChild {
 
 	/**
-	 * Produces, from a record, the combination of values of each parent; created by reflection, with a public constructor
-	 * without parameters.
-	 */
-	@SuppressWarnings("rawtypes")
-	Class<? extends Function> parentsCombinations();
-
-	/**
 	 * The class of the entity (a configurator or a virtual entity, with the entity annotations) whose {@code calculateId}
 	 * gives the id of each parent from its combination; its name is the kind of group ({@code parentName}).
 	 */
-	Class<?> parentIdEntity();
-
-	/** The field of the record that keeps the ids of its parents, as they were when it was written. */
-	String storedParentIdsField();
+	Class<?> value();
 
 	/** Decorator class that runs the {@code before} side of the writes. */
 	Class<?> beforeDecoratorClass() default JnGrouperChildEntityBeforeWrite.class;

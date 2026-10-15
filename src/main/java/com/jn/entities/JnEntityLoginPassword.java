@@ -15,9 +15,11 @@ import com.ccp.json.validations.fields.annotations.CcpJsonCopyFieldValidationsFr
 import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidatorRequired;
 import com.jn.db.bulk.JnExecuteBulkOperation;
 import com.jn.entities.decorators.annotations.JnEntityVersionable;
+import com.jn.entities.decorators.annotations.JnEntityVersionablePurge;
 import com.jn.entities.decorators.builders.JnEntityVersionableBuilder;
 import com.jn.entities.decorators.builders.JnEntityVersionablePurgeBuilder;
 import com.jn.entities.decorators.engine.JnVersionableEntity;
+import com.jn.entities.decorators.engine.JnVersionablePurgeEntity;
 import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
 import com.jn.utils.JnDeleteKeysFromCache;
@@ -42,6 +44,7 @@ import com.jn.utils.JnDeleteKeysFromCache;
 @CcpEntityCustomDecorators(value = {@CcpEntityCustomDecorator(value = JnEntityVersionableBuilder.class, priority = 2),@CcpEntityCustomDecorator(value = JnEntityVersionablePurgeBuilder.class, priority = 5),})
 @CcpEntityCache(3600)
 @JnEntityVersionable(JnVersionableEntity.class)
+@JnEntityVersionablePurge(JnVersionablePurgeEntity.class)
 @CcpEntityFieldsTransformer(classReferenceWithTheFields = JnJsonTransformersFieldsEntityDefault.class)
 @CcpEntityFieldsValidator(classReferenceWithTheFields = JnEntityLoginPassword.Fields.class)
 

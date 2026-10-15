@@ -1,12 +1,15 @@
 package com.jn.entities.decorators.engine;
 
+import java.util.Map;
+
 import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.especifications.db.utils.entity.CcpEntity;
 import com.jn.entities.decorators.annotations.JnEntityGrouperChild;
 
 /**
  * Decorator that puts the record in its groups after the writes. It stays inside the field transformers (priority 5):
- * the save sees the record as written, with the fields its parents come from already calculated. The {@code before} side
+ * the save sees the record with the fields its parents come from already transformed, and it is the one that fills the
+ * field of {@code @JnStoredParentIdsField} with the ids of those parents. The {@code before} side
  * is the responsibility of {@code JnGrouperChildEntityBeforeWrite}.
  */
 public class JnGrouperChildEntityAfterWrite extends JnGrouperChildEntityOnWrite {
@@ -21,14 +24,18 @@ public class JnGrouperChildEntityAfterWrite extends JnGrouperChildEntityOnWrite 
 	}
 
 	/**
-	 * Saves and puts the record in the groups of its parents, on the side saved.
+	 * Calculates the parents of the record once: their ids fill the field annotated with {@code @JnStoredParentIdsField}
+	 * before the save, and the record enters their groups, on the side saved, after it.
 	 * @param json the record
 	 * @return whether the record was inserted
 	 */
 	public boolean save(CcpJsonRepresentation json) {
-		boolean inserted = this.entity.save(json);
+		JnEntityGrouperParents parents = this.getParents();
+		Map<String, CcpJsonRepresentation> recordParents = parents.getParents(json);
+		CcpJsonRepresentation jsonWithParentIds = parents.putParentIds(json, recordParents);
+		boolean inserted = this.entity.save(jsonWithParentIds);
 		boolean twinSide = this.isTwinSide();
-		this.addToGroups(twinSide, json);
+		this.addToGroups(twinSide, jsonWithParentIds, parents, recordParents);
 		return inserted;
 	}
 

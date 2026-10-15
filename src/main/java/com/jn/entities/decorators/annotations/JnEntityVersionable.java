@@ -8,7 +8,7 @@ import java.lang.annotation.Target;
 
 /**
  * Makes the entity versionable: every write keeps the previous state of the record in {@code jn_versionable}. Built by
- * {@code JnEntityVersionableBuilder} (priority 2), always together with {@code JnEntityVersionablePurgeBuilder}
+ * {@code JnEntityVersionableBuilder} (priority 2), always together with {@code @JnEntityVersionablePurge} and {@code JnEntityVersionablePurgeBuilder}
  * (priority 5).
  */
 @Retention(RUNTIME)

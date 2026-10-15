@@ -1,7 +1,9 @@
 package com.jn.entities;
 
 import com.jn.entities.decorators.annotations.JnEntityVersionable;
+import com.jn.entities.decorators.annotations.JnEntityVersionablePurge;
 import com.jn.entities.decorators.engine.JnVersionableEntity;
+import com.jn.entities.decorators.engine.JnVersionablePurgeEntity;
 import java.util.List;
 
 import com.ccp.decorators.CcpJsonFieldName;
@@ -38,6 +40,7 @@ import com.jn.json.fields.validation.JnJsonCommonsFields;
 @CcpEntityCache(3600)
 @CcpEntityCustomDecorators(value = {@CcpEntityCustomDecorator(value = JnEntityVersionableBuilder.class, priority = 2),@CcpEntityCustomDecorator(value = JnEntityVersionablePurgeBuilder.class, priority = 5),})
 @JnEntityVersionable(JnVersionableEntity.class)
+@JnEntityVersionablePurge(JnVersionablePurgeEntity.class)
 @CcpEntityFieldsTransformer(classReferenceWithTheFields = JnJsonTransformersFieldsEntityDefault.class)
 @CcpEntityFieldsValidator(classReferenceWithTheFields = JnEntityEmailParametersToSend.Fields.class)
 public class JnEntityEmailParametersToSend implements CcpEntityConfigurator{

@@ -39,8 +39,9 @@ public abstract class JnGrouperChildEntityOnWrite extends CcpEntityDelegator {
 	 * load the entity of the parent ids in the middle of the initialization of the grouped entity.
 	 * @return the parents configured for the entity
 	 */
-	private JnEntityGrouperParents getParents() {
-		JnEntityGrouperParents parents = new JnEntityGrouperParents(this.annotation);
+	protected JnEntityGrouperParents getParents() {
+		CcpEntityMetaData entityDetails = this.getEntityMetaData();
+		JnEntityGrouperParents parents = new JnEntityGrouperParents(this.annotation, entityDetails.configurationClass);
 		return parents;
 	}
 
@@ -101,12 +102,23 @@ public abstract class JnGrouperChildEntityOnWrite extends CcpEntityDelegator {
 	 * @param record the record, its primary key already transformed
 	 */
 	protected void addToGroups(boolean twinSide, CcpJsonRepresentation record) {
+		JnEntityGrouperParents parents = this.getParents();
+		Map<String, CcpJsonRepresentation> recordParents = parents.getParents(record);
+		this.addToGroups(twinSide, record, parents, recordParents);
+	}
+
+	/**
+	 * Puts the record in the groups of parents already calculated, on the given side of the grouper.
+	 * @param twinSide whether the twin side of the grouper is the one written
+	 * @param record the record, its primary key already transformed
+	 * @param parents the parents configured for the entity
+	 * @param recordParents the parents of the record, as {@code JnEntityGrouperParents.getParents} returns them
+	 */
+	protected void addToGroups(boolean twinSide, CcpJsonRepresentation record, JnEntityGrouperParents parents, Map<String, CcpJsonRepresentation> recordParents) {
 		CcpEntity mainEntity = this.getMainEntity();
 		CcpEntityMetaData mainDetails = mainEntity.getEntityMetaData();
 		String childId = mainEntity.calculateId(record);
-		JnEntityGrouperParents parents = this.getParents();
 		String parentName = parents.getParentName();
-		Map<String, CcpJsonRepresentation> recordParents = parents.getParents(record);
 		CcpEntity grouper = JnGroupers.getGrouper(twinSide);
 		JnGroupers.addChild(grouper, parentName, mainDetails.entityName, childId, recordParents);
 	}

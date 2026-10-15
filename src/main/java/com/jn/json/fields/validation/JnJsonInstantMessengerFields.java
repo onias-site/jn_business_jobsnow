@@ -54,5 +54,25 @@ public enum JnJsonInstantMessengerFields implements CcpJsonFieldName{
 	@CcpJsonFieldTypeString
 	botToken,
 
+	/**
+	 * The {@code botReply} field: text, the reply that the engine of a step leaves for the end message of the step, already
+	 * in the language of the session.
+	 */
+	@CcpJsonFieldTypeString
+	botReply,
+
+	/**
+	 * The {@code typedValueToRedirect} field: text, a command that the engine of a step asks the bot to run as if the
+	 * operator had typed it, once the session of the step ends.
+	 */
+	@CcpJsonFieldTypeString
+	typedValueToRedirect,
+
+	/**
+	 * The {@code listToShowAgain} field: text, the command whose list the bot shows again after running
+	 * {@code typedValueToRedirect}.
+	 */
+	@CcpJsonFieldTypeString
+	listToShowAgain,
 
 }

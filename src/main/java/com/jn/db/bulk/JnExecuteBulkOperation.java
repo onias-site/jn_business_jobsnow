@@ -21,7 +21,6 @@ import com.ccp.especifications.db.crud.CcpSelectUnionAll;
 import com.ccp.especifications.db.utils.entity.CcpEntity;
 import com.ccp.process.CcpProcessStatusDefault;
 import com.jn.entities.JnEntityRecordToReprocess;
-import com.jn.utils.JnDeleteKeysFromCache;
 import java.util.stream.Stream;
 
 /**
@@ -132,16 +131,18 @@ public class JnExecuteBulkOperation implements CcpExecuteBulkOperation{
 		var reprocessItemsStream = errorsStream.map(x -> x.getReprocess(FunctionReprocessMapper.INSTANCE, JnEntityRecordToReprocess.ENTITY));
 		List<CcpBulkItem> reprocessItems = reprocessItemsStream.collect(Collectors.toList());
 		this.executeBulk(reprocessItems, functionToDeleteKeysInTheCache);
-		JnExecuteBulkOperation resultAfterCacheCleanup = this.deleteKeysFromCache(allResults);
+		JnExecuteBulkOperation resultAfterCacheCleanup = this.deleteKeysFromCache(allResults, functionToDeleteKeysInTheCache);
 		return resultAfterCacheCleanup; 
 	}
 
 	/**
-	 * Deletes from the cache the keys of the items that succeeded.
+	 * Deletes from the cache the keys of the items that succeeded, through the cleanup given by the caller (until 2026-10-14
+	 * the given one was ignored and every key went to {@code JnDeleteKeysFromCache}, the keys of entities without cache too).
 	 * @param allResults the bulk results
+	 * @param functionToDeleteKeysInTheCache the cache cleanup
 	 * @return this instance
 	 */
-	private JnExecuteBulkOperation deleteKeysFromCache(List<CcpBulkOperationResult> allResults) {
+	private JnExecuteBulkOperation deleteKeysFromCache(List<CcpBulkOperationResult> allResults, Consumer<String[]> functionToDeleteKeysInTheCache) {
 		var resultsStream = new ArrayList<>(allResults).stream();
 		var successfulResultsStream = resultsStream
 		.filter(x -> false == x.hasError());
@@ -152,7 +153,7 @@ public class JnExecuteBulkOperation implements CcpExecuteBulkOperation{
 		int keysToDeleteInCacheSize = keysToDeleteInCache.size();
 		String[] keysToDelete = keysToDeleteInCache.toArray(new String[keysToDeleteInCacheSize]);
 		
-		JnDeleteKeysFromCache.INSTANCE.accept(keysToDelete);
+		functionToDeleteKeysInTheCache.accept(keysToDelete);
 		return this;
 	}
 	
@@ -206,7 +207,7 @@ public class JnExecuteBulkOperation implements CcpExecuteBulkOperation{
 		var reprocessItemsStream = failedResultsStream.map(x -> x.getReprocess(FunctionReprocessMapper.INSTANCE, JnEntityRecordToReprocess.ENTITY));
 		List<CcpBulkItem> reprocessItems = reprocessItemsStream.collect(Collectors.toList());
 		this.executeBulk(reprocessItems, functionToDeleteKeysInTheCache);
-		this.deleteKeysFromCache(allResults);
+		this.deleteKeysFromCache(allResults, functionToDeleteKeysInTheCache);
 
 		int createdStatus = CcpProcessStatusDefault.CREATED.asNumber();
 		Stream<CcpBulkOperationResult> resultsStream = allResults.stream();

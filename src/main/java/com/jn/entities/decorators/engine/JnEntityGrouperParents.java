@@ -1,23 +1,30 @@
 package com.jn.entities.decorators.engine;
 
+import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 
 import com.ccp.decorators.CcpFieldName;
+import com.ccp.decorators.CcpJsonFieldName;
 import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.decorators.CcpReflectionConstructorDecorator;
 import com.ccp.especifications.db.utils.entity.CcpEntity;
 import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityFactory;
 import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityMetaData;
+import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidatorArray;
 import com.jn.entities.decorators.annotations.JnEntityGrouperChild;
+import com.jn.entities.decorators.annotations.JnStoredParentIdsField;
 
 /**
- * The groups of {@code JnEntityGrouper} the records of an entity belong to, as {@code @JnEntityGrouperChild} configures
- * them: the kind of group, the parents of a record (one per combination of its values, each identified by the id of
- * the combination) and the parents a stored record was written with. Any cost center uses it through the annotation
- * alone (the resumes of the vis, grouped by each search they satisfy, are the first).
+ * The groups of {@code JnEntityGrouper} the records of an entity belong to, as {@code @JnEntityGrouperChild} and
+ * {@code @JnStoredParentIdsField} configure them: the kind of group, the parents of a record (one per combination of its
+ * values, each identified by the id of the combination) and the parents a stored record was written with. Any cost
+ * center uses it through the annotations alone (the resumes of the vis, grouped by each search they satisfy, are the
+ * first).
  */
 public class JnEntityGrouperParents {
 
@@ -33,14 +40,71 @@ public class JnEntityGrouperParents {
 	/**
 	 * Reads the grouping configured for the entity.
 	 * @param annotation the grouping configured for the entity
+	 * @param configurationClass the configurator class of the grouped entity, whose fields hold the one annotated with
+	 * {@code @JnStoredParentIdsField}
 	 */
-	public JnEntityGrouperParents(JnEntityGrouperChild annotation) {
-		CcpReflectionConstructorDecorator combinationsConstructor = new CcpReflectionConstructorDecorator(annotation.parentsCombinations());
+	public JnEntityGrouperParents(JnEntityGrouperChild annotation, Class<?> configurationClass) {
+		Field storedParentIdsDeclaration = getStoredParentIdsDeclaration(configurationClass);
+		JnStoredParentIdsField storedParentIdsAnnotation = storedParentIdsDeclaration.getAnnotation(JnStoredParentIdsField.class);
+		CcpReflectionConstructorDecorator combinationsConstructor = new CcpReflectionConstructorDecorator(storedParentIdsAnnotation.value());
 		this.parentsCombinations = combinationsConstructor.newInstance();
 		// built from the annotations of the class, as its ENTITY is: the class does not have to be a configurator
-		CcpEntityFactory parentIdEntityFactory = new CcpEntityFactory(annotation.parentIdEntity());
+		CcpEntityFactory parentIdEntityFactory = new CcpEntityFactory(annotation.value());
 		this.parentIdEntity = parentIdEntityFactory.entityInstance;
-		this.storedParentIdsField = new CcpFieldName(annotation.storedParentIdsField());
+		String storedParentIdsFieldName = storedParentIdsDeclaration.getName();
+		this.storedParentIdsField = new CcpFieldName(storedParentIdsFieldName);
+	}
+
+	/**
+	 * The only field of the entity annotated with {@code @JnStoredParentIdsField}, which must be a list.
+	 * @param configurationClass the configurator class of the grouped entity
+	 * @return the declaration of the field
+	 * @throws JnErrorStoredParentIdsFieldIsMissing when no field carries the annotation
+	 * @throws JnErrorStoredParentIdsFieldIsDuplicated when more than one field carries it
+	 * @throws JnErrorStoredParentIdsFieldIsNotAnArray when the field is not a list
+	 */
+	private static Field getStoredParentIdsDeclaration(Class<?> configurationClass) {
+		Class<?> fieldsClass = CcpEntityFactory.getFieldsClass(configurationClass);
+		Field[] declaredFields = fieldsClass.getDeclaredFields();
+		List<Field> annotatedFields = new ArrayList<>();
+		for (Field declaredField : declaredFields) {
+			Class<?> declaredFieldType = declaredField.getType();
+			boolean isNotAFieldName = false == CcpJsonFieldName.class.isAssignableFrom(declaredFieldType);
+
+			if(isNotAFieldName) {
+				continue;
+			}
+
+			boolean isNotAnnotated = false == declaredField.isAnnotationPresent(JnStoredParentIdsField.class);
+
+			if(isNotAnnotated) {
+				continue;
+			}
+
+			annotatedFields.add(declaredField);
+		}
+
+		boolean noFieldAnnotated = annotatedFields.isEmpty();
+
+		if(noFieldAnnotated) {
+			throw new JnErrorStoredParentIdsFieldIsMissing(configurationClass);
+		}
+
+		int annotatedFieldsCount = annotatedFields.size();
+		boolean moreThanOneFieldAnnotated = annotatedFieldsCount > 1;
+
+		if(moreThanOneFieldAnnotated) {
+			throw new JnErrorStoredParentIdsFieldIsDuplicated(configurationClass, annotatedFields);
+		}
+
+		Field storedParentIdsDeclaration = annotatedFields.get(0);
+		boolean isNotAnArray = false == storedParentIdsDeclaration.isAnnotationPresent(CcpJsonFieldValidatorArray.class);
+
+		if(isNotAnArray) {
+			throw new JnErrorStoredParentIdsFieldIsNotAnArray(configurationClass, storedParentIdsDeclaration);
+		}
+
+		return storedParentIdsDeclaration;
 	}
 
 	/**
@@ -69,6 +133,20 @@ public class JnEntityGrouperParents {
 	}
 
 	/**
+	 * Fills the field annotated with {@code @JnStoredParentIdsField} with the ids of the parents of the record, replacing
+	 * whatever the input brought in it: the stored record tells, later, the groups it must leave.
+	 * @param record the record as it is being written
+	 * @param recordParents the parents of the record, as {@link #getParents} returns them
+	 * @return the record with the ids of its parents
+	 */
+	public CcpJsonRepresentation putParentIds(CcpJsonRepresentation record, Map<String, CcpJsonRepresentation> recordParents) {
+		Set<String> parentIdsSet = recordParents.keySet();
+		List<String> parentIds = new ArrayList<>(parentIdsSet);
+		CcpJsonRepresentation recordWithParentIds = record.put(this.storedParentIdsField, parentIds);
+		return recordWithParentIds;
+	}
+
+	/**
 	 * The parents a stored record belongs to, as they were when it was written: the groups it must leave.
 	 * @param storedRecord the record as it is stored
 	 * @return the parent ids
@@ -76,5 +154,43 @@ public class JnEntityGrouperParents {
 	public List<String> getStoredParentIds(CcpJsonRepresentation storedRecord) {
 		List<String> storedParentIds = storedRecord.getAsStringList(this.storedParentIdsField);
 		return storedParentIds;
+	}
+
+	/** Raised when no field of the grouped entity is annotated with {@code @JnStoredParentIdsField}. */
+	@SuppressWarnings("serial")
+	private static class JnErrorStoredParentIdsFieldIsMissing extends RuntimeException {
+		/**
+		 * Builds the error.
+		 * @param configurationClass the configurator class of the grouped entity
+		 */
+		private JnErrorStoredParentIdsFieldIsMissing(Class<?> configurationClass) {
+			super("No field of " + configurationClass.getName() + " is annotated with @JnStoredParentIdsField");
+		}
+	}
+
+	/** Raised when more than one field of the grouped entity is annotated with {@code @JnStoredParentIdsField}. */
+	@SuppressWarnings("serial")
+	private static class JnErrorStoredParentIdsFieldIsDuplicated extends RuntimeException {
+		/**
+		 * Builds the error.
+		 * @param configurationClass the configurator class of the grouped entity
+		 * @param annotatedFields the fields that carry the annotation
+		 */
+		private JnErrorStoredParentIdsFieldIsDuplicated(Class<?> configurationClass, List<Field> annotatedFields) {
+			super("Only one field of " + configurationClass.getName() + " can be annotated with @JnStoredParentIdsField, found: " + annotatedFields);
+		}
+	}
+
+	/** Raised when the field annotated with {@code @JnStoredParentIdsField} is not a list. */
+	@SuppressWarnings("serial")
+	private static class JnErrorStoredParentIdsFieldIsNotAnArray extends RuntimeException {
+		/**
+		 * Builds the error.
+		 * @param configurationClass the configurator class of the grouped entity
+		 * @param storedParentIdsDeclaration the field that carries the annotation
+		 */
+		private JnErrorStoredParentIdsFieldIsNotAnArray(Class<?> configurationClass, Field storedParentIdsDeclaration) {
+			super("The field " + storedParentIdsDeclaration.getName() + " of " + configurationClass.getName() + " is annotated with @JnStoredParentIdsField, so it must be a list (@CcpJsonFieldValidatorArray)");
+		}
 	}
 }

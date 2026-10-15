@@ -112,8 +112,11 @@ public enum JnJsonCommonsFields implements CcpJsonFieldName{
 	@CcpJsonFieldTypeString(maxLength = 100)
 	subject, 
 	
-	/** The {@code message} field: text. */
-	@CcpJsonFieldTypeString(minLength = 5, maxLength = 500_000)
+	/**
+	 * The {@code message} field: text. Up to 2026-10-14 at most 500,000 characters: the message of an error carrying a
+	 * whole union all (the groups of a resume) went past it, and the exception handler failed without saving the error.
+	 */
+	@CcpJsonFieldTypeString(minLength = 5, maxLength = 50_000_000)
 	message, 
 	
 	/** The {@code sender} field: text. */

@@ -2,9 +2,14 @@ package com.jn.services;
 
 import com.ccp.business.CcpBusiness;
 import com.ccp.constants.CcpOtherConstants;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import com.ccp.decorators.CcpJsonFieldName;
 import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.especifications.db.crud.CcpGetEntityId;
+import com.ccp.flow.CcpErrorFlowDisturb;
 import com.ccp.especifications.db.utils.entity.CcpEntity;
 import com.ccp.especifications.db.utils.entity.CcpEntityOperationType;
 import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityMetaData;
@@ -16,6 +21,7 @@ import com.jn.business.login.JnBusinessEvaluateAttempts;
 import com.jn.business.login.JnBusinessExecuteLogin;
 import com.jn.business.login.JnBusinessExecuteLogout;
 import com.jn.business.login.JnBusinessRefuseExpiredSession;
+import com.jn.business.login.JnBusinessRefuseSessionOfAnotherClient;
 import com.jn.business.login.JnBusinessSavePassword;
 import com.jn.business.messages.JnMessages;
 import com.jn.entities.JnEntityDisposableRecord;
@@ -68,6 +74,28 @@ public enum JnServiceLogin implements JnService {
 		 * @return the resulting fields of the user and the session token
 		 */
 		public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
+			// the session token is generated before the checks: only a successful login hands it over. Until 2026-10-14 every
+			// refusal (the 409 of an open session, for one) answered a new token that never became a session
+			try {
+				CcpJsonRepresentation loggedIn = this.login(json);
+				return loggedIn;
+			} catch (CcpErrorFlowDisturb notLoggedIn) {
+				CcpJsonRepresentation jsonWithoutSessionToken = notLoggedIn.json.removeFields(CcpJsonCommonsFields.sessionToken);
+				List<CcpJsonFieldName> fieldList = new ArrayList<>(Arrays.asList(notLoggedIn.fields));
+				fieldList.remove(CcpJsonCommonsFields.sessionToken);
+				CcpJsonFieldName[] fieldsWithoutSessionToken = fieldList.toArray(new CcpJsonFieldName[0]);
+				String message = notLoggedIn.getMessage();
+				CcpErrorFlowDisturb withoutSessionToken = new CcpErrorFlowDisturb(jsonWithoutSessionToken, notLoggedIn.status, message, fieldsWithoutSessionToken);
+				throw withoutSessionToken;
+			}
+		}
+
+		/**
+		 * Runs the login checks.
+		 * @param json the login request
+		 * @return the resulting fields of the user and the session token
+		 */
+		private CcpJsonRepresentation login(CcpJsonRepresentation json) {
 
 			CcpBusiness functionToEvaluatePasswordAttempts = this.createFunctionToEvaluatePasswordAttempts();
 			CcpJsonRepresentation[] parametersToSearchInAllEntities = this.createParametersToSearchInAllEntities(json);
@@ -102,7 +130,8 @@ public enum JnServiceLogin implements JnService {
 	 * Validates the session: the {@code sessionToken} must be present (401), match an open session (401) and be the current
 	 * session of the e-mail (401, see {@code JnBusinessCheckCurrentSession}). Every token of no session at all counts one
 	 * attempt; the third one deletes (locks) the password, and a valid one resets the counter. A session replaced by a
-	 * newer one, or one that expired ({@code JnBusinessRefuseExpiredSession}), does not count an attempt.
+	 * newer one, one that expired ({@code JnBusinessRefuseExpiredSession}), or the current one sent by another user agent or
+	 * IP ({@code JnBusinessRefuseSessionOfAnotherClient}), does not count an attempt.
 	 */
 	ValidateLogin{
 
@@ -134,6 +163,8 @@ public enum JnServiceLogin implements JnService {
 			.loadThisIdFromEntity(JnEntityLoginSessionConflict.ENTITY).and()
 				// an expired session is refused without counting an attempt; only a token of no session at all counts one
 				.ifThisIdIsNotPresentInEntity(JnEntityLoginSessionValidation.ENTITY).executeAction(JnBusinessRefuseExpiredSession.INSTANCE).and()
+				// the right token sent by another client (user agent or IP) is not a guess against the password
+				.ifThisIdIsNotPresentInEntity(JnEntityLoginSessionValidation.ENTITY).executeAction(JnBusinessRefuseSessionOfAnotherClient.INSTANCE).and()
 				.ifThisIdIsNotPresentInEntity(JnEntityLoginSessionValidation.ENTITY).returnStatus(JnProcessStatusExecuteLogin.invalidSession).and()
 				// a session replaced by a newer one of the same e-mail is refused without counting an attempt
 				.executeAction(JnBusinessCheckCurrentSession.TO_VALIDATE_LOGIN)
@@ -144,7 +175,7 @@ public enum JnServiceLogin implements JnService {
 	},
 
 	/**
-	 * Registers the login e-mail (the first step of the login). In order: a locked token (403), a locked password (427), an
+	 * Registers the login e-mail (the first step of the login). In order: a locked token (403), a locked password (423), an
 	 * open session (409); a new e-mail is saved; then no onboarding answers (201) and no password (202) tell which screen
 	 * comes next.
 	 */
@@ -172,7 +203,7 @@ public enum JnServiceLogin implements JnService {
 	},
 	/**
 	 * Tells how complete the registration of the e-mail is: a locked token (403), no login e-mail (404), a locked password
-	 * (427), an open session (409), no onboarding answers (201), no password (202), or complete (200).
+	 * (423), an open session (409), no onboarding answers (201), no password (202), or complete (200).
 	 */
 	ExistsLoginEmail {
 		/**
@@ -225,7 +256,7 @@ public enum JnServiceLogin implements JnService {
 	},
 	/**
 	 * Saves the onboarding answers. In order: a locked token (403), no login e-mail (404), an open session (409), a locked
-	 * password (427); answers not saved yet are saved; then no password (202).
+	 * password (423); answers not saved yet are saved; then no password (202).
 	 */
 	SaveAnswers {
 		/**
@@ -296,8 +327,7 @@ public enum JnServiceLogin implements JnService {
 						JnJsonCommonsFields.ip,
 						JnJsonCommonsFields.email,
 						JnJsonCommonsFields.expirationDate,
-						JnJsonCommonsFields.dateItWasSaved,
-						CcpJsonCommonsFields.sessionToken
+						JnJsonCommonsFields.dateItWasSaved
 						)
 			.endThisProcedureRetrievingTheResultingData(this, LoadDataAboutToken.INSTANCE, LoadDataAboutToken.INSTANCE, JnDeleteKeysFromCache.INSTANCE);
 
@@ -374,8 +404,7 @@ public enum JnServiceLogin implements JnService {
 				.andFinallyReturningTheseFields(
 						JnJsonCommonsFields.expirationDate,
 						JnJsonCommonsFields.dateItWasSaved,
-						JnJsonCommonsFields.timestamp,
-						CcpJsonCommonsFields.sessionToken
+						JnJsonCommonsFields.timestamp
 						)
 			.endThisProcedureRetrievingTheResultingData(this, LoadDataAboutToken.INSTANCE, save, JnDeleteKeysFromCache.INSTANCE);
 
@@ -413,8 +442,7 @@ public enum JnServiceLogin implements JnService {
 				.andFinallyReturningTheseFields(
 						JnJsonCommonsFields.expirationDate,
 						JnJsonCommonsFields.dateItWasSaved,
-						JnJsonCommonsFields.timestamp,
-						CcpJsonCommonsFields.sessionToken
+						JnJsonCommonsFields.timestamp
 						)
 			.endThisProcedureRetrievingTheResultingData(this, LoadDataAboutToken.INSTANCE, save, JnDeleteKeysFromCache.INSTANCE);
 

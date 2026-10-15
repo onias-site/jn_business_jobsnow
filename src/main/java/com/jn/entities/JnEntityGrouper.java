@@ -12,7 +12,7 @@ import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidatorArray;
 import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidatorRequired;
 import com.jn.db.bulk.JnExecuteBulkOperation;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
-import com.jn.utils.JnDeleteKeysFromCache;
+import com.jn.utils.JnDoNotDeleteKeysFromCache;
 
 /**
  * Generic group of records: a parent (an id, the kind of group and the values the id came from) and the id of every
@@ -30,7 +30,8 @@ import com.jn.utils.JnDeleteKeysFromCache;
 @CcpEntityTwin(
 		twinEntityName = "jn_inactive_grouper",
 		bulkExecutorClass = JnExecuteBulkOperation.class,
-		functionToDeleteKeysInTheCacheClass = JnDeleteKeysFromCache.class
+		// the grouper is not cached: its writes delete no cache key (until 2026-10-14 each group written deleted one)
+		functionToDeleteKeysInTheCacheClass = JnDoNotDeleteKeysFromCache.class
 		)
 @CcpEntityFieldsValidator(classReferenceWithTheFields = JnEntityGrouper.Fields.class)
 public class JnEntityGrouper implements CcpEntityConfigurator {
