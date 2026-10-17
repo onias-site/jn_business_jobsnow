@@ -86,6 +86,18 @@ public class JnMensageriaReceiver extends CcpMensageriaReceiver{
 	}
 	
 	/**
+	 * Runs the task and records its outcome in {@code jn_async_task}, as {@link #executeProcess} does for the consumers
+	 * of Pub/Sub.
+	 * @param processName the topic
+	 * @param json the message
+	 * @return this instance
+	 */
+	public JnMensageriaReceiver executeProcessAndRecordOutcome(String processName, CcpJsonRepresentation json) {
+		JnMensageriaReceiver executeProcess = this.executeProcess(JnEntityAsyncTask.ENTITY, processName, json);
+		return executeProcess;
+	}
+
+	/**
 	 * Records the outcome of the processing in the asynchronous task.
 	 * <p>The start comes from the message itself, not from a database query: {@code JnFunctionMensageriaSender} writes
 	 * {@code started} in the JSON <b>before</b> publishing it, so the field arrives with the message. Reading the record
