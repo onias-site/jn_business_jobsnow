@@ -24,8 +24,8 @@ import com.jn.json.fields.validation.JnJsonCommonsFields;
  * <li>index {@code jn_async_task}</li>
  * </ul>
  */
-@CcpEntityFieldsTransformer(classReferenceWithTheFields = JnJsonTransformersFieldsEntityDefault.class)
-@CcpEntityFieldsValidator(classReferenceWithTheFields = JnEntityAsyncTask.Fields.class)
+@CcpEntityFieldsTransformer(JnJsonTransformersFieldsEntityDefault.class)
+@CcpEntityFieldsValidator(JnEntityAsyncTask.Fields.class)
 public class JnEntityAsyncTask implements CcpEntityConfigurator {
 
 	/** The entity {@code jn_async_task}, with every decorator of this configuration. */

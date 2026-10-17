@@ -2,7 +2,6 @@ package com.jn.business.messages;
 
 import java.util.List;
 
-import com.ccp.business.CcpBusiness;
 import com.ccp.decorators.CcpJsonFieldName;
 import com.ccp.decorators.CcpJsonRepresentation;
 import com.jn.entities.JnEntityLoginToken;
@@ -10,9 +9,9 @@ import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault
 import com.jn.json.fields.validation.JnJsonCommonsFields;
 
 /**
- * Catalog of the message templates sent to the user and to support. Each class name is used
- * as the topic in {@code @JnEntitySendMessageToUserWhenWriteOperation} and in
- * {@code @JnEntitySendMessageToUserWhenTransferOperation}.
+ * Catalog of the message templates sent to the user and to support. Each class is a {@code JnMessageTemplate}, named by
+ * the message annotations of the entities (such as
+ * {@code @CcpAfterSaveFromMainEntitySendAnEmailMessageAndIfFailsSaveAWarning}), and its name is the topic of the sending.
  *
  * <p>Each template is a {@code CcpBusiness}: before composing and sending the message,
  * {@code JnSendMessageToUser.apply} instantiates the topic via reflection and runs its {@code apply},
@@ -22,7 +21,7 @@ import com.jn.json.fields.validation.JnJsonCommonsFields;
 public class JnMessages {
 
 	/** Notice to the support team about a new request to unlock a login token. */
-	public static class JnNotifySupportAboutPendingLockedLoginToken implements CcpBusiness {
+	public static class JnNotifySupportAboutPendingLockedLoginToken implements JnMessageTemplate {
 		/**
 		 * Needs no preparation.
 		 * @param json the values of the message
@@ -34,7 +33,7 @@ public class JnMessages {
 	}
 
 	/** Notice to the support team about a new request to resend a login token. */
-	public static class JnNotifySupportAboutPendingResendLoginToken implements CcpBusiness {
+	public static class JnNotifySupportAboutPendingResendLoginToken implements JnMessageTemplate {
 		/**
 		 * Needs no preparation.
 		 * @param json the values of the message
@@ -46,7 +45,7 @@ public class JnMessages {
 	}
 
 	/** Notice to the support team that a request to unlock a login token was solved. */
-	public static class JnNotifySupportAboutSolvedLockedLoginToken implements CcpBusiness {
+	public static class JnNotifySupportAboutSolvedLockedLoginToken implements JnMessageTemplate {
 		/**
 		 * Needs no preparation.
 		 * @param json the values of the message
@@ -58,7 +57,7 @@ public class JnMessages {
 	}
 
 	/** Notice to the support team that a request to resend a login token was solved. */
-	public static class JnNotifySupportAboutSolvedResendLoginToken implements CcpBusiness {
+	public static class JnNotifySupportAboutSolvedResendLoginToken implements JnMessageTemplate {
 		/**
 		 * Needs no preparation.
 		 * @param json the values of the message
@@ -75,7 +74,7 @@ public class JnMessages {
 	 * {@code token}, so here the fields are renamed back: the message body needs the readable
 	 * email and token, not the hashes.
 	 */
-	public static class JnNotifyUserAboutLoginToken implements CcpBusiness {
+	public static class JnNotifyUserAboutLoginToken implements JnMessageTemplate {
 		/**
 		 * Renames the plain e-mail and token back to {@code email} and {@code token}.
 		 * @param json the values of the message
@@ -93,7 +92,7 @@ public class JnMessages {
 	/**
 	 * Error notice sent to support as a file. See {@link #toSupportNotice(CcpJsonRepresentation)}.
 	 */
-	public static class JnNotifySupportAboutAnError implements CcpBusiness {
+	public static class JnNotifySupportAboutAnError implements JnMessageTemplate {
 		/**
 		 * Prepares the support notice.
 		 * @param json the error
@@ -108,7 +107,7 @@ public class JnMessages {
 	/**
 	 * Warning notice sent to support as a file. See {@link #toSupportNotice(CcpJsonRepresentation)}.
 	 */
-	public static class JnNotifySupportAboutWaring implements CcpBusiness {
+	public static class JnNotifySupportAboutWaring implements JnMessageTemplate {
 		/**
 		 * Prepares the support notice.
 		 * @param json the warning

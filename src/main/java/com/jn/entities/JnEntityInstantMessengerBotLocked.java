@@ -25,8 +25,8 @@ import com.jn.json.fields.validation.JnJsonInstantMessengerFields;
  * </ul>
  */
 @CcpEntityCache(3600)
-@CcpEntityFieldsTransformer(classReferenceWithTheFields = JnJsonTransformersFieldsEntityDefault.class)
-@CcpEntityFieldsValidator(classReferenceWithTheFields = JnEntityInstantMessengerBotLocked.Fields.class)
+@CcpEntityFieldsTransformer(JnJsonTransformersFieldsEntityDefault.class)
+@CcpEntityFieldsValidator(JnEntityInstantMessengerBotLocked.Fields.class)
 public class JnEntityInstantMessengerBotLocked implements CcpEntityConfigurator {
 	
 	/** The entity {@code jn_instant_messenger_bot_locked}, with every decorator of this configuration. */

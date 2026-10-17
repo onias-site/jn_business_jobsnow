@@ -3,8 +3,7 @@ package com.jn.entities;
 import com.ccp.decorators.CcpJsonFieldName;
 import com.ccp.especifications.db.utils.entity.CcpEntity;
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityCache;
-import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityCustomDecorator;
-import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityCustomDecorators;
+import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityDisposable;
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityFieldsTransformer;
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityFieldsValidator;
 import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityFactory;
@@ -13,8 +12,6 @@ import com.ccp.especifications.db.utils.entity.decorators.interfaces.CcpEntityCo
 import com.ccp.especifications.db.utils.entity.fields.annotations.CcpEntityFieldPrimaryKey;
 import com.ccp.json.validations.fields.annotations.CcpJsonCopyFieldValidationsFrom;
 import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidatorRequired;
-import com.jn.entities.decorators.annotations.JnEntityDisposable;
-import com.jn.entities.decorators.builders.JnEntityDisposableBuilder;
 import com.jn.entities.decorators.engine.JnDisposableEntity;
 import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
@@ -30,10 +27,9 @@ import com.jn.json.fields.validation.JnJsonCommonsFields;
  * </ul>
  */
 @CcpEntityCache(3600)
-@CcpEntityCustomDecorators(value = {@CcpEntityCustomDecorator(value = JnEntityDisposableBuilder.class, priority = 1),})
-@JnEntityDisposable(value = JnDisposableEntity.class, timeOption = CcpEntityExpurgableOptions.hourly)
-@CcpEntityFieldsTransformer(classReferenceWithTheFields = JnJsonTransformersFieldsEntityDefault.class)
-@CcpEntityFieldsValidator(classReferenceWithTheFields = JnEntityHttpApiErrorClient.Fields.class)
+@CcpEntityFieldsValidator(JnEntityHttpApiErrorClient.Fields.class)
+@CcpEntityDisposable(value = JnDisposableEntity.class, timeOption = CcpEntityExpurgableOptions.hourly)
+@CcpEntityFieldsTransformer(JnJsonTransformersFieldsEntityDefault.class)
 public class JnEntityHttpApiErrorClient implements CcpEntityConfigurator {
 	
 	/** The entity {@code jn_http_api_error_client}, with every decorator of this configuration. */

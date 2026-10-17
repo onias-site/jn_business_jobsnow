@@ -23,8 +23,8 @@ import com.jn.json.fields.validation.JnJsonCommonsFields;
  * </ul>
  */
 @CcpEntityCache(3600)
-@CcpEntityFieldsTransformer(classReferenceWithTheFields = JnJsonTransformersFieldsEntityDefault.class)
-@CcpEntityFieldsValidator(classReferenceWithTheFields = JnEntityLoginTokenAttempts.Fields.class)
+@CcpEntityFieldsTransformer(JnJsonTransformersFieldsEntityDefault.class)
+@CcpEntityFieldsValidator(JnEntityLoginTokenAttempts.Fields.class)
 public class JnEntityLoginTokenAttempts implements CcpEntityConfigurator {
 
 	/** The entity {@code jn_login_token_attempts}, with every decorator of this configuration. */

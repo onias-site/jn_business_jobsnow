@@ -22,7 +22,7 @@ import com.jn.utils.JnDeleteKeysFromCache;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
 
 /**
- * Versioning decorator ({@code @JnEntityVersionable}): every bulk write of the record also creates a history row in
+ * Versioning decorator ({@code @CcpEntityVersionable}): every bulk write of the record also creates a history row in
  * {@code jn_versionable} with the state of the record before the write (the stored record, or the given fields when it
  * does not exist yet), the operation, the date and time, the entity name and the serialized primary key.
  */

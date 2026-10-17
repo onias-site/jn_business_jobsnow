@@ -24,8 +24,8 @@ import com.jn.messages.JnMustNotSendMessage;
  * <li>records cached for 3600 seconds</li>
  * </ul>
  */
-@CcpEntityFieldsTransformer(classReferenceWithTheFields = JnJsonTransformersFieldsEntityDefault.class)
-@CcpEntityFieldsValidator(classReferenceWithTheFields = JnEntityMessageDidNotSent.Fields.class)
+@CcpEntityFieldsTransformer(JnJsonTransformersFieldsEntityDefault.class)
+@CcpEntityFieldsValidator(JnEntityMessageDidNotSent.Fields.class)
 @CcpEntityCache(3600)
 
 public class JnEntityMessageDidNotSent implements CcpEntityConfigurator {
@@ -51,7 +51,7 @@ public class JnEntityMessageDidNotSent implements CcpEntityConfigurator {
 		
 		/**
 		 * Nome da entidade cuja pesquisa no union-all impediu o envio, tal como gravado por
-		 * {@code JnMustNotSendMessage} e pesquisado por {@code JnServiceLogin}.
+		 * {@code JnMustNotSendMessage} e pesquisado pelo serviço de login.
 		 */
 		@CcpEntityFieldPrimaryKey
 		@CcpJsonFieldValidatorRequired

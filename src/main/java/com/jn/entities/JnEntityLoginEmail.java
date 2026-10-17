@@ -22,8 +22,8 @@ import com.jn.json.fields.validation.JnJsonCommonsFields;
  * </ul>
  */
 @CcpEntityCache(3600)
-@CcpEntityFieldsTransformer(classReferenceWithTheFields = JnJsonTransformersFieldsEntityDefault.class)
-@CcpEntityFieldsValidator(classReferenceWithTheFields = JnEntityLoginEmail.Fields.class)
+@CcpEntityFieldsTransformer(JnJsonTransformersFieldsEntityDefault.class)
+@CcpEntityFieldsValidator(JnEntityLoginEmail.Fields.class)
 public class JnEntityLoginEmail implements CcpEntityConfigurator {
 	
 	/** The entity {@code jn_login_email}, with every decorator of this configuration. */

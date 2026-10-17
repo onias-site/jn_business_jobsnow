@@ -24,8 +24,8 @@ import com.jn.json.fields.validation.JnJsonCommonsFields;
  * </ul>
  */
 @CcpEntityOlyReadable
-@CcpEntityFieldsTransformer(classReferenceWithTheFields = JnJsonTransformersFieldsEntityDefault.class)
-@CcpEntityFieldsValidator(classReferenceWithTheFields = JnEntityVersionable.Fields.class)
+@CcpEntityFieldsTransformer(JnJsonTransformersFieldsEntityDefault.class)
+@CcpEntityFieldsValidator(JnEntityVersionable.Fields.class)
 
 public class JnEntityVersionable implements CcpEntityConfigurator {
 

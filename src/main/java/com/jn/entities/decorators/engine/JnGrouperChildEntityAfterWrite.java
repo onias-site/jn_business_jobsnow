@@ -4,12 +4,12 @@ import java.util.Map;
 
 import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.especifications.db.utils.entity.CcpEntity;
-import com.jn.entities.decorators.annotations.JnEntityGrouperChild;
+import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityGrouperChild;
 
 /**
  * Decorator that puts the record in its groups after the writes. It stays inside the field transformers (priority 5):
  * the save sees the record with the fields its parents come from already transformed, and it is the one that fills the
- * field of {@code @JnStoredParentIdsField} with the ids of those parents. The {@code before} side
+ * field of {@code @CcpStoredParentIdsField} with the ids of those parents. The {@code before} side
  * is the responsibility of {@code JnGrouperChildEntityBeforeWrite}.
  */
 public class JnGrouperChildEntityAfterWrite extends JnGrouperChildEntityOnWrite {
@@ -19,12 +19,12 @@ public class JnGrouperChildEntityAfterWrite extends JnGrouperChildEntityOnWrite 
 	 * @param entity the entity decorated so far
 	 * @param annotation the grouping configured for the entity
 	 */
-	public JnGrouperChildEntityAfterWrite(CcpEntity entity, JnEntityGrouperChild annotation) {
+	public JnGrouperChildEntityAfterWrite(CcpEntity entity, CcpEntityGrouperChild annotation) {
 		super(entity, annotation);
 	}
 
 	/**
-	 * Calculates the parents of the record once: their ids fill the field annotated with {@code @JnStoredParentIdsField}
+	 * Calculates the parents of the record once: their ids fill the field annotated with {@code @CcpStoredParentIdsField}
 	 * before the save, and the record enters their groups, on the side saved, after it.
 	 * @param json the record
 	 * @return whether the record was inserted

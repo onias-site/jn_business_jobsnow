@@ -29,8 +29,8 @@ import com.jn.json.fields.validation.JnJsonCommonsFields;
  * </ul>
  */
 @CcpEntityOlyReadable
-@CcpEntityFieldsTransformer(classReferenceWithTheFields = JnJsonTransformersFieldsEntityDefault.class)
-@CcpEntityFieldsValidator(classReferenceWithTheFields = JnEntityDisposableRecord.Fields.class)
+@CcpEntityFieldsTransformer(JnJsonTransformersFieldsEntityDefault.class)
+@CcpEntityFieldsValidator(JnEntityDisposableRecord.Fields.class)
 public class JnEntityDisposableRecord implements CcpEntityConfigurator {
 
 	/** The entity {@code jn_disposable_record}, with every decorator of this configuration. */

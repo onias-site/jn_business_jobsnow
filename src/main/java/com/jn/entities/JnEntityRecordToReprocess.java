@@ -24,8 +24,8 @@ import com.jn.json.fields.validation.JnJsonCommonsFields;
  * </ul>
  */
 @CcpEntityOlyReadable
-@CcpEntityFieldsTransformer(classReferenceWithTheFields = JnJsonTransformersFieldsEntityDefault.class)
-@CcpEntityFieldsValidator(classReferenceWithTheFields = JnEntityRecordToReprocess.Fields.class)
+@CcpEntityFieldsTransformer(JnJsonTransformersFieldsEntityDefault.class)
+@CcpEntityFieldsValidator(JnEntityRecordToReprocess.Fields.class)
 public class JnEntityRecordToReprocess implements CcpEntityConfigurator {
 	
 	/** The entity {@code jn_record_to_reprocess}, with every decorator of this configuration. */

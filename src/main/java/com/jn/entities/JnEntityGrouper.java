@@ -25,7 +25,7 @@ import com.jn.utils.JnDoNotDeleteKeysFromCache;
  * <p>
  * Twin entity ({@code jn_inactive_grouper}): the children on the main side of their entity are in the main groups, the
  * ones on the twin side (the inactive resumes, for instance) in the twin groups, under the same group keys. The entities
- * annotated with {@code @JnEntityGrouperChild} keep both sides up to date.
+ * annotated with {@code @CcpEntityGrouperChild} keep both sides up to date.
  */
 @CcpEntityTwin(
 		twinEntityName = "jn_inactive_grouper",
@@ -33,7 +33,7 @@ import com.jn.utils.JnDoNotDeleteKeysFromCache;
 		// the grouper is not cached: its writes delete no cache key (until 2026-10-14 each group written deleted one)
 		functionToDeleteKeysInTheCacheClass = JnDoNotDeleteKeysFromCache.class
 		)
-@CcpEntityFieldsValidator(classReferenceWithTheFields = JnEntityGrouper.Fields.class)
+@CcpEntityFieldsValidator(JnEntityGrouper.Fields.class)
 public class JnEntityGrouper implements CcpEntityConfigurator {
 
 	/** The entity {@code jn_grouper}, with every decorator of this configuration. */

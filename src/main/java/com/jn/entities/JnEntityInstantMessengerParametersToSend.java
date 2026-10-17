@@ -9,10 +9,10 @@ import com.ccp.decorators.CcpTemplateFunctions;
 import com.ccp.especifications.db.bulk.CcpBulkItem;
 import com.ccp.especifications.db.utils.entity.CcpEntity;
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityCache;
-import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityCustomDecorator;
-import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityCustomDecorators;
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityFieldsTransformer;
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityFieldsValidator;
+import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityVersionable;
+import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityVersionablePurge;
 import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityFactory;
 import com.ccp.especifications.db.utils.entity.decorators.interfaces.CcpEntityConfigurator;
 import com.ccp.especifications.db.utils.entity.fields.annotations.CcpEntityFieldPrimaryKey;
@@ -26,10 +26,6 @@ import com.jn.business.messages.JnMessages.JnNotifySupportAboutPendingLockedLogi
 import com.jn.business.messages.JnMessages.JnNotifySupportAboutPendingResendLoginToken;
 import com.jn.business.messages.JnMessages.JnNotifySupportAboutSolvedLockedLoginToken;
 import com.jn.business.messages.JnMessages.JnNotifySupportAboutSolvedResendLoginToken;
-import com.jn.entities.decorators.annotations.JnEntityVersionable;
-import com.jn.entities.decorators.annotations.JnEntityVersionablePurge;
-import com.jn.entities.decorators.builders.JnEntityVersionableBuilder;
-import com.jn.entities.decorators.builders.JnEntityVersionablePurgeBuilder;
 import com.jn.entities.decorators.engine.JnVersionableEntity;
 import com.jn.entities.decorators.engine.JnVersionablePurgeEntity;
 import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault;
@@ -48,11 +44,10 @@ import com.jn.json.fields.validation.JnJsonInstantMessengerFields;
  * </ul>
  */
 @CcpEntityCache(3600)
-@CcpEntityCustomDecorators(value = {@CcpEntityCustomDecorator(value = JnEntityVersionableBuilder.class, priority = 2),@CcpEntityCustomDecorator(value = JnEntityVersionablePurgeBuilder.class, priority = 5),})
-@JnEntityVersionable(JnVersionableEntity.class)
-@JnEntityVersionablePurge(JnVersionablePurgeEntity.class)
-@CcpEntityFieldsTransformer(classReferenceWithTheFields = JnJsonTransformersFieldsEntityDefault.class)
-@CcpEntityFieldsValidator(classReferenceWithTheFields = JnEntityInstantMessengerParametersToSend.Fields.class)
+@CcpEntityVersionable(JnVersionableEntity.class)
+@CcpEntityVersionablePurge(JnVersionablePurgeEntity.class)
+@CcpEntityFieldsTransformer(JnJsonTransformersFieldsEntityDefault.class)
+@CcpEntityFieldsValidator(JnEntityInstantMessengerParametersToSend.Fields.class)
 public class JnEntityInstantMessengerParametersToSend implements CcpEntityConfigurator {
 	
 	/** The entity {@code jn_instant_messenger_parameters_to_send}, with every decorator of this configuration. */

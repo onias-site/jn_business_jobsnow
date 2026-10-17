@@ -1,14 +1,13 @@
 package com.jn.entities;
 
-import static com.jn.entities.decorators.enums.JnEntitySendMessageToUserWhenWriteOperationType.afterInsertFromMainEntitySendAnInstantMessageAndIfFailsLogTheError;
-
 import com.ccp.decorators.CcpJsonFieldName;
 import com.ccp.especifications.db.utils.entity.CcpEntity;
+import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityAsyncWriter;
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityCache;
-import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityCustomDecorator;
-import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityCustomDecorators;
+import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityDisposable;
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityFieldsTransformer;
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityFieldsValidator;
+import com.ccp.especifications.db.utils.entity.decorators.annotations.messages.write.CcpAfterInsertFromMainEntitySendAnInstantMessageAndIfFailsLogTheError;
 import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityFactory;
 import com.ccp.especifications.db.utils.entity.decorators.enums.CcpEntityExpurgableOptions;
 import com.ccp.especifications.db.utils.entity.decorators.interfaces.CcpEntityConfigurator;
@@ -17,14 +16,6 @@ import com.ccp.json.validations.fields.annotations.CcpJsonCopyFieldValidationsFr
 import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidatorRequired;
 import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeString;
 import com.jn.business.messages.JnMessages;
-import com.jn.entities.decorators.annotations.JnEntityAsyncWriter;
-import com.jn.entities.decorators.annotations.JnEntityDisposable;
-import com.jn.entities.decorators.annotations.JnEntitySendMessageToUserWhenWrite;
-import com.jn.entities.decorators.annotations.JnEntitySendMessageToUserWhenWriteOperation;
-import com.jn.entities.decorators.builders.JnEntityAsyncWriterBuilder;
-import com.jn.entities.decorators.builders.JnEntityDisposableBuilder;
-import com.jn.entities.decorators.builders.JnEntitySendMessageToUserAfterWriteBuilder;
-import com.jn.entities.decorators.builders.JnEntitySendMessageToUserBeforeWriteBuilder;
 import com.jn.entities.decorators.engine.JnAsyncWriterEntity;
 import com.jn.entities.decorators.engine.JnDisposableEntity;
 import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault;
@@ -42,23 +33,12 @@ import com.jn.json.fields.validation.JnJsonCommonsFields;
  * <li>disposable: records expire by the {@code hourly} granularity</li>
  * </ul>
  */
-@CcpEntityCustomDecorators(value = {
-		@CcpEntityCustomDecorator(value = JnEntityDisposableBuilder.class, priority = 1)
-		,@CcpEntityCustomDecorator(value = JnEntityAsyncWriterBuilder.class, priority = 8)
-		,@CcpEntityCustomDecorator(value = JnEntitySendMessageToUserBeforeWriteBuilder.class, priority = 7)
-		,@CcpEntityCustomDecorator(value = JnEntitySendMessageToUserAfterWriteBuilder.class, priority = 5)
-		})
-@JnEntitySendMessageToUserWhenWrite({
-		@JnEntitySendMessageToUserWhenWriteOperation(
-				operationType = afterInsertFromMainEntitySendAnInstantMessageAndIfFailsLogTheError,
-				messageTemplate = JnMessages.JnNotifySupportAboutWaring.class
-				)
-})
 @CcpEntityCache(3600)
-@JnEntityAsyncWriter(JnAsyncWriterEntity.class)
-@JnEntityDisposable(value = JnDisposableEntity.class, timeOption = CcpEntityExpurgableOptions.hourly)
-@CcpEntityFieldsTransformer(classReferenceWithTheFields = JnJsonTransformersFieldsEntityDefault.class)
-@CcpEntityFieldsValidator(classReferenceWithTheFields = JnEntityJobsnowWarning.Fields.class)
+@CcpEntityAsyncWriter(JnAsyncWriterEntity.class)
+@CcpEntityFieldsValidator(JnEntityJobsnowWarning.Fields.class)
+@CcpEntityDisposable(value = JnDisposableEntity.class, timeOption = CcpEntityExpurgableOptions.hourly)
+@CcpEntityFieldsTransformer(JnJsonTransformersFieldsEntityDefault.class)
+@CcpAfterInsertFromMainEntitySendAnInstantMessageAndIfFailsLogTheError(JnMessages.JnNotifySupportAboutWaring.class)
 public class JnEntityJobsnowWarning implements CcpEntityConfigurator {
 
 	/** The entity {@code jn_jobsnow_warning}, with every decorator of this configuration. */

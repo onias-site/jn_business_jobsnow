@@ -11,7 +11,7 @@ import com.ccp.especifications.db.utils.entity.decorators.interfaces.CcpEntityCo
 import com.ccp.especifications.mensageria.receiver.CcpMensageriaReceiver;
 import com.jn.db.bulk.JnExecuteBulkOperation;
 import com.jn.entities.JnEntityAsyncTask;
-import com.jn.entities.decorators.builders.JnEntityAsyncWriterBuilder;
+import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityDecoratorTypes;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
 import com.jn.utils.JnDeleteKeysFromCache;
 
@@ -152,7 +152,7 @@ public class JnMensageriaReceiver extends CcpMensageriaReceiver{
 	 */
 	protected CcpEntity getCustomEntity(Object newInstance) {
 		CcpEntityConfigurator configurator = (CcpEntityConfigurator)newInstance;
-		CcpEntity entity = CcpEntityFactory.getCustomEntity(configurator, JnEntityAsyncWriterBuilder.INSTANCE);
+		CcpEntity entity = CcpEntityFactory.getCustomEntity(configurator, CcpEntityDecoratorTypes.AsyncWriter);
 		return entity;
 	}
 
@@ -162,7 +162,7 @@ public class JnMensageriaReceiver extends CcpMensageriaReceiver{
 	 * @return the twin
 	 */
 	protected CcpEntity getTwinEntity(CcpEntity entity) {
-		CcpEntity twinEntity = entity.getTwinEntity(JnEntityAsyncWriterBuilder.INSTANCE);
+		CcpEntity twinEntity = entity.getTwinEntity(CcpEntityDecoratorTypes.AsyncWriter);
 		return twinEntity;
 	}
 

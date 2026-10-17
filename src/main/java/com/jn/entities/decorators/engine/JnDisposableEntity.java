@@ -28,7 +28,7 @@ import com.jn.json.fields.validation.JnJsonCommonsFields;
 import com.jn.utils.JnDeleteKeysFromCache;
 
 /**
- * Expiration decorator ({@code @JnEntityDisposable}). The id of a record is the SHA-1 of the current period (formatted by
+ * Expiration decorator ({@code @CcpEntityDisposable}). The id of a record is the SHA-1 of the current period (formatted by
  * the granularity) plus the original id, so each period has its own document; every write also writes, in
  * {@code jn_disposable_record}, a copy of the record keyed by entity and primary key with the expiration timestamp
  * (see finding: the expiration is computed from the current time). A record counts as present when the document of the

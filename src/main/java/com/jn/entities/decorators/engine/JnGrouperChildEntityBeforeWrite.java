@@ -2,7 +2,7 @@ package com.jn.entities.decorators.engine;
 
 import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.especifications.db.utils.entity.CcpEntity;
-import com.jn.entities.decorators.annotations.JnEntityGrouperChild;
+import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityGrouperChild;
 
 /**
  * Decorator that takes the record out of its groups before the writes, while it can still be read as it is stored. It
@@ -16,7 +16,7 @@ public class JnGrouperChildEntityBeforeWrite extends JnGrouperChildEntityOnWrite
 	 * @param entity the entity decorated so far
 	 * @param annotation the grouping configured for the entity
 	 */
-	public JnGrouperChildEntityBeforeWrite(CcpEntity entity, JnEntityGrouperChild annotation) {
+	public JnGrouperChildEntityBeforeWrite(CcpEntity entity, CcpEntityGrouperChild annotation) {
 		super(entity, annotation);
 	}
 

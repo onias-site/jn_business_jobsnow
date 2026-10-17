@@ -10,11 +10,11 @@ import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityT
 import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityDelegator;
 import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityMetaData;
 import com.ccp.especifications.db.utils.entity.decorators.interfaces.CcpEntityConfigurator;
-import com.jn.entities.decorators.annotations.JnEntityGrouperChild;
+import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityGrouperChild;
 import com.jn.utils.JnGroupers;
 
 /**
- * Base shared by the decorators that keep the records of an entity ({@code @JnEntityGrouperChild}) in the groups of
+ * Base shared by the decorators that keep the records of an entity ({@code @CcpEntityGrouperChild}) in the groups of
  * {@code JnEntityGrouper}. Each side of the entity has its side of the grouper: the main records are children of the main
  * groups, the twin records of the twin groups. The child is the id of the record, the same on both sides, and the child
  * name is the name of the main entity, so a group has the same key on both sides.
@@ -22,14 +22,14 @@ import com.jn.utils.JnGroupers;
 public abstract class JnGrouperChildEntityOnWrite extends CcpEntityDelegator {
 
 	/** The grouping configured for the entity. */
-	private final JnEntityGrouperChild annotation;
+	private final CcpEntityGrouperChild annotation;
 
 	/**
 	 * Wraps the entity.
 	 * @param entity the entity decorated so far
 	 * @param annotation the grouping configured for the entity
 	 */
-	protected JnGrouperChildEntityOnWrite(CcpEntity entity, JnEntityGrouperChild annotation) {
+	protected JnGrouperChildEntityOnWrite(CcpEntity entity, CcpEntityGrouperChild annotation) {
 		super(entity);
 		this.annotation = annotation;
 	}

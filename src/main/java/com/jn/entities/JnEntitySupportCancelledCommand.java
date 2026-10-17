@@ -28,8 +28,8 @@ import com.jn.json.fields.validation.JnJsonInstantMessengerFields;
  * <li>index {@code jn_support_cancelled_command}</li>
  * </ul>
  */
-@CcpEntityFieldsTransformer(classReferenceWithTheFields = JnJsonTransformersFieldsEntityDefault.class)
-@CcpEntityFieldsValidator(classReferenceWithTheFields = JnEntitySupportCancelledCommand.Fields.class)
+@CcpEntityFieldsTransformer(JnJsonTransformersFieldsEntityDefault.class)
+@CcpEntityFieldsValidator(JnEntitySupportCancelledCommand.Fields.class)
 public class JnEntitySupportCancelledCommand implements CcpEntityConfigurator {
 
 	/** The entity {@code jn_support_cancelled_command}, with every decorator of this configuration. */

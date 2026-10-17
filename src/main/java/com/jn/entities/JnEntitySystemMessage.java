@@ -32,8 +32,8 @@ import com.jn.utils.JnLanguage;
  * </ul>
  */
 @CcpEntityCache(3600)
-@CcpEntityFieldsTransformer(classReferenceWithTheFields = JnJsonTransformersFieldsEntityDefault.class)
-@CcpEntityFieldsValidator(classReferenceWithTheFields = JnEntitySystemMessage.Fields.class)
+@CcpEntityFieldsTransformer(JnJsonTransformersFieldsEntityDefault.class)
+@CcpEntityFieldsValidator(JnEntitySystemMessage.Fields.class)
 public class JnEntitySystemMessage implements CcpEntityConfigurator {
 
 	/** The entity {@code jn_system_message}, with every decorator of this configuration. */

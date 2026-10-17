@@ -1,34 +1,23 @@
 package com.jn.entities;
 
-import static com.jn.entities.decorators.enums.JnEntitySendMessageToUserWhenWriteOperationType.afterInsertFromMainEntitySendAnEmailMessageAndIfFailsThrowAnError;
-
 import com.ccp.decorators.CcpJsonFieldName;
 import com.ccp.especifications.db.utils.entity.CcpEntity;
+import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityAsyncWriter;
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityCache;
-import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityCustomDecorator;
-import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityCustomDecorators;
+import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityDisposable;
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityFieldsTransformer;
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityFieldsValidator;
-import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityOperation;
-import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityOperations;
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityTwin;
+import com.ccp.especifications.db.utils.entity.decorators.annotations.messages.write.CcpAfterInsertFromMainEntitySendAnEmailMessageAndIfFailsThrowAnError;
+import com.ccp.especifications.db.utils.entity.decorators.annotations.operations.CcpBeforeSaveFromMainEntity;
 import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityFactory;
 import com.ccp.especifications.db.utils.entity.decorators.enums.CcpEntityExpurgableOptions;
-import com.ccp.especifications.db.utils.entity.decorators.enums.CcpEntityOperationType;
 import com.ccp.especifications.db.utils.entity.decorators.interfaces.CcpEntityConfigurator;
 import com.ccp.especifications.db.utils.entity.fields.annotations.CcpEntityFieldPrimaryKey;
 import com.ccp.json.validations.fields.annotations.CcpJsonCopyFieldValidationsFrom;
 import com.jn.business.login.JnBusinessPrepareLoginTokenBeforeSave;
 import com.jn.business.messages.JnMessages;
 import com.jn.db.bulk.JnExecuteBulkOperation;
-import com.jn.entities.decorators.annotations.JnEntityAsyncWriter;
-import com.jn.entities.decorators.annotations.JnEntityDisposable;
-import com.jn.entities.decorators.annotations.JnEntitySendMessageToUserWhenWrite;
-import com.jn.entities.decorators.annotations.JnEntitySendMessageToUserWhenWriteOperation;
-import com.jn.entities.decorators.builders.JnEntityAsyncWriterBuilder;
-import com.jn.entities.decorators.builders.JnEntityDisposableBuilder;
-import com.jn.entities.decorators.builders.JnEntitySendMessageToUserAfterWriteBuilder;
-import com.jn.entities.decorators.builders.JnEntitySendMessageToUserBeforeWriteBuilder;
 import com.jn.entities.decorators.engine.JnAsyncWriterEntity;
 import com.jn.entities.decorators.engine.JnDisposableEntity;
 import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault;
@@ -50,30 +39,17 @@ import com.jn.utils.JnDeleteKeysFromCache;
  * </ul>
  */
 @CcpEntityCache(86400)
-@CcpEntityCustomDecorators(value = {
-		@CcpEntityCustomDecorator(value = JnEntityAsyncWriterBuilder.class, priority = 8),
-		@CcpEntityCustomDecorator(value = JnEntityDisposableBuilder.class, priority = 1)
-		,@CcpEntityCustomDecorator(value = JnEntitySendMessageToUserBeforeWriteBuilder.class, priority = 7)
-		,@CcpEntityCustomDecorator(value = JnEntitySendMessageToUserAfterWriteBuilder.class, priority = 5)
-		})
-@CcpEntityOperations({
-		@CcpEntityOperation(operationType = CcpEntityOperationType.beforeSaveFromMainEntity,  execute = {JnBusinessPrepareLoginTokenBeforeSave.class}, operationHandlers = {}),
-})
-@JnEntitySendMessageToUserWhenWrite({
-		@JnEntitySendMessageToUserWhenWriteOperation(
-				operationType = afterInsertFromMainEntitySendAnEmailMessageAndIfFailsThrowAnError,
-				messageTemplate = JnMessages.JnNotifyUserAboutLoginToken.class
-				)
-})
-@JnEntityAsyncWriter(JnAsyncWriterEntity.class)
+@CcpEntityAsyncWriter(JnAsyncWriterEntity.class)
+@CcpEntityFieldsValidator(JnEntityLoginToken.Fields.class)
+@CcpEntityFieldsTransformer(JnJsonTransformersFieldsEntityDefault.class)
+@CcpEntityDisposable(value = JnDisposableEntity.class, timeOption = CcpEntityExpurgableOptions.monthly)
+@CcpBeforeSaveFromMainEntity(execute = {JnBusinessPrepareLoginTokenBeforeSave.class}, operationHandlers = {})
+@CcpAfterInsertFromMainEntitySendAnEmailMessageAndIfFailsThrowAnError(JnMessages.JnNotifyUserAboutLoginToken.class)
 @CcpEntityTwin(
 		twinEntityName = "jn_login_token_locked",
 		bulkExecutorClass = JnExecuteBulkOperation.class,
 		functionToDeleteKeysInTheCacheClass = JnDeleteKeysFromCache.class
 		)
-@JnEntityDisposable(value = JnDisposableEntity.class, timeOption = CcpEntityExpurgableOptions.monthly)
-@CcpEntityFieldsTransformer(classReferenceWithTheFields = JnJsonTransformersFieldsEntityDefault.class)
-@CcpEntityFieldsValidator(classReferenceWithTheFields = JnEntityLoginToken.Fields.class)
 public class JnEntityLoginToken implements CcpEntityConfigurator {
 	
 	/** The entity {@code jn_login_token}, with every decorator of this configuration. */
