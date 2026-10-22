@@ -133,6 +133,26 @@ public class JnEntityGrouperParents {
 	}
 
 	/**
+	 * The parents of a record that did not go through the field transformers yet: each combination has its primary key
+	 * transformed as the entity of the parent ids does it (the e-mail becomes its SHA-1, for one) and keeps only the fields
+	 * of that entity, so no original value of a transformed field reaches the group.
+	 * @param rawRecord the record as it came, its fields not transformed
+	 * @return the combination of each parent, by parent id
+	 */
+	public Map<String, CcpJsonRepresentation> getParentsFromRawRecord(CcpJsonRepresentation rawRecord) {
+		List<CcpJsonRepresentation> combinations = this.parentsCombinations.apply(rawRecord);
+		CcpEntityMetaData parentIdEntityDetails = this.parentIdEntity.getEntityMetaData();
+		Map<String, CcpJsonRepresentation> parentJsonByParentId = new LinkedHashMap<>();
+		for (CcpJsonRepresentation combination : combinations) {
+			CcpJsonRepresentation handledCombination = this.parentIdEntity.getJsonWithHandledPrimaryKey(combination);
+			CcpJsonRepresentation parentJson = parentIdEntityDetails.getOnlyExistingFields(handledCombination);
+			String parentId = this.parentIdEntity.calculateId(parentJson);
+			parentJsonByParentId.put(parentId, parentJson);
+		}
+		return parentJsonByParentId;
+	}
+
+	/**
 	 * Fills the field annotated with {@code @CcpStoredParentIdsField} with the ids of the parents of the record, replacing
 	 * whatever the input brought in it: the stored record tells, later, the groups it must leave.
 	 * @param record the record as it is being written
@@ -144,6 +164,16 @@ public class JnEntityGrouperParents {
 		List<String> parentIds = new ArrayList<>(parentIdsSet);
 		CcpJsonRepresentation recordWithParentIds = record.put(this.storedParentIdsField, parentIds);
 		return recordWithParentIds;
+	}
+
+	/**
+	 * The record without the field annotated with {@code @CcpStoredParentIdsField}.
+	 * @param record the record
+	 * @return the record without the ids of its parents
+	 */
+	public CcpJsonRepresentation removeParentIds(CcpJsonRepresentation record) {
+		CcpJsonRepresentation recordWithoutParentIds = record.removeFields(this.storedParentIdsField);
+		return recordWithoutParentIds;
 	}
 
 	/**

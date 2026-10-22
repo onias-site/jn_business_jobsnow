@@ -54,8 +54,11 @@ public enum JnJsonCommonsFields implements CcpJsonFieldName{
 	@CcpJsonFieldTypeString(minLength = 2, maxLength = 50)
 	childName,
 
-	/** The {@code child} field: text, the id of a record of the entity named by {@code childName} that belongs to a group. */
-	@CcpJsonFieldTypeString(minLength = 1, maxLength = 100)
+	/**
+	 * The {@code child} field: text, a record of the entity named by {@code childName} that belongs to a group: its id,
+	 * or the record itself as a JSON text when the entity is grouped by {@code JnGrouperChildAsJsonEntityBeforeWrite}.
+	 */
+	@CcpJsonFieldTypeString(minLength = 1)
 	child,
 
 	/** The {@code childCount} field: non-negative integer, the size of the {@code child} list. */
@@ -85,7 +88,15 @@ public enum JnJsonCommonsFields implements CcpJsonFieldName{
 	/** The {@code date} field: text. */
 	@CcpJsonFieldTypeString(exactLength = 23)
 	date,
-	
+
+	/**
+	 * The {@code disposablePeriod} field: text, a period of a disposable entity in the format of its granularity (for
+	 * example, {@code 202610} for {@code monthly}); given to {@code calculateId}, it replaces the current period, so the id
+	 * of a past period can be calculated.
+	 */
+	@CcpJsonFieldTypeString(minLength = 4, maxLength = 23)
+	disposablePeriod,
+
 	/** The {@code entity} field: text. */
 	@CcpJsonFieldTypeString(maxLength = 50)
 	entity, 

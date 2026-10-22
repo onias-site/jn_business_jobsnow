@@ -157,13 +157,32 @@ public class JnDisposableEntity extends CcpDefaultEntityDelegator<Object>{
 	}
 
 	/**
-	 * Computes the id of the document of the current period: SHA-1 of the formatted period and the original id.
+	 * The period of the id: the one given in {@code disposablePeriod} (already in the format of the granularity), or the
+	 * current one.
+	 * @param json the record
+	 * @return the formatted period
+	 */
+	private String getPeriod(CcpJsonRepresentation json) {
+		boolean periodGiven = json.containsAllFields(JnJsonCommonsFields.disposablePeriod);
+
+		if(periodGiven) {
+			String givenPeriod = json.getAsString(JnJsonCommonsFields.disposablePeriod);
+			return givenPeriod;
+		}
+
+		String currentPeriod = this.extractFormatedCurrentTimestamp();
+		return currentPeriod;
+	}
+
+	/**
+	 * Computes the id of the document of the current period (or of the period given in {@code disposablePeriod}): SHA-1
+	 * of the formatted period and the original id.
 	 * @param json the record
 	 * @return the id
 	 */
 	public String calculateId(CcpJsonRepresentation json) {
 
-		String formattedTimestamp = this.extractFormatedCurrentTimestamp();
+		String formattedTimestamp = this.getPeriod(json);
 		String entityId = this.entity.calculateId(json);
 
 		ArrayList<Object> onlyPrimaryKeysValues = new ArrayList<>();

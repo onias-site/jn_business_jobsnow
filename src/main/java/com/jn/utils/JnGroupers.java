@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 
 import com.ccp.constants.CcpOtherConstants;
@@ -43,8 +44,26 @@ public final class JnGroupers {
 						+ "else { ctx._source.childCount = ctx._source.child.size(); } }";
 			}
 		},
+		/**
+		 * Takes out every child that contains all the texts of {@code childKeys} (the earlier version of the same record),
+		 * adds the child and recounts; keeps the parent values.
+		 */
+		replaceChild {
+			public String getValue() {
+				return "def kept = new ArrayList(); "
+						+ "for (def c : ctx._source.child) { boolean sameRecord = true; "
+						+ "for (def k : params.childKeys) { if (c.indexOf(k) < 0) { sameRecord = false; } } "
+						+ "if (false == sameRecord) { kept.add(c); } } "
+						+ "kept.add(params.childId); "
+						+ "ctx._source.child = kept; "
+						+ "ctx._source.childCount = kept.size(); "
+						+ "ctx._source.parentJson = params.parentJson;";
+			}
+		},
 		/** Parameter: the id of the child being added or removed. */
 		childId,
+		/** Parameter: the texts that only the children of the same record contain. */
+		childKeys,
 		/** Parameter: the values the parent id came from. */
 		parentJson,
 	}
@@ -137,6 +156,25 @@ public final class JnGroupers {
 	}
 
 	/**
+	 * Puts the child in the group of each parent in place of the earlier version of the same record (the children that
+	 * contain every text of {@code childKeys}); a group that does not exist yet is created with the child as its only one.
+	 * @param grouper the side of the grouper (main or twin)
+	 * @param parentName the kind of group
+	 * @param childName the name of the entity of the child
+	 * @param childKeys the texts that only the children of the same record contain
+	 * @param child the child
+	 * @param parents the values of each parent, by parent id
+	 */
+	public static void replaceChild(CcpEntity grouper, String parentName, String childName, List<String> childKeys, String child, Map<String, CcpJsonRepresentation> parents) {
+		CcpJsonRepresentation childParams = CcpOtherConstants.EMPTY_JSON.put(Scripts.childId, child);
+		CcpJsonRepresentation childAndKeysParams = childParams.put(Scripts.childKeys, childKeys);
+		Set<String> parentIdsSet = parents.keySet();
+		List<String> parentIds = new ArrayList<>(parentIdsSet);
+		JnGroupersReplaceChildItem itemOfTheParent = new JnGroupersReplaceChildItem(grouper, parentName, childName, child, childAndKeysParams, parents);
+		writeGroups(parentIds, itemOfTheParent);
+	}
+
+	/**
 	 * Takes the child out of the group of each parent; a group left with no child is deleted, and a group that does not
 	 * exist is not created.
 	 * @param grouper the side of the grouper (main or twin)
@@ -166,7 +204,7 @@ public final class JnGroupers {
 	 * @param scriptedUpsert whether the script also runs when the group does not exist
 	 * @return the bulk item
 	 */
-	private static CcpBulkItem getScriptedItem(CcpEntity grouper, CcpJsonRepresentation groupKey, Scripts script, CcpJsonRepresentation params, CcpJsonRepresentation upsert, boolean scriptedUpsert) {
+	static CcpBulkItem getScriptedItem(CcpEntity grouper, CcpJsonRepresentation groupKey, Scripts script, CcpJsonRepresentation params, CcpJsonRepresentation upsert, boolean scriptedUpsert) {
 		String source = script.getValue();
 		String groupId = grouper.calculateId(groupKey);
 		CcpJsonRepresentation itemWithScript = CcpOtherConstants.EMPTY_JSON.put(CcpBulkScriptedUpdateFields.script, source);
