@@ -41,6 +41,10 @@ import com.jn.json.fields.validation.JnJsonCommonsFields;
 @CcpEntityFieldsTransformer(JnJsonTransformersFieldsEntityDefault.class)
 @CcpAfterInsertFromMainEntitySendAnInstantMessageAndIfFailsSaveAWarning(JnMessages.JnNotifySupportAboutAnError.class)
 public class JnEntityJobsnowError implements CcpEntityConfigurator {
+	/** The single instance: the class keeps no state. */
+	public final static JnEntityJobsnowError INSTANCE = new JnEntityJobsnowError();
+
+	private JnEntityJobsnowError() {}
 
 	/** The entity {@code jn_jobsnow_error}, with every decorator of this configuration. */
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityJobsnowError.class).entityInstance;

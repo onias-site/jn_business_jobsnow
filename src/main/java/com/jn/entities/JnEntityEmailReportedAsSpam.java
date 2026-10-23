@@ -26,6 +26,11 @@ import com.jn.json.fields.validation.JnJsonCommonsFields;
 @CcpEntityFieldsTransformer(JnJsonTransformersFieldsEntityDefault.class)
 @CcpEntityFieldsValidator(JnEntityEmailReportedAsSpam.Fields.class)
 public class JnEntityEmailReportedAsSpam implements CcpEntityConfigurator {
+	/** The single instance: the class keeps no state. */
+	public final static JnEntityEmailReportedAsSpam INSTANCE = new JnEntityEmailReportedAsSpam();
+
+	private JnEntityEmailReportedAsSpam() {}
+
 	/** The entity {@code jn_email_reported_as_spam}, with every decorator of this configuration. */
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityEmailReportedAsSpam.class).entityInstance;
 	

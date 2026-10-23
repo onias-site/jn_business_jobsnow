@@ -2,132 +2,29 @@ package com.jn.mensageria;
 
 import java.util.function.Consumer;
 
-import com.ccp.business.CcpBusiness;
-import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.especifications.db.bulk.CcpExecuteBulkOperation;
 import com.ccp.especifications.db.utils.entity.CcpEntity;
+import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityDecoratorTypes;
 import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityFactory;
 import com.ccp.especifications.db.utils.entity.decorators.interfaces.CcpEntityConfigurator;
 import com.ccp.especifications.mensageria.receiver.CcpMensageriaReceiver;
 import com.jn.db.bulk.JnExecuteBulkOperation;
-import com.jn.entities.JnEntityAsyncTask;
-import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityDecoratorTypes;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
 import com.jn.utils.JnDeleteKeysFromCache;
 
 /**
  * Receives the messages of messaging and runs, for each one, the business or the entity operation named by the topic
- * (and the {@code operation} field); the outcome (success or error, response, end time and elapsed time) is recorded
- * back in {@code jn_async_task}.
+ * (and the {@code operation} field), through {@link CcpMensageriaReceiver#executeProcess}.
  */
 public class JnMensageriaReceiver extends CcpMensageriaReceiver{
-	
+
 	/** Singleton; use {@link #INSTANCE}. The operation is read from the {@code operation} field. */
 	private JnMensageriaReceiver() {
 		super(JnJsonCommonsFields.operation.name());
 	}
-	
+
 	/** The single instance. */
 	public static final JnMensageriaReceiver INSTANCE = new JnMensageriaReceiver();
-	
-	/**
-	 * Records a failed outcome.
-	 * @param entity the entity of the asynchronous tasks
-	 * @param messageDetails the message
-	 * @param e the failure
-	 * @return this instance
-	 */
-	private JnMensageriaReceiver saveResult(
-			CcpEntity entity, 
-			CcpJsonRepresentation messageDetails, 
-			Throwable e
-			) {
-		CcpJsonRepresentation response = new CcpJsonRepresentation(e);
-		JnMensageriaReceiver saveResult = this.saveResult(entity, messageDetails, response, false);
-		return saveResult;
-		
-	}
-
-	/**
-	 * Records a successful outcome.
-	 * @param entity the entity of the asynchronous tasks
-	 * @param messageDetails the message
-	 * @param response the response of the task
-	 * @return this instance
-	 */
-	private JnMensageriaReceiver saveResult(CcpEntity entity, CcpJsonRepresentation messageDetails, CcpJsonRepresentation response) {
-		JnMensageriaReceiver saveResult = this.saveResult(entity, messageDetails, response, true);
-		return saveResult;
-	}
-	
-	
-	
-	/**
-	 * Runs the task and records its outcome; a failure is recorded, not rethrown.
-	 * @param entity the entity of the asynchronous tasks
-	 * @param processName the topic
-	 * @param json the message
-	 * @return this instance
-	 */
-	public JnMensageriaReceiver executeProcess(
-			CcpEntity entity,
-			String processName, 
-			CcpJsonRepresentation json
-			) {
-		try {
-			CcpBusiness process = this.getProcess(processName, json);
-			CcpJsonRepresentation response = process.execute(json);
-			JnMensageriaReceiver saveResult = this.saveResult(entity, json, response);
-			return saveResult;
-		} catch (Throwable e) {
-			JnMensageriaReceiver saveResult = this.saveResult(entity, json, e);
-			return saveResult;
-		}
-	}
-	
-	/**
-	 * Runs the task and records its outcome in {@code jn_async_task}, as {@link #executeProcess} does for the consumers
-	 * of Pub/Sub.
-	 * @param processName the topic
-	 * @param json the message
-	 * @return this instance
-	 */
-	public JnMensageriaReceiver executeProcessAndRecordOutcome(String processName, CcpJsonRepresentation json) {
-		JnMensageriaReceiver executeProcess = this.executeProcess(JnEntityAsyncTask.ENTITY, processName, json);
-		return executeProcess;
-	}
-
-	/**
-	 * Records the outcome of the processing in the asynchronous task.
-	 * <p>The start comes from the message itself, not from a database query: {@code JnFunctionMensageriaSender} writes
-	 * {@code started} in the JSON <b>before</b> publishing it, so the field arrives with the message. Reading the record
-	 * just to get that number cost one database call per message consumed, in every asynchronous flow of the system.</p>
-	 * <p>The response is recorded as JSON text, like {@code request}: the field is {@code text} in {@code jn_async_task},
-	 * and Elasticsearch refuses an object there.</p>
-	 * @param entity the entity of the asynchronous tasks
-	 * @param messageDetails the message
-	 * @param response the response or the error
-	 * @param success whether the task succeeded
-	 * @return this instance
-	 */
-	private JnMensageriaReceiver saveResult(CcpEntity entity, CcpJsonRepresentation messageDetails, CcpJsonRepresentation response, boolean success) {
-		Long finished = System.currentTimeMillis();
-		boolean hasStarted = messageDetails.containsAllFields(JnEntityAsyncTask.Fields.started);
-		// read as a number, not cast: a message that came through JSON (Pub/Sub push or pull) brings started as a double
-		Long started = hasStarted ? messageDetails.getAsLongNumber(JnEntityAsyncTask.Fields.started) : finished;
-		Long enlapsedTime = finished - started;
-		String responseAsText = response.asUgglyJson();
-		CcpJsonRepresentation put = messageDetails
-				.put(JnEntityAsyncTask.Fields.enlapsedTime, enlapsedTime);
-				CcpJsonRepresentation put2 = put
-				.put(JnJsonCommonsFields.response, responseAsText);
-				CcpJsonRepresentation put3 = put2
-				.put(JnEntityAsyncTask.Fields.finished, finished);
-				CcpJsonRepresentation processResult = put3
-				.put(JnEntityAsyncTask.Fields.success, success);
-		entity.save(processResult);
-		return this;
-	}
 
 	/**
 	 * The bulk executor of the jn cost center.
@@ -144,7 +41,7 @@ public class JnMensageriaReceiver extends CcpMensageriaReceiver{
 	public Consumer<String[]> getFunctionToDeleteKeysInTheCache() {
 		return JnDeleteKeysFromCache.INSTANCE;
 	}
-	
+
 	/**
 	 * Builds the entity of the configurator without the asynchronous writer, so the consumer writes for real.
 	 * @param newInstance the configurator
@@ -165,5 +62,4 @@ public class JnMensageriaReceiver extends CcpMensageriaReceiver{
 		CcpEntity twinEntity = entity.getTwinEntity(CcpEntityDecoratorTypes.AsyncWriter);
 		return twinEntity;
 	}
-
 }

@@ -1,7 +1,6 @@
 package com.jn.utils;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -14,12 +13,16 @@ import com.ccp.especifications.db.bulk.CcpBulkEntityOperationType;
 import com.ccp.especifications.db.bulk.CcpBulkItem;
 import com.ccp.especifications.db.bulk.CcpBulkScriptedUpdateFields;
 import com.ccp.especifications.db.utils.entity.CcpEntity;
+import com.ccp.especifications.db.utils.entity.decorators.enums.CcpEntityPhase;
+import com.jn.business.grouper.JnBusinessGetGroup;
 import com.jn.db.bulk.JnExecuteBulkOperation;
 import com.jn.entities.JnEntityGrouper;
 
 /**
  * Writes the children of the groups of {@code JnEntityGrouper}, on the side given (the main grouper or its twin). Each
- * group is a single record that keeps only the ids of its children. The writes are atomic scripts run by the database
+ * group is a single record that keeps only the ids of its children (or their JSON texts), or, in a group of counters
+ * ({@code @CcpEntityGrouperChildCounter}), a single JSON text with one counter per key. {@code childCount} is the size
+ * of the {@code child} list, but in a group of counters, where it is the number of keys. The writes are atomic scripts run by the database
  * ({@code scriptedUpdate}): two children changing the same group at the same time are applied one after the other, and
  * none overwrites the other. Nothing is read before writing.
  */
@@ -27,11 +30,32 @@ public final class JnGroupers {
 
 	/** The scripts run over a group, and their parameters. */
 	enum Scripts implements CcpJsonFieldName {
+		/**
+		 * The default count of the children, part of every script but {@code incrementCounter}: the size of the
+		 * {@code child} list.
+		 */
+		childCountIsTheSizeOfChild {
+			public String getValue() {
+				return "ctx._source.childCount = ctx._source.child.size(); ";
+			}
+		},
 		/** Adds the child id when it is not there yet and recounts; keeps the parent values. */
 		addChild {
 			public String getValue() {
 				return "if (false == ctx._source.child.contains(params.childId)) { ctx._source.child.add(params.childId); } "
-						+ "ctx._source.childCount = ctx._source.child.size(); "
+						+ childCountIsTheSizeOfChild.getValue()
+						+ "ctx._source.parentJson = params.parentJson;";
+			}
+		},
+		/**
+		 * Adds the child at the end, even when an equal one is already there (a history), drops the oldest ones beyond
+		 * {@code maxChildren} and recounts; keeps the parent values.
+		 */
+		appendChildKeepingTheLast {
+			public String getValue() {
+				return "ctx._source.child.add(params.childId); "
+						+ "while (ctx._source.child.size() > params.maxChildren) { ctx._source.child.remove(0); } "
+						+ childCountIsTheSizeOfChild.getValue()
 						+ "ctx._source.parentJson = params.parentJson;";
 			}
 		},
@@ -41,7 +65,7 @@ public final class JnGroupers {
 				return "if (ctx._source.child == null) { ctx.op = 'none'; } "
 						+ "else { ctx._source.child.removeIf(c -> c == params.childId); "
 						+ "if (ctx._source.child.isEmpty()) { ctx.op = 'delete'; } "
-						+ "else { ctx._source.childCount = ctx._source.child.size(); } }";
+						+ "else { " + childCountIsTheSizeOfChild.getValue() + "} }";
 			}
 		},
 		/**
@@ -56,12 +80,40 @@ public final class JnGroupers {
 						+ "if (false == sameRecord) { kept.add(c); } } "
 						+ "kept.add(params.childId); "
 						+ "ctx._source.child = kept; "
-						+ "ctx._source.childCount = kept.size(); "
+						+ childCountIsTheSizeOfChild.getValue()
+						+ "ctx._source.parentJson = params.parentJson;";
+			}
+		},
+		/**
+		 * Adds 1 to the counter of {@code counterKey} in the only child of the group, a JSON text of counters
+		 * ({@code {"key":count,...}}), and keeps the parent values. The exception to {@code childCountIsTheSizeOfChild}:
+		 * {@code childCount} is the number of keys, 1 more when the key enters the text. Painless does not parse JSON, so
+		 * the text is changed as text: the counter of the key is the digits after {@code "key":} (a key holds no quote).
+		 */
+		incrementCounter {
+			public String getValue() {
+				return "String key = '\"' + params.counterKey + '\":'; "
+						+ "String counters = ctx._source.child[0]; "
+						+ "int keyStart = counters.indexOf(key); "
+						+ "if (keyStart < 0) { "
+						+ "String separator = counters.length() > 2 ? ',' : ''; "
+						+ "ctx._source.child[0] = counters.substring(0, counters.length() - 1) + separator + key + '1}'; "
+						+ "ctx._source.childCount = ctx._source.childCount + 1; } "
+						+ "else { "
+						+ "int countStart = keyStart + key.length(); "
+						+ "int countEnd = countStart; "
+						+ "while (countEnd < counters.length() && Character.isDigit(counters.charAt(countEnd))) { countEnd++; } "
+						+ "int count = Integer.parseInt(counters.substring(countStart, countEnd)); "
+						+ "ctx._source.child[0] = counters.substring(0, countStart) + (count + 1) + counters.substring(countEnd); } "
 						+ "ctx._source.parentJson = params.parentJson;";
 			}
 		},
 		/** Parameter: the id of the child being added or removed. */
 		childId,
+		/** Parameter: the key of the counter being incremented. */
+		counterKey,
+		/** Parameter: the most children a history keeps. */
+		maxChildren,
 		/** Parameter: the texts that only the children of the same record contain. */
 		childKeys,
 		/** Parameter: the values the parent id came from. */
@@ -93,14 +145,13 @@ public final class JnGroupers {
 	 * @return the main grouper or its twin
 	 */
 	public static CcpEntity getGrouper(boolean twinSide) {
-		CcpEntity grouper = twinSide ? JnEntityGrouper.ENTITY.getTwinEntity() : JnEntityGrouper.ENTITY;
+		CcpEntityPhase side = twinSide ? CcpEntityPhase.twinEntity : CcpEntityPhase.mainEntity;
+		CcpEntity grouper = side.getEntity(JnEntityGrouper.ENTITY);
 		return grouper;
 	}
 
 	/**
-	 * Reads a group on one side of the grouper. The same group can exist on both sides (some children active, others
-	 * inactive), and the {@code getOneById} of a twin entity answers {@code REDIRECT} when the record is only on the other
-	 * side: this reads both sides by id in a single search and keeps the side asked, so it never redirects.
+	 * Reads a group on one side of the grouper, through the common read of the groups ({@code JnBusinessGetGroup}).
 	 * @param twinSide whether the twin side is the one read
 	 * @param parentName the kind of group
 	 * @param childName the name of the entity of the children
@@ -109,9 +160,9 @@ public final class JnGroupers {
 	 */
 	public static CcpJsonRepresentation getGroup(boolean twinSide, String parentName, String childName, String parentId) {
 		CcpJsonRepresentation groupKey = getGroupKey(parentName, childName, parentId);
-		CcpJsonRepresentation groupOnBothSides = JnEntityGrouper.ENTITY.getOneByIdAnyWhere(groupKey);
-		CcpEntity grouper = getGrouper(twinSide);
-		CcpJsonRepresentation group = groupOnBothSides.getInnerJson(grouper);
+		CcpEntityPhase side = twinSide ? CcpEntityPhase.twinEntity : CcpEntityPhase.mainEntity;
+		CcpJsonRepresentation groupKeyAndSide = groupKey.put(JnBusinessGetGroup.Fields.side, side.name());
+		CcpJsonRepresentation group = JnBusinessGetGroup.INSTANCE.execute(groupKeyAndSide);
 		return group;
 	}
 
@@ -140,19 +191,35 @@ public final class JnGroupers {
 	 */
 	public static void addChild(CcpEntity grouper, String parentName, String childName, String childId, Map<String, CcpJsonRepresentation> parents) {
 		CcpJsonRepresentation childIdParams = CcpOtherConstants.EMPTY_JSON.put(Scripts.childId, childId);
-		List<String> children = Arrays.asList(childId);
-		List<String> parentIds = new ArrayList<>(parents.keySet());
+		Set<String> parentIdsSet = parents.keySet();
+		List<String> parentIds = new ArrayList<>(parentIdsSet);
+		JnGroupersAddChildItem itemOfTheParent = new JnGroupersAddChildItem(grouper, parentName, childName, childId, childIdParams, parents);
+		writeGroups(parentIds, itemOfTheParent);
+	}
 
-		writeGroups(parentIds, parentId -> {
-			CcpJsonRepresentation groupKey = getGroupKey(parentName, childName, parentId);
-			CcpJsonRepresentation parentJson = parents.get(parentId);
-			CcpJsonRepresentation params = childIdParams.put(Scripts.parentJson, parentJson);
-			CcpJsonRepresentation newGroupWithParentJson = groupKey.put(JnEntityGrouper.Fields.parentJson, parentJson);
-			CcpJsonRepresentation newGroupWithChildren = newGroupWithParentJson.put(JnEntityGrouper.Fields.child, children);
-			CcpJsonRepresentation newGroup = newGroupWithChildren.put(JnEntityGrouper.Fields.childCount, 1);
-			CcpBulkItem item = getScriptedItem(grouper, groupKey, Scripts.addChild, params, newGroup, false);
-			return item;
-		});
+	/**
+	 * The bulk items that add the child at the end of the group of each parent, to be written with the other items of the
+	 * caller: a history, so an equal child already there is kept and the new one enters too, and only the last
+	 * {@code maxChildren} stay; a group that does not exist yet is created with the child as its only one.
+	 * @param grouper the side of the grouper (main or twin)
+	 * @param parentName the kind of group
+	 * @param childName the name of the entity of the child
+	 * @param child the child
+	 * @param maxChildren the most children the group keeps
+	 * @param parents the values of each parent, by parent id
+	 * @return one bulk item per parent
+	 */
+	public static List<CcpBulkItem> getItemsToAppendChildKeepingTheLast(CcpEntity grouper, String parentName, String childName, String child, int maxChildren, Map<String, CcpJsonRepresentation> parents) {
+		CcpJsonRepresentation childParams = CcpOtherConstants.EMPTY_JSON.put(Scripts.childId, child);
+		CcpJsonRepresentation childAndMaxParams = childParams.put(Scripts.maxChildren, maxChildren);
+		JnGroupersAppendChildItem itemOfTheParent = new JnGroupersAppendChildItem(grouper, parentName, childName, child, childAndMaxParams, parents);
+		List<CcpBulkItem> items = new ArrayList<>();
+		Set<String> parentIds = parents.keySet();
+		for (String parentId : parentIds) {
+			CcpBulkItem item = itemOfTheParent.apply(parentId);
+			items.add(item);
+		}
+		return items;
 	}
 
 	/**
@@ -175,6 +242,45 @@ public final class JnGroupers {
 	}
 
 	/**
+	 * The counters of a group of counters ({@code @CcpEntityGrouperChildCounter}), read by id on the main side of the
+	 * grouper: its only child, a JSON text, parsed.
+	 * @param parentName the kind of group
+	 * @param childName the name of the entity of the counted records
+	 * @param parentId the parent id
+	 * @return the counter of each key, empty when the group does not exist
+	 */
+	public static CcpJsonRepresentation getCounters(String parentName, String childName, String parentId) {
+		CcpJsonRepresentation group = getGroup(false, parentName, childName, parentId);
+		List<String> children = group.getAsStringList(JnEntityGrouper.Fields.child);
+		boolean noCounter = children.isEmpty();
+
+		if(noCounter) {
+			return CcpOtherConstants.EMPTY_JSON;
+		}
+
+		String countersText = children.get(0);
+		CcpJsonRepresentation counters = new CcpJsonRepresentation(countersText);
+		return counters;
+	}
+
+	/**
+	 * Adds 1 to the counter of the key in the group of counters of each parent; a group that does not exist yet is created
+	 * with this counter at 1.
+	 * @param grouper the side of the grouper (main or twin)
+	 * @param parentName the kind of group
+	 * @param childName the name of the entity of the counted record
+	 * @param counterKey the key of the counter
+	 * @param parents the values of each parent, by parent id
+	 */
+	public static void incrementCounter(CcpEntity grouper, String parentName, String childName, String counterKey, Map<String, CcpJsonRepresentation> parents) {
+		CcpJsonRepresentation counterKeyParams = CcpOtherConstants.EMPTY_JSON.put(Scripts.counterKey, counterKey);
+		Set<String> parentIdsSet = parents.keySet();
+		List<String> parentIds = new ArrayList<>(parentIdsSet);
+		JnGroupersIncrementCounterItem itemOfTheParent = new JnGroupersIncrementCounterItem(grouper, parentName, childName, counterKeyParams, parents);
+		writeGroups(parentIds, itemOfTheParent);
+	}
+
+	/**
 	 * Takes the child out of the group of each parent; a group left with no child is deleted, and a group that does not
 	 * exist is not created.
 	 * @param grouper the side of the grouper (main or twin)
@@ -185,13 +291,8 @@ public final class JnGroupers {
 	 */
 	public static void removeChild(CcpEntity grouper, String parentName, String childName, String childId, List<String> parentIds) {
 		CcpJsonRepresentation params = CcpOtherConstants.EMPTY_JSON.put(Scripts.childId, childId);
-
-		writeGroups(parentIds, parentId -> {
-			CcpJsonRepresentation groupKey = getGroupKey(parentName, childName, parentId);
-			// the script also runs when the group does not exist, to decide not to create it
-			CcpBulkItem item = getScriptedItem(grouper, groupKey, Scripts.removeChild, params, CcpOtherConstants.EMPTY_JSON, true);
-			return item;
-		});
+		JnGroupersRemoveChildItem itemOfTheParent = new JnGroupersRemoveChildItem(grouper, parentName, childName, params);
+		writeGroups(parentIds, itemOfTheParent);
 	}
 
 	/**

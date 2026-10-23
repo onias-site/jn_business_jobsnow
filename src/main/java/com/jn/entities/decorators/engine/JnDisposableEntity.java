@@ -521,8 +521,7 @@ public class JnDisposableEntity extends CcpDefaultEntityDelegator<Object>{
 	/**
 	 * Returns the document of the current period from the search result; otherwise the record kept in a copy not expired
 	 * yet; otherwise an empty JSON. Until 2026-10-14 this variant read only the document of the current period: the
-	 * records loaded by {@code CcpGetEntityId.loadThisIdFromEntity} (the current session of {@code JnEntityLoginSessionConflict},
-	 * for one) vanished at the turn of the period, and every session died at the turn of the hour while its copy was valid.
+	 * records loaded by {@code CcpGetEntityId.loadThisIdFromEntity} (the current session of the login, for one) vanished at the turn of the period, and every session died at the turn of the hour while its copy was valid.
 	 * @param unionAll the search result
 	 * @param jsonSupplier supplies the record
 	 * @return the record, or an empty JSON

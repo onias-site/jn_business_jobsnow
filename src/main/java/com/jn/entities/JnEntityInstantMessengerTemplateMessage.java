@@ -41,6 +41,10 @@ import com.jn.utils.JnLanguage;
 @CcpEntityFieldsTransformer(JnJsonTransformersFieldsEntityDefault.class)
 @CcpEntityFieldsValidator(JnEntityInstantMessengerTemplateMessage.Fields.class)
 public class JnEntityInstantMessengerTemplateMessage  implements CcpEntityConfigurator {
+	/** The single instance: the class keeps no state. */
+	public final static JnEntityInstantMessengerTemplateMessage INSTANCE = new JnEntityInstantMessengerTemplateMessage();
+
+	private JnEntityInstantMessengerTemplateMessage() {}
 
 	/** The entity {@code jn_instant_messenger_template_message}, with every decorator of this configuration. */
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityInstantMessengerTemplateMessage.class).entityInstance;

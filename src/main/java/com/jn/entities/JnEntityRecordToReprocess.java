@@ -27,7 +27,11 @@ import com.jn.json.fields.validation.JnJsonCommonsFields;
 @CcpEntityFieldsTransformer(JnJsonTransformersFieldsEntityDefault.class)
 @CcpEntityFieldsValidator(JnEntityRecordToReprocess.Fields.class)
 public class JnEntityRecordToReprocess implements CcpEntityConfigurator {
-	
+	/** The single instance: the class keeps no state. */
+	public final static JnEntityRecordToReprocess INSTANCE = new JnEntityRecordToReprocess();
+
+	private JnEntityRecordToReprocess() {}
+
 	/** The entity {@code jn_record_to_reprocess}, with every decorator of this configuration. */
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityRecordToReprocess.class).entityInstance;
 

@@ -49,7 +49,11 @@ import com.jn.json.fields.validation.JnJsonInstantMessengerFields;
 @CcpEntityFieldsTransformer(JnJsonTransformersFieldsEntityDefault.class)
 @CcpEntityFieldsValidator(JnEntityInstantMessengerParametersToSend.Fields.class)
 public class JnEntityInstantMessengerParametersToSend implements CcpEntityConfigurator {
-	
+	/** The single instance: the class keeps no state. */
+	public final static JnEntityInstantMessengerParametersToSend INSTANCE = new JnEntityInstantMessengerParametersToSend();
+
+	private JnEntityInstantMessengerParametersToSend() {}
+
 	/** The entity {@code jn_instant_messenger_parameters_to_send}, with every decorator of this configuration. */
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityInstantMessengerParametersToSend.class).entityInstance;
 

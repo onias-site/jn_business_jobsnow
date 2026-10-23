@@ -29,7 +29,11 @@ import com.jn.messages.JnMustNotSendMessage;
 @CcpEntityCache(3600)
 
 public class JnEntityMessageDidNotSent implements CcpEntityConfigurator {
-	
+	/** The single instance: the class keeps no state. */
+	public final static JnEntityMessageDidNotSent INSTANCE = new JnEntityMessageDidNotSent();
+
+	private JnEntityMessageDidNotSent() {}
+
 	/** The entity {@code jn_message_did_not_sent}, with every decorator of this configuration. */
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityMessageDidNotSent.class).entityInstance;
 

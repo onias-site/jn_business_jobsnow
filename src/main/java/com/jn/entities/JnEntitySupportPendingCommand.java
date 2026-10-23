@@ -25,6 +25,10 @@ import com.jn.json.fields.validation.JnJsonInstantMessengerFields;
 @CcpEntityFieldsTransformer(JnJsonTransformersFieldsEntityDefault.class)
 @CcpEntityFieldsValidator(JnEntitySupportPendingCommand.Fields.class)
 public class JnEntitySupportPendingCommand implements CcpEntityConfigurator {
+	/** The single instance: the class keeps no state. */
+	public final static JnEntitySupportPendingCommand INSTANCE = new JnEntitySupportPendingCommand();
+
+	private JnEntitySupportPendingCommand() {}
 
 	/** The entity {@code jn_support_pending_command}, with every decorator of this configuration. */
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntitySupportPendingCommand.class).entityInstance;

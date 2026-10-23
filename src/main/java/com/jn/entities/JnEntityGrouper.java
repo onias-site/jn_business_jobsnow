@@ -35,6 +35,10 @@ import com.jn.utils.JnDoNotDeleteKeysFromCache;
 		)
 @CcpEntityFieldsValidator(JnEntityGrouper.Fields.class)
 public class JnEntityGrouper implements CcpEntityConfigurator {
+	/** The single instance: the class keeps no state. */
+	public final static JnEntityGrouper INSTANCE = new JnEntityGrouper();
+
+	private JnEntityGrouper() {}
 
 	/** The entity {@code jn_grouper}, with every decorator of this configuration. */
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityGrouper.class).entityInstance;
@@ -60,7 +64,11 @@ public class JnEntityGrouper implements CcpEntityConfigurator {
 		@CcpEntityFieldPrimaryKey
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		childName,
-		/** The {@code child} field: required, list of ids, validated as in {@code JnJsonCommonsFields}. */
+		/**
+		 * The {@code child} field: required, list of ids (or of JSON texts), validated as in {@code JnJsonCommonsFields};
+		 * in a group of counters, a list with a single JSON text of counters. {@code childCount} is the size of this list,
+		 * but in a group of counters, where it is the number of keys of that JSON.
+		 */
 		@CcpJsonFieldValidatorRequired
 		@CcpJsonFieldValidatorArray
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)

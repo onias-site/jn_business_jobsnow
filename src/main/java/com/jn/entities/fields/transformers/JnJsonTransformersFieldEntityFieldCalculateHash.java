@@ -10,8 +10,8 @@ import com.ccp.hash.CcpHashAlgorithm;
 /**
  * Field transformer that computes the SHA-1 hash of a field and stores both the original value
  * and the hash. It allows the hash to be used as the primary key while the original value remains
- * available in another field. The subclass {@code JnJsonTransformersFieldEntityTokenHash} specializes
- * this behavior for the {@code token} field of {@code JnEntityLoginSessionValidation}.
+ * available in another field. A subclass in the login specializes
+ * this behavior for the {@code token} field of the session.
  */
 public class JnJsonTransformersFieldEntityFieldCalculateHash implements CcpJsonTransformersDefaultEntityField{
 
@@ -32,7 +32,7 @@ public class JnJsonTransformersFieldEntityFieldCalculateHash implements CcpJsonT
 	 * @param fieldName the field transformed into its hash
 	 * @param name the name of the transformer
 	 */
-	JnJsonTransformersFieldEntityFieldCalculateHash(CcpJsonFieldName originalName, CcpJsonFieldName fieldName, CcpJsonFieldName name) {
+	protected JnJsonTransformersFieldEntityFieldCalculateHash(CcpJsonFieldName originalName, CcpJsonFieldName fieldName, CcpJsonFieldName name) {
 		this.originalName = originalName;
 		this.fieldName = fieldName;
 		this.name = name;

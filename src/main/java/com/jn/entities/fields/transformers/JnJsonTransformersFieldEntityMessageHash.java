@@ -13,7 +13,11 @@ import com.ccp.decorators.CcpStringDecorator;
  * message to the same recipient within the same hour is not sent again.
  */
 public class JnJsonTransformersFieldEntityMessageHash implements CcpJsonTransformersDefaultEntityField {
-	
+	/** The single instance: the class keeps no state. */
+	public final static JnJsonTransformersFieldEntityMessageHash INSTANCE = new JnJsonTransformersFieldEntityMessageHash();
+
+	private JnJsonTransformersFieldEntityMessageHash() {}
+
 	/**
 	 * Replaces {@code message} with its SHA-1 hash and keeps the original in {@code originalMessage}.
 	 * @param json the record

@@ -39,6 +39,10 @@ import com.jn.json.fields.validation.JnJsonCommonsFields;
 @CcpEntityFieldsValidator(JnEntityEmailParametersToSend.Fields.class)
 @CcpEntityFieldsTransformer(JnJsonTransformersFieldsEntityDefault.class)
 public class JnEntityEmailParametersToSend implements CcpEntityConfigurator{
+	/** The single instance: the class keeps no state. */
+	public final static JnEntityEmailParametersToSend INSTANCE = new JnEntityEmailParametersToSend();
+
+	private JnEntityEmailParametersToSend() {}
 
 	/** The entity {@code jn_email_parameters_to_send}, with every decorator of this configuration. */
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityEmailParametersToSend.class).entityInstance;

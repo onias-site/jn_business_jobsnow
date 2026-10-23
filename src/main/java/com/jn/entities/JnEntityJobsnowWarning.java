@@ -40,6 +40,10 @@ import com.jn.json.fields.validation.JnJsonCommonsFields;
 @CcpEntityFieldsTransformer(JnJsonTransformersFieldsEntityDefault.class)
 @CcpAfterInsertFromMainEntitySendAnInstantMessageAndIfFailsLogTheError(JnMessages.JnNotifySupportAboutWaring.class)
 public class JnEntityJobsnowWarning implements CcpEntityConfigurator {
+	/** The single instance: the class keeps no state. */
+	public final static JnEntityJobsnowWarning INSTANCE = new JnEntityJobsnowWarning();
+
+	private JnEntityJobsnowWarning() {}
 
 	/** The entity {@code jn_jobsnow_warning}, with every decorator of this configuration. */
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityJobsnowWarning.class).entityInstance;

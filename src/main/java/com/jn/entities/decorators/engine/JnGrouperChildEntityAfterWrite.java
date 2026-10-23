@@ -1,5 +1,7 @@
 package com.jn.entities.decorators.engine;
 
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.ccp.decorators.CcpJsonRepresentation;
@@ -24,18 +26,27 @@ public class JnGrouperChildEntityAfterWrite extends JnGrouperChildEntityOnWrite 
 	}
 
 	/**
-	 * Calculates the parents of the record once: their ids fill the field annotated with {@code @CcpStoredParentIdsField}
-	 * before the save, and the record enters their groups, on the side saved, after it.
+	 * Calculates the parents of each kind of the record once: their ids fill the field annotated with
+	 * {@code @CcpStoredParentIdsField} of that kind before the save, and the record enters their groups, on the side
+	 * saved, after it.
 	 * @param json the record
 	 * @return whether the record was inserted
 	 */
 	public boolean save(CcpJsonRepresentation json) {
-		JnEntityGrouperParents parents = this.getParents();
-		Map<String, CcpJsonRepresentation> recordParents = parents.getParents(json);
-		CcpJsonRepresentation jsonWithParentIds = parents.putParentIds(json, recordParents);
+		List<JnEntityGrouperParents> allParents = this.getAllParents();
+		Map<JnEntityGrouperParents, Map<String, CcpJsonRepresentation>> recordParentsByKind = new LinkedHashMap<>();
+		CcpJsonRepresentation jsonWithParentIds = json;
+		for (JnEntityGrouperParents parents : allParents) {
+			Map<String, CcpJsonRepresentation> recordParents = parents.getParents(json);
+			recordParentsByKind.put(parents, recordParents);
+			jsonWithParentIds = parents.putParentIds(jsonWithParentIds, recordParents);
+		}
 		boolean inserted = this.entity.save(jsonWithParentIds);
 		boolean twinSide = this.isTwinSide();
-		this.addToGroups(twinSide, jsonWithParentIds, parents, recordParents);
+		for (JnEntityGrouperParents parents : allParents) {
+			Map<String, CcpJsonRepresentation> recordParents = recordParentsByKind.get(parents);
+			this.addToGroups(twinSide, jsonWithParentIds, parents, recordParents);
+		}
 		return inserted;
 	}
 

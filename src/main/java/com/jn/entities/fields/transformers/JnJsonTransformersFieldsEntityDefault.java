@@ -16,7 +16,6 @@ import com.ccp.especifications.db.utils.entity.fields.CcpEntityField;
 import com.ccp.especifications.db.utils.entity.fields.CcpJsonTransformersDefaultEntityField;
 import com.ccp.especifications.password.CcpPasswordHandler;
 import com.ccp.hash.CcpHashAlgorithm;
-import com.jn.entities.JnEntityLoginToken;
 import com.jn.exceptions.JnErrorIsNotAnEmail;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
 
@@ -113,7 +112,7 @@ public enum JnJsonTransformersFieldsEntityDefault implements CcpJsonTransformers
 
 			// every read of the token entity runs the transformers: generating and hashing a token there (BCrypt, cost
 			// 12, about 250 ms) produced a value nobody used. The token is generated where it is born,
-			// JnBusinessPrepareLoginTokenBeforeSave (until 2026-10-08 it was generated here when absent)
+			// by the business that prepares the login token before saving it (until 2026-10-08 it was generated here when absent)
 			boolean noToken = false == json.containsAllFields(JnJsonCommonsFields.originalToken);
 
 			if(noToken) {
@@ -126,7 +125,7 @@ public enum JnJsonTransformersFieldsEntityDefault implements CcpJsonTransformers
 			
 			String hashedToken = passwordHandler.getHash(originalToken);
 			CcpJsonRepresentation jsonWithHashedToken = json
-					.put(JnEntityLoginToken.Fields.token, hashedToken);
+					.put(JnJsonCommonsFields.token, hashedToken);
 
 					CcpJsonRepresentation jsonWithOriginalToken = jsonWithHashedToken
 					.put(JnJsonCommonsFields.originalToken, originalToken)
@@ -184,7 +183,7 @@ public enum JnJsonTransformersFieldsEntityDefault implements CcpJsonTransformers
 			
 			String tokenHashValue = hash.asString(CcpHashAlgorithm.SHA1);
 			CcpJsonRepresentation jsonWithHashedToken = json
-					.put(JnEntityLoginToken.Fields.token, tokenHashValue);
+					.put(JnJsonCommonsFields.token, tokenHashValue);
 
 					CcpJsonRepresentation jsonWithOriginalToken = jsonWithHashedToken
 					.put(JnJsonCommonsFields.originalToken, originalToken)

@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 
@@ -17,14 +18,23 @@ import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityFactor
 import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityMetaData;
 import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidatorArray;
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityGrouperChild;
+import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityGrouperChildCounter;
+import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityGrouperParentCombinations;
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpStoredParentIdsField;
 
 /**
- * The groups of {@code JnEntityGrouper} the records of an entity belong to, as {@code @CcpEntityGrouperChild} and
- * {@code @CcpStoredParentIdsField} configure them: the kind of group, the parents of a record (one per combination of its
- * values, each identified by the id of the combination) and the parents a stored record was written with. Any cost
- * center uses it through the annotations alone (the resumes of the vis, grouped by each search they satisfy, are the
- * first).
+ * The groups of {@code JnEntityGrouper} of one kind the records of an entity belong to, as {@code @CcpEntityGrouperChild}
+ * (or {@code @CcpEntityGrouperChildCounter}) configures them: the kind of group (one class of the {@code value} of the
+ * annotation) and the parents of a record (one per combination of its values, each identified by the id of the
+ * combination). The parent is declared in one of two ways:
+ * <ul>
+ * <li><b>oneToMany</b>, by {@code @CcpEntityGrouperParentCombinations} on the entity: the parents come from the values
+ * of the record itself, so the parents a stored record was written with are calculated again from it;</li>
+ * <li><b>manyToMany</b>, by a list field annotated with {@code @CcpStoredParentIdsField}: the record keeps in that field
+ * the ids of the parents it was written with.</li>
+ * </ul>
+ * An entity that is a child of several kinds of group has one instance per kind ({@link #getAll}). Any cost center
+ * uses it through the annotations alone (the resumes of the vis, grouped by each search they satisfy, are the first).
  */
 public class JnEntityGrouperParents {
 
@@ -34,36 +44,113 @@ public class JnEntityGrouperParents {
 	/** Calculates the id of each parent from its combination. */
 	private final CcpEntity parentIdEntity;
 
-	/** The field of the record that keeps the ids of its parents. */
-	private final CcpFieldName storedParentIdsField;
+	/** The field of the record that keeps the ids of its parents (manyToMany); empty in a oneToMany. */
+	private final Optional<CcpFieldName> storedParentIdsField;
 
 	/**
-	 * Reads the grouping configured for the entity.
-	 * @param annotation the grouping configured for the entity
-	 * @param configurationClass the configurator class of the grouped entity, whose fields hold the one annotated with
-	 * {@code @CcpStoredParentIdsField}
+	 * Reads the grouping of one kind configured for the entity.
+	 * @param parentClass one class of the {@code value} of the grouping annotation: the parent entity
+	 * @param configurationClass the configurator class of the grouped entity, which declares the parent by a
+	 * {@code @CcpEntityGrouperParentCombinations} or by a field annotated with {@code @CcpStoredParentIdsField} whose
+	 * {@code parent} is {@code parentClass}
 	 */
-	public JnEntityGrouperParents(CcpEntityGrouperChild annotation, Class<?> configurationClass) {
-		Field storedParentIdsDeclaration = getStoredParentIdsDeclaration(configurationClass);
-		CcpStoredParentIdsField storedParentIdsAnnotation = storedParentIdsDeclaration.getAnnotation(CcpStoredParentIdsField.class);
-		CcpReflectionConstructorDecorator combinationsConstructor = new CcpReflectionConstructorDecorator(storedParentIdsAnnotation.value());
+	public JnEntityGrouperParents(Class<?> parentClass, Class<?> configurationClass) {
+		List<Field> annotatedFields = getStoredParentIdsDeclarations(configurationClass);
+		List<Field> fieldsOfTheParent = getStoredParentIdsDeclarationsOf(parentClass, annotatedFields);
+		List<CcpEntityGrouperParentCombinations> combinationsOfTheParent = getCombinationsDeclarationsOf(parentClass, configurationClass);
+		Class<?> combinationsClass = getCombinationsClass(configurationClass, parentClass, fieldsOfTheParent, combinationsOfTheParent);
+		CcpReflectionConstructorDecorator combinationsConstructor = new CcpReflectionConstructorDecorator(combinationsClass);
 		this.parentsCombinations = combinationsConstructor.newInstance();
 		// built from the annotations of the class, as its ENTITY is: the class does not have to be a configurator
-		CcpEntityFactory parentIdEntityFactory = new CcpEntityFactory(annotation.value());
+		CcpEntityFactory parentIdEntityFactory = new CcpEntityFactory(parentClass);
 		this.parentIdEntity = parentIdEntityFactory.entityInstance;
-		String storedParentIdsFieldName = storedParentIdsDeclaration.getName();
-		this.storedParentIdsField = new CcpFieldName(storedParentIdsFieldName);
+		this.storedParentIdsField = getStoredParentIdsField(configurationClass, fieldsOfTheParent);
 	}
 
 	/**
-	 * The only field of the entity annotated with {@code @CcpStoredParentIdsField}, which must be a list.
+	 * Every kind of group of the given parents, in the order they are declared.
+	 * @param parentClasses the {@code value} of the grouping annotation
 	 * @param configurationClass the configurator class of the grouped entity
-	 * @return the declaration of the field
-	 * @throws JnErrorStoredParentIdsFieldIsMissing when no field carries the annotation
-	 * @throws JnErrorStoredParentIdsFieldIsDuplicated when more than one field carries it
-	 * @throws JnErrorStoredParentIdsFieldIsNotAnArray when the field is not a list
+	 * @return the parents of each kind
+	 * @throws JnErrorParentDeclarationWithUnknownParent when a {@code @CcpStoredParentIdsField} or a
+	 * {@code @CcpEntityGrouperParentCombinations} has a {@code parent} that is in the {@code value} of no grouping
+	 * annotation of the entity
 	 */
-	private static Field getStoredParentIdsDeclaration(Class<?> configurationClass) {
+	public static List<JnEntityGrouperParents> getAll(Class<?>[] parentClasses, Class<?> configurationClass) {
+		List<Class<?>> knownParents = getParentsOfEveryGrouping(configurationClass);
+		List<Field> annotatedFields = getStoredParentIdsDeclarations(configurationClass);
+		for (Field annotatedField : annotatedFields) {
+			CcpStoredParentIdsField storedParentIdsAnnotation = annotatedField.getAnnotation(CcpStoredParentIdsField.class);
+			Class<?> parentClass = storedParentIdsAnnotation.parent();
+			boolean knownParent = knownParents.contains(parentClass);
+
+			if(knownParent) {
+				continue;
+			}
+
+			String fieldName = annotatedField.getName();
+			throw new JnErrorParentDeclarationWithUnknownParent(configurationClass, fieldName, parentClass);
+		}
+
+		CcpEntityGrouperParentCombinations[] combinationsDeclarations = configurationClass.getAnnotationsByType(CcpEntityGrouperParentCombinations.class);
+		for (CcpEntityGrouperParentCombinations combinationsDeclaration : combinationsDeclarations) {
+			Class<?> parentClass = combinationsDeclaration.parent();
+			boolean knownParent = knownParents.contains(parentClass);
+
+			if(knownParent) {
+				continue;
+			}
+
+			throw new JnErrorParentDeclarationWithUnknownParent(configurationClass, Constants.COMBINATIONS_ANNOTATION.getValue(), parentClass);
+		}
+
+		List<JnEntityGrouperParents> allParents = new ArrayList<>();
+		for (Class<?> parentClass : parentClasses) {
+			JnEntityGrouperParents parents = new JnEntityGrouperParents(parentClass, configurationClass);
+			allParents.add(parents);
+		}
+		return allParents;
+	}
+
+	/** The texts of this class. */
+	enum Constants implements CcpJsonFieldName {
+		/** How a {@code @CcpEntityGrouperParentCombinations} is named in the errors. */
+		COMBINATIONS_ANNOTATION {
+			public String getValue() {
+				return "@CcpEntityGrouperParentCombinations";
+			}
+		},
+	}
+
+	/**
+	 * The parents of every grouping annotation of the entity ({@code @CcpEntityGrouperChild} and
+	 * {@code @CcpEntityGrouperChildCounter}).
+	 * @param configurationClass the configurator class of the grouped entity
+	 * @return the parent classes
+	 */
+	private static List<Class<?>> getParentsOfEveryGrouping(Class<?> configurationClass) {
+		List<Class<?>> parents = new ArrayList<>();
+		CcpEntityGrouperChild[] groupings = configurationClass.getAnnotationsByType(CcpEntityGrouperChild.class);
+		for (CcpEntityGrouperChild grouping : groupings) {
+			Class<?>[] groupingParents = grouping.value();
+			List<Class<?>> groupingParentsList = List.of(groupingParents);
+			parents.addAll(groupingParentsList);
+		}
+		CcpEntityGrouperChildCounter[] counters = configurationClass.getAnnotationsByType(CcpEntityGrouperChildCounter.class);
+		for (CcpEntityGrouperChildCounter counter : counters) {
+			Class<?>[] counterParents = counter.value();
+			List<Class<?>> counterParentsList = List.of(counterParents);
+			parents.addAll(counterParentsList);
+		}
+		return parents;
+	}
+
+	/**
+	 * The fields of the entity annotated with {@code @CcpStoredParentIdsField}, whatever their parent.
+	 * @param configurationClass the configurator class of the grouped entity
+	 * @return the declarations of the fields
+	 */
+	private static List<Field> getStoredParentIdsDeclarations(Class<?> configurationClass) {
 		Class<?> fieldsClass = CcpEntityFactory.getFieldsClass(configurationClass);
 		Field[] declaredFields = fieldsClass.getDeclaredFields();
 		List<Field> annotatedFields = new ArrayList<>();
@@ -83,28 +170,123 @@ public class JnEntityGrouperParents {
 
 			annotatedFields.add(declaredField);
 		}
+		return annotatedFields;
+	}
 
-		boolean noFieldAnnotated = annotatedFields.isEmpty();
+	/**
+	 * The fields annotated with {@code @CcpStoredParentIdsField} whose {@code parent} is the given class.
+	 * @param parentClass the parent entity
+	 * @param annotatedFields the fields of the entity annotated with {@code @CcpStoredParentIdsField}
+	 * @return the declarations of the fields of that parent
+	 */
+	private static List<Field> getStoredParentIdsDeclarationsOf(Class<?> parentClass, List<Field> annotatedFields) {
+		List<Field> fieldsOfTheParent = new ArrayList<>();
+		for (Field annotatedField : annotatedFields) {
+			CcpStoredParentIdsField storedParentIdsAnnotation = annotatedField.getAnnotation(CcpStoredParentIdsField.class);
+			Class<?> fieldParentClass = storedParentIdsAnnotation.parent();
+			boolean anotherParent = false == parentClass.equals(fieldParentClass);
 
-		if(noFieldAnnotated) {
-			throw new JnErrorStoredParentIdsFieldIsMissing(configurationClass);
+			if(anotherParent) {
+				continue;
+			}
+
+			fieldsOfTheParent.add(annotatedField);
+		}
+		return fieldsOfTheParent;
+	}
+
+	/**
+	 * The {@code @CcpEntityGrouperParentCombinations} of the entity whose {@code parent} is the given class.
+	 * @param parentClass the parent entity
+	 * @param configurationClass the configurator class of the grouped entity
+	 * @return the declarations of that parent
+	 */
+	private static List<CcpEntityGrouperParentCombinations> getCombinationsDeclarationsOf(Class<?> parentClass, Class<?> configurationClass) {
+		CcpEntityGrouperParentCombinations[] combinationsDeclarations = configurationClass.getAnnotationsByType(CcpEntityGrouperParentCombinations.class);
+		List<CcpEntityGrouperParentCombinations> combinationsOfTheParent = new ArrayList<>();
+		for (CcpEntityGrouperParentCombinations combinationsDeclaration : combinationsDeclarations) {
+			Class<?> declarationParentClass = combinationsDeclaration.parent();
+			boolean anotherParent = false == parentClass.equals(declarationParentClass);
+
+			if(anotherParent) {
+				continue;
+			}
+
+			combinationsOfTheParent.add(combinationsDeclaration);
+		}
+		return combinationsOfTheParent;
+	}
+
+	/**
+	 * The class that produces the combinations of the parent, from its only declaration.
+	 * @param configurationClass the configurator class of the grouped entity
+	 * @param parentClass the parent entity
+	 * @param fieldsOfTheParent the fields annotated with {@code @CcpStoredParentIdsField} of that parent
+	 * @param combinationsOfTheParent the {@code @CcpEntityGrouperParentCombinations} of that parent
+	 * @return the class of the combinations
+	 * @throws JnErrorParentDeclarationIsMissing when the parent is declared in no way
+	 * @throws JnErrorParentDeclarationIsDuplicated when it is declared more than once
+	 */
+	private static Class<?> getCombinationsClass(Class<?> configurationClass, Class<?> parentClass, List<Field> fieldsOfTheParent, List<CcpEntityGrouperParentCombinations> combinationsOfTheParent) {
+		List<String> declarations = new ArrayList<>();
+		for (Field fieldOfTheParent : fieldsOfTheParent) {
+			String fieldName = fieldOfTheParent.getName();
+			declarations.add(fieldName);
+		}
+		for (int index = 0; index < combinationsOfTheParent.size(); index++) {
+			String combinationsAnnotation = Constants.COMBINATIONS_ANNOTATION.getValue();
+			declarations.add(combinationsAnnotation);
 		}
 
-		int annotatedFieldsCount = annotatedFields.size();
-		boolean moreThanOneFieldAnnotated = annotatedFieldsCount > 1;
+		boolean notDeclared = declarations.isEmpty();
 
-		if(moreThanOneFieldAnnotated) {
-			throw new JnErrorStoredParentIdsFieldIsDuplicated(configurationClass, annotatedFields);
+		if(notDeclared) {
+			throw new JnErrorParentDeclarationIsMissing(configurationClass, parentClass);
 		}
 
-		Field storedParentIdsDeclaration = annotatedFields.get(0);
+		int declarationsCount = declarations.size();
+		boolean declaredMoreThanOnce = declarationsCount > 1;
+
+		if(declaredMoreThanOnce) {
+			throw new JnErrorParentDeclarationIsDuplicated(configurationClass, parentClass, declarations);
+		}
+
+		boolean oneToMany = fieldsOfTheParent.isEmpty();
+
+		if(oneToMany) {
+			CcpEntityGrouperParentCombinations combinationsDeclaration = combinationsOfTheParent.get(0);
+			return combinationsDeclaration.value();
+		}
+
+		Field storedParentIdsDeclaration = fieldsOfTheParent.get(0);
+		CcpStoredParentIdsField storedParentIdsAnnotation = storedParentIdsDeclaration.getAnnotation(CcpStoredParentIdsField.class);
+		return storedParentIdsAnnotation.value();
+	}
+
+	/**
+	 * The field that keeps the ids of the parents, which must be a list; none in a oneToMany.
+	 * @param configurationClass the configurator class of the grouped entity
+	 * @param fieldsOfTheParent the fields annotated with {@code @CcpStoredParentIdsField} of the parent (one at most)
+	 * @return the field, empty in a oneToMany
+	 * @throws JnErrorStoredParentIdsFieldIsNotAnArray when the field is not a list
+	 */
+	private static Optional<CcpFieldName> getStoredParentIdsField(Class<?> configurationClass, List<Field> fieldsOfTheParent) {
+		boolean oneToMany = fieldsOfTheParent.isEmpty();
+
+		if(oneToMany) {
+			return Optional.empty();
+		}
+
+		Field storedParentIdsDeclaration = fieldsOfTheParent.get(0);
 		boolean isNotAnArray = false == storedParentIdsDeclaration.isAnnotationPresent(CcpJsonFieldValidatorArray.class);
 
 		if(isNotAnArray) {
 			throw new JnErrorStoredParentIdsFieldIsNotAnArray(configurationClass, storedParentIdsDeclaration);
 		}
 
-		return storedParentIdsDeclaration;
+		String storedParentIdsFieldName = storedParentIdsDeclaration.getName();
+		CcpFieldName storedParentIdsFieldDecorator = new CcpFieldName(storedParentIdsFieldName);
+		return Optional.of(storedParentIdsFieldDecorator);
 	}
 
 	/**
@@ -154,60 +336,106 @@ public class JnEntityGrouperParents {
 
 	/**
 	 * Fills the field annotated with {@code @CcpStoredParentIdsField} with the ids of the parents of the record, replacing
-	 * whatever the input brought in it: the stored record tells, later, the groups it must leave.
+	 * whatever the input brought in it: the stored record tells, later, the groups it must leave. A oneToMany has no such
+	 * field, and the record is returned as it is.
 	 * @param record the record as it is being written
 	 * @param recordParents the parents of the record, as {@link #getParents} returns them
 	 * @return the record with the ids of its parents
 	 */
 	public CcpJsonRepresentation putParentIds(CcpJsonRepresentation record, Map<String, CcpJsonRepresentation> recordParents) {
+		boolean oneToMany = this.storedParentIdsField.isEmpty();
+
+		if(oneToMany) {
+			return record;
+		}
+
+		CcpFieldName storedParentIdsFieldName = this.storedParentIdsField.get();
 		Set<String> parentIdsSet = recordParents.keySet();
 		List<String> parentIds = new ArrayList<>(parentIdsSet);
-		CcpJsonRepresentation recordWithParentIds = record.put(this.storedParentIdsField, parentIds);
+		CcpJsonRepresentation recordWithParentIds = record.put(storedParentIdsFieldName, parentIds);
 		return recordWithParentIds;
 	}
 
 	/**
-	 * The record without the field annotated with {@code @CcpStoredParentIdsField}.
+	 * The record without the field annotated with {@code @CcpStoredParentIdsField} (as it is, in a oneToMany).
 	 * @param record the record
 	 * @return the record without the ids of its parents
 	 */
 	public CcpJsonRepresentation removeParentIds(CcpJsonRepresentation record) {
-		CcpJsonRepresentation recordWithoutParentIds = record.removeFields(this.storedParentIdsField);
+		boolean oneToMany = this.storedParentIdsField.isEmpty();
+
+		if(oneToMany) {
+			return record;
+		}
+
+		CcpFieldName storedParentIdsFieldName = this.storedParentIdsField.get();
+		CcpJsonRepresentation recordWithoutParentIds = record.removeFields(storedParentIdsFieldName);
 		return recordWithoutParentIds;
 	}
 
 	/**
-	 * The parents a stored record belongs to, as they were when it was written: the groups it must leave.
+	 * The parents a stored record belongs to, as they were when it was written: the groups it must leave. In a oneToMany
+	 * they are calculated again from the stored record; in a manyToMany they are the ids kept in its field.
 	 * @param storedRecord the record as it is stored
 	 * @return the parent ids
 	 */
 	public List<String> getStoredParentIds(CcpJsonRepresentation storedRecord) {
-		List<String> storedParentIds = storedRecord.getAsStringList(this.storedParentIdsField);
+		boolean oneToMany = this.storedParentIdsField.isEmpty();
+
+		if(oneToMany) {
+			Map<String, CcpJsonRepresentation> storedParents = this.getParents(storedRecord);
+			Set<String> storedParentIds = storedParents.keySet();
+			return new ArrayList<>(storedParentIds);
+		}
+
+		CcpFieldName storedParentIdsFieldName = this.storedParentIdsField.get();
+		List<String> storedParentIds = storedRecord.getAsStringList(storedParentIdsFieldName);
 		return storedParentIds;
 	}
 
-	/** Raised when no field of the grouped entity is annotated with {@code @CcpStoredParentIdsField}. */
+	/** Raised when the grouped entity declares a parent in no way. */
 	@SuppressWarnings("serial")
-	private static class JnErrorStoredParentIdsFieldIsMissing extends RuntimeException {
+	private static class JnErrorParentDeclarationIsMissing extends RuntimeException {
 		/**
 		 * Builds the error.
 		 * @param configurationClass the configurator class of the grouped entity
+		 * @param parentClass the parent entity that is not declared
 		 */
-		private JnErrorStoredParentIdsFieldIsMissing(Class<?> configurationClass) {
-			super("No field of " + configurationClass.getName() + " is annotated with @CcpStoredParentIdsField");
+		private JnErrorParentDeclarationIsMissing(Class<?> configurationClass, Class<?> parentClass) {
+			super(configurationClass.getName() + " declares the parent " + parentClass.getName() + " neither by @CcpEntityGrouperParentCombinations(parent = "
+					+ parentClass.getName() + ".class) (oneToMany) nor by a field annotated with @CcpStoredParentIdsField(parent = " + parentClass.getName() + ".class) (manyToMany)");
 		}
 	}
 
-	/** Raised when more than one field of the grouped entity is annotated with {@code @CcpStoredParentIdsField}. */
+	/** Raised when the grouped entity declares a parent more than once. */
 	@SuppressWarnings("serial")
-	private static class JnErrorStoredParentIdsFieldIsDuplicated extends RuntimeException {
+	private static class JnErrorParentDeclarationIsDuplicated extends RuntimeException {
 		/**
 		 * Builds the error.
 		 * @param configurationClass the configurator class of the grouped entity
-		 * @param annotatedFields the fields that carry the annotation
+		 * @param parentClass the parent entity declared more than once
+		 * @param declarations the declarations found (field names or the combinations annotation)
 		 */
-		private JnErrorStoredParentIdsFieldIsDuplicated(Class<?> configurationClass, List<Field> annotatedFields) {
-			super("Only one field of " + configurationClass.getName() + " can be annotated with @CcpStoredParentIdsField, found: " + annotatedFields);
+		private JnErrorParentDeclarationIsDuplicated(Class<?> configurationClass, Class<?> parentClass, List<String> declarations) {
+			super(configurationClass.getName() + " must declare the parent " + parentClass.getName() + " only once, by @CcpEntityGrouperParentCombinations or by a field annotated with @CcpStoredParentIdsField, found: " + declarations);
+		}
+	}
+
+	/**
+	 * Raised when the {@code parent} of a {@code @CcpStoredParentIdsField} or of a
+	 * {@code @CcpEntityGrouperParentCombinations} is in the {@code value} of no grouping annotation of the entity.
+	 */
+	@SuppressWarnings("serial")
+	private static class JnErrorParentDeclarationWithUnknownParent extends RuntimeException {
+		/**
+		 * Builds the error.
+		 * @param configurationClass the configurator class of the grouped entity
+		 * @param declaration the declaration of the parent (a field name or the combinations annotation)
+		 * @param parentClass the parent of the declaration
+		 */
+		private JnErrorParentDeclarationWithUnknownParent(Class<?> configurationClass, String declaration, Class<?> parentClass) {
+			super("The declaration " + declaration + " of " + configurationClass.getName() + " has the parent " + parentClass.getName()
+					+ ", but that class is in the value of no @CcpEntityGrouperChild nor @CcpEntityGrouperChildCounter");
 		}
 	}
 

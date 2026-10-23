@@ -27,6 +27,10 @@ import com.jn.json.fields.validation.JnJsonInstantMessengerFields;
 @CcpEntityFieldsTransformer(JnJsonTransformersFieldsEntityDefault.class)
 @CcpEntityFieldsValidator(JnEntityBotCommandStepExplanation.Fields.class)
 public class JnEntityBotCommandStepExplanation implements CcpEntityConfigurator {
+	/** The single instance: the class keeps no state. */
+	public final static JnEntityBotCommandStepExplanation INSTANCE = new JnEntityBotCommandStepExplanation();
+
+	private JnEntityBotCommandStepExplanation() {}
 
 	/** The entity {@code jn_bot_command_step_explanation}, with every decorator of this configuration. */
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityBotCommandStepExplanation.class).entityInstance;

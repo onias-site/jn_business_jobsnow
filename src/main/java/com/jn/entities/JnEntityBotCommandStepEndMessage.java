@@ -43,6 +43,10 @@ import com.jn.utils.JnLanguage;
 @CcpEntityFieldsTransformer(JnJsonTransformersFieldsEntityDefault.class)
 @CcpEntityFieldsValidator(JnEntityBotCommandStepEndMessage.Fields.class)
 public class JnEntityBotCommandStepEndMessage implements CcpEntityConfigurator {
+	/** The single instance: the class keeps no state. */
+	public final static JnEntityBotCommandStepEndMessage INSTANCE = new JnEntityBotCommandStepEndMessage();
+
+	private JnEntityBotCommandStepEndMessage() {}
 
 	/** The entity {@code jn_bot_command_step_end_message}, with every decorator of this configuration. */
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityBotCommandStepEndMessage.class).entityInstance;

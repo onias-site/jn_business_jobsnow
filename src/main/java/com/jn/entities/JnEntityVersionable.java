@@ -28,6 +28,10 @@ import com.jn.json.fields.validation.JnJsonCommonsFields;
 @CcpEntityFieldsValidator(JnEntityVersionable.Fields.class)
 
 public class JnEntityVersionable implements CcpEntityConfigurator {
+	/** The single instance: the class keeps no state. */
+	public final static JnEntityVersionable INSTANCE = new JnEntityVersionable();
+
+	private JnEntityVersionable() {}
 
 	/** The entity {@code jn_versionable}, with every decorator of this configuration. */
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityVersionable.class).entityInstance;

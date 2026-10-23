@@ -36,13 +36,14 @@ public abstract class JnGrouperChildEntityOnWrite extends CcpEntityDelegator {
 
 	/**
 	 * The parents of the records, built when a write needs them: building them while the decorator chain is built would
-	 * load the entity of the parent ids in the middle of the initialization of the grouped entity.
-	 * @return the parents configured for the entity
+	 * load the entities of the parent ids in the middle of the initialization of the grouped entity.
+	 * @return the parents configured for the entity, one per kind of group
 	 */
-	protected JnEntityGrouperParents getParents() {
+	protected List<JnEntityGrouperParents> getAllParents() {
 		CcpEntityMetaData entityDetails = this.getEntityMetaData();
-		JnEntityGrouperParents parents = new JnEntityGrouperParents(this.annotation, entityDetails.configurationClass);
-		return parents;
+		Class<?>[] parentClasses = this.annotation.value();
+		List<JnEntityGrouperParents> allParents = JnEntityGrouperParents.getAll(parentClasses, entityDetails.configurationClass);
+		return allParents;
 	}
 
 	/**
@@ -97,21 +98,23 @@ public abstract class JnGrouperChildEntityOnWrite extends CcpEntityDelegator {
 	}
 
 	/**
-	 * Puts the record in the groups of its parents, on the given side of the grouper.
+	 * Puts the record in the groups of its parents of every kind, on the given side of the grouper.
 	 * @param twinSide whether the twin side of the grouper is the one written
 	 * @param record the record, its primary key already transformed
 	 */
 	protected void addToGroups(boolean twinSide, CcpJsonRepresentation record) {
-		JnEntityGrouperParents parents = this.getParents();
-		Map<String, CcpJsonRepresentation> recordParents = parents.getParents(record);
-		this.addToGroups(twinSide, record, parents, recordParents);
+		List<JnEntityGrouperParents> allParents = this.getAllParents();
+		for (JnEntityGrouperParents parents : allParents) {
+			Map<String, CcpJsonRepresentation> recordParents = parents.getParents(record);
+			this.addToGroups(twinSide, record, parents, recordParents);
+		}
 	}
 
 	/**
-	 * Puts the record in the groups of parents already calculated, on the given side of the grouper.
+	 * Puts the record in the groups of parents of one kind already calculated, on the given side of the grouper.
 	 * @param twinSide whether the twin side of the grouper is the one written
 	 * @param record the record, its primary key already transformed
-	 * @param parents the parents configured for the entity
+	 * @param parents the parents of one kind configured for the entity
 	 * @param recordParents the parents of the record, as {@code JnEntityGrouperParents.getParents} returns them
 	 */
 	protected void addToGroups(boolean twinSide, CcpJsonRepresentation record, JnEntityGrouperParents parents, Map<String, CcpJsonRepresentation> recordParents) {
@@ -124,7 +127,7 @@ public abstract class JnGrouperChildEntityOnWrite extends CcpEntityDelegator {
 	}
 
 	/**
-	 * Takes the stored record out of the groups it is in, on the given side of the grouper.
+	 * Takes the stored record out of the groups it is in, of every kind, on the given side of the grouper.
 	 * @param twinSide whether the twin side of the grouper is the one written
 	 * @param storedRecord the record as it is stored
 	 */
@@ -132,11 +135,13 @@ public abstract class JnGrouperChildEntityOnWrite extends CcpEntityDelegator {
 		CcpEntity mainEntity = this.getMainEntity();
 		CcpEntityMetaData mainDetails = mainEntity.getEntityMetaData();
 		String childId = mainEntity.calculateId(storedRecord);
-		JnEntityGrouperParents parents = this.getParents();
-		String parentName = parents.getParentName();
-		List<String> parentIds = parents.getStoredParentIds(storedRecord);
 		CcpEntity grouper = JnGroupers.getGrouper(twinSide);
-		JnGroupers.removeChild(grouper, parentName, mainDetails.entityName, childId, parentIds);
+		List<JnEntityGrouperParents> allParents = this.getAllParents();
+		for (JnEntityGrouperParents parents : allParents) {
+			String parentName = parents.getParentName();
+			List<String> parentIds = parents.getStoredParentIds(storedRecord);
+			JnGroupers.removeChild(grouper, parentName, mainDetails.entityName, childId, parentIds);
+		}
 	}
 
 	/**

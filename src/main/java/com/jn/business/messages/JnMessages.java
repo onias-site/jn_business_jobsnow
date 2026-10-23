@@ -4,7 +4,6 @@ import java.util.List;
 
 import com.ccp.decorators.CcpJsonFieldName;
 import com.ccp.decorators.CcpJsonRepresentation;
-import com.jn.entities.JnEntityLoginToken;
 import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
 
@@ -22,6 +21,11 @@ public class JnMessages {
 
 	/** Notice to the support team about a new request to unlock a login token. */
 	public static class JnNotifySupportAboutPendingLockedLoginToken implements JnMessageTemplate {
+		/** The single instance: the class keeps no state. */
+		public final static JnNotifySupportAboutPendingLockedLoginToken INSTANCE = new JnNotifySupportAboutPendingLockedLoginToken();
+
+		private JnNotifySupportAboutPendingLockedLoginToken() {}
+
 		/**
 		 * Needs no preparation.
 		 * @param json the values of the message
@@ -34,6 +38,11 @@ public class JnMessages {
 
 	/** Notice to the support team about a new request to resend a login token. */
 	public static class JnNotifySupportAboutPendingResendLoginToken implements JnMessageTemplate {
+		/** The single instance: the class keeps no state. */
+		public final static JnNotifySupportAboutPendingResendLoginToken INSTANCE = new JnNotifySupportAboutPendingResendLoginToken();
+
+		private JnNotifySupportAboutPendingResendLoginToken() {}
+
 		/**
 		 * Needs no preparation.
 		 * @param json the values of the message
@@ -46,6 +55,11 @@ public class JnMessages {
 
 	/** Notice to the support team that a request to unlock a login token was solved. */
 	public static class JnNotifySupportAboutSolvedLockedLoginToken implements JnMessageTemplate {
+		/** The single instance: the class keeps no state. */
+		public final static JnNotifySupportAboutSolvedLockedLoginToken INSTANCE = new JnNotifySupportAboutSolvedLockedLoginToken();
+
+		private JnNotifySupportAboutSolvedLockedLoginToken() {}
+
 		/**
 		 * Needs no preparation.
 		 * @param json the values of the message
@@ -58,6 +72,11 @@ public class JnMessages {
 
 	/** Notice to the support team that a request to resend a login token was solved. */
 	public static class JnNotifySupportAboutSolvedResendLoginToken implements JnMessageTemplate {
+		/** The single instance: the class keeps no state. */
+		public final static JnNotifySupportAboutSolvedResendLoginToken INSTANCE = new JnNotifySupportAboutSolvedResendLoginToken();
+
+		private JnNotifySupportAboutSolvedResendLoginToken() {}
+
 		/**
 		 * Needs no preparation.
 		 * @param json the values of the message
@@ -75,6 +94,11 @@ public class JnMessages {
 	 * email and token, not the hashes.
 	 */
 	public static class JnNotifyUserAboutLoginToken implements JnMessageTemplate {
+		/** The single instance: the class keeps no state. */
+		public final static JnNotifyUserAboutLoginToken INSTANCE = new JnNotifyUserAboutLoginToken();
+
+		private JnNotifyUserAboutLoginToken() {}
+
 		/**
 		 * Renames the plain e-mail and token back to {@code email} and {@code token}.
 		 * @param json the values of the message
@@ -84,7 +108,7 @@ public class JnMessages {
 			CcpJsonRepresentation withOriginalEmail = json
 					.renameField(JnJsonTransformersFieldsEntityDefault.JsonFieldNames.originalEmail, JnJsonCommonsFields.email);
 			CcpJsonRepresentation withOriginalToken = withOriginalEmail
-					.renameField(JnJsonCommonsFields.originalToken, JnEntityLoginToken.Fields.token);
+					.renameField(JnJsonCommonsFields.originalToken, JnJsonCommonsFields.token);
 			return withOriginalToken;
 		}
 	}
@@ -93,6 +117,11 @@ public class JnMessages {
 	 * Error notice sent to support as a file. See {@link #toSupportNotice(CcpJsonRepresentation)}.
 	 */
 	public static class JnNotifySupportAboutAnError implements JnMessageTemplate {
+		/** The single instance: the class keeps no state. */
+		public final static JnNotifySupportAboutAnError INSTANCE = new JnNotifySupportAboutAnError();
+
+		private JnNotifySupportAboutAnError() {}
+
 		/**
 		 * Prepares the support notice.
 		 * @param json the error
@@ -108,6 +137,11 @@ public class JnMessages {
 	 * Warning notice sent to support as a file. See {@link #toSupportNotice(CcpJsonRepresentation)}.
 	 */
 	public static class JnNotifySupportAboutWaring implements JnMessageTemplate {
+		/** The single instance: the class keeps no state. */
+		public final static JnNotifySupportAboutWaring INSTANCE = new JnNotifySupportAboutWaring();
+
+		private JnNotifySupportAboutWaring() {}
+
 		/**
 		 * Prepares the support notice.
 		 * @param json the warning

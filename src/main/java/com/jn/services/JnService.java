@@ -5,8 +5,7 @@ import com.ccp.service.CcpService;
 
 /**
  * Base of the services. By convention each item of the service enum has a top-level type with the same name in the same
- * package (usually declared as a secondary type in the service file, see {@code GetAsyncTaskStatusById} in
- * {@code JnServiceAsyncTask.java}) holding its input rules. A nested type does not work: {@code Class.forName} would look
+ * package (in a file of its own or declared as a secondary type in the service file) holding its input rules. A nested type does not work: {@code Class.forName} would look
  * for {@code package.ServiceName$ItemName}, not {@code package.ItemName}, and fail with
  * {@link JnErrorServiceValidationClassNotFound}.
  */

@@ -40,6 +40,10 @@ import com.jn.json.fields.validation.JnJsonInstantMessengerFields;
 @CcpEntityFieldsValidator(JnEntityBotCommand.Fields.class)
 @CcpEntityFieldsTransformer(JnJsonTransformersFieldsEntityDefault.class)
 public class JnEntityBotCommand implements CcpEntityConfigurator {
+	/** The single instance: the class keeps no state. */
+	public final static JnEntityBotCommand INSTANCE = new JnEntityBotCommand();
+
+	private JnEntityBotCommand() {}
 
 	/** The entity {@code jn_bot_command}, with every decorator of this configuration. */
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityBotCommand.class).entityInstance;

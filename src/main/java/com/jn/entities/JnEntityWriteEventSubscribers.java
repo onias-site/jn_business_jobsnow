@@ -53,6 +53,10 @@ import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault
 @CcpEntityFieldsValidator(JnEntityWriteEventSubscribers.Fields.class)
 @CcpEntityFieldsTransformer(JnJsonTransformersFieldsEntityDefault.class)
 public class JnEntityWriteEventSubscribers implements CcpEntityConfigurator {
+	/** The single instance: the class keeps no state. */
+	public final static JnEntityWriteEventSubscribers INSTANCE = new JnEntityWriteEventSubscribers();
+
+	private JnEntityWriteEventSubscribers() {}
 
 	/** The entity {@code jn_write_event_subscribers}, with every decorator of this configuration. */
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityWriteEventSubscribers.class).entityInstance;
@@ -62,14 +66,12 @@ public class JnEntityWriteEventSubscribers implements CcpEntityConfigurator {
 	 * {@code @CcpEntityFieldsValidator}).
 	 */
 	public static enum Fields implements CcpJsonFieldName{
-		/** The {@code entityName} field: part of the primary key, required, text, the entity that is written. */
+		/** The {@code entityName} field: part of the primary key (so required), text, the entity that is written. */
 		@CcpEntityFieldPrimaryKey
-		@CcpJsonFieldValidatorRequired
 		@CcpJsonFieldTypeString(minLength = 1, maxLength = 100)
 		entityName,
-		/** The {@code writeOperation} field: part of the primary key, required, text, the write listened to. */
+		/** The {@code writeOperation} field: part of the primary key (so required), text, the write listened to. */
 		@CcpEntityFieldPrimaryKey
-		@CcpJsonFieldValidatorRequired
 		@CcpJsonFieldTypeString(allowedValuesEnum = CcpEntityDecoratorOperationType.class)
 		writeOperation,
 		/** The {@code subscribers} field: required, list, the class names of the businesses that run after the write. */

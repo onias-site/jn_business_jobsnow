@@ -31,7 +31,11 @@ import com.jn.json.fields.validation.JnJsonCommonsFields;
 @CcpEntityDisposable(value = JnDisposableEntity.class, timeOption = CcpEntityExpurgableOptions.hourly)
 @CcpEntityFieldsTransformer(JnJsonTransformersFieldsEntityDefault.class)
 public class JnEntityHttpApiErrorServer implements CcpEntityConfigurator {
-	
+	/** The single instance: the class keeps no state. */
+	public final static JnEntityHttpApiErrorServer INSTANCE = new JnEntityHttpApiErrorServer();
+
+	private JnEntityHttpApiErrorServer() {}
+
 	/** The entity {@code jn_http_api_error_server}, with every decorator of this configuration. */
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityHttpApiErrorServer.class).entityInstance;
 

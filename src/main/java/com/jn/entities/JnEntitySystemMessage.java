@@ -35,6 +35,10 @@ import com.jn.utils.JnLanguage;
 @CcpEntityFieldsTransformer(JnJsonTransformersFieldsEntityDefault.class)
 @CcpEntityFieldsValidator(JnEntitySystemMessage.Fields.class)
 public class JnEntitySystemMessage implements CcpEntityConfigurator {
+	/** The single instance: the class keeps no state. */
+	public final static JnEntitySystemMessage INSTANCE = new JnEntitySystemMessage();
+
+	private JnEntitySystemMessage() {}
 
 	/** The entity {@code jn_system_message}, with every decorator of this configuration. */
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntitySystemMessage.class).entityInstance;

@@ -31,6 +31,10 @@ import com.jn.json.fields.validation.JnJsonInstantMessengerFields;
 @CcpEntityFieldsTransformer(JnJsonTransformersFieldsEntityDefault.class)
 @CcpEntityFieldsValidator(JnEntitySupportCancelledCommand.Fields.class)
 public class JnEntitySupportCancelledCommand implements CcpEntityConfigurator {
+	/** The single instance: the class keeps no state. */
+	public final static JnEntitySupportCancelledCommand INSTANCE = new JnEntitySupportCancelledCommand();
+
+	private JnEntitySupportCancelledCommand() {}
 
 	/** The entity {@code jn_support_cancelled_command}, with every decorator of this configuration. */
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntitySupportCancelledCommand.class).entityInstance;

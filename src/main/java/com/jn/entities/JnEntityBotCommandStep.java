@@ -47,6 +47,10 @@ import com.jn.utils.JnLanguage;
 @CcpEntityFieldsValidator(JnEntityBotCommandStep.Fields.class)
 @CcpEntityFieldsTransformer(JnJsonTransformersFieldsEntityDefault.class)
 public class JnEntityBotCommandStep implements CcpEntityConfigurator {
+	/** The single instance: the class keeps no state. */
+	public final static JnEntityBotCommandStep INSTANCE = new JnEntityBotCommandStep();
+
+	private JnEntityBotCommandStep() {}
 
 	/** The entity {@code jn_bot_command_step}, with every decorator of this configuration. */
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityBotCommandStep.class).entityInstance;

@@ -38,6 +38,10 @@ import com.jn.utils.JnLanguage;
 @CcpEntityFieldsValidator(JnEntityEmailTemplateMessage.Fields.class)
 @CcpEntityFieldsTransformer(JnJsonTransformersFieldsEntityDefault.class)
 public class JnEntityEmailTemplateMessage  implements CcpEntityConfigurator{
+	/** The single instance: the class keeps no state. */
+	public final static JnEntityEmailTemplateMessage INSTANCE = new JnEntityEmailTemplateMessage();
+
+	private JnEntityEmailTemplateMessage() {}
 
 	/** The entity {@code jn_email_template_message}, with every decorator of this configuration. */
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityEmailTemplateMessage.class).entityInstance;

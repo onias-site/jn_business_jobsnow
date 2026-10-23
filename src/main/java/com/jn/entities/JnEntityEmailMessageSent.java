@@ -32,7 +32,11 @@ import com.jn.json.fields.validation.JnJsonCommonsFields;
 @CcpEntityFieldsTransformer(JnJsonTransformersFieldsEntityDefault.class)
 
 public class JnEntityEmailMessageSent implements CcpEntityConfigurator {
-	
+	/** The single instance: the class keeps no state. */
+	public final static JnEntityEmailMessageSent INSTANCE = new JnEntityEmailMessageSent();
+
+	private JnEntityEmailMessageSent() {}
+
 	/** The entity {@code jn_email_message_sent}, with every decorator of this configuration. */
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityEmailMessageSent.class).entityInstance;
 

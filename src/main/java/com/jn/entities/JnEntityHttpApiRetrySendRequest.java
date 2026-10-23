@@ -34,6 +34,10 @@ import com.jn.json.fields.validation.JnJsonCommonsFields;
 @CcpEntityFieldsTransformer(JnJsonTransformersFieldsEntityDefault.class)
 
 public class JnEntityHttpApiRetrySendRequest implements CcpEntityConfigurator {
+	/** The single instance: the class keeps no state. */
+	public final static JnEntityHttpApiRetrySendRequest INSTANCE = new JnEntityHttpApiRetrySendRequest();
+
+	private JnEntityHttpApiRetrySendRequest() {}
 
 	/** The entity {@code jn_http_api_retry_send_request}, with every decorator of this configuration. */
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityHttpApiRetrySendRequest.class).entityInstance;

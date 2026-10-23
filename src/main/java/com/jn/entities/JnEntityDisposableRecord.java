@@ -32,6 +32,10 @@ import com.jn.json.fields.validation.JnJsonCommonsFields;
 @CcpEntityFieldsTransformer(JnJsonTransformersFieldsEntityDefault.class)
 @CcpEntityFieldsValidator(JnEntityDisposableRecord.Fields.class)
 public class JnEntityDisposableRecord implements CcpEntityConfigurator {
+	/** The single instance: the class keeps no state. */
+	public final static JnEntityDisposableRecord INSTANCE = new JnEntityDisposableRecord();
+
+	private JnEntityDisposableRecord() {}
 
 	/** The entity {@code jn_disposable_record}, with every decorator of this configuration. */
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityDisposableRecord.class).entityInstance;

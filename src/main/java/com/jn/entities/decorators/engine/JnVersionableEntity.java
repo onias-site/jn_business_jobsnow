@@ -57,13 +57,7 @@ public class JnVersionableEntity extends CcpDefaultEntityDelegator<Object>{
 	 */
 	private static CcpJsonRepresentation getRecordToAudit(CcpEntityMetaData entityDetails, CcpJsonRepresentation json) {
 
-		CcpBusiness ifNotFound = x ->
-
-		{
-			CcpJsonRepresentation handledJson = entityDetails.entity.getHandledJson(json);
-			CcpJsonRepresentation onlyExistingFields = entityDetails.getOnlyExistingFields(handledJson);
-			return onlyExistingFields;
-		};
+		CcpBusiness ifNotFound = new JnBusinessEntityFieldsOfTheJson(entityDetails, json);
 
 		CcpJsonRepresentation recordToAudit = entityDetails.getOneByIdOrHandleItIfThisIdWasNotFound(json, ifNotFound);
 

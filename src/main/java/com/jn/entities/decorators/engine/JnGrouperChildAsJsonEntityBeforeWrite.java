@@ -3,6 +3,7 @@ package com.jn.entities.decorators.engine;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -56,8 +57,8 @@ public class JnGrouperChildAsJsonEntityBeforeWrite extends JnGrouperChildEntityO
 	}
 
 	/**
-	 * Saves the record with the date of the write and the ids of its parents, then puts it, as a JSON text, in their
-	 * groups in place of its earlier version.
+	 * Saves the record with the date of the write and the ids of its parents of every kind, then puts it, as a JSON text,
+	 * in the groups of each kind in place of its earlier version.
 	 * @param json the record, its fields not transformed yet
 	 * @return whether the record was inserted
 	 */
@@ -66,20 +67,28 @@ public class JnGrouperChildAsJsonEntityBeforeWrite extends JnGrouperChildEntityO
 		CcpTimeDecorator now = new CcpTimeDecorator();
 		String currentDate = now.getFormattedDateTime(dateFormat);
 		CcpJsonRepresentation jsonWithDate = json.put(JnJsonCommonsFields.date, currentDate);
-		JnEntityGrouperParents parents = this.getParents();
-		Map<String, CcpJsonRepresentation> recordParents = parents.getParentsFromRawRecord(jsonWithDate);
-		CcpJsonRepresentation jsonWithParentIds = parents.putParentIds(jsonWithDate, recordParents);
+		List<JnEntityGrouperParents> allParents = this.getAllParents();
+		Map<JnEntityGrouperParents, Map<String, CcpJsonRepresentation>> recordParentsByKind = new LinkedHashMap<>();
+		CcpJsonRepresentation jsonWithParentIds = jsonWithDate;
+		for (JnEntityGrouperParents parents : allParents) {
+			Map<String, CcpJsonRepresentation> recordParents = parents.getParentsFromRawRecord(jsonWithDate);
+			recordParentsByKind.put(parents, recordParents);
+			jsonWithParentIds = parents.putParentIds(jsonWithParentIds, recordParents);
+		}
 		boolean inserted = this.entity.save(jsonWithParentIds);
 
-		Collection<CcpJsonRepresentation> parentJsons = recordParents.values();
-		Set<String> parentFields = getParentFields(parentJsons);
-		CcpJsonRepresentation childRecord = this.getChildRecord(jsonWithDate, parents, parentFields);
-		String child = childRecord.asUgglyJson();
-		List<String> childKeys = this.getChildKeys(jsonWithDate, parentFields);
-		String parentName = parents.getParentName();
 		CcpEntityMetaData entityDetails = this.getEntityMetaData();
 		CcpEntity grouper = JnGroupers.getGrouper(false);
-		JnGroupers.replaceChild(grouper, parentName, entityDetails.entityName, childKeys, child, recordParents);
+		for (JnEntityGrouperParents parents : allParents) {
+			Map<String, CcpJsonRepresentation> recordParents = recordParentsByKind.get(parents);
+			Collection<CcpJsonRepresentation> parentJsons = recordParents.values();
+			Set<String> parentFields = getParentFields(parentJsons);
+			CcpJsonRepresentation childRecord = this.getChildRecord(jsonWithDate, allParents, parentFields);
+			String child = childRecord.asUgglyJson();
+			List<String> childKeys = this.getChildKeys(jsonWithDate, parentFields);
+			String parentName = parents.getParentName();
+			JnGroupers.replaceChild(grouper, parentName, entityDetails.entityName, childKeys, child, recordParents);
+		}
 		return inserted;
 	}
 
@@ -98,14 +107,14 @@ public class JnGrouperChildAsJsonEntityBeforeWrite extends JnGrouperChildEntityO
 	}
 
 	/**
-	 * The record kept in the groups: the fields of the entity present in it, but the ones its parents come from (they are
-	 * in the group already) and the list of the parent ids.
+	 * The record kept in the groups of one kind: the fields of the entity present in it, but the ones its parents of that
+	 * kind come from (they are in the group already) and the lists of the parent ids of every kind.
 	 * @param record the record, with its date
-	 * @param parents the parents configured for the entity
-	 * @param parentFields the fields the parents come from
+	 * @param allParents the parents configured for the entity, one per kind of group
+	 * @param parentFields the fields the parents of the kind come from
 	 * @return the child record
 	 */
-	private CcpJsonRepresentation getChildRecord(CcpJsonRepresentation record, JnEntityGrouperParents parents, Set<String> parentFields) {
+	private CcpJsonRepresentation getChildRecord(CcpJsonRepresentation record, List<JnEntityGrouperParents> allParents, Set<String> parentFields) {
 		CcpEntityMetaData entityDetails = this.getEntityMetaData();
 		List<String> childFields = new ArrayList<>();
 		for (CcpEntityField field : entityDetails.allFields) {
@@ -118,8 +127,10 @@ public class JnGrouperChildAsJsonEntityBeforeWrite extends JnGrouperChildEntityO
 
 			childFields.add(fieldName);
 		}
-		CcpJsonRepresentation childRecord = record.getJsonPiece(childFields);
-		CcpJsonRepresentation childRecordWithoutParentIds = parents.removeParentIds(childRecord);
+		CcpJsonRepresentation childRecordWithoutParentIds = record.getJsonPiece(childFields);
+		for (JnEntityGrouperParents parents : allParents) {
+			childRecordWithoutParentIds = parents.removeParentIds(childRecordWithoutParentIds);
+		}
 		return childRecordWithoutParentIds;
 	}
 

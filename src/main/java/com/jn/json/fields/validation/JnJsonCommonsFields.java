@@ -56,7 +56,9 @@ public enum JnJsonCommonsFields implements CcpJsonFieldName{
 
 	/**
 	 * The {@code child} field: text, a record of the entity named by {@code childName} that belongs to a group: its id,
-	 * or the record itself as a JSON text when the entity is grouped by {@code JnGrouperChildAsJsonEntityBeforeWrite}.
+	 * or the record itself as a JSON text when the entity is grouped by {@code JnGrouperChildAsJsonEntityBeforeWrite}. In
+	 * a group of counters ({@code JnGrouperChildCounterEntityBeforeWrite}) the only child is a JSON text with one counter
+	 * per key, written by script only.
 	 */
 	@CcpJsonFieldTypeString(minLength = 1)
 	child,
