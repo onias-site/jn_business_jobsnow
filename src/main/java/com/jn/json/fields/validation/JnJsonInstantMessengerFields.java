@@ -2,8 +2,10 @@ package com.jn.json.fields.validation;
 
 import com.ccp.decorators.CcpJsonFieldName;
 import com.ccp.json.defaultvalues.annotations.CcpJsonFieldDefaultValue;
+import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeBoolean;
 import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeNestedJson;
 import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeNumber;
+import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeNumberInteger;
 import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeString;
 import com.jn.business.messages.JnInstantMessageType;
 
@@ -74,5 +76,28 @@ public enum JnJsonInstantMessengerFields implements CcpJsonFieldName{
 	 */
 	@CcpJsonFieldTypeString
 	listToShowAgain,
+
+	/**
+	 * The {@code skipTheTicket} field: boolean, put by the engine of a step that ends its session leaving the ticket of the
+	 * command open (the operator chose to go to the next ticket, {@code /answerContactUs} of js): the bot keeps the ticket
+	 * and shows {@code /pendingTickets} from the ticket after it.
+	 */
+	@CcpJsonFieldTypeBoolean
+	skipTheTicket,
+
+	/**
+	 * The {@code skippedTicket} field: text, the ticket left open by a command that ended with {@code skipTheTicket}; the
+	 * list of {@code /pendingTickets} starts from the ticket after it.
+	 */
+	@CcpJsonFieldTypeString
+	skippedTicket,
+
+	/**
+	 * The {@code priority} field: integer from 0 to 9, the priority of a ticket of the support operator: the lower, the
+	 * sooner the {@code /pendingTickets} list shows it (on a tie, the older first). Put in the json of the notice by
+	 * the message template that sends the command to the operator.
+	 */
+	@CcpJsonFieldTypeNumberInteger(minValue = 0, maxValue = 9)
+	priority,
 
 }

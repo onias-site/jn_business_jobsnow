@@ -6,6 +6,7 @@ import com.ccp.decorators.CcpJsonFieldName;
 import com.ccp.decorators.CcpJsonRepresentation;
 import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
+import com.jn.json.fields.validation.JnJsonInstantMessengerFields;
 
 /**
  * Catalog of the message templates sent to the user and to support. Each class is a {@code JnMessageTemplate}, named by
@@ -27,12 +28,13 @@ public class JnMessages {
 		private JnNotifySupportAboutPendingLockedLoginToken() {}
 
 		/**
-		 * Needs no preparation.
+		 * Puts the priority of the ticket of the operator ({@code /solveLoginTokenTicket}: 1, a user who cannot log in).
 		 * @param json the values of the message
-		 * @return the same JSON
+		 * @return the JSON with the priority
 		 */
 		public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
-			return json;
+			CcpJsonRepresentation jsonWithPriority = json.put(JnJsonInstantMessengerFields.priority, 1);
+			return jsonWithPriority;
 		}
 	}
 
@@ -44,12 +46,13 @@ public class JnMessages {
 		private JnNotifySupportAboutPendingResendLoginToken() {}
 
 		/**
-		 * Needs no preparation.
+		 * Puts the priority of the ticket of the operator ({@code /solveLoginTokenTicket}: 1, a user who cannot log in).
 		 * @param json the values of the message
-		 * @return the same JSON
+		 * @return the JSON with the priority
 		 */
 		public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
-			return json;
+			CcpJsonRepresentation jsonWithPriority = json.put(JnJsonInstantMessengerFields.priority, 1);
+			return jsonWithPriority;
 		}
 	}
 

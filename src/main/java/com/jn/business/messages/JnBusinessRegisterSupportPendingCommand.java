@@ -17,7 +17,9 @@ import com.jn.json.fields.validation.JnJsonInstantMessengerFields;
  * left alone.
  *
  * <p>The text recorded is the one the operator received: the template of the message resolved with the values of
- * this sending, the same resolution {@link JnInstantMessageType} applies before delivering it.
+ * this sending, the same resolution {@link JnInstantMessageType} applies before delivering it. The {@code priority} of
+ * the ticket comes in the json of the sending, put there by the message template that sends the command (its
+ * {@code apply}): a command sent to the operator without it is refused by the validation of the entity.
  */
 public class JnBusinessRegisterSupportPendingCommand implements CcpBusiness{
 
@@ -53,12 +55,16 @@ public class JnBusinessRegisterSupportPendingCommand implements CcpBusiness{
 
 		String command = JnEntitySupportPendingCommand.normalize(sentText);
 		Long chatId = json.getAsLongNumber(JnJsonInstantMessengerFields.chatId);
+		Object priority = json.get(JnJsonInstantMessengerFields.priority);
 		long now = System.currentTimeMillis();
 
 		CcpJsonRepresentation pendingCommandWithBotName = CcpOtherConstants.EMPTY_JSON.put(JnEntitySupportPendingCommand.Fields.botName, botName);
 		CcpJsonRepresentation pendingCommandWithChatId = pendingCommandWithBotName.put(JnEntitySupportPendingCommand.Fields.chatId, chatId);
 		CcpJsonRepresentation pendingCommandWithCommand = pendingCommandWithChatId.put(JnEntitySupportPendingCommand.Fields.command, command);
-		CcpJsonRepresentation pendingCommand = pendingCommandWithCommand.put(JnEntitySupportPendingCommand.Fields.timestamp, now);
+		CcpJsonRepresentation pendingCommandWithTimestamp = pendingCommandWithCommand.put(JnEntitySupportPendingCommand.Fields.timestamp, now);
+		boolean noPriority = false == json.containsField(JnJsonInstantMessengerFields.priority);
+		// without it the save is refused by the validation, which names the missing field
+		CcpJsonRepresentation pendingCommand = noPriority ? pendingCommandWithTimestamp : pendingCommandWithTimestamp.put(JnEntitySupportPendingCommand.Fields.priority, priority);
 
 		JnEntitySupportPendingCommand.ENTITY.save(pendingCommand);
 		// sent again after the user gave it up and before the operator listed the tickets: the cancellation is older

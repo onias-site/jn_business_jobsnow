@@ -11,6 +11,7 @@ import com.ccp.decorators.CcpJsonFieldName;
 import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.especifications.db.bulk.CcpBulkEntityOperationType;
 import com.ccp.especifications.db.bulk.CcpBulkItem;
+import com.ccp.especifications.db.bulk.CcpBulkScriptedUpdateFields;
 import com.ccp.especifications.db.utils.entity.CcpEntity;
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityCache;
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityFieldsTransformer;
@@ -37,8 +38,10 @@ import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault
  * own classes. That is how a write of js reaches vis without either of them importing the other, the same way the bot
  * engine (jb) runs the steps of vis by class name.
  * <p>
- * One record per event: a second cost center that listens to the same event adds its business to the
- * {@code subscribers} of the same seed, since two seeds with the same id would collide.
+ * One record per event, which every cost center that listens to it fills: since 2026-10-23 a seed adds its businesses to
+ * the {@code subscribers} already recorded (an atomic script of the database), so the seeds of two cost centers (vis and
+ * js listening to the user ignored by the support) do not overwrite each other, and recreating the entities of one of
+ * them keeps the businesses of the other.
  * <p>
  * Configuration:
  * <ul>
@@ -60,6 +63,18 @@ public class JnEntityWriteEventSubscribers implements CcpEntityConfigurator {
 
 	/** The entity {@code jn_write_event_subscribers}, with every decorator of this configuration. */
 	public static final CcpEntity ENTITY = new CcpEntityFactory(JnEntityWriteEventSubscribers.class).entityInstance;
+
+	/** The script of the seeds and its parameter. */
+	enum Scripts implements CcpJsonFieldName {
+		/** Adds each subscriber of the seed that is not recorded yet. */
+		addSubscribers {
+			public String getValue() {
+				return "for (def s : params.subscribers) { if (false == ctx._source.subscribers.contains(s)) { ctx._source.subscribers.add(s); } }";
+			}
+		},
+		/** Parameter: the class names of the subscribers of the seed. */
+		subscribers,
+	}
 
 	/**
 	 * The fields of the entity, with their validation rules (this enum is the class named by
@@ -124,7 +139,16 @@ public class JnEntityWriteEventSubscribers implements CcpEntityConfigurator {
 		String entityNameValue = entityName.getValue();
 		CcpJsonRepresentation eventKey = getEventKey(entityNameValue, writeOperation);
 		CcpJsonRepresentation eventSubscribers = eventKey.put(Fields.subscribers, subscriberNames);
-		List<CcpBulkItem> seeds = ENTITY.toBulkItems(eventSubscribers, CcpBulkEntityOperationType.create);
+		String script = Scripts.addSubscribers.getValue();
+		CcpJsonRepresentation params = CcpOtherConstants.EMPTY_JSON.put(Scripts.subscribers, subscriberNames);
+		CcpJsonRepresentation itemWithScript = CcpOtherConstants.EMPTY_JSON.put(CcpBulkScriptedUpdateFields.script, script);
+		CcpJsonRepresentation itemWithParams = itemWithScript.put(CcpBulkScriptedUpdateFields.params, params);
+		// the first seed of the event creates the record as it is
+		CcpJsonRepresentation itemWithUpsert = itemWithParams.put(CcpBulkScriptedUpdateFields.upsert, eventSubscribers);
+		CcpJsonRepresentation item = itemWithUpsert.put(CcpBulkScriptedUpdateFields.scriptedUpsert, false);
+		String eventId = ENTITY.calculateId(eventKey);
+		CcpBulkItem seed = new CcpBulkItem(item, CcpBulkEntityOperationType.scriptedUpdate, ENTITY, eventId);
+		List<CcpBulkItem> seeds = Arrays.asList(seed);
 		return seeds;
 	}
 }

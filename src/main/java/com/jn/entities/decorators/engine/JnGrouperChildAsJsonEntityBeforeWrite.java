@@ -97,7 +97,7 @@ public class JnGrouperChildAsJsonEntityBeforeWrite extends JnGrouperChildEntityO
 	 * @param parentJsons the values of each parent
 	 * @return the names of their fields
 	 */
-	private static Set<String> getParentFields(Collection<CcpJsonRepresentation> parentJsons) {
+	protected static Set<String> getParentFields(Collection<CcpJsonRepresentation> parentJsons) {
 		Set<String> parentFields = new HashSet<>();
 		for (CcpJsonRepresentation parentJson : parentJsons) {
 			Set<String> fieldsOfTheParent = parentJson.fieldSet();
@@ -114,7 +114,7 @@ public class JnGrouperChildAsJsonEntityBeforeWrite extends JnGrouperChildEntityO
 	 * @param parentFields the fields the parents of the kind come from
 	 * @return the child record
 	 */
-	private CcpJsonRepresentation getChildRecord(CcpJsonRepresentation record, List<JnEntityGrouperParents> allParents, Set<String> parentFields) {
+	protected CcpJsonRepresentation getChildRecord(CcpJsonRepresentation record, List<JnEntityGrouperParents> allParents, Set<String> parentFields) {
 		CcpEntityMetaData entityDetails = this.getEntityMetaData();
 		List<String> childFields = new ArrayList<>();
 		for (CcpEntityField field : entityDetails.allFields) {
@@ -141,7 +141,7 @@ public class JnGrouperChildAsJsonEntityBeforeWrite extends JnGrouperChildEntityO
 	 * @param parentFields the fields the parents come from
 	 * @return the texts
 	 */
-	private List<String> getChildKeys(CcpJsonRepresentation record, Set<String> parentFields) {
+	protected List<String> getChildKeys(CcpJsonRepresentation record, Set<String> parentFields) {
 		CcpEntityMetaData entityDetails = this.getEntityMetaData();
 		List<String> childKeys = new ArrayList<>();
 		for (String primaryKeyName : entityDetails.primaryKeyNames) {

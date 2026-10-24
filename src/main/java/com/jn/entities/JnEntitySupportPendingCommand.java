@@ -57,6 +57,14 @@ public class JnEntitySupportPendingCommand implements CcpEntityConfigurator {
 		@CcpJsonFieldValidatorRequired
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		timestamp,
+
+		/**
+		 * The {@code priority} field: required, validated as in {@code JnJsonInstantMessengerFields}; the lower, the sooner
+		 * the operator sees the ticket. Comes from the json of the notice, where the message template put it.
+		 */
+		@CcpJsonFieldValidatorRequired
+		@CcpJsonCopyFieldValidationsFrom(JnJsonInstantMessengerFields.class)
+		priority,
 		;
 	}
 

@@ -69,6 +69,22 @@ public final class JnGroupers {
 			}
 		},
 		/**
+		 * Takes out every child that contains all the texts of {@code childKeys} (every version of the same record);
+		 * deletes the group left empty; creates nothing when the group does not exist.
+		 */
+		removeChildByKeys {
+			public String getValue() {
+				return "if (ctx._source.child == null) { ctx.op = 'none'; } "
+						+ "else { def kept = new ArrayList(); "
+						+ "for (def c : ctx._source.child) { boolean sameRecord = true; "
+						+ "for (def k : params.childKeys) { if (c.indexOf(k) < 0) { sameRecord = false; } } "
+						+ "if (false == sameRecord) { kept.add(c); } } "
+						+ "ctx._source.child = kept; "
+						+ "if (ctx._source.child.isEmpty()) { ctx.op = 'delete'; } "
+						+ "else { " + childCountIsTheSizeOfChild.getValue() + "} }";
+			}
+		},
+		/**
 		 * Takes out every child that contains all the texts of {@code childKeys} (the earlier version of the same record),
 		 * adds the child and recounts; keeps the parent values.
 		 */
@@ -291,7 +307,23 @@ public final class JnGroupers {
 	 */
 	public static void removeChild(CcpEntity grouper, String parentName, String childName, String childId, List<String> parentIds) {
 		CcpJsonRepresentation params = CcpOtherConstants.EMPTY_JSON.put(Scripts.childId, childId);
-		JnGroupersRemoveChildItem itemOfTheParent = new JnGroupersRemoveChildItem(grouper, parentName, childName, params);
+		JnGroupersRemoveChildItem itemOfTheParent = new JnGroupersRemoveChildItem(grouper, parentName, childName, Scripts.removeChild, params);
+		writeGroups(parentIds, itemOfTheParent);
+	}
+
+	/**
+	 * Takes out of the group of each parent the children kept as JSON texts that contain every text of
+	 * {@code childKeys} (the versions of the same record); a group left with no child is deleted, and a group that does
+	 * not exist is not created.
+	 * @param grouper the side of the grouper (main or twin)
+	 * @param parentName the kind of group
+	 * @param childName the name of the entity of the child
+	 * @param childKeys the texts that only the children of the same record contain
+	 * @param parentIds the parent ids
+	 */
+	public static void removeChildByKeys(CcpEntity grouper, String parentName, String childName, List<String> childKeys, List<String> parentIds) {
+		CcpJsonRepresentation params = CcpOtherConstants.EMPTY_JSON.put(Scripts.childKeys, childKeys);
+		JnGroupersRemoveChildItem itemOfTheParent = new JnGroupersRemoveChildItem(grouper, parentName, childName, Scripts.removeChildByKeys, params);
 		writeGroups(parentIds, itemOfTheParent);
 	}
 
