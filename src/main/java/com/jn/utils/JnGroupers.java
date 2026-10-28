@@ -1,18 +1,22 @@
 package com.jn.utils;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 
 import com.ccp.constants.CcpOtherConstants;
+import com.ccp.decorators.CcpFieldName;
 import com.ccp.decorators.CcpJsonFieldName;
 import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.especifications.db.bulk.CcpBulkEntityOperationType;
 import com.ccp.especifications.db.bulk.CcpBulkItem;
 import com.ccp.especifications.db.bulk.CcpBulkScriptedUpdateFields;
 import com.ccp.especifications.db.utils.entity.CcpEntity;
+import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityMetaData;
 import com.ccp.especifications.db.utils.entity.decorators.enums.CcpEntityPhase;
 import com.jn.business.grouper.JnBusinessGetGroup;
 import com.jn.db.bulk.JnExecuteBulkOperation;
@@ -37,6 +41,14 @@ public final class JnGroupers {
 		childCountIsTheSizeOfChild {
 			public String getValue() {
 				return "ctx._source.childCount = ctx._source.child.size(); ";
+			}
+		},
+		/** Adds each child id that is not there yet and recounts; keeps the parent values. */
+		addChildren {
+			public String getValue() {
+				return "for (def childId : params.childIds) { if (false == ctx._source.child.contains(childId)) { ctx._source.child.add(childId); } } "
+						+ childCountIsTheSizeOfChild.getValue()
+						+ "ctx._source.parentJson = params.parentJson;";
 			}
 		},
 		/** Adds the child id when it is not there yet and recounts; keeps the parent values. */
@@ -64,6 +76,15 @@ public final class JnGroupers {
 			public String getValue() {
 				return "if (ctx._source.child == null) { ctx.op = 'none'; } "
 						+ "else { ctx._source.child.removeIf(c -> c == params.childId); "
+						+ "if (ctx._source.child.isEmpty()) { ctx.op = 'delete'; } "
+						+ "else { " + childCountIsTheSizeOfChild.getValue() + "} }";
+			}
+		},
+		/** Removes each child of {@code childIds}; deletes the group left empty; creates nothing when the group does not exist. */
+		removeChildren {
+			public String getValue() {
+				return "if (ctx._source.child == null) { ctx.op = 'none'; } "
+						+ "else { ctx._source.child.removeIf(c -> params.childIds.contains(c)); "
 						+ "if (ctx._source.child.isEmpty()) { ctx.op = 'delete'; } "
 						+ "else { " + childCountIsTheSizeOfChild.getValue() + "} }";
 			}
@@ -126,6 +147,8 @@ public final class JnGroupers {
 		},
 		/** Parameter: the id of the child being added or removed. */
 		childId,
+		/** Parameter: the ids of the children being added or removed. */
+		childIds,
 		/** Parameter: the key of the counter being incremented. */
 		counterKey,
 		/** Parameter: the most children a history keeps. */
@@ -197,6 +220,71 @@ public final class JnGroupers {
 	}
 
 	/**
+	 * The children of several groups of the same kind, read by id on the main side of the grouper in a single round trip
+	 * (the common read, {@link JnBusinessGetGroup}, reads one group at a time).
+	 * @param parentName the kind of group
+	 * @param childName the name of the entity of the children
+	 * @param parentIds the parent ids
+	 * @return the ids of the children of each group found, by parent id; a group that does not exist is left out
+	 */
+	public static Map<String, List<String>> getChildrenOfGroups(String parentName, String childName, Collection<String> parentIds) {
+		List<CcpJsonRepresentation> groupKeys = new ArrayList<>();
+		for (String parentId : parentIds) {
+			CcpJsonRepresentation groupKey = getGroupKey(parentName, childName, parentId);
+			groupKeys.add(groupKey);
+		}
+		CcpEntityMetaData grouperDetails = JnEntityGrouper.ENTITY.getEntityMetaData();
+		CcpJsonRepresentation groupsById = grouperDetails.getMultipleByIds(groupKeys);
+
+		Map<String, List<String>> childrenByParentId = new LinkedHashMap<>();
+		for (CcpJsonRepresentation groupKey : groupKeys) {
+			String groupId = JnEntityGrouper.ENTITY.calculateId(groupKey);
+			CcpFieldName groupIdFieldName = new CcpFieldName(groupId);
+			CcpJsonRepresentation group = groupsById.getInnerJson(groupIdFieldName);
+			boolean groupNotFound = group.isEmpty();
+
+			if(groupNotFound) {
+				continue;
+			}
+
+			String parentId = groupKey.getAsString(JnEntityGrouper.Fields.parentId);
+			List<String> children = group.getAsStringList(JnEntityGrouper.Fields.child);
+			childrenByParentId.put(parentId, children);
+		}
+		return childrenByParentId;
+	}
+
+	/**
+	 * The bulk items that create, on the main side of the grouper, whole groups whose children are already known (a seed
+	 * written by bulk, which the decorator of {@code @CcpEntityGrouperChild} does not see). One item per group, since a
+	 * bulk keeps a single item per document: adding the children one by one in the same bulk would keep only the last.
+	 * A group that already exists is replaced.
+	 * @param parentName the kind of group
+	 * @param childName the name of the entity of the children
+	 * @param parentJsonByParentId the values each parent id came from
+	 * @param childrenByParentId the ids of the children of each parent
+	 * @return one bulk item per group
+	 */
+	public static List<CcpBulkItem> getItemsToCreateGroups(String parentName, String childName, Map<String, CcpJsonRepresentation> parentJsonByParentId, Map<String, List<String>> childrenByParentId) {
+		CcpEntity grouper = getGrouper(false);
+		List<CcpBulkItem> items = new ArrayList<>();
+		Set<String> parentIds = childrenByParentId.keySet();
+		for (String parentId : parentIds) {
+			CcpJsonRepresentation groupKey = getGroupKey(parentName, childName, parentId);
+			CcpJsonRepresentation parentJson = parentJsonByParentId.get(parentId);
+			List<String> children = childrenByParentId.get(parentId);
+			int childCount = children.size();
+			CcpJsonRepresentation groupWithParentJson = groupKey.put(JnEntityGrouper.Fields.parentJson, parentJson);
+			CcpJsonRepresentation groupWithChildren = groupWithParentJson.put(JnEntityGrouper.Fields.child, children);
+			CcpJsonRepresentation group = groupWithChildren.put(JnEntityGrouper.Fields.childCount, childCount);
+			String groupId = grouper.calculateId(groupKey);
+			CcpBulkItem item = new CcpBulkItem(group, CcpBulkEntityOperationType.create, grouper, groupId);
+			items.add(item);
+		}
+		return items;
+	}
+
+	/**
 	 * Puts the child in the group of each parent; a group that does not exist yet is created with the child as its only
 	 * one, and a child already there is not repeated.
 	 * @param grouper the side of the grouper (main or twin)
@@ -211,6 +299,46 @@ public final class JnGroupers {
 		List<String> parentIds = new ArrayList<>(parentIdsSet);
 		JnGroupersAddChildItem itemOfTheParent = new JnGroupersAddChildItem(grouper, parentName, childName, childId, childIdParams, parents);
 		writeGroups(parentIds, itemOfTheParent);
+	}
+
+	/**
+	 * Puts several children in the group of each parent at once, for the loads written by bulk (which the decorator of
+	 * {@code @CcpEntityGrouperChild} does not see): one atomic script per group, so the groups already there keep their
+	 * children and nothing is read before writing. A group that does not exist yet is created with its children, and a
+	 * child already there is not repeated.
+	 * @param grouper the side of the grouper (main or twin)
+	 * @param parentName the kind of group
+	 * @param childName the name of the entity of the children
+	 * @param childrenByParentId the ids of the children of each parent, with no repetition
+	 * @param parents the values of each parent, by parent id
+	 */
+	public static void addChildren(CcpEntity grouper, String parentName, String childName, Map<String, List<String>> childrenByParentId, Map<String, CcpJsonRepresentation> parents) {
+		Set<String> parentIdsSet = childrenByParentId.keySet();
+		List<String> parentIds = new ArrayList<>(parentIdsSet);
+		JnGroupersAddChildrenItem itemOfTheParent = new JnGroupersAddChildrenItem(grouper, parentName, childName, childrenByParentId, parents);
+		writeGroups(parentIds, itemOfTheParent);
+	}
+
+	/**
+	 * The bulk items that put several children in the group of each parent, to be written with the other items of the
+	 * caller (see {@link #addChildren}): one atomic script per group, a child already there is not repeated and a group
+	 * that does not exist yet is created with its children.
+	 * @param grouper the side of the grouper (main or twin)
+	 * @param parentName the kind of group
+	 * @param childName the name of the entity of the children
+	 * @param childrenByParentId the children of each parent, with no repetition
+	 * @param parents the values of each parent, by parent id
+	 * @return one bulk item per parent
+	 */
+	public static List<CcpBulkItem> getItemsToAddChildren(CcpEntity grouper, String parentName, String childName, Map<String, List<String>> childrenByParentId, Map<String, CcpJsonRepresentation> parents) {
+		JnGroupersAddChildrenItem itemOfTheParent = new JnGroupersAddChildrenItem(grouper, parentName, childName, childrenByParentId, parents);
+		List<CcpBulkItem> items = new ArrayList<>();
+		Set<String> parentIds = childrenByParentId.keySet();
+		for (String parentId : parentIds) {
+			CcpBulkItem item = itemOfTheParent.apply(parentId);
+			items.add(item);
+		}
+		return items;
 	}
 
 	/**
@@ -308,6 +436,22 @@ public final class JnGroupers {
 	public static void removeChild(CcpEntity grouper, String parentName, String childName, String childId, List<String> parentIds) {
 		CcpJsonRepresentation params = CcpOtherConstants.EMPTY_JSON.put(Scripts.childId, childId);
 		JnGroupersRemoveChildItem itemOfTheParent = new JnGroupersRemoveChildItem(grouper, parentName, childName, Scripts.removeChild, params);
+		writeGroups(parentIds, itemOfTheParent);
+	}
+
+	/**
+	 * Takes, out of the group of each parent, its own children, {@link #BULK_SIZE} groups at a time; a group left with no
+	 * child is deleted, and a group that does not exist is not created. The children leave by an atomic script, so a child
+	 * that entered the group after it was read stays.
+	 * @param grouper the side of the grouper (main or twin)
+	 * @param parentName the kind of group
+	 * @param childName the name of the entity of the children
+	 * @param childrenByParentId the children that leave each group, by parent id
+	 */
+	public static void removeChildren(CcpEntity grouper, String parentName, String childName, Map<String, List<String>> childrenByParentId) {
+		Set<String> parentIdsSet = childrenByParentId.keySet();
+		List<String> parentIds = new ArrayList<>(parentIdsSet);
+		JnGroupersRemoveChildrenItem itemOfTheParent = new JnGroupersRemoveChildrenItem(grouper, parentName, childName, childrenByParentId);
 		writeGroups(parentIds, itemOfTheParent);
 	}
 

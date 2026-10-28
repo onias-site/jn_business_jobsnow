@@ -6,6 +6,8 @@ import com.ccp.decorators.CcpTimeDecorator;
 import com.ccp.especifications.db.utils.entity.CcpEntity;
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityFieldsTransformer;
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityFieldsValidator;
+import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityGrouperChild;
+import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityGrouperParentCombinations;
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityOlyReadable;
 import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityFactory;
 import com.ccp.especifications.db.utils.entity.decorators.interfaces.CcpEntityConfigurator;
@@ -15,7 +17,10 @@ import com.ccp.json.validations.fields.annotations.CcpJsonCopyFieldValidationsFr
 import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeNumberUnsigned;
 import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidatorRequired;
 import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeString;
+import com.jn.entities.decorators.engine.JnGrouperChildEntityAfterWrite;
+import com.jn.entities.decorators.engine.JnGrouperChildEntityBeforeWrite;
 import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault;
+import com.jn.json.transformers.JnDisposableRecordToPurgeCombinations;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
 
 
@@ -27,8 +32,17 @@ import com.jn.json.fields.validation.JnJsonCommonsFields;
  * <li>index {@code jn_disposable_record}</li>
  * <li>read-only: save, delete and transfer do nothing</li>
  * </ul>
+ * <p>
+ * Since 2026-10-28 each copy of an entity whose expired records are purged
+ * ({@code @CcpEntityDisposable(removeCompletely = true)}, the default) is a child of the group of its own {@code entity}
+ * and {@code id} ({@link JnEntityVirtualDisposableRecordToPurge}). The copy is written by bulk, which the decorators of
+ * {@code @CcpEntityGrouperChild} do not see, so {@code JnDisposableEntity} writes the group in the same bulk, with one
+ * child per document of a period written (its index, its id and the end of its period), the documents the daily purge
+ * removes once they expire.
  */
 @CcpEntityOlyReadable
+@CcpEntityGrouperChild(value = {JnEntityVirtualDisposableRecordToPurge.class}, beforeDecoratorClass = JnGrouperChildEntityBeforeWrite.class, afterDecoratorClass = JnGrouperChildEntityAfterWrite.class)
+@CcpEntityGrouperParentCombinations(parent = JnEntityVirtualDisposableRecordToPurge.class, value = JnDisposableRecordToPurgeCombinations.class)
 @CcpEntityFieldsTransformer(JnJsonTransformersFieldsEntityDefault.class)
 @CcpEntityFieldsValidator(JnEntityDisposableRecord.Fields.class)
 public class JnEntityDisposableRecord implements CcpEntityConfigurator {

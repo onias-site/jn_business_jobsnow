@@ -2,6 +2,7 @@ package com.jn.entities.decorators.engine;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -24,8 +25,10 @@ import com.ccp.especifications.db.utils.entity.decorators.enums.CcpEntityExpurga
 import com.ccp.hash.CcpHashAlgorithm;
 import com.jn.db.bulk.JnExecuteBulkOperation;
 import com.jn.entities.JnEntityDisposableRecord;
+import com.jn.entities.JnEntityVirtualDisposableRecordToPurge;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
 import com.jn.utils.JnDeleteKeysFromCache;
+import com.jn.utils.JnGroupers;
 
 /**
  * Expiration decorator ({@code @CcpEntityDisposable}). The id of a record is the SHA-1 of the current period (formatted by
@@ -33,20 +36,30 @@ import com.jn.utils.JnDeleteKeysFromCache;
  * {@code jn_disposable_record}, a copy of the record keyed by entity and primary key with the expiration timestamp
  * (see finding: the expiration is computed from the current time). A record counts as present when the document of the
  * current period exists, or when the copy exists and has not expired.
+ * <p>
+ * When the expired records of the entity are purged ({@code removeCompletely}, the default of the annotation), every write
+ * also puts the document of the period written in the group of the record among the records to purge
+ * ({@link JnEntityVirtualDisposableRecordToPurge}, in {@code JnEntityGrouper}), in the same bulk: a JSON text with its
+ * index ({@code entity}), its {@code id} and the end of its period ({@code timestamp}). The daily purge reads these groups.
  */
 public class JnDisposableEntity extends CcpDefaultEntityDelegator<Object>{
 	
 	/** The expiration granularity. */
 	private final CcpEntityExpurgableOptions timeOption;
 
+	/** Whether the expired records are purged: only then are the documents written kept in the groups to purge. */
+	private final boolean removeCompletely;
+
 	/**
 	 * Wraps the entity.
 	 * @param entity the entity decorated so far
 	 * @param timeOption the expiration granularity
+	 * @param removeCompletely whether the expired records are purged
 	 */
-	public JnDisposableEntity(CcpEntity entity, CcpEntityExpurgableOptions timeOption) {
+	public JnDisposableEntity(CcpEntity entity, CcpEntityExpurgableOptions timeOption, boolean removeCompletely) {
 		super(entity, JnExecuteBulkOperation.INSTANCE, JnDeleteKeysFromCache.INSTANCE);
 		this.timeOption = timeOption;
+		this.removeCompletely = removeCompletely;
 	}
 	
 	/**
@@ -472,7 +485,8 @@ public class JnDisposableEntity extends CcpDefaultEntityDelegator<Object>{
 	}
 
 	/**
-	 * The items of the wrapped entity, with the id of the current period, plus the item of the copy.
+	 * The items of the wrapped entity, with the id of the current period, plus the item of the copy and, when the expired
+	 * records are purged, the item of the group of the record among the records to purge.
 	 * @param json the record
 	 * @param operation the bulk operation
 	 * @return the bulk items
@@ -489,7 +503,60 @@ public class JnDisposableEntity extends CcpDefaultEntityDelegator<Object>{
 		ArrayList<CcpBulkItem> items = new ArrayList<>(bulkItems);
 		CcpBulkItem expurgableToBulkOperation = this.getExpurgableToBulkOperation(json, operation);
 		items.add(expurgableToBulkOperation);
+		List<CcpBulkItem> itemsOfTheGroupToPurge = this.getItemsOfTheGroupToPurge(json, operation, bulkItems);
+		items.addAll(itemsOfTheGroupToPurge);
 		return items;
+	}
+
+	/**
+	 * The item that puts, in the group of the record among the records to purge, each document of this entity (or of its
+	 * twin) that the write produces: a JSON text with its index, its id and the end of its period. None when the expired
+	 * records of the entity are kept, or for a delete (the purge only removes what is still there).
+	 * @param json the record
+	 * @param operation the bulk operation
+	 * @param bulkItems the items of the wrapped entity, already with the id of the period
+	 * @return the item of the group, or none
+	 */
+	private List<CcpBulkItem> getItemsOfTheGroupToPurge(CcpJsonRepresentation json, CcpBulkEntityOperationType operation, List<CcpBulkItem> bulkItems) {
+		boolean keptForever = false == this.removeCompletely;
+
+		if(keptForever) {
+			return new ArrayList<>();
+		}
+
+		boolean deletion = CcpBulkEntityOperationType.delete == operation;
+
+		if(deletion) {
+			return new ArrayList<>();
+		}
+
+		String period = this.getPeriod(json);
+		Long endOfThePeriod = this.timeOption.getEndOfThePeriod(period);
+		List<String> children = new ArrayList<>();
+		for (CcpBulkItem item : bulkItems) {
+			boolean isAnotherEntity = this.isAnotherEntity(item);
+
+			if(isAnotherEntity) {
+				continue;
+			}
+
+			CcpEntityMetaData itemEntityDetails = item.entity.getEntityMetaData();
+			CcpJsonRepresentation childWithEntity = CcpOtherConstants.EMPTY_JSON.put(JnJsonCommonsFields.entity, itemEntityDetails.entityName);
+			CcpJsonRepresentation childWithId = childWithEntity.put(JnJsonCommonsFields.id, item.id);
+			CcpJsonRepresentation child = childWithId.put(JnJsonCommonsFields.timestamp, endOfThePeriod);
+			String childText = child.asUgglyJson();
+			children.add(childText);
+		}
+
+		CcpJsonRepresentation expurgableId = this.getExpurgableId(json);
+		String parentId = JnEntityVirtualDisposableRecordToPurge.ENTITY.calculateId(expurgableId);
+		Map<String, List<String>> childrenByParentId = Map.of(parentId, children);
+		Map<String, CcpJsonRepresentation> parents = Map.of(parentId, expurgableId);
+		CcpEntityMetaData parentDetails = JnEntityVirtualDisposableRecordToPurge.ENTITY.getEntityMetaData();
+		CcpEntityMetaData copyDetails = JnEntityDisposableRecord.ENTITY.getEntityMetaData();
+		CcpEntity grouper = JnGroupers.getGrouper(false);
+		List<CcpBulkItem> itemsOfTheGroup = JnGroupers.getItemsToAddChildren(grouper, parentDetails.entityName, copyDetails.entityName, childrenByParentId, parents);
+		return itemsOfTheGroup;
 	}
 
 	/**
