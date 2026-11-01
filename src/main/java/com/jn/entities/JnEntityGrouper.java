@@ -65,7 +65,8 @@ public class JnEntityGrouper implements CcpEntityConfigurator {
 		@CcpJsonCopyFieldValidationsFrom(JnJsonCommonsFields.class)
 		childName,
 		/**
-		 * The {@code child} field: required, list of ids (or of JSON texts), validated as in {@code JnJsonCommonsFields};
+		 * The {@code child} field: required, list of ids (or of JSON texts, or of the values of a field of the records),
+		 * validated as in {@code JnJsonCommonsFields};
 		 * in a group of counters, a list with a single JSON text of counters. {@code childCount} is the size of this list,
 		 * but in a group of counters, where it is the number of keys of that JSON.
 		 */

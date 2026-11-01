@@ -12,6 +12,7 @@ import com.ccp.decorators.CcpFieldName;
 import com.ccp.decorators.CcpHashDecorator;
 import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.decorators.CcpStringDecorator;
+import com.ccp.decorators.CcpTimeDecorator;
 import com.ccp.dependency.injection.CcpDependencyInjection;
 import com.ccp.especifications.db.bulk.CcpBulkEntityOperationType;
 import com.ccp.especifications.db.bulk.CcpBulkItem;
@@ -150,8 +151,9 @@ public class JnDisposableEntity extends CcpDefaultEntityDelegator<Object>{
 		String id = primaryKeyValues.asUgglyJson();
 		Long timestamp = json.getOrDefault(JnJsonCommonsFields.timestamp, () -> System.currentTimeMillis());
 		CcpJsonRepresentation onlyExistingFields = entityDetails.getOnlyExistingFields(json);
-		Long nextTimeStamp = this.timeOption.getNextTimeStamp(timestamp);
-		String nextDate = this.timeOption.getNextDate(timestamp);
+		Long nextTimeStamp = this.getExpiration(json, timestamp);
+		CcpTimeDecorator expiration = new CcpTimeDecorator(nextTimeStamp);
+		String nextDate = expiration.getFormattedDateTime(CcpEntityExpurgableOptions.millisecond.format);
 		CcpJsonRepresentation jsonWithFormat = expurgableId
 				.put(JnEntityDisposableRecord.Fields.format, this.timeOption.format);
 				CcpJsonRepresentation jsonWithNextTimestamp = jsonWithFormat
@@ -167,6 +169,40 @@ public class JnDisposableEntity extends CcpDefaultEntityDelegator<Object>{
 				.put(JnJsonCommonsFields.id, id)
 				;
 		return expurgable;
+	}
+
+	/**
+	 * The expiration of the copy: the end of the period given in {@code disposablePeriod}, so a record of a past period is
+	 * born expired; otherwise one period after the write.
+	 * @param json the record
+	 * @param timestamp the moment of the write
+	 * @return the expiration
+	 */
+	private Long getExpiration(CcpJsonRepresentation json, Long timestamp) {
+		boolean periodGiven = json.containsAllFields(JnJsonCommonsFields.disposablePeriod);
+
+		if(periodGiven) {
+			String givenPeriod = json.getAsString(JnJsonCommonsFields.disposablePeriod);
+			Long endOfThePeriod = this.timeOption.getEndOfThePeriod(givenPeriod);
+			return endOfThePeriod;
+		}
+
+		Long nextTimeStamp = this.timeOption.getNextTimeStamp(timestamp);
+		return nextTimeStamp;
+	}
+
+	/**
+	 * Tells whether another period than the current one was asked for: the copy keeps the last write of the record, whatever
+	 * its period, so it does not answer for a past period. Until 2026-10-31, reading a past period with no document brought
+	 * the record of the current one.
+	 * @param json the record
+	 * @return {@code true} when {@code disposablePeriod} names another period
+	 */
+	private boolean isAnotherPeriodAsked(CcpJsonRepresentation json) {
+		String period = this.getPeriod(json);
+		String currentPeriod = this.extractFormatedCurrentTimestamp();
+		boolean samePeriod = period.equals(currentPeriod);
+		return false == samePeriod;
 	}
 
 	/**
@@ -227,6 +263,13 @@ public class JnDisposableEntity extends CcpDefaultEntityDelegator<Object>{
 		if(isPresentInOriginalEntity) {
 			return true;
 		}
+
+		boolean anotherPeriodAsked = this.isAnotherPeriodAsked(json);
+
+		if(anotherPeriodAsked) {
+			return false;
+		}
+
 		boolean isPresentInDisposable = JnEntityDisposableRecord.ENTITY.isPresentInThisUnionAll(unionAll, expurgableId);
 
 		boolean isNotPresentInCopyEntity = false == isPresentInDisposable;
@@ -282,7 +325,9 @@ public class JnDisposableEntity extends CcpDefaultEntityDelegator<Object>{
 
 		boolean isNotPresentInCopyEntity = false == isPresentInDisposable;
 
-		if(isNotPresentInCopyEntity) {
+		boolean copyDoesNotAnswer = isNotPresentInCopyEntity || this.isAnotherPeriodAsked(json);
+
+		if(copyDoesNotAnswer) {
 			CcpJsonRepresentation oneById =  this.entity.getOneById(json);
 			return oneById;
 		}
@@ -390,6 +435,12 @@ public class JnDisposableEntity extends CcpDefaultEntityDelegator<Object>{
 			return recordFromUnionAll;
 		}
 
+		boolean anotherPeriodAsked = this.isAnotherPeriodAsked(json);
+
+		if(anotherPeriodAsked) {
+			return CcpOtherConstants.EMPTY_JSON;
+		}
+
 		Supplier<CcpJsonRepresentation> jsonSupplier = () -> this.getExpurgableId(json);
 		CcpJsonRepresentation recordFromDisposable = JnEntityDisposableRecord.ENTITY.getRecordFromUnionAll(unionAll, jsonSupplier);
 		boolean validTimestamp = this.isValidTimestamp(recordFromDisposable);
@@ -421,7 +472,13 @@ public class JnDisposableEntity extends CcpDefaultEntityDelegator<Object>{
 		if(presentInThisUnionAll) {
 			return true;
 		}
-		
+
+		boolean anotherPeriodAsked = this.isAnotherPeriodAsked(json);
+
+		if(anotherPeriodAsked) {
+			return false;
+		}
+
 		CcpJsonRepresentation expurgableId = this.getExpurgableId(json);
 		boolean isPresentInDisposable = JnEntityDisposableRecord.ENTITY.isPresentInThisUnionAll(unionAll, expurgableId);
 
@@ -440,11 +497,13 @@ public class JnDisposableEntity extends CcpDefaultEntityDelegator<Object>{
 	}
 
 	/**
-	 * Gives the bulk item of this entity (or of its twin) the id of the current period; items of other entities are kept.
+	 * Gives the bulk item of this entity (or of its twin) the id of the period of the record; items of other entities are
+	 * kept. The item keeps only the fields of the entity, so the {@code disposablePeriod} comes from the record itself.
 	 * @param item the bulk item
+	 * @param json the record
 	 * @return the adjusted item
 	 */
-	private CcpBulkItem replaceId(CcpBulkItem item) {
+	private CcpBulkItem replaceId(CcpBulkItem item, CcpJsonRepresentation json) {
 		
 		boolean isAnotherEntity = this.isAnotherEntity(item);
 		
@@ -452,7 +511,9 @@ public class JnDisposableEntity extends CcpDefaultEntityDelegator<Object>{
 			return item;
 		}
 		
-		String id = this.calculateId(item.json);
+		String period = this.getPeriod(json);
+		CcpJsonRepresentation jsonWithThePeriod = item.json.put(JnJsonCommonsFields.disposablePeriod, period);
+		String id = this.calculateId(jsonWithThePeriod);
 		CcpEntityMetaData entityMetaData = this.getEntityMetaData();
 		CcpBulkItem itemWithReplacedId = new CcpBulkItem(item.json, item.operation, entityMetaData.entity, id);
 		return itemWithReplacedId;
@@ -496,7 +557,7 @@ public class JnDisposableEntity extends CcpDefaultEntityDelegator<Object>{
 		Stream<CcpBulkItem> originalBulkItemsStream = originalBulkItems
 				.stream();
 				var bulkItemsWithReplacedIdStream = originalBulkItemsStream
-				.map(item -> this.replaceId(item));
+				.map(item -> this.replaceId(item, json));
 				List<CcpBulkItem> bulkItems = bulkItemsWithReplacedIdStream
 				.collect(Collectors.toList())
 				;

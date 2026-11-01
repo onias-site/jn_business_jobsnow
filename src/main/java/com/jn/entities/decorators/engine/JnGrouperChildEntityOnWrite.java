@@ -120,10 +120,21 @@ public abstract class JnGrouperChildEntityOnWrite extends CcpEntityDelegator {
 	protected void addToGroups(boolean twinSide, CcpJsonRepresentation record, JnEntityGrouperParents parents, Map<String, CcpJsonRepresentation> recordParents) {
 		CcpEntity mainEntity = this.getMainEntity();
 		CcpEntityMetaData mainDetails = mainEntity.getEntityMetaData();
-		String childId = mainEntity.calculateId(record);
+		String child = this.getChild(mainEntity, record);
 		String parentName = parents.getParentName();
 		CcpEntity grouper = JnGroupers.getGrouper(twinSide);
-		JnGroupers.addChild(grouper, parentName, mainDetails.entityName, childId, recordParents);
+		JnGroupers.addChild(grouper, parentName, mainDetails.entityName, child, recordParents);
+	}
+
+	/**
+	 * What the record keeps in its groups.
+	 * @param mainEntity the main side of the entity
+	 * @param record the record, its primary key already transformed
+	 * @return the id of the record
+	 */
+	protected String getChild(CcpEntity mainEntity, CcpJsonRepresentation record) {
+		String childId = mainEntity.calculateId(record);
+		return childId;
 	}
 
 	/**
