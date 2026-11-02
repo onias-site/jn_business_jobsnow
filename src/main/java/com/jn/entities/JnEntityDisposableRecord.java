@@ -4,6 +4,7 @@ import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.decorators.CcpJsonFieldName;
 import com.ccp.decorators.CcpTimeDecorator;
 import com.ccp.especifications.db.utils.entity.CcpEntity;
+import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityCache;
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityFieldsTransformer;
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityFieldsValidator;
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityGrouperChild;
@@ -40,6 +41,7 @@ import com.jn.json.fields.validation.JnJsonCommonsFields;
  * child per document of a period written (its index, its id and the end of its period), the documents the daily purge
  * removes once they expire.
  */
+@CcpEntityCache(3600)
 @CcpEntityOlyReadable
 @CcpEntityGrouperChild(value = {JnEntityVirtualDisposableRecordToPurge.class}, beforeDecoratorClass = JnGrouperChildEntityBeforeWrite.class, afterDecoratorClass = JnGrouperChildEntityAfterWrite.class)
 @CcpEntityGrouperParentCombinations(parent = JnEntityVirtualDisposableRecordToPurge.class, value = JnDisposableRecordToPurgeCombinations.class)

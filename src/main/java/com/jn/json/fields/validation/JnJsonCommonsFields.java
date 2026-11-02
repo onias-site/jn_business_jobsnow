@@ -139,7 +139,11 @@ public enum JnJsonCommonsFields implements CcpJsonFieldName{
 	/** The {@code moreParameters} field: nested JSON. */
 	@CcpJsonFieldTypeNestedJson
 	moreParameters,
-	
+
+	/** The {@code emailHeaders} field: the custom headers of an e-mail, the value of each one by its name. */
+	@CcpJsonFieldTypeNestedJson
+	emailHeaders,
+
 	/** The {@code templateId} field: text. */
 	@CcpJsonFieldTypeString(maxLength = 100, isJavaClass = true)
 	templateId,

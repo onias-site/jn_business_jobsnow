@@ -24,7 +24,7 @@ import com.jn.business.messages.JnMessageSenderExceptionHandler;
 import com.jn.business.messages.JnMessageType;
 import com.jn.entities.JnEntityEmailMessageSent;
 import com.jn.entities.JnEntityEmailParametersToSend;
-import com.jn.entities.JnEntityEmailReportedAsSpam;
+import com.jn.entities.JnEntityEmailSuppressed;
 import com.jn.entities.JnEntityEmailTemplateMessage;
 import com.jn.entities.JnEntityInstantMessengerBotLocked;
 import com.jn.entities.JnEntityInstantMessengerMessageSent;
@@ -69,7 +69,7 @@ public class JnSendMessageToUser implements CcpBusiness{
 	}
 
 	/**
-	 * Adds the e-mail step, with the e-mail entities (spam report as the block).
+	 * Adds the e-mail step, with the e-mail entities (the addresses suppressed by the provider as the block).
 	 * @param exceptionHandler what happens when the sending fails
 	 * @return the next part of the fluent API
 	 */
@@ -79,7 +79,7 @@ public class JnSendMessageToUser implements CcpBusiness{
 				httpRequester,
 				JnEntityEmailParametersToSend.ENTITY,
 				JnEntityEmailTemplateMessage.ENTITY,
-				JnEntityEmailReportedAsSpam.ENTITY,
+				JnEntityEmailSuppressed.ENTITY,
 				JnEntityEmailMessageSent.ENTITY
 		);
 		return new JnAddDefaultStep(addOneStep);

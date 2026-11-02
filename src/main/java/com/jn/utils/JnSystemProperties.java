@@ -78,6 +78,15 @@ public class JnSystemProperties {
 	}
 	
 	/**
+	 * Returns the base URL of the suppression lists of the e-mail API.
+	 * @return the {@code urlEmailSuppressionKey} property
+	 */
+	public String urlEmailSuppressionValue() {
+		String response = this.systemProperties.getAsString(Fields.urlEmailSuppressionKey);
+		return response;
+	}
+
+	/**
 	 * Returns the language of the messages sent to the support team.
 	 * @return the {@code supportLanguage} property
 	 */

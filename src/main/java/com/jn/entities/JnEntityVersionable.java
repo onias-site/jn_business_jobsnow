@@ -2,6 +2,7 @@ package com.jn.entities;
 
 import com.ccp.decorators.CcpJsonFieldName;
 import com.ccp.especifications.db.utils.entity.CcpEntity;
+import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityCache;
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityFieldsTransformer;
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityFieldsValidator;
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityOlyReadable;
@@ -23,6 +24,7 @@ import com.jn.json.fields.validation.JnJsonCommonsFields;
  * <li>read-only: save, delete and transfer do nothing</li>
  * </ul>
  */
+@CcpEntityCache(3600)
 @CcpEntityOlyReadable
 @CcpEntityFieldsTransformer(JnJsonTransformersFieldsEntityDefault.class)
 @CcpEntityFieldsValidator(JnEntityVersionable.Fields.class)

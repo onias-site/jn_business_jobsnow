@@ -25,7 +25,7 @@ public enum JnMustNotSendMessage{
 	parameterEntities(false),
 	/** Refuses when the channel has no template. */
 	messageEntities(false),
-	/** Refuses when the receiver blocked the channel (spam report, bot locked). */
+	/** Refuses when the receiver blocked the channel (address suppressed by the e-mail provider, bot locked). */
 	blockEntities(true)
 	;
 	/** Whether the rule refuses when the record exists ({@code true}) or when it is missing ({@code false}). */

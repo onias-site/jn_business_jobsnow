@@ -507,7 +507,7 @@ public final class JnGroupers {
 				CcpBulkItem item = itemOfTheParent.apply(parentId);
 				bulkItems.add(item);
 			}
-			JnExecuteBulkOperation.INSTANCE.executeBulk(bulkItems, JnDoNotDeleteKeysFromCache.INSTANCE);
+			JnExecuteBulkOperation.INSTANCE.executeBulk(bulkItems, JnDeleteKeysFromCache.INSTANCE);
 		}
 	}
 }

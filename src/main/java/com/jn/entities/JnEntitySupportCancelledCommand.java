@@ -2,6 +2,7 @@ package com.jn.entities;
 
 import com.ccp.decorators.CcpJsonFieldName;
 import com.ccp.especifications.db.utils.entity.CcpEntity;
+import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityCache;
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityFieldsTransformer;
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityFieldsValidator;
 import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityFactory;
@@ -20,14 +21,14 @@ import com.jn.json.fields.validation.JnJsonInstantMessengerFields;
  * {@code JnBusinessCancelSupportPendingCommand}, with the same key as {@link JnEntitySupportPendingCommand}. The
  * support bot (jb, which the cost centers that send the commands can not see) reads these records when it lists the
  * tickets of the operator, deletes the tickets they name and then deletes them. A command sent again after being
- * cancelled deletes its cancellation ({@code JnBusinessRegisterSupportPendingCommand}), so the new ticket survives. No
- * cache: the record is written by one process and read by another.
+ * cancelled deletes its cancellation ({@code JnBusinessRegisterSupportPendingCommand}), so the new ticket survives.
  * <p>
  * Configuration:
  * <ul>
  * <li>index {@code jn_support_cancelled_command}</li>
  * </ul>
  */
+@CcpEntityCache(3600)
 @CcpEntityFieldsTransformer(JnJsonTransformersFieldsEntityDefault.class)
 @CcpEntityFieldsValidator(JnEntitySupportCancelledCommand.Fields.class)
 public class JnEntitySupportCancelledCommand implements CcpEntityConfigurator {

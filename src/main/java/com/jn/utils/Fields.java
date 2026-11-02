@@ -24,6 +24,8 @@ public enum Fields implements CcpJsonFieldName{
 	supportLanguage,
 	/** The {@code urlEmailKey} property: the URL of the e-mail API. */
 	urlEmailKey,
+	/** The {@code urlEmailSuppressionKey} property: the base URL of the suppression lists of the e-mail API. */
+	urlEmailSuppressionKey,
 	/** The {@code urlInstantMessengerKey} property: the URL of the instant messenger API. */
 	urlInstantMessengerKey,
 	/** The {@code tokenEmailKey} property: the credential of the e-mail API. */

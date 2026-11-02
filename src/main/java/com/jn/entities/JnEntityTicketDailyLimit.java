@@ -4,6 +4,7 @@ import com.ccp.constants.CcpOtherConstants;
 import com.ccp.decorators.CcpJsonFieldName;
 import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.especifications.db.utils.entity.CcpEntity;
+import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityCache;
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityDisposable;
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityFieldsTransformer;
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityFieldsValidator;
@@ -33,9 +34,10 @@ import com.jn.json.fields.validation.JnTicketQuotaGroups;
  * longer matches, but its copy in {@code jn_disposable_record} expires one day after it was written, and
  * {@code JnDisposableEntity.exists} still accepts it until then.
  * <p>
- * Not cached: the check is a single read by id, and without cache the test scripts can free the day by deleting the
- * record straight from the database.
+ * Cached: deleting the record straight from the database does not free the day while the cache holds it; delete it
+ * through the entity or restart the APIs.
  */
+@CcpEntityCache(3600)
 @CcpEntityDisposable(value = JnDisposableEntity.class, timeOption = CcpEntityExpurgableOptions.daily)
 @CcpEntityFieldsTransformer(JnJsonTransformersFieldsEntityDefault.class)
 @CcpEntityFieldsValidator(JnEntityTicketDailyLimit.Fields.class)

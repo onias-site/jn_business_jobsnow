@@ -2,6 +2,7 @@ package com.jn.entities;
 
 import com.ccp.decorators.CcpJsonFieldName;
 import com.ccp.especifications.db.utils.entity.CcpEntity;
+import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityCache;
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityFieldsTransformer;
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityFieldsValidator;
 import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityFactory;
@@ -15,13 +16,14 @@ import com.jn.json.fields.validation.JnJsonCommonsFields;
 import com.jn.json.fields.validation.JnJsonInstantMessengerFields;
 
 /**
- * Inbox of the bot commands sent to the support operator (for example {@code /solveLoginTokenTicket unlockToken <email>} or {@code /fixSkillHierarchy <parent> <type> <email>}) that the operator has not run yet. Each record is written by the instant message sending ({@code JnBusinessRegisterSupportPendingCommand}) right before the command is delivered to the operator (so a failed delivery still leaves the ticket), whatever the cost center that triggered it, so a new kind of ticket needs no registration here: it is enough that its message to the support bot is a command. The support bot itself belongs to the jb cost center, which jn cannot see; this entity is where the two meet. The bot moves these records to its own list of tickets and deletes them when the operator runs the command. No cache: the record is written by one process and read by another.
+ * Inbox of the bot commands sent to the support operator (for example {@code /solveLoginTokenTicket unlockToken <email>} or {@code /fixSkillHierarchy <parent> <type> <email>}) that the operator has not run yet. Each record is written by the instant message sending ({@code JnBusinessRegisterSupportPendingCommand}) right before the command is delivered to the operator (so a failed delivery still leaves the ticket), whatever the cost center that triggered it, so a new kind of ticket needs no registration here: it is enough that its message to the support bot is a command. The support bot itself belongs to the jb cost center, which jn cannot see; this entity is where the two meet. The bot moves these records to its own list of tickets and deletes them when the operator runs the command.
  * <p>
  * Configuration:
  * <ul>
  * <li>index {@code jn_support_pending_command}</li>
  * </ul>
  */
+@CcpEntityCache(3600)
 @CcpEntityFieldsTransformer(JnJsonTransformersFieldsEntityDefault.class)
 @CcpEntityFieldsValidator(JnEntitySupportPendingCommand.Fields.class)
 public class JnEntitySupportPendingCommand implements CcpEntityConfigurator {

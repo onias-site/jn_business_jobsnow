@@ -2,6 +2,7 @@ package com.jn.entities;
 
 import com.ccp.decorators.CcpJsonFieldName;
 import com.ccp.especifications.db.utils.entity.CcpEntity;
+import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityCache;
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityFieldsValidator;
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityTwin;
 import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityFactory;
@@ -12,7 +13,7 @@ import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidatorArray;
 import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidatorRequired;
 import com.jn.db.bulk.JnExecuteBulkOperation;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
-import com.jn.utils.JnDoNotDeleteKeysFromCache;
+import com.jn.utils.JnDeleteKeysFromCache;
 
 /**
  * Generic group of records: a parent (an id, the kind of group and the values the id came from) and the id of every
@@ -27,11 +28,11 @@ import com.jn.utils.JnDoNotDeleteKeysFromCache;
  * ones on the twin side (the inactive resumes, for instance) in the twin groups, under the same group keys. The entities
  * annotated with {@code @CcpEntityGrouperChild} keep both sides up to date.
  */
+@CcpEntityCache(3600)
 @CcpEntityTwin(
 		twinEntityName = "jn_inactive_grouper",
 		bulkExecutorClass = JnExecuteBulkOperation.class,
-		// the grouper is not cached: its writes delete no cache key (until 2026-10-14 each group written deleted one)
-		functionToDeleteKeysInTheCacheClass = JnDoNotDeleteKeysFromCache.class
+		functionToDeleteKeysInTheCacheClass = JnDeleteKeysFromCache.class
 		)
 @CcpEntityFieldsValidator(JnEntityGrouper.Fields.class)
 public class JnEntityGrouper implements CcpEntityConfigurator {

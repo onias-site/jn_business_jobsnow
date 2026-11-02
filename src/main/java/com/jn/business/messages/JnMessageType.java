@@ -6,7 +6,7 @@ import com.ccp.decorators.CcpStringDecorator;
 import com.ccp.decorators.CcpTimeDecorator;
 import com.ccp.dependency.injection.CcpDependencyInjection;
 import com.ccp.especifications.db.utils.entity.fields.annotations.CcpEntityFieldPrimaryKey;
-import com.ccp.especifications.email.CcpEmailSender;
+import com.ccp.especifications.email.CcpEmailProvider;
 import com.ccp.especifications.http.CcpHttpApiExecutor;
 import com.ccp.especifications.http.CcpHttpContentType;
 import com.ccp.especifications.http.CcpHttpTooManyRequests;
@@ -29,7 +29,7 @@ import com.ccp.json.fields.validation.CcpJsonCommonsFields;
  * {@link JnSendMessageToUser}, the parameters it adds to the keys of the sending and how to deliver a message.
  */
 public enum JnMessageType implements CcpHttpApiExecutor{
-	/** E-mail, through {@code CcpEmailSender}. */
+	/** E-mail, through {@code CcpEmailProvider}. */
 	email{
 
 		/**
@@ -45,11 +45,11 @@ public enum JnMessageType implements CcpHttpApiExecutor{
 		
 		/**
 		 * Gets the email parameters from the JSON and from the system properties, resolves the
-		 * message template, sends it via CcpEmailSender and saves the sending record.
+		 * message template, sends it via CcpEmailProvider and saves the sending record.
 		 */
 		public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
 
-			CcpEmailSender emailSender = CcpDependencyInjection.getDependency(CcpEmailSender.class);
+			CcpEmailProvider emailSender = CcpDependencyInjection.getDependency(CcpEmailProvider.class);
 			
 			String providerUrl =  JnSystemProperties.INSTANCE.urlEmailValue();
 			String providerToken =  JnSystemProperties.INSTANCE.tokenEmailValue();
@@ -62,7 +62,8 @@ public enum JnMessageType implements CcpHttpApiExecutor{
 			String message = resolvedMessage.content;
 			CcpHttpContentType contentType = json.getAsEnum(JnJsonCommonsFields.contentType, CcpHttpContentType.class, CcpHttpContentType.TEXT_HTML);
 			String[] recipients = json.getAsStringArray(JnJsonCommonsFields.email, CcpJsonCommonsFields.emails);
-			emailSender.sendSimpleTextEmailMessage(providerToken, providerUrl, templateId, sender, subject, message, contentType, recipients);
+			CcpJsonRepresentation emailHeaders = json.getInnerJson(JnJsonCommonsFields.emailHeaders);
+			emailSender.sendSimpleTextEmailMessage(providerToken, providerUrl, templateId, sender, subject, message, contentType, emailHeaders, recipients);
 			JnEntityEmailMessageSent.ENTITY.save(json);
 			return json;
 		}
