@@ -21,7 +21,25 @@ public enum JnJsonInstantMessengerFields implements CcpJsonFieldName{
 	
 	/** The {@code chatId} field: decimal number. */
 	@CcpJsonFieldTypeNumber
-	chatId, 
+	chatId,
+
+	/**
+	 * The {@code operatorChatId} field: decimal number, the private chat of the operator when the notice of a ticket goes
+	 * to a group; the ticket of {@code /pendingTickets} belongs to it, not to the group. Kept in {@code moreParameters}.
+	 */
+	@CcpJsonFieldTypeNumber
+	operatorChatId,
+
+	/** The {@code messageThreadKey} field: text, the key of the sending in {@code messageThreadIds}, put by the template. */
+	@CcpJsonFieldTypeString
+	messageThreadKey,
+
+	/**
+	 * The {@code messageThreadIds} field: nested JSON, the topic of the group of each {@code messageThreadKey}; a key
+	 * without a topic goes to the General topic. Kept in {@code moreParameters}.
+	 */
+	@CcpJsonFieldTypeNestedJson
+	messageThreadIds,
 	 
 	/** The {@code moreParameters} field: nested JSON. */
 	@CcpJsonFieldTypeNestedJson

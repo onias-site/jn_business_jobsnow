@@ -17,6 +17,8 @@ import com.ccp.especifications.db.utils.entity.decorators.interfaces.CcpEntityCo
 import com.ccp.especifications.db.utils.entity.fields.annotations.CcpEntityFieldPrimaryKey;
 import com.ccp.json.validations.fields.annotations.CcpJsonCopyFieldValidationsFrom;
 import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidatorRequired;
+import com.jn.business.bots.JnSupportBotCommands;
+import com.jn.business.bots.stack.trace.JnSupportStackTraceFields;
 import com.jn.business.messages.JnMessages;
 import com.jn.entities.decorators.engine.JnVersionableEntity;
 import com.jn.entities.decorators.engine.JnVersionablePurgeEntity;
@@ -116,11 +118,25 @@ public class JnEntityInstantMessengerTemplateMessage  implements CcpEntityConfig
 						.put(JnJsonCommonsFields.language, JnLanguage.portuguese)
 				;
 				
+				// the command is the same in every language
+		String stackTraceTicketTemplateId = JnMessages.JnNotifySupportAboutStackTraceTicket.class.getName();
+		String stackTraceTicketCommand = "/" + JnSupportBotCommands.solveStackTrace + " {" + JnSupportStackTraceFields.errorId + "}";
+		CcpJsonRepresentation stackTraceTicketWithMessage = CcpOtherConstants.EMPTY_JSON
+		.put(JnJsonCommonsFields.message, stackTraceTicketCommand);
+		CcpJsonRepresentation stackTraceTicketWithTemplateId = stackTraceTicketWithMessage
+		.put(JnJsonCommonsFields.templateId, stackTraceTicketTemplateId);
+		CcpJsonRepresentation notifyStackTraceTicketInPortuguese = stackTraceTicketWithTemplateId
+		.put(JnJsonCommonsFields.language, JnLanguage.portuguese);
+		CcpJsonRepresentation notifyStackTraceTicketInEnglish = stackTraceTicketWithTemplateId
+		.put(JnJsonCommonsFields.language, JnLanguage.english);
+
 		List<CcpBulkItem> createBulkItems = CcpEntityConfigurator.super.toCreateBulkItems(
-				ENTITY
+ENTITY
 				, notifyError
 				, notifyWarning
 				, notifyAboutSolvedLockedToken
+				, notifyStackTraceTicketInPortuguese
+				, notifyStackTraceTicketInEnglish
 				, notifyAboutSolvedResendToken				
 				);
 

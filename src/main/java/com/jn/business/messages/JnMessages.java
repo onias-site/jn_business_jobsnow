@@ -4,6 +4,8 @@ import java.util.List;
 
 import com.ccp.decorators.CcpJsonFieldName;
 import com.ccp.decorators.CcpJsonRepresentation;
+import com.jn.business.bots.stack.trace.JnSupportStackTraceFields;
+import com.jn.entities.JnEntityJobsnowError;
 import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
 import com.jn.json.fields.validation.JnJsonInstantMessengerFields;
@@ -28,12 +30,12 @@ public class JnMessages {
 		private JnNotifySupportAboutPendingLockedLoginToken() {}
 
 		/**
-		 * Puts the priority of the ticket of the operator ({@code /solveLoginTokenTicket}: 1, a user who cannot log in).
+		 * Puts the priority of the ticket of the operator ({@code /solveLoginTokenTicket}: 2, a user who cannot log in).
 		 * @param json the values of the message
 		 * @return the JSON with the priority
 		 */
 		public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
-			CcpJsonRepresentation jsonWithPriority = json.put(JnJsonInstantMessengerFields.priority, 1);
+			CcpJsonRepresentation jsonWithPriority = json.put(JnJsonInstantMessengerFields.priority, 2);
 			return jsonWithPriority;
 		}
 	}
@@ -46,12 +48,12 @@ public class JnMessages {
 		private JnNotifySupportAboutPendingResendLoginToken() {}
 
 		/**
-		 * Puts the priority of the ticket of the operator ({@code /solveLoginTokenTicket}: 1, a user who cannot log in).
+		 * Puts the priority of the ticket of the operator ({@code /solveLoginTokenTicket}: 2, a user who cannot log in).
 		 * @param json the values of the message
 		 * @return the JSON with the priority
 		 */
 		public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
-			CcpJsonRepresentation jsonWithPriority = json.put(JnJsonInstantMessengerFields.priority, 1);
+			CcpJsonRepresentation jsonWithPriority = json.put(JnJsonInstantMessengerFields.priority, 2);
 			return jsonWithPriority;
 		}
 	}
@@ -126,13 +128,48 @@ public class JnMessages {
 		private JnNotifySupportAboutAnError() {}
 
 		/**
-		 * Prepares the support notice.
+		 * Prepares the support notice, which goes to the topic of the API where the error happened; an error without
+		 * {@code origin} goes to the General topic.
 		 * @param json the error
 		 * @return the notice
 		 */
 		public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
 			CcpJsonRepresentation supportNotice = toSupportNotice(json);
-			return supportNotice;
+			boolean noOrigin = false == json.containsField(JnEntityJobsnowError.Fields.origin);
+
+			if(noOrigin) {
+				return supportNotice;
+			}
+
+			String origin = json.getAsString(JnEntityJobsnowError.Fields.origin);
+			CcpJsonRepresentation supportNoticeWithTopic = supportNotice.put(JnJsonInstantMessengerFields.messageThreadKey, origin);
+			return supportNoticeWithTopic;
+		}
+	}
+
+		/**
+	 * The ticket of an error, sent to the operator as the command {@code /solveStackTrace <errorId>}: the most urgent
+	 * ticket there is, with priority 0. The id is the one of the document of the period, what {@code JnSupportStackTraceShow}
+	 * reads. The text of the exception leaves {@code message}: the JSON of the sending prevails over the template when both
+	 * are merged, and the command would be replaced by it.
+	 */
+	public static class JnNotifySupportAboutStackTraceTicket implements JnMessageTemplate {
+		/** The single instance: the class keeps no state. */
+		public final static JnNotifySupportAboutStackTraceTicket INSTANCE = new JnNotifySupportAboutStackTraceTicket();
+
+		private JnNotifySupportAboutStackTraceTicket() {}
+
+		/**
+		 * Puts the id of the error and the priority of the ticket.
+		 * @param json the error
+		 * @return the values of the command
+		 */
+		public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
+			String errorId = JnEntityJobsnowError.ENTITY.calculateId(json);
+			CcpJsonRepresentation jsonWithoutTheErrorText = json.removeFields(CcpJsonRepresentation.CcpStackTraceFields.message);
+			CcpJsonRepresentation jsonWithErrorId = jsonWithoutTheErrorText.put(JnSupportStackTraceFields.errorId, errorId);
+			CcpJsonRepresentation jsonWithPriority = jsonWithErrorId.put(JnJsonInstantMessengerFields.priority, 0);
+			return jsonWithPriority;
 		}
 	}
 

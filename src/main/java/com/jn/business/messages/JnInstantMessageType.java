@@ -1,6 +1,7 @@
 package com.jn.business.messages;
 
 import com.ccp.business.CcpBusiness;
+import com.ccp.decorators.CcpFieldName;
 import com.ccp.decorators.CcpJsonFieldName;
 import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.decorators.CcpStringDecorator;
@@ -34,9 +35,10 @@ public enum JnInstantMessageType implements CcpBusiness{
 			String botToken = json.getAsString(JnJsonInstantMessengerFields.botToken);
 			Long chatId = json.getAsLongNumber(JnJsonInstantMessengerFields.chatId);
 			Long replyTo = super.getReplyTo(json);
+			Long messageThreadId = super.getMessageThreadId(json);
 			CcpStringDecorator botNameDecorator = json.getAsStringDecorator(JnJsonInstantMessengerFields.botName);
 			CcpJsonFieldName botName = botNameDecorator.jsonFieldName();
-			CcpJsonRepresentation result = instantMessenger.sendTextMessage(botName, botToken, chatId, replyTo, message);
+			CcpJsonRepresentation result = instantMessenger.sendTextMessage(botName, botToken, chatId, messageThreadId, replyTo, message);
 			CcpJsonRepresentation jsonWithResult = json.mergeWithAnotherJson(result);
 			return jsonWithResult;
 		}
@@ -56,7 +58,8 @@ public enum JnInstantMessageType implements CcpBusiness{
 			String botToken = json.getAsString(JnJsonInstantMessengerFields.botToken) ;
 			Long chatId = json.getAsLongNumber(JnJsonInstantMessengerFields.chatId);
 			Long replyTo = super.getReplyTo(json);
-			
+			Long messageThreadId = super.getMessageThreadId(json);
+
 			String message = super.getMessage(json, messageFields, JnJsonCommonsFields.message);
 			String caption = super.getMessage(json, messageFields, JnJsonInstantMessengerFields.caption);
 			String fileName = super.getMessage(json, messageFields, JnJsonInstantMessengerFields.fileName);
@@ -65,7 +68,7 @@ public enum JnInstantMessageType implements CcpBusiness{
 			Byte[] bytes = messageDecorator.getBytes();
 			CcpStringDecorator botNameDecorator = json.getAsStringDecorator(JnJsonInstantMessengerFields.botName);
 			CcpJsonFieldName botName = botNameDecorator.jsonFieldName();
-			CcpJsonRepresentation result = instantMessenger.sendFile(botName, botToken, chatId, replyTo, fileName, caption, bytes);
+			CcpJsonRepresentation result = instantMessenger.sendFile(botName, botToken, chatId, messageThreadId, replyTo, fileName, caption, bytes);
 			CcpJsonRepresentation jsonWithResult = json.mergeWithAnotherJson(result);
 			return jsonWithResult;
 		}
@@ -105,6 +108,32 @@ public enum JnInstantMessageType implements CcpBusiness{
 
 		Long replyTo = json.getAsLongNumber(CcpJsonCommonsFields.replyTo);
 		return replyTo;
+	}
+
+	/**
+	 * Returns the topic of the group that receives this sending: the item of {@code messageThreadIds} (of the sending
+	 * parameters) named by {@code messageThreadKey} (put by the template).
+	 * @param json the values of the message
+	 * @return the id of the topic, or 0 for no topic (no key, or a key without a topic)
+	 */
+	protected Long getMessageThreadId(CcpJsonRepresentation json) {
+		boolean noMessageThread = false == json.containsAllFields(JnJsonInstantMessengerFields.messageThreadKey, JnJsonInstantMessengerFields.messageThreadIds);
+
+		if(noMessageThread) {
+			return 0L;
+		}
+
+		String messageThreadKey = json.getAsString(JnJsonInstantMessengerFields.messageThreadKey);
+		CcpFieldName messageThreadKeyField = new CcpFieldName(messageThreadKey);
+		CcpJsonRepresentation messageThreadIds = json.getInnerJson(JnJsonInstantMessengerFields.messageThreadIds);
+		boolean keyWithoutTopic = false == messageThreadIds.containsField(messageThreadKeyField);
+
+		if(keyWithoutTopic) {
+			return 0L;
+		}
+
+		Long messageThreadId = messageThreadIds.getAsLongNumber(messageThreadKeyField);
+		return messageThreadId;
 	}
 
 	/**

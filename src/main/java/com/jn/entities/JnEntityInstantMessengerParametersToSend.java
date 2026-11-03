@@ -26,9 +26,11 @@ import com.jn.business.messages.JnMessages.JnNotifySupportAboutPendingLockedLogi
 import com.jn.business.messages.JnMessages.JnNotifySupportAboutPendingResendLoginToken;
 import com.jn.business.messages.JnMessages.JnNotifySupportAboutSolvedLockedLoginToken;
 import com.jn.business.messages.JnMessages.JnNotifySupportAboutSolvedResendLoginToken;
+import com.jn.business.messages.JnMessages.JnNotifySupportAboutStackTraceTicket;
 import com.jn.entities.decorators.engine.JnVersionableEntity;
 import com.jn.entities.decorators.engine.JnVersionablePurgeEntity;
 import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault;
+import com.jn.json.fields.validation.JnApiOrigins;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
 import com.jn.json.fields.validation.JnJsonInstantMessengerFields;
 
@@ -95,8 +97,23 @@ public class JnEntityInstantMessengerParametersToSend implements CcpEntityConfig
 		;
 	}
 	/**
-	 * Seeds the support bot settings: errors and warnings sent as a text file (caption with the error type), and the
-	 * pending requests of token unlock and resend sent as text, all to the support chat with 10 attempts 3 seconds apart.
+	 * Returns the chat that owns the ticket of a command sent to the support bot: {@code operatorChatId} when the notice
+	 * goes to a group, otherwise the {@code chatId} that received it.
+	 * @param json the sending parameters, with the values of {@code moreParameters} at the root
+	 * @return the chat of the operator
+	 */
+	public static Long getOperatorChatId(CcpJsonRepresentation json) {
+		boolean sentToTheOperator = false == json.containsField(JnJsonInstantMessengerFields.operatorChatId);
+		CcpJsonFieldName operatorChat = sentToTheOperator ? JnJsonInstantMessengerFields.chatId : JnJsonInstantMessengerFields.operatorChatId;
+		Long operatorChatId = json.getAsLongNumber(operatorChat);
+		return operatorChatId;
+	}
+
+	/**
+	 * Seeds the support bot settings: errors and warnings sent as a text file (caption with the error type) to the group
+	 * of the stack traces, errors in the topic of the API they came from (warnings have no API and go to the General
+	 * topic), and the tickets of the errors and the pending requests of token unlock and resend sent as text to the support chat, all with 10 attempts
+	 * 3 seconds apart.
 	 * @return the seed records
 	 */
 	public List<CcpBulkItem> getFirstRecordsToInsert() {
@@ -118,10 +135,16 @@ public class JnEntityInstantMessengerParametersToSend implements CcpEntityConfig
 		CcpJsonRepresentation errorJsonWithContentType = errorJsonWithTemplateId
 		.put(JnJsonCommonsFields.contentType, CcpHttpContentType.TEXT_PLAIN);
 		CcpJsonRepresentation errorJsonWithChatId = errorJsonWithContentType
-		.put(JnJsonInstantMessengerFields.chatId, 751717896L);
+		.put(JnJsonInstantMessengerFields.chatId, -1004489667665L);
+		CcpJsonRepresentation messageThreadIdOfVis = CcpOtherConstants.EMPTY_JSON
+		.put(JnApiOrigins.vis, 4L);
+		CcpJsonRepresentation messageThreadIds = messageThreadIdOfVis
+		.put(JnApiOrigins.js, 5L);
+		CcpJsonRepresentation errorJsonWithMessageThreadIds = errorJsonWithChatId
+		.addToItem(JnJsonCommonsFields.moreParameters, JnJsonInstantMessengerFields.messageThreadIds, messageThreadIds);
 
 		
-		CcpJsonRepresentation notifyError = errorJsonWithChatId
+		CcpJsonRepresentation notifyError = errorJsonWithMessageThreadIds
 		.put(JnJsonInstantMessengerFields.caption, "{type}")
 		;
 		// the warning notice goes through the same channel as the error notice; without this record every save of
@@ -191,15 +214,32 @@ public class JnEntityInstantMessengerParametersToSend implements CcpEntityConfig
 		.put(JnJsonInstantMessengerFields.chatId, 751717896L)
 		;
 		
+				CcpJsonRepresentation stackTraceTicketJsonWithInstantMessageType = CcpOtherConstants.EMPTY_JSON
+		.put(JnJsonInstantMessengerFields.instantMessageType, JnInstantMessageType.text);
+		String stackTraceTicketTemplateId = JnNotifySupportAboutStackTraceTicket.class.getName();
+		CcpJsonRepresentation stackTraceTicketJsonWithTemplateId = stackTraceTicketJsonWithInstantMessageType
+		.put(JnJsonCommonsFields.templateId, stackTraceTicketTemplateId);
+		CcpJsonRepresentation stackTraceTicketJsonWithMaxTries = stackTraceTicketJsonWithTemplateId
+		.addToItem(JnJsonCommonsFields.moreParameters, JnJsonCommonsFields.maxTriesToSendMessage, 10);
+		CcpJsonRepresentation stackTraceTicketJsonWithSleepTime = stackTraceTicketJsonWithMaxTries
+		.addToItem(JnJsonCommonsFields.moreParameters, JnJsonCommonsFields.sleepToSendMessage, 3000);
+		CcpJsonRepresentation stackTraceTicketJsonWithBotName = stackTraceTicketJsonWithSleepTime
+		.put(JnJsonInstantMessengerFields.botName, JnMessageType.JnBotType.support);
+
+		CcpJsonRepresentation notifySupportAboutStackTraceTicket = stackTraceTicketJsonWithBotName
+		.put(JnJsonInstantMessengerFields.chatId, 751717896L)
+		;
+
 		List<CcpBulkItem> createBulkItems = CcpEntityConfigurator.super.toCreateBulkItems(
-				ENTITY
+ENTITY
 				, notifyError
 				, notifyWarning
 				, notifySupportAboutSolvedLockedToken
 				, notifySupportAboutSolvedResendToken
 				, notifySupportAboutPendingLockedToken
-				, notifySupportAboutPendingResendToken
-				);
+								, notifySupportAboutPendingResendToken
+				, notifySupportAboutStackTraceTicket
+);
 
 		return createBulkItems;
 	}

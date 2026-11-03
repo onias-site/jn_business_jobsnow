@@ -77,7 +77,9 @@ public class JnBusinessCancelSupportPendingCommand implements CcpBusiness {
 
 		String command = JnEntitySupportPendingCommand.normalize(sentText);
 		String botName = parameters.getAsString(JnJsonInstantMessengerFields.botName);
-		Long chatId = parameters.getAsLongNumber(JnJsonInstantMessengerFields.chatId);
+		CcpJsonRepresentation moreParameters = parameters.getInnerJson(JnJsonCommonsFields.moreParameters);
+		CcpJsonRepresentation parametersWithMoreParameters = parameters.mergeWithAnotherJson(moreParameters);
+		Long chatId = JnEntityInstantMessengerParametersToSend.getOperatorChatId(parametersWithMoreParameters);
 		long now = System.currentTimeMillis();
 
 		CcpJsonRepresentation commandWithBotName = CcpOtherConstants.EMPTY_JSON.put(JnEntitySupportCancelledCommand.Fields.botName, botName);

@@ -12,5 +12,7 @@ public enum JnCommandNamesInPortuguese implements CcpJsonFieldName{
 	allowCommandToUser { public String getValue() { return "permitirComandoAoUsuario"; } },
 	/** {@code /listarUsuariosIgnorados}. */
 	ignoredUsers { public String getValue() { return "listarUsuariosIgnorados"; } },
+	/** {@code /resolverStackTrace}. */
+	solveStackTrace { public String getValue() { return "resolverStackTrace"; } },
 	;
 }

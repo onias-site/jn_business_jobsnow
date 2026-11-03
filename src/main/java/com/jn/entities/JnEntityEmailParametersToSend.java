@@ -84,7 +84,7 @@ public class JnEntityEmailParametersToSend implements CcpEntityConfigurator{
 	 */
 	public List<CcpBulkItem> getFirstRecordsToInsert() {
 		String errorParametersWithEmail = "{" + "	\"email\": \"devs.jobsnow@gmail.com\",";
-		String errorParametersWithSender = errorParametersWithEmail + "	\"sender\": \"devs.jobsnow@gmail.com\",";
+		String errorParametersWithSender = errorParametersWithEmail + "	\"sender\": \"curriculos@onias.site\",";
 		String errorParametersWithSubjectTypeKey = errorParametersWithSender
 						+ "	\"subjectType\": \"";
 						String errorSubjectType = JnMessages.JnNotifySupportAboutAnError.class.getName();
@@ -99,7 +99,7 @@ public class JnEntityEmailParametersToSend implements CcpEntityConfigurator{
 						String errorParametersWithTemplateId = errorParametersWithTemplateIdValue		
 						+ "\"";
 						String errorParameters = errorParametersWithTemplateId + "}";
-						String tokenParametersWithSubjectTypeKey = "{\"sender\": \"devs.jobsnow@gmail.com\"," + "	\"subjectType\": \"";
+						String tokenParametersWithSubjectTypeKey = "{\"sender\": \"curriculos@onias.site\"," + "	\"subjectType\": \"";
 						String tokenSubjectType = JnMessages.JnNotifyUserAboutLoginToken.class.getName();
 						String tokenParametersWithSubjectTypeValue = tokenParametersWithSubjectTypeKey
 						+ tokenSubjectType;

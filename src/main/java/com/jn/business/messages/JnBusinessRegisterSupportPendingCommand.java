@@ -6,6 +6,7 @@ import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.decorators.CcpTextDecorator;
 import com.jn.entities.JnEntitySupportCancelledCommand;
 import com.jn.entities.JnEntitySupportPendingCommand;
+import com.jn.entities.JnEntityInstantMessengerParametersToSend;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
 import com.jn.json.fields.validation.JnJsonInstantMessengerFields;
 
@@ -54,7 +55,8 @@ public class JnBusinessRegisterSupportPendingCommand implements CcpBusiness{
 		}
 
 		String command = JnEntitySupportPendingCommand.normalize(sentText);
-		Long chatId = json.getAsLongNumber(JnJsonInstantMessengerFields.chatId);
+		// a notice sent to a group keeps the ticket with the operator, who lists it in the private chat
+		Long chatId = JnEntityInstantMessengerParametersToSend.getOperatorChatId(json);
 		Object priority = json.get(JnJsonInstantMessengerFields.priority);
 		long now = System.currentTimeMillis();
 
