@@ -149,7 +149,7 @@ public class JnDisposableEntity extends CcpDefaultEntityDelegator<Object>{
 		Supplier<CcpJsonRepresentation> jsonSupplier = json.getJsonSupplier();
 		CcpJsonRepresentation primaryKeyValues = entityDetails.getPrimaryKeyValues(jsonSupplier);
 		String id = primaryKeyValues.asUgglyJson();
-		Long timestamp = json.getOrDefault(JnJsonCommonsFields.timestamp, () -> System.currentTimeMillis());
+		Long timestamp = this.getWriteMoment(json);
 		CcpJsonRepresentation onlyExistingFields = entityDetails.getOnlyExistingFields(json);
 		Long nextTimeStamp = this.getExpiration(json, timestamp);
 		CcpTimeDecorator expiration = new CcpTimeDecorator(nextTimeStamp);
@@ -169,6 +169,30 @@ public class JnDisposableEntity extends CcpDefaultEntityDelegator<Object>{
 				.put(JnJsonCommonsFields.id, id)
 				;
 		return expurgable;
+	}
+
+	/**
+	 * The moment of the write: the {@code timestamp} of the record only when the entity stores one; otherwise now. A
+	 * {@code timestamp} that is not a field of the entity comes from its copy, never from the record: the save of
+	 * {@code CcpDefaultEntityDelegator} builds the items twice, and the second time the json carries the fields of the copy
+	 * built the first time, whose {@code timestamp} is already the expiration (a read by id merges it as well). Taken as
+	 * the moment of the write, it pushed the expiration one more period ahead: until 2026-11-03 the daily quota of the
+	 * tickets ({@code jn_ticket_daily_limit}) lasted 48 hours.
+	 * @param json the record, possibly with the fields of its copy
+	 * @return the moment of the write
+	 */
+	private Long getWriteMoment(CcpJsonRepresentation json) {
+		CcpEntityMetaData entityDetails = this.getEntityMetaData();
+		CcpJsonRepresentation onlyExistingFields = entityDetails.getOnlyExistingFields(json);
+		boolean storesItsOwnTimestamp = onlyExistingFields.containsAllFields(JnJsonCommonsFields.timestamp);
+
+		if(storesItsOwnTimestamp) {
+			Long timestamp = onlyExistingFields.getAsLongNumber(JnJsonCommonsFields.timestamp);
+			return timestamp;
+		}
+
+		long now = System.currentTimeMillis();
+		return now;
 	}
 
 	/**
