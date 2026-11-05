@@ -49,6 +49,21 @@ public class JnFunctionMensageriaSender implements CcpBusiness {
 	}
 
 	/**
+	 * Prepares the sending of a business to the queue of its own for the qualifier: the topic is
+	 * {@code <class of the business>~<qualifier>} ({@link CcpMensageriaReceiver#getQualifiedTopic}), and the consumer
+	 * still runs the business. Each qualifier is a topic and a subscription, created from {@code topicos.tsv}.
+	 * @param topic the business
+	 * @param queueQualifier the qualifier of the queue (e.g. the name of a bot command)
+	 */
+	public JnFunctionMensageriaSender(CcpBusiness topic, String queueQualifier) {
+		this.jsonValidationClass = topic.getJsonValidationClass();
+		var topicClass = topic.getClass();
+		this.topic = CcpMensageriaReceiver.getQualifiedTopic(topicClass, queueQualifier);
+		this.entityName = "";
+		this.operation = "";
+	}
+
+	/**
 	 * Prepares the sending of an entity operation.
 	 * @param entity the entity
 	 * @param operation the operation
