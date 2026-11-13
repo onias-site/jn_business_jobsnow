@@ -15,29 +15,39 @@ import com.jn.entities.JnEntityMessageDidNotSent.JnReasonDetails;
  * The "do not send" rules of {@link JnSendMessageToUser}, one per list of entities of the sender (same name). Each rule
  * checks the entity of the channel in the search result: a rule marked "when present" refuses the sending when the
  * record exists, the others refuse it when the record is missing. A refusal is recorded in
- * {@code jn_message_did_not_sent} (when the message has a receiver) and raised as {@link MessageDidNotSend}.
+ * {@code jn_message_did_not_sent} (when the message has a receiver) and raised as {@link MessageDidNotSend}. A refusal
+ * chosen by the receiver (the e-mail provider suppressed the address, the user blocked the bot) only skips its channel,
+ * whatever the exception handler of the channel: it is not a failure of the system.
  */
 public enum JnMustNotSendMessage{
 
 	/** Refuses when the same message was already sent within the window of the entity. */
-	alreadySentEntities(true),
+	alreadySentEntities(true, false),
 	/** Refuses when the channel has no sending parameters. */
-	parameterEntities(false),
+	parameterEntities(false, false),
 	/** Refuses when the channel has no template. */
-	messageEntities(false),
-	/** Refuses when the receiver blocked the channel (address suppressed by the e-mail provider, bot locked). */
-	blockEntities(true)
+	messageEntities(false, false),
+	/**
+	 * Refuses when the receiver blocked the channel (address suppressed by the e-mail provider, bot locked). Up to
+	 * 2026-11-12 a channel with {@code THROWS} raised this refusal: a contact us from a suppressed address failed after
+	 * saving the ticket, and the notice to the support team, the next channel, was never sent.
+	 */
+	blockEntities(true, true)
 	;
 	/** Whether the rule refuses when the record exists ({@code true}) or when it is missing ({@code false}). */
 	final boolean whenPresentInUnionAll;
-	
+
+	/** Whether the refusal was chosen by the receiver, so it only skips the channel and never reaches its handler. */
+	final boolean refusalChosenByTheReceiver;
 	
 	/**
 	 * Associates the rule with its condition.
 	 * @param whenPresentInThisUnionAll whether the rule refuses when the record exists
+	 * @param refusalChosenByTheReceiver whether the refusal was chosen by the receiver
 	 */
-	private JnMustNotSendMessage(boolean whenPresentInThisUnionAll) {
+	private JnMustNotSendMessage(boolean whenPresentInThisUnionAll, boolean refusalChosenByTheReceiver) {
 		this.whenPresentInUnionAll = whenPresentInThisUnionAll;
+		this.refusalChosenByTheReceiver = refusalChosenByTheReceiver;
 	}
 	
 	/**
@@ -104,7 +114,7 @@ public enum JnMustNotSendMessage{
 				;
 		CcpJsonRepresentation jsonToSave = this.putReasonMessage(put, reasonMessage);
 		this.saveDiagnosticWhenItHasARecipient(jsonToSave);
-		throw new MessageDidNotSend(jsonToSave);
+		throw new MessageDidNotSend(this, jsonToSave);
 	}
 
 	/**
@@ -151,12 +161,18 @@ public enum JnMustNotSendMessage{
 	/** Raised when a rule refuses the sending; the message is the recorded diagnosis. */
 	@SuppressWarnings("serial")
 	static class MessageDidNotSend extends RuntimeException{
+
+		/** The rule that refused the sending. */
+		final JnMustNotSendMessage rule;
+
 		/**
 		 * Builds the refusal.
+		 * @param rule the rule that refused the sending
 		 * @param json the diagnosis
 		 */
-		protected MessageDidNotSend(CcpJsonRepresentation json) {
+		protected MessageDidNotSend(JnMustNotSendMessage rule, CcpJsonRepresentation json) {
 			super(json.toString());
+			this.rule = rule;
 		}
 	}
 	

@@ -1,8 +1,11 @@
 package com.jn.entities.decorators.engine;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
+import com.ccp.constants.CcpOtherConstants;
 import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.decorators.CcpReflectionConstructorDecorator;
 import com.ccp.especifications.db.utils.entity.CcpEntity;
@@ -11,12 +14,14 @@ import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityDelega
 import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityMetaData;
 import com.ccp.especifications.db.utils.entity.decorators.interfaces.CcpEntityConfigurator;
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityGrouperChild;
+import com.jn.json.fields.validation.JnJsonCommonsFields;
 import com.jn.utils.JnGroupers;
 
 /**
  * Base shared by the decorators that keep the records of an entity ({@code @CcpEntityGrouperChild}) in the groups of
  * {@code JnEntityGrouper}. Each side of the entity has its side of the grouper: the main records are children of the main
- * groups, the twin records of the twin groups. The child is the id of the record, the same on both sides, and the child
+ * groups, the twin records of the twin groups. The child is the id of the record, the same on both sides, or, when the
+ * annotation names {@code childFields}, a JSON text with those fields of the record and its id in {@code id}; the child
  * name is the name of the main entity, so a group has the same key on both sides.
  */
 public abstract class JnGrouperChildEntityOnWrite extends CcpEntityDelegator {
@@ -127,14 +132,33 @@ public abstract class JnGrouperChildEntityOnWrite extends CcpEntityDelegator {
 	}
 
 	/**
-	 * What the record keeps in its groups.
+	 * What the record keeps in its groups: its id or, when the annotation names {@code childFields}, a JSON text with
+	 * those fields of the record, the fields its {@code childFieldsProducers} calculate and its id in {@code id}.
 	 * @param mainEntity the main side of the entity
-	 * @param record the record, its primary key already transformed
-	 * @return the id of the record
+	 * @param record the record, its fields already transformed
+	 * @return the child
 	 */
 	protected String getChild(CcpEntity mainEntity, CcpJsonRepresentation record) {
 		String childId = mainEntity.calculateId(record);
-		return childId;
+		String[] childFields = this.annotation.childFields();
+		boolean childIsTheId = childFields.length == 0;
+
+		if(childIsTheId) {
+			return childId;
+		}
+
+		List<String> childFieldsList = Arrays.asList(childFields);
+		CcpJsonRepresentation childRecord = record.getJsonPiece(childFieldsList);
+		Class<?>[] childFieldsProducers = this.annotation.childFieldsProducers();
+		for (Class<?> childFieldsProducerClass : childFieldsProducers) {
+			CcpReflectionConstructorDecorator producerConstructor = new CcpReflectionConstructorDecorator(childFieldsProducerClass);
+			Function<CcpJsonRepresentation, CcpJsonRepresentation> childFieldsProducer = producerConstructor.newInstance();
+			CcpJsonRepresentation producedFields = childFieldsProducer.apply(record);
+			childRecord = childRecord.mergeWithAnotherJson(producedFields);
+		}
+		CcpJsonRepresentation childRecordWithId = childRecord.put(JnJsonCommonsFields.id, childId);
+		String child = childRecordWithId.asUgglyJson();
+		return child;
 	}
 
 	/**
@@ -151,8 +175,34 @@ public abstract class JnGrouperChildEntityOnWrite extends CcpEntityDelegator {
 		for (JnEntityGrouperParents parents : allParents) {
 			String parentName = parents.getParentName();
 			List<String> parentIds = parents.getStoredParentIds(storedRecord);
-			JnGroupers.removeChild(grouper, parentName, mainDetails.entityName, childId, parentIds);
+			this.removeChild(grouper, parentName, mainDetails.entityName, childId, parentIds);
 		}
+	}
+
+	/**
+	 * Takes the child of a record out of the groups of some parents: by its id or, when the child is a JSON text
+	 * ({@code childFields}), by the text {@code "id":"<id>"} that only the children of that record contain.
+	 * @param grouper the side of the grouper written
+	 * @param parentName the kind of group
+	 * @param childName the name of the main entity
+	 * @param childId the id of the record
+	 * @param parentIds the parent ids
+	 */
+	private void removeChild(CcpEntity grouper, String parentName, String childName, String childId, List<String> parentIds) {
+		String[] childFields = this.annotation.childFields();
+		boolean childIsTheId = childFields.length == 0;
+
+		if(childIsTheId) {
+			JnGroupers.removeChild(grouper, parentName, childName, childId, parentIds);
+			return;
+		}
+
+		CcpJsonRepresentation idAlone = CcpOtherConstants.EMPTY_JSON.put(JnJsonCommonsFields.id, childId);
+		String idAloneText = idAlone.asUgglyJson();
+		int closingBrace = idAloneText.length() - 1;
+		String childKey = idAloneText.substring(1, closingBrace);
+		List<String> childKeys = Arrays.asList(childKey);
+		JnGroupers.removeChildByKeys(grouper, parentName, childName, childKeys, parentIds);
 	}
 
 	/**

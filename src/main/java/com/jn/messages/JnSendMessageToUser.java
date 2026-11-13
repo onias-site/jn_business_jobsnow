@@ -138,7 +138,9 @@ public class JnSendMessageToUser implements CcpBusiness{
 	 * sending is refused, hands the refusal to the exception handler of the channel, the same one that handles the failures
 	 * of the HTTP call. {@code THROWS} rethrows the refusal; {@code LENIENT} and {@code LOG} record the warning and only that
 	 * sending is skipped. A refusal that happens while another refusal is being recorded does not reach the handler: it is
-	 * only logged. A repeatable template skips the "already sent" rule.
+	 * only logged. A refusal chosen by the receiver (suppressed address, bot locked) only skips the channel, with any
+	 * handler: its diagnosis is already in {@code jn_message_did_not_sent}. A repeatable template skips the "already sent"
+	 * rule.
 	 * @param unionAll the search result
 	 * @param idToSearch the keys of the channel
 	 * @param index the position of the channel
@@ -161,6 +163,12 @@ public class JnSendMessageToUser implements CcpBusiness{
 			}
 			return false;
 		} catch (JnMustNotSendMessage.MessageDidNotSend refusal) {
+
+			boolean refusalChosenByTheReceiver = refusal.rule.refusalChosenByTheReceiver;
+
+			if(refusalChosenByTheReceiver) {
+				return true;
+			}
 
 			boolean mustThrow = messenger.exceptionHandler == JnMessageSenderExceptionHandler.THROWS;
 

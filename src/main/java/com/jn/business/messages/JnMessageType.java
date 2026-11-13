@@ -55,7 +55,10 @@ public enum JnMessageType implements CcpHttpApiExecutor{
 			String providerToken =  JnSystemProperties.INSTANCE.tokenEmailValue();
 			String templateId = json.getAsString(JnJsonCommonsFields.templateId);
 			String sender = json.getAsString(JnJsonCommonsFields.sender);
-			String subject = json.getAsString(JnJsonCommonsFields.subject);
+			CcpStringDecorator subjectDecorator = json.getAsStringDecorator(JnJsonCommonsFields.subject);
+			var subjectTemplate = subjectDecorator.text();
+			var resolvedSubject = subjectTemplate.resolveTemplate(json);
+			String subject = resolvedSubject.content;
 			CcpStringDecorator messageDecorator = json.getAsStringDecorator(JnJsonCommonsFields.message);
 			var messageTemplate = messageDecorator.text();
 			var resolvedMessage = messageTemplate.resolveTemplate(json);
@@ -64,8 +67,9 @@ public enum JnMessageType implements CcpHttpApiExecutor{
 			String[] recipients = json.getAsStringArray(JnJsonCommonsFields.email, CcpJsonCommonsFields.emails);
 			CcpJsonRepresentation emailHeaders = json.getInnerJson(JnJsonCommonsFields.emailHeaders);
 			emailSender.sendSimpleTextEmailMessage(providerToken, providerUrl, templateId, sender, subject, message, contentType, emailHeaders, recipients);
-			JnEntityEmailMessageSent.ENTITY.save(json);
-			return json;
+			CcpJsonRepresentation jsonWithResolvedSubject = json.put(JnJsonCommonsFields.subject, subject);
+			JnEntityEmailMessageSent.ENTITY.save(jsonWithResolvedSubject);
+			return jsonWithResolvedSubject;
 		}
 
 		/**

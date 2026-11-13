@@ -35,7 +35,7 @@ public final class JnGroupers {
 	/** The scripts run over a group, and their parameters. */
 	enum Scripts implements CcpJsonFieldName {
 		/**
-		 * The default count of the children, part of every script but {@code incrementCounter}: the size of the
+		 * The default count of the children, part of every script but {@code incrementCounter} and {@code addToCounters}: the size of the
 		 * {@code child} list.
 		 */
 		childCountIsTheSizeOfChild {
@@ -145,12 +145,52 @@ public final class JnGroupers {
 						+ "ctx._source.parentJson = params.parentJson;";
 			}
 		},
+		/**
+		 * Adds to the counters of the only child of the group, a JSON text of counters ({@code {"key":count,...}}), the
+		 * deltas of {@code counterDeltas} (key: amount, positive or negative): a key whose counter reaches 0 leaves the
+		 * text, {@code childCount} is the number of keys, and the group left with no key is deleted (a group that did not
+		 * exist and gets no key is not created). Painless does not parse JSON, so the text is read as text: each key is
+		 * between quotes (a key holds no quote) and its counter is the digits after {@code "key":}.
+		 */
+		addToCounters {
+			public String getValue() {
+				return "String counters = ctx._source.child[0]; "
+						+ "Map countByKey = new LinkedHashMap(); "
+						+ "int keyStart = counters.indexOf('\"'); "
+						+ "while (keyStart >= 0) { "
+						+ "int keyEnd = counters.indexOf('\"', keyStart + 1); "
+						+ "int countStart = keyEnd + 2; "
+						+ "int countEnd = countStart; "
+						+ "while (countEnd < counters.length() && Character.isDigit(counters.charAt(countEnd))) { countEnd++; } "
+						+ "countByKey.put(counters.substring(keyStart + 1, keyEnd), Integer.parseInt(counters.substring(countStart, countEnd))); "
+						+ "keyStart = counters.indexOf('\"', countEnd); } "
+						+ "for (def delta : params.counterDeltas.entrySet()) { "
+						+ "int count = countByKey.containsKey(delta.getKey()) ? countByKey.get(delta.getKey()) : 0; "
+						// the parameters arrive through JSON, where a number may come as 1.0
+						+ "count = count + ((Number) delta.getValue()).intValue(); "
+						+ "if (count > 0) { countByKey.put(delta.getKey(), count); } "
+						+ "else { countByKey.remove(delta.getKey()); } } "
+						+ "if (countByKey.isEmpty()) { "
+						+ "if (ctx._source.childCount == 0) { ctx.op = 'none'; } else { ctx.op = 'delete'; } } "
+						+ "else { "
+						+ "StringBuilder newCounters = new StringBuilder('{'); "
+						+ "for (def counter : countByKey.entrySet()) { "
+						+ "if (newCounters.length() > 1) { newCounters.append(','); } "
+						+ "newCounters.append('\"').append(counter.getKey()).append('\":').append(counter.getValue()); } "
+						+ "newCounters.append('}'); "
+						+ "ctx._source.child[0] = newCounters.toString(); "
+						+ "ctx._source.childCount = countByKey.size(); "
+						+ "ctx._source.parentJson = params.parentJson; }";
+			}
+		},
 		/** Parameter: the id of the child being added or removed. */
 		childId,
 		/** Parameter: the ids of the children being added or removed. */
 		childIds,
 		/** Parameter: the key of the counter being incremented. */
 		counterKey,
+		/** Parameter: the amount added to the counter of each key (negative to subtract). */
+		counterDeltas,
 		/** Parameter: the most children a history keeps. */
 		maxChildren,
 		/** Parameter: the texts that only the children of the same record contain. */
@@ -421,6 +461,23 @@ public final class JnGroupers {
 		Set<String> parentIdsSet = parents.keySet();
 		List<String> parentIds = new ArrayList<>(parentIdsSet);
 		JnGroupersIncrementCounterItem itemOfTheParent = new JnGroupersIncrementCounterItem(grouper, parentName, childName, counterKeyParams, parents);
+		writeGroups(parentIds, itemOfTheParent);
+	}
+
+	/**
+	 * Adds to the counters of the group of counters of each parent its own deltas (positive or negative); a key whose
+	 * counter reaches 0 leaves the group, a group left with no key is deleted, and a group that does not exist yet is
+	 * created only when some key ends above 0.
+	 * @param grouper the side of the grouper (main or twin)
+	 * @param parentName the kind of group
+	 * @param childName the name of the entity of the counted records
+	 * @param deltasByParentId the amount added to the counter of each key, by parent id
+	 * @param parents the values of each parent, by parent id
+	 */
+	public static void addToCounters(CcpEntity grouper, String parentName, String childName, Map<String, CcpJsonRepresentation> deltasByParentId, Map<String, CcpJsonRepresentation> parents) {
+		Set<String> parentIdsSet = deltasByParentId.keySet();
+		List<String> parentIds = new ArrayList<>(parentIdsSet);
+		JnGroupersAddToCountersItem itemOfTheParent = new JnGroupersAddToCountersItem(grouper, parentName, childName, deltasByParentId, parents);
 		writeGroups(parentIds, itemOfTheParent);
 	}
 

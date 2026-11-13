@@ -87,6 +87,13 @@ public enum JnJsonCommonsFields implements CcpJsonFieldName{
 	@CcpJsonFieldTypeNumberUnsigned
 	timestamp, 
 	
+	/**
+	 * The {@code insertionDate} field: text, the moment the record was inserted ({@code dd/MM/yyyy HH:mm:ss}), kept by
+	 * the decorator of {@code @CcpEntityInsertionDate}.
+	 */
+	@CcpJsonFieldTypeString(exactLength = 19)
+	insertionDate,
+	
 	/** The {@code date} field: text. */
 	@CcpJsonFieldTypeString(exactLength = 23)
 	date,
@@ -122,7 +129,7 @@ public enum JnJsonCommonsFields implements CcpJsonFieldName{
 	email, 
 
 	/** The {@code subject} field: text. */
-	@CcpJsonFieldTypeString(maxLength = 100)
+	@CcpJsonFieldTypeString(maxLength = 250)
 	subject, 
 	
 	/**
