@@ -2,8 +2,6 @@ package com.jn.business.session;
 
 import com.ccp.business.CcpBusiness;
 import com.ccp.decorators.CcpJsonRepresentation;
-import com.ccp.decorators.CcpReflectionConstructorDecorator;
-import com.ccp.decorators.CcpStringDecorator;
 import com.jn.entities.JnEntitySessionValidator;
 import com.jn.entities.JnSessionValidatorNames;
 
@@ -24,12 +22,7 @@ public class JnBusinessValidateSession implements CcpBusiness {
 	 * @return what the seeded validator answers
 	 */
 	public CcpJsonRepresentation apply(CcpJsonRepresentation json) {
-		CcpJsonRepresentation key = JnEntitySessionValidator.getKey(JnSessionValidatorNames.userSession);
-		CcpJsonRepresentation validator = JnEntitySessionValidator.ENTITY.getOneById(key);
-		String businessName = validator.getAsString(JnEntitySessionValidator.Fields.business);
-		CcpStringDecorator businessNameDecorator = new CcpStringDecorator(businessName);
-		CcpReflectionConstructorDecorator reflection = businessNameDecorator.reflection();
-		CcpBusiness business = reflection.newInstance();
+		CcpBusiness business = JnEntitySessionValidator.getValidator(JnSessionValidatorNames.userSession);
 		CcpJsonRepresentation validated = business.execute(json);
 		return validated;
 	}

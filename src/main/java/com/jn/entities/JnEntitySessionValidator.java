@@ -6,6 +6,8 @@ import com.ccp.business.CcpBusiness;
 import com.ccp.constants.CcpOtherConstants;
 import com.ccp.decorators.CcpJsonFieldName;
 import com.ccp.decorators.CcpJsonRepresentation;
+import com.ccp.decorators.CcpReflectionConstructorDecorator;
+import com.ccp.decorators.CcpStringDecorator;
 import com.ccp.especifications.db.bulk.CcpBulkEntityOperationType;
 import com.ccp.especifications.db.bulk.CcpBulkItem;
 import com.ccp.especifications.db.utils.entity.CcpEntity;
@@ -81,5 +83,21 @@ public class JnEntitySessionValidator implements CcpEntityConfigurator {
 		CcpJsonRepresentation validator = key.put(Fields.business, businessName);
 		List<CcpBulkItem> seeds = ENTITY.toBulkItems(validator, CcpBulkEntityOperationType.create);
 		return seeds;
+	}
+
+	/**
+	 * The business seeded for the validator, instantiated by its class name: the caller runs it without importing the
+	 * cost center that seeded it.
+	 * @param validatorName the name of the validator
+	 * @return the business
+	 */
+	public static CcpBusiness getValidator(JnSessionValidatorNames validatorName) {
+		CcpJsonRepresentation key = getKey(validatorName);
+		CcpJsonRepresentation validator = ENTITY.getOneById(key);
+		String businessName = validator.getAsString(Fields.business);
+		CcpStringDecorator businessNameDecorator = new CcpStringDecorator(businessName);
+		CcpReflectionConstructorDecorator reflection = businessNameDecorator.reflection();
+		CcpBusiness business = reflection.newInstance();
+		return business;
 	}
 }
