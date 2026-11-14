@@ -295,6 +295,26 @@ public final class JnGroupers {
 	}
 
 	/**
+	 * The children of groups of any kinds (each key with its own parent name and child name), read by id on the main side
+	 * of the grouper in a single round trip.
+	 * @param groupKeys the keys of the groups (see {@link #getGroupKey})
+	 * @return the children of each group, in the order of the keys; empty for a group that does not exist
+	 */
+	public static List<List<String>> getChildrenOfEachGroup(List<CcpJsonRepresentation> groupKeys) {
+		CcpEntityMetaData grouperDetails = JnEntityGrouper.ENTITY.getEntityMetaData();
+		CcpJsonRepresentation groupsById = grouperDetails.getMultipleByIds(groupKeys);
+		List<List<String>> childrenOfEachGroup = new ArrayList<>();
+		for (CcpJsonRepresentation groupKey : groupKeys) {
+			String groupId = JnEntityGrouper.ENTITY.calculateId(groupKey);
+			CcpFieldName groupIdFieldName = new CcpFieldName(groupId);
+			CcpJsonRepresentation group = groupsById.getInnerJson(groupIdFieldName);
+			List<String> children = group.getAsStringList(JnEntityGrouper.Fields.child);
+			childrenOfEachGroup.add(children);
+		}
+		return childrenOfEachGroup;
+	}
+
+	/**
 	 * The bulk items that create, on the main side of the grouper, whole groups whose children are already known (a seed
 	 * written by bulk, which the decorator of {@code @CcpEntityGrouperChild} does not see). One item per group, since a
 	 * bulk keeps a single item per document: adding the children one by one in the same bulk would keep only the last.
