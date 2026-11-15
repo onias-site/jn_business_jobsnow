@@ -14,8 +14,9 @@ import com.ccp.especifications.db.utils.entity.decorators.interfaces.CcpEntityCo
  * as {@link JnGrouperChildCounterEntityBeforeWrite} does, but finds its previous write on either side of a twin entity:
  * the record stored on the main side or, when it is only on the twin side (deactivated), the one stored there. So a
  * record brought back from the twin is not counted again in the parents it was already in. Made for the views of the
- * resumes ({@code vis_viewed_resume}, the screen "Quem me viu"): a recruiter who views again, in the same month, a resume
- * whose view went to the twin is the same recruiter, counted once per month (until 2026-11-14 it counted again).
+ * resumes ({@code vis_viewed_resume}): in the screen "Quem me viu", a recruiter who views again, in the same month, a
+ * resume whose view went to the twin is the same recruiter, counted once per month; in the chart of the companies that
+ * view the most resumes (screen Curiosities), the same view is not counted twice (until 2026-11-14 both counted again).
  */
 public class JnGrouperChildCounterOnBothSidesEntityBeforeWrite extends JnGrouperChildCounterEntityBeforeWrite {
 
