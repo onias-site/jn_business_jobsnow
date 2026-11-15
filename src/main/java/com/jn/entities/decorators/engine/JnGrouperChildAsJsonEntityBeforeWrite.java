@@ -26,7 +26,8 @@ import com.jn.utils.JnGroupers;
  * read of the grouped entity. It stays in the outer part of the chain (priority 7), before the field transformers, so the
  * child keeps the values as they came (the field transformers still store them transformed in the entity).
  * <ul>
- * <li>save: fills {@code date} with the current date and time ({@code dd/MM/yyyy HH:mm:ss}), saves and then puts, in the
+ * <li>save: fills {@code date} with the current date and time ({@code dd/MM/yyyy HH:mm:ss}), or keeps the one the caller
+ * gave (an edit that must not change the period of the groups, since 2026-11-15), saves and then puts, in the
  * groups of its parents, the record without the fields its parents come from and with that date, in place of the earlier
  * version of the same record (the children that contain the primary key fields that do not come from the parents);</li>
  * <li>delete and deleteAnyWhere of an entity without twin: the groups are a history and are left as they are;</li>
@@ -71,15 +72,17 @@ public class JnGrouperChildAsJsonEntityBeforeWrite extends JnGrouperChildEntityO
 	 */
 	public boolean save(CcpJsonRepresentation json) {
 		this.removeFromTheGroupsOfTheOtherSide(json);
+		// a date given by the caller is kept (an edit of the record that is not a new write of it, since 2026-11-15)
+		Long momentOfTheWrite = getMomentOfTheWrite(json);
 		String dateFormat = Constants.DATE_FORMAT.getValue();
-		CcpTimeDecorator now = new CcpTimeDecorator();
-		String currentDate = now.getFormattedDateTime(dateFormat);
-		CcpJsonRepresentation jsonWithDate = json.put(JnJsonCommonsFields.date, currentDate);
+		CcpTimeDecorator moment = new CcpTimeDecorator(momentOfTheWrite);
+		String dateOfTheWrite = moment.getFormattedDateTime(dateFormat);
+		CcpJsonRepresentation jsonWithDate = json.put(JnJsonCommonsFields.date, dateOfTheWrite);
 		List<JnEntityGrouperParents> allParents = this.getAllParents();
 		Map<JnEntityGrouperParents, Map<String, CcpJsonRepresentation>> recordParentsByKind = new LinkedHashMap<>();
 		CcpJsonRepresentation jsonWithParentIds = jsonWithDate;
 		for (JnEntityGrouperParents parents : allParents) {
-			Map<String, CcpJsonRepresentation> recordParents = parents.getParentsFromRawRecord(jsonWithDate);
+			Map<String, CcpJsonRepresentation> recordParents = parents.getParentsFromRawRecordAtTheMoment(jsonWithDate, momentOfTheWrite);
 			recordParentsByKind.put(parents, recordParents);
 			jsonWithParentIds = parents.putParentIds(jsonWithParentIds, recordParents);
 		}
