@@ -1,5 +1,7 @@
 package com.jn.entities;
 
+import com.jn.entities.decorators.engine.JnAsyncWriterEntity;
+import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityAsyncWriter;
 import com.ccp.constants.CcpOtherConstants;
 import com.ccp.decorators.CcpJsonFieldName;
 import com.ccp.decorators.CcpJsonRepresentation;
@@ -38,6 +40,7 @@ import com.jn.json.fields.validation.JnTicketQuotaGroups;
  * through the entity or restart the APIs.
  */
 @CcpEntityCache(3600)
+@CcpEntityAsyncWriter(JnAsyncWriterEntity.class)
 @CcpEntityDisposable(value = JnDisposableEntity.class, timeOption = CcpEntityExpurgableOptions.daily)
 @CcpEntityFieldsTransformer(JnJsonTransformersFieldsEntityDefault.class)
 @CcpEntityFieldsValidator(JnEntityTicketDailyLimit.Fields.class)
