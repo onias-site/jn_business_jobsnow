@@ -24,7 +24,9 @@ import com.jn.utils.JnGroupers;
  * <ul>
  * <li>save: reads the stored record, saves and then counts the record in its new parents. The parents of the previous
  * write are calculated from the stored record with its primary key as it came (the key is the same, and only the input
- * has it readable);</li>
+ * has it readable). Only the stored record on the side of this decorator is read: a record brought back from the twin
+ * counts again (a ticket opened again is a new ticket); {@link JnGrouperChildCounterOnBothSidesEntityBeforeWrite} also
+ * reads the twin side, so a record brought back from it does not count again;</li>
  * <li>delete and deleteAnyWhere: the counters are a history and are left as they are.</li>
  * </ul>
  * The groups are always on the main side of the grouper. Two records counted in the same group at the same moment both
@@ -76,20 +78,31 @@ public class JnGrouperChildCounterEntityBeforeWrite extends CcpEntityDelegator {
 	 * @return the previous version, empty when the record was never written
 	 */
 	private CcpJsonRepresentation getPreviousVersion(CcpJsonRepresentation json) {
-		CcpJsonRepresentation jsonWithHandledPrimaryKey = this.entity.getJsonWithHandledPrimaryKey(json);
-		CcpEntityMetaData entityDetails = this.getEntityMetaData();
-		// the transformers also keep the original values: only the transformed ones calculate the id
-		CcpJsonRepresentation recordKey = entityDetails.getOnlyExistingFields(jsonWithHandledPrimaryKey);
-		CcpJsonRepresentation storedRecord = entityDetails.getOneByIdOrHandleItIfThisIdWasNotFound(recordKey, notFound -> CcpOtherConstants.EMPTY_JSON);
+		CcpJsonRepresentation storedRecord = this.getStoredRecord(json);
 		boolean neverWritten = storedRecord.isEmpty();
 
 		if(neverWritten) {
 			return storedRecord;
 		}
 
+		CcpEntityMetaData entityDetails = this.getEntityMetaData();
 		CcpJsonRepresentation rawPrimaryKey = json.getJsonPiece(entityDetails.primaryKeyNames);
 		CcpJsonRepresentation previousVersion = storedRecord.mergeWithAnotherJson(rawPrimaryKey);
 		return previousVersion;
+	}
+
+	/**
+	 * The record as stored on the side of this decorator, read by id straight from the database (no cache).
+	 * @param json the record (at least its key, not transformed yet)
+	 * @return the stored record, empty when it is not there
+	 */
+	protected CcpJsonRepresentation getStoredRecord(CcpJsonRepresentation json) {
+		CcpJsonRepresentation jsonWithHandledPrimaryKey = this.entity.getJsonWithHandledPrimaryKey(json);
+		CcpEntityMetaData entityDetails = this.getEntityMetaData();
+		// the transformers also keep the original values: only the transformed ones calculate the id
+		CcpJsonRepresentation recordKey = entityDetails.getOnlyExistingFields(jsonWithHandledPrimaryKey);
+		CcpJsonRepresentation storedRecord = entityDetails.getOneByIdOrHandleItIfThisIdWasNotFound(recordKey, notFound -> CcpOtherConstants.EMPTY_JSON);
+		return storedRecord;
 	}
 
 	/**
