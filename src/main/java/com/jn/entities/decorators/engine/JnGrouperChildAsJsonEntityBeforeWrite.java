@@ -29,11 +29,17 @@ import com.jn.utils.JnGroupers;
  * <li>save: fills {@code date} with the current date and time ({@code dd/MM/yyyy HH:mm:ss}), saves and then puts, in the
  * groups of its parents, the record without the fields its parents come from and with that date, in place of the earlier
  * version of the same record (the children that contain the primary key fields that do not come from the parents);</li>
- * <li>delete and deleteAnyWhere: the groups are a history and are left as they are.</li>
+ * <li>delete and deleteAnyWhere of an entity without twin: the groups are a history and are left as they are;</li>
+ * <li>in a twin entity (since 2026-11-15) the groups follow the sides of the entity: the delete moves the child from the
+ * groups of the side it leaves to the groups of the side it goes to (the main records in {@code jn_grouper}, the twin ones
+ * in {@code jn_inactive_grouper}), the save takes it out of the groups of the other side, and the deleteAnyWhere takes it
+ * out of the groups of both sides. A child moved keeps its {@code date} and stays in the groups of the period of that
+ * date (the month of the view, for a disposable parent), with the fields the delete brought (a comment, for one).</li>
  * </ul>
  * The parents are calculated from the record as it came, the primary key of each one transformed as the entity of the
- * parent ids does it (the e-mail becomes its SHA-1, for one); the groups are always on the main side of the grouper. Its
- * {@code afterDecoratorClass} is {@code JnGrouperChildAsJsonEntityAfterWrite}, which does nothing.
+ * parent ids does it (the e-mail becomes its SHA-1, for one), so the delete, like the save, expects the primary key as it
+ * came (the LinkedIn address, not its hash). Its {@code afterDecoratorClass} is
+ * {@code JnGrouperChildAsJsonEntityAfterWrite}, which does nothing.
  */
 public class JnGrouperChildAsJsonEntityBeforeWrite extends JnGrouperChildEntityOnWrite {
 
@@ -58,11 +64,13 @@ public class JnGrouperChildAsJsonEntityBeforeWrite extends JnGrouperChildEntityO
 
 	/**
 	 * Saves the record with the date of the write and the ids of its parents of every kind, then puts it, as a JSON text,
-	 * in the groups of each kind in place of its earlier version.
+	 * in the groups of each kind in place of its earlier version; in a twin entity the record first leaves the groups of the
+	 * other side, as it leaves that side of the entity.
 	 * @param json the record, its fields not transformed yet
 	 * @return whether the record was inserted
 	 */
 	public boolean save(CcpJsonRepresentation json) {
+		this.removeFromTheGroupsOfTheOtherSide(json);
 		String dateFormat = Constants.DATE_FORMAT.getValue();
 		CcpTimeDecorator now = new CcpTimeDecorator();
 		String currentDate = now.getFormattedDateTime(dateFormat);
@@ -77,8 +85,9 @@ public class JnGrouperChildAsJsonEntityBeforeWrite extends JnGrouperChildEntityO
 		}
 		boolean inserted = this.entity.save(jsonWithParentIds);
 
-		CcpEntityMetaData entityDetails = this.getEntityMetaData();
-		CcpEntity grouper = JnGroupers.getGrouper(false);
+		String mainEntityName = this.getMainEntityName();
+		boolean twinSide = this.isTwinSide();
+		CcpEntity grouper = JnGroupers.getGrouper(twinSide);
 		for (JnEntityGrouperParents parents : allParents) {
 			Map<String, CcpJsonRepresentation> recordParents = recordParentsByKind.get(parents);
 			Collection<CcpJsonRepresentation> parentJsons = recordParents.values();
@@ -87,9 +96,219 @@ public class JnGrouperChildAsJsonEntityBeforeWrite extends JnGrouperChildEntityO
 			String child = childRecord.asUgglyJson();
 			List<String> childKeys = this.getChildKeys(jsonWithDate, parentFields);
 			String parentName = parents.getParentName();
-			JnGroupers.replaceChild(grouper, parentName, entityDetails.entityName, childKeys, child, recordParents);
+			JnGroupers.replaceChild(grouper, parentName, mainEntityName, childKeys, child, recordParents);
 		}
 		return inserted;
+	}
+
+	/**
+	 * Deletes; in a twin entity the record changes sides (the deactivation on the main side, the reactivation on the twin
+	 * side), and its child goes, with it, from the groups of the side it leaves to the groups of the side it goes to.
+	 * @param json the record (at least its primary key, as it came)
+	 * @return whether the record existed
+	 */
+	public boolean delete(CcpJsonRepresentation json) {
+		boolean noSides = false == this.hasTwin();
+
+		if(noSides) {
+			return this.entity.delete(json);
+		}
+
+		boolean fromTwinSide = this.isTwinSide();
+		CcpEntity sideLeft = this.getSideEntity(fromTwinSide);
+		boolean notStored = false == sideLeft.exists(json);
+
+		if(notStored) {
+			return this.entity.delete(json);
+		}
+
+		CcpJsonRepresentation storedRecord = sideLeft.getOneById(json);
+		boolean deleted = this.entity.delete(json);
+		this.moveBetweenTheGroups(fromTwinSide, json, storedRecord);
+		return deleted;
+	}
+
+	/**
+	 * Moves the child of the record from the groups of the side it left to the groups of the side it went to, in the period
+	 * of its {@code date}: the child as the groups of the side left kept it, with the fields the delete brought (a comment,
+	 * for one); when those groups do not have it, the child is built from the stored record.
+	 * @param fromTwinSide whether the record left the twin side
+	 * @param json the record, as the delete brought it
+	 * @param storedRecord the record as it was stored on the side left
+	 */
+	private void moveBetweenTheGroups(boolean fromTwinSide, CcpJsonRepresentation json, CcpJsonRepresentation storedRecord) {
+		Long momentOfTheWrite = getMomentOfTheWrite(storedRecord);
+		boolean toTwinSide = false == fromTwinSide;
+		String mainEntityName = this.getMainEntityName();
+		CcpEntity grouperLeft = JnGroupers.getGrouper(fromTwinSide);
+		CcpEntity grouperReached = JnGroupers.getGrouper(toTwinSide);
+		CcpJsonRepresentation movedRecord = storedRecord.mergeWithAnotherJson(json);
+		List<JnEntityGrouperParents> allParents = this.getAllParents();
+		for (JnEntityGrouperParents parents : allParents) {
+			Map<String, CcpJsonRepresentation> recordParents = parents.getParentsFromRawRecordAtTheMoment(json, momentOfTheWrite);
+			Collection<CcpJsonRepresentation> parentJsons = recordParents.values();
+			Set<String> parentFields = getParentFields(parentJsons);
+			List<String> childKeys = this.getChildKeys(json, parentFields);
+			String parentName = parents.getParentName();
+			Set<String> parentIdsSet = recordParents.keySet();
+			List<String> parentIds = new ArrayList<>(parentIdsSet);
+			CcpJsonRepresentation fieldsOfTheDelete = this.getChildRecord(json, allParents, parentFields);
+			CcpJsonRepresentation childBuiltFromTheRecord = this.getChildRecord(movedRecord, allParents, parentFields);
+			CcpJsonRepresentation keptChild = findTheKeptChild(fromTwinSide, parentName, mainEntityName, parentIds, childKeys, childBuiltFromTheRecord);
+			CcpJsonRepresentation movedChild = keptChild.mergeWithAnotherJson(fieldsOfTheDelete);
+			String child = movedChild.asUgglyJson();
+			JnGroupers.removeChildByKeys(grouperLeft, parentName, mainEntityName, childKeys, parentIds);
+			JnGroupers.replaceChild(grouperReached, parentName, mainEntityName, childKeys, child, recordParents);
+		}
+	}
+
+	/**
+	 * The child of the record as the groups of a side keep it: the first child, among the groups of the parents, that
+	 * contains every text of {@code childKeys}.
+	 * @param twinSide whether the twin side of the grouper is the one read
+	 * @param parentName the kind of group
+	 * @param childName the name of the main entity
+	 * @param parentIds the parent ids
+	 * @param childKeys the texts that only the children of the record contain
+	 * @param childWhenNotKept the child returned when no group keeps it
+	 * @return the child, parsed
+	 */
+	private static CcpJsonRepresentation findTheKeptChild(boolean twinSide, String parentName, String childName, List<String> parentIds, List<String> childKeys, CcpJsonRepresentation childWhenNotKept) {
+		for (String parentId : parentIds) {
+			List<String> children = JnGroupers.getChildren(twinSide, parentName, childName, parentId);
+			for (String child : children) {
+				boolean anotherRecord = false == containsEveryKey(child, childKeys);
+
+				if(anotherRecord) {
+					continue;
+				}
+
+				return new CcpJsonRepresentation(child);
+			}
+		}
+		return childWhenNotKept;
+	}
+
+	/**
+	 * Whether a child contains every text of {@code childKeys}.
+	 * @param child the child, a JSON text
+	 * @param childKeys the texts
+	 * @return {@code true} when every text is in the child
+	 */
+	private static boolean containsEveryKey(String child, List<String> childKeys) {
+		for (String childKey : childKeys) {
+			boolean missing = false == child.contains(childKey);
+
+			if(missing) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * Deletes from both sides; in a twin entity the child leaves the groups of the sides where the record is stored.
+	 * @param json the record (at least its primary key, as it came)
+	 * @return whether the record existed
+	 */
+	public boolean deleteAnyWhere(CcpJsonRepresentation json) {
+		boolean noSides = false == this.hasTwin();
+
+		if(noSides) {
+			return this.entity.deleteAnyWhere(json);
+		}
+
+		this.removeFromTheGroupsOfTheSide(false, json);
+		this.removeFromTheGroupsOfTheSide(true, json);
+		boolean deleted = this.entity.deleteAnyWhere(json);
+		return deleted;
+	}
+
+	/**
+	 * In a twin entity, takes the child of the record out of the groups of the side opposite to this one, when the record
+	 * is stored there (the save writes on its side and deletes from the other one).
+	 * @param json the record, as it came
+	 */
+	private void removeFromTheGroupsOfTheOtherSide(CcpJsonRepresentation json) {
+		boolean noSides = false == this.hasTwin();
+
+		if(noSides) {
+			return;
+		}
+
+		boolean twinSide = this.isTwinSide();
+		boolean otherSide = false == twinSide;
+		this.removeFromTheGroupsOfTheSide(otherSide, json);
+	}
+
+	/**
+	 * Takes the child of the record out of the groups of a side, when the record is stored on that side of the entity: the
+	 * groups of the period of its {@code date}.
+	 * @param twinSide whether the twin side is the one checked
+	 * @param json the record, as it came
+	 */
+	private void removeFromTheGroupsOfTheSide(boolean twinSide, CcpJsonRepresentation json) {
+		CcpEntity sideEntity = this.getSideEntity(twinSide);
+		boolean notStored = false == sideEntity.exists(json);
+
+		if(notStored) {
+			return;
+		}
+
+		CcpJsonRepresentation storedRecord = sideEntity.getOneById(json);
+		Long momentOfTheWrite = getMomentOfTheWrite(storedRecord);
+		this.removeFromTheGroups(twinSide, json, momentOfTheWrite);
+	}
+
+	/**
+	 * Takes the child of the record out of the groups of every kind, on a side of the grouper, in the period of a moment.
+	 * @param twinSide whether the twin side of the grouper is the one written
+	 * @param json the record, as it came
+	 * @param momentOfTheWrite the moment of the last save of the record
+	 */
+	private void removeFromTheGroups(boolean twinSide, CcpJsonRepresentation json, Long momentOfTheWrite) {
+		String mainEntityName = this.getMainEntityName();
+		CcpEntity grouper = JnGroupers.getGrouper(twinSide);
+		List<JnEntityGrouperParents> allParents = this.getAllParents();
+		for (JnEntityGrouperParents parents : allParents) {
+			Map<String, CcpJsonRepresentation> recordParents = parents.getParentsFromRawRecordAtTheMoment(json, momentOfTheWrite);
+			Collection<CcpJsonRepresentation> parentJsons = recordParents.values();
+			Set<String> parentFields = getParentFields(parentJsons);
+			List<String> childKeys = this.getChildKeys(json, parentFields);
+			Set<String> parentIdsSet = recordParents.keySet();
+			List<String> parentIds = new ArrayList<>(parentIdsSet);
+			String parentName = parents.getParentName();
+			JnGroupers.removeChildByKeys(grouper, parentName, mainEntityName, childKeys, parentIds);
+		}
+	}
+
+	/**
+	 * The moment of the last save of a stored record, read from its {@code date}; the current moment when it has none.
+	 * @param storedRecord the record as it is stored
+	 * @return the moment, in milliseconds
+	 */
+	private static Long getMomentOfTheWrite(CcpJsonRepresentation storedRecord) {
+		boolean noDate = false == storedRecord.containsAllFields(JnJsonCommonsFields.date);
+
+		if(noDate) {
+			CcpTimeDecorator now = new CcpTimeDecorator();
+			return now.getContent();
+		}
+
+		String date = storedRecord.getAsString(JnJsonCommonsFields.date);
+		String dateFormat = Constants.DATE_FORMAT.getValue();
+		CcpTimeDecorator momentOfTheWrite = new CcpTimeDecorator(date, dateFormat);
+		return momentOfTheWrite.getContent();
+	}
+
+	/**
+	 * The name of the main entity: the child name of the groups on both sides.
+	 * @return the entity name
+	 */
+	private String getMainEntityName() {
+		CcpEntity mainEntity = this.getSideEntity(false);
+		CcpEntityMetaData mainDetails = mainEntity.getEntityMetaData();
+		return mainDetails.entityName;
 	}
 
 	/**

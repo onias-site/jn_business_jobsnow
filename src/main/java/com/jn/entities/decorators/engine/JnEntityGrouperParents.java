@@ -2,6 +2,7 @@ package com.jn.entities.decorators.engine;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,7 +18,10 @@ import com.ccp.especifications.db.utils.entity.CcpEntity;
 import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityFactory;
 import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityMetaData;
 import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidatorArray;
+import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityDisposable;
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityGrouperChild;
+import com.ccp.especifications.db.utils.entity.decorators.enums.CcpEntityExpurgableOptions;
+import com.jn.json.fields.validation.JnJsonCommonsFields;
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityGrouperChildCounter;
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpEntityGrouperParentCombinations;
 import com.ccp.especifications.db.utils.entity.decorators.annotations.CcpStoredParentIdsField;
@@ -332,6 +336,37 @@ public class JnEntityGrouperParents {
 			parentJsonByParentId.put(parentId, parentJson);
 		}
 		return parentJsonByParentId;
+	}
+
+	/**
+	 * The parents of a record that did not go through the field transformers yet, as they were at a given moment: the id
+	 * of a parent whose entity is disposable ({@code @CcpEntityDisposable}) is the one of the period of that moment (as
+	 * {@code disposablePeriod} asks); any other parent has the id {@link #getParentsFromRawRecord} gives.
+	 * @param rawRecord the record as it came, its fields not transformed
+	 * @param moment the moment, in milliseconds
+	 * @return the combination of each parent, by parent id
+	 */
+	public Map<String, CcpJsonRepresentation> getParentsFromRawRecordAtTheMoment(CcpJsonRepresentation rawRecord, Long moment) {
+		Map<String, CcpJsonRepresentation> currentParents = this.getParentsFromRawRecord(rawRecord);
+		CcpEntityMetaData parentIdEntityDetails = this.parentIdEntity.getEntityMetaData();
+		Class<?> parentClass = parentIdEntityDetails.configurationClass;
+		boolean notDisposable = false == parentClass.isAnnotationPresent(CcpEntityDisposable.class);
+
+		if(notDisposable) {
+			return currentParents;
+		}
+
+		CcpEntityDisposable disposable = parentClass.getAnnotation(CcpEntityDisposable.class);
+		CcpEntityExpurgableOptions timeOption = disposable.timeOption();
+		String period = timeOption.getFormattedDate(moment);
+		Map<String, CcpJsonRepresentation> parentsAtTheMoment = new LinkedHashMap<>();
+		Collection<CcpJsonRepresentation> parentJsons = currentParents.values();
+		for (CcpJsonRepresentation parentJson : parentJsons) {
+			CcpJsonRepresentation parentJsonInThePeriod = parentJson.put(JnJsonCommonsFields.disposablePeriod, period);
+			String parentId = this.parentIdEntity.calculateId(parentJsonInThePeriod);
+			parentsAtTheMoment.put(parentId, parentJson);
+		}
+		return parentsAtTheMoment;
 	}
 
 	/**
