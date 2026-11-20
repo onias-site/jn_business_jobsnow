@@ -1,11 +1,9 @@
 package com.jn.entities.decorators.engine;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+
 import com.ccp.business.CcpBusiness;
 import com.ccp.constants.CcpOtherConstants;
 import com.ccp.decorators.CcpJsonRepresentation;
@@ -17,17 +15,20 @@ import com.ccp.especifications.db.utils.entity.decorators.engine.CcpDefaultEntit
 import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityMetaData;
 import com.ccp.especifications.db.utils.entity.decorators.enums.CcpEntityExpurgableOptions;
 import com.jn.db.bulk.JnExecuteBulkOperation;
-import com.jn.entities.JnEntityVersionable;
-import com.jn.utils.JnDeleteKeysFromCache;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
+import com.jn.utils.JnDeleteKeysFromCache;
+import com.jn.utils.JnVersionableHistory;
 
 /**
- * Versioning decorator ({@code @CcpEntityVersionable}): every bulk write of the record also creates a history row in
- * {@code jn_versionable} with the state of the record before the write (the stored record, or the given fields when it
- * does not exist yet), the operation, the date and time, the entity name and the serialized primary key.
+ * Versioning decorator ({@code @CcpEntityVersionable}): every bulk write of the record also adds a version at the end of
+ * the history of the record, a group of {@code jn_grouper} ({@link JnVersionableHistory}), in the same bulk: the state of
+ * the record before the write (the stored record, or the given fields when it does not exist yet), the operation and the
+ * date and time. Until 2026-11-20 each version was a row of its own in {@code jn_versionable}, found only by a query.
+ * <p>
+ * A bulk keeps a single item per document, so two writes of the same record in the same bulk leave only one version.
  */
 public class JnVersionableEntity extends CcpDefaultEntityDelegator<Object>{
-	
+
 	/**
 	 * Wraps the entity.
 	 * @param entity the entity decorated so far
@@ -37,23 +38,8 @@ public class JnVersionableEntity extends CcpDefaultEntityDelegator<Object>{
 	}
 
 	/**
-	 * Builds the {@code create} bulk item of the history row.
-	 * @param json the record
-	 * @param operation the bulk operation being recorded
-	 * @return the bulk item of the history row
-	 */
-	private final CcpBulkItem getVersionableToBulkOperationToBulkOperation(CcpJsonRepresentation json, CcpBulkEntityOperationType operation) {
-		
-		CcpJsonRepresentation versionable = this.getVersionableRecord(json, operation);
-		String historyRecordId = JnEntityVersionable.ENTITY.calculateId(versionable);
-		CcpBulkItem historyBulkItem = new CcpBulkItem(versionable, CcpBulkEntityOperationType.create, JnEntityVersionable.ENTITY, historyRecordId);
-				
-		return historyBulkItem;
-	}
-
-	/**
-	 * Returns the record that will be pictured in the history row: the one saved in the database when
-	 * it exists, or the entity fields present in the json when it does not exist yet.
+	 * Returns the record that will be pictured in the version: the one saved in the database when it exists, or the
+	 * entity fields present in the json when it does not exist yet.
 	 */
 	private static CcpJsonRepresentation getRecordToAudit(CcpEntityMetaData entityDetails, CcpJsonRepresentation json) {
 
@@ -65,67 +51,59 @@ public class JnVersionableEntity extends CcpDefaultEntityDelegator<Object>{
 	}
 
 	/**
-	 * Computes the value saved in the {@code id} field of the history row: the record's serialized
-	 * primary key. It is by this value, together with the entity name, that a record's history is found.
+	 * The values of the primary key of the record.
+	 * @param entityDetails the metadata of the entity
+	 * @param recordToAudit the record
+	 * @return the primary key values
 	 */
-	private static String getVersionableRecordId(CcpEntityMetaData entityDetails, CcpJsonRepresentation recordToAudit) {
-
+	private static CcpJsonRepresentation getPrimaryKey(CcpEntityMetaData entityDetails, CcpJsonRepresentation recordToAudit) {
 		Supplier<CcpJsonRepresentation> jsonSupplier = recordToAudit.getJsonSupplier();
 		CcpJsonRepresentation primaryKeyValues = entityDetails.getPrimaryKeyValues(jsonSupplier);
-
-		String id = primaryKeyValues.asUgglyJson();
-
-		return id;
+		return primaryKeyValues;
 	}
 
 	/**
-	 * Builds the history row: {@code id}, {@code json} (the record as text), {@code operation}, {@code date},
-	 * {@code entity} and {@code timestamp}.
+	 * Builds the version: {@code operation}, {@code date}, {@code timestamp} and {@code json} (the record).
+	 * @param recordToAudit the record before the write
+	 * @param operation the bulk operation being recorded
+	 * @return the version
+	 */
+	private static CcpJsonRepresentation getVersion(CcpJsonRepresentation recordToAudit, CcpBulkEntityOperationType operation) {
+		CcpTimeDecorator currentTime = new CcpTimeDecorator();
+		String formattedDateTime = currentTime.getFormattedDateTime(CcpEntityExpurgableOptions.millisecond.format);
+		long currentTimeMillis = System.currentTimeMillis();
+		String operationName = operation.name();
+		CcpJsonRepresentation versionWithOperation = CcpOtherConstants.EMPTY_JSON.put(JnJsonCommonsFields.operation, operationName);
+		CcpJsonRepresentation versionWithDate = versionWithOperation.put(JnJsonCommonsFields.date, formattedDateTime);
+		CcpJsonRepresentation versionWithTimestamp = versionWithDate.put(JnJsonCommonsFields.timestamp, currentTimeMillis);
+		CcpJsonRepresentation version = versionWithTimestamp.put(JnJsonCommonsFields.json, recordToAudit);
+		return version;
+	}
+
+	/**
+	 * Builds the bulk item that adds the version to the history of the record.
 	 * @param json the record
 	 * @param operation the bulk operation being recorded
-	 * @return the history row
+	 * @return the bulk items of the history
 	 */
-	private CcpJsonRepresentation getVersionableRecord(CcpJsonRepresentation json, CcpBulkEntityOperationType operation) {
-
+	private List<CcpBulkItem> getItemsOfTheHistory(CcpJsonRepresentation json, CcpBulkEntityOperationType operation) {
 		CcpEntityMetaData entityDetails = this.entity.getEntityMetaData();
-
 		CcpJsonRepresentation recordToAudit = getRecordToAudit(entityDetails, json);
-
-		String id = getVersionableRecordId(entityDetails, recordToAudit);
-		CcpTimeDecorator currentTime = new CcpTimeDecorator();
-
-		String formattedDateTime = currentTime.getFormattedDateTime(CcpEntityExpurgableOptions.millisecond.format);
-		CcpJsonRepresentation jsonWithId = CcpOtherConstants.EMPTY_JSON
-				.put(JnJsonCommonsFields.id, id);
-				String recordAsText = "" + recordToAudit;
-				CcpJsonRepresentation jsonWithRecord = jsonWithId
-				.put(JnJsonCommonsFields.json, recordAsText);
-				CcpJsonRepresentation jsonWithOperation = jsonWithRecord
-				.put(JnJsonCommonsFields.operation, operation);
-				CcpJsonRepresentation jsonWithDate = jsonWithOperation
-				.put(JnJsonCommonsFields.date, formattedDateTime);
-				CcpJsonRepresentation jsonWithEntity = jsonWithDate
-				.put(JnJsonCommonsFields.entity, entityDetails.entityName);
-				long currentTimeMillis = System.currentTimeMillis();
-
-		CcpJsonRepresentation audit = 
-				jsonWithEntity
-				.put(JnJsonCommonsFields.timestamp, currentTimeMillis)
-		;
-		return audit;
+		CcpJsonRepresentation primaryKey = getPrimaryKey(entityDetails, recordToAudit);
+		String recordId = entityDetails.entity.calculateId(recordToAudit);
+		CcpJsonRepresentation version = getVersion(recordToAudit, operation);
+		List<CcpBulkItem> itemsOfTheHistory = JnVersionableHistory.getItemsToAppendTheVersion(entityDetails.entityName, recordId, primaryKey, version);
+		return itemsOfTheHistory;
 	}
 
-
-
 	/**
-	 * Builds the message consumed by {@code JnBusinessDeleteVersionableRecords}: the {@code id} each
-	 * history row stores and the names under which they may have been saved (main and twin).
+	 * Builds the message consumed by {@code JnBusinessDeleteVersionableRecords}: the document id of the record and the
+	 * names under which its history may have been saved (main and twin).
 	 *
-	 * <p>The one that enqueues the purge is {@code JnVersionablePurgeEntity}, not this decorator: this one
-	 * sits inside the twin, and the twin's {@code deleteAnyWhere} never reaches it. The building lives here
-	 * because it uses the same {@code id} computation as the saving of the history rows — both sides
-	 * must agree, otherwise the purge does not find what was saved. It must be called before the
-	 * deletion: the saved record is read to extract the primary key.
+	 * <p>The one that enqueues the purge is {@code JnVersionablePurgeEntity}, not this decorator: this one sits inside the
+	 * twin, and the twin's {@code deleteAnyWhere} never reaches it. The building lives here because it uses the same id
+	 * of the writes of the history: both sides must agree, otherwise the purge does not find what was saved. It must be
+	 * called before the deletion: the saved record is read to calculate the id.
 	 */
 	static CcpJsonRepresentation getDeletionRequest(CcpEntity entity, CcpJsonRepresentation json) {
 
@@ -133,14 +111,12 @@ public class JnVersionableEntity extends CcpDefaultEntityDelegator<Object>{
 
 		CcpJsonRepresentation recordToDelete = getRecordToAudit(entityDetails, json);
 
-		String versionableRecordId = getVersionableRecordId(entityDetails, recordToDelete);
+		String recordId = entityDetails.entity.calculateId(recordToDelete);
 
-		String[] entitiesToDelete = getEntitiesToDelete(entityDetails);
+		String[] entitiesToDelete = entityDetails.getEntitiesToSelect();
 
-		CcpJsonRepresentation withEntityName = CcpOtherConstants.EMPTY_JSON
-				.put(JnJsonCommonsFields.entity, entityDetails.entityName);
-				CcpJsonRepresentation withRecordId = withEntityName
-				.put(JnJsonCommonsFields.id, versionableRecordId);
+		CcpJsonRepresentation withRecordId = CcpOtherConstants.EMPTY_JSON
+				.put(JnJsonCommonsFields.id, recordId);
 
 		CcpJsonRepresentation deletionRequest = withRecordId
 				.put(JnBusinessDeleteVersionableRecords.JsonFieldNames.entitiesToDelete, entitiesToDelete);
@@ -149,55 +125,7 @@ public class JnVersionableEntity extends CcpDefaultEntityDelegator<Object>{
 	}
 
 	/**
-	 * Lists the tables from which the record itself must be deleted: the main one and the twin, when it exists.
-	 * {@code JnEntityVersionable} is removed from the list because its rows are not found by the document
-	 * id, but by the pair ({@code entity}, {@code id}) — they are deleted by the other criterion of the purge
-	 * query, which {@code JnBusinessDeleteVersionableRecords} itself adds.
-	 */
-	private static String[] getEntitiesToDelete(CcpEntityMetaData entityDetails) {
-
-		CcpEntityMetaData versionableMetaData = JnEntityVersionable.ENTITY.getEntityMetaData();
-
-		String[] entitiesToSelect = entityDetails.getEntitiesToSelect();
-		List<String> allEntities = Arrays.asList(entitiesToSelect);
-		Stream<String> allEntitiesStream = allEntities.stream();
-		var withoutTheHistory = allEntitiesStream.filter(x -> false == x.equals(versionableMetaData.entityName));
-
-		List<String> entitiesToDelete = withoutTheHistory.collect(Collectors.toList());
-		int size = entitiesToDelete.size();
-
-		String[] entitiesToDeleteArray = entitiesToDelete.toArray(new String[size]);
-
-		return entitiesToDeleteArray;
-	}
-	
-	/**
-	 * The associated entities of the wrapped entity plus {@code jn_versionable}.
-	 * @return the associated entities
-	 */
-	public List<CcpEntity> getAssociatedEntities() {
-		List<CcpEntity> associatedEntities = this.entity.getAssociatedEntities();
-		ArrayList<CcpEntity> result = new ArrayList<CcpEntity>(associatedEntities);
-		result.add(JnEntityVersionable.ENTITY);
-		return result;
-	}
-	
-	/**
-	 * Not supported on this decorator, on purpose: finding a record in {@code jn_versionable} needs a query (by
-	 * {@code entity} and {@code id}, ordered by {@code timestamp}), and online reads (the ones coming from the front end)
-	 * are always get by id; queries run only in queue listeners, asynchronous processes or schedulers. Do not "fix" it.
-	 * @param json the record
-	 * @return never returns
-	 * @throws UnsupportedOperationException always
-	 */
-	public CcpJsonRepresentation getOneByIdAnyWhere(CcpJsonRepresentation json) {
-		Object throwException = this.throwException();
-		return (CcpJsonRepresentation)throwException;
-	}
-	
-
-	/**
-	 * The items of the wrapped entity plus the history row.
+	 * The items of the wrapped entity plus the version of the history.
 	 * @param json the record
 	 * @param operation the bulk operation
 	 * @return the bulk items
@@ -205,11 +133,8 @@ public class JnVersionableEntity extends CcpDefaultEntityDelegator<Object>{
 	public List<CcpBulkItem> toBulkItems(CcpJsonRepresentation json, CcpBulkEntityOperationType operation) {
 		List<CcpBulkItem> bulkItems = this.entity.toBulkItems(json, operation);
 		List<CcpBulkItem> bulkItemsWithHistory = new ArrayList<>(bulkItems);
-		
-		CcpBulkItem versionableToBulkOperation = this.getVersionableToBulkOperationToBulkOperation(json, operation);
-		bulkItemsWithHistory.add(versionableToBulkOperation);
+		List<CcpBulkItem> itemsOfTheHistory = this.getItemsOfTheHistory(json, operation);
+		bulkItemsWithHistory.addAll(itemsOfTheHistory);
 		return bulkItemsWithHistory;
 	}
-
-	
 }

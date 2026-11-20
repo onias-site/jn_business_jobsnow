@@ -43,7 +43,7 @@ import com.jn.json.fields.validation.JnGrouperChartsScreens;
  * <ul>
  * <li>index {@code jn_grouper_charts_providers}</li>
  * <li>records cached for 3600 seconds</li>
- * <li>versionable: every write keeps the previous state in {@code jn_versionable}</li>
+ * <li>versionable: every write keeps the previous state in its history ({@code JnVersionableHistory}, in {@code jn_grouper})</li>
  * </ul>
  */
 @CcpEntityCache(3600)

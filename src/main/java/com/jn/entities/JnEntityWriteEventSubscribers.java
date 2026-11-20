@@ -47,7 +47,7 @@ import com.jn.entities.fields.transformers.JnJsonTransformersFieldsEntityDefault
  * <ul>
  * <li>index {@code jn_write_event_subscribers}</li>
  * <li>records cached for 3600 seconds</li>
- * <li>versionable: every write keeps the previous state in {@code jn_versionable}</li>
+ * <li>versionable: every write keeps the previous state in its history ({@code JnVersionableHistory}, in {@code jn_grouper})</li>
  * </ul>
  */
 @CcpEntityCache(3600)

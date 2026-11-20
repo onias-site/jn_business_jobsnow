@@ -42,7 +42,7 @@ import com.jn.json.fields.validation.JnJsonInstantMessengerFields;
  * <ul>
  * <li>index {@code jn_instant_messenger_parameters_to_send}</li>
  * <li>records cached for 3600 seconds</li>
- * <li>versionable: every write keeps the previous state in {@code jn_versionable}</li>
+ * <li>versionable: every write keeps the previous state in its history ({@code JnVersionableHistory}, in {@code jn_grouper})</li>
  * </ul>
  */
 @CcpEntityCache(3600)
