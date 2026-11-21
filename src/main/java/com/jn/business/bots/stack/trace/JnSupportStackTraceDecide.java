@@ -11,8 +11,9 @@ import com.jn.utils.JnLanguage;
 /**
  * Second step of the {@code solveStackTrace} command: the operator tells that the error was solved, closing the ticket
  * ({@code ticketSolved}; the bot deletes it when the session ends), or leaves it open to go to the next ticket
- * ({@code ticketSkipped}, with {@link JnJsonInstantMessengerFields#skipTheTicket}). The record of the error stays, as
- * the history of what happened. Any other answer is asked again ({@code invalidAnswer}).
+ * ({@code ticketSkipped}, with {@link JnJsonInstantMessengerFields#skipTheTicket}). A solved error moves to the twin
+ * {@code jn_jobsnow_error_solved} ({@link JnSupportStackTraceMoveToSolved}), which keeps the history of what happened.
+ * Any other answer is asked again ({@code invalidAnswer}).
  */
 public class JnSupportStackTraceDecide implements CcpBusiness {
 	/** The single instance: the class keeps no state. */
@@ -41,6 +42,7 @@ public class JnSupportStackTraceDecide implements CcpBusiness {
 		boolean solved = solvedAnswer.equals(answer);
 
 		if(solved) {
+			JnSupportStackTraceMoveToSolved.INSTANCE.execute(json);
 			CcpJsonRepresentation jsonWithReply = JnSupportStackTraceConversation.replyAboutTheError(json, JnSupportStackTraceMessages.ticketSolved);
 			return JnSupportStackTraceStatus.ticketSolved.throwException(jsonWithReply);
 		}

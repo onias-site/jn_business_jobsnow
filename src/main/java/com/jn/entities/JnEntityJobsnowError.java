@@ -42,7 +42,7 @@ import com.jn.utils.JnDeleteKeysFromCache;
  * <li>on {@code afterInsertFromMainEntitySendAnInstantMessageAndIfFailsLogTheError} sends {@code JnNotifySupportAboutStackTraceTicket}: an annotation of its own because the messages of one annotation are chained, and the notice would inherit the chat and the text of the ticket; the ticket is recorded before its delivery, so a failure only needs the log</li>
  * <li>written asynchronously, through messaging</li>
  * <li>disposable: records expire by the {@code hourly} granularity, and the documents of the past periods stay, because a ticket may wait longer than that</li>
- * <li>twin entity {@code jn_jobsnow_error_solved}: receives the errors deleted from the main one, the solved ones</li>
+ * <li>twin entity {@code jn_jobsnow_error_solved}: receives the solved errors, moved there by {@code /solveStackTrace}</li>
  * </ul>
  */
 @CcpEntityCache(3600)
