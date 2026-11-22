@@ -139,8 +139,21 @@ public abstract class JnGrouperChildEntityOnWrite extends CcpEntityDelegator {
 	 * @return the child
 	 */
 	protected String getChild(CcpEntity mainEntity, CcpJsonRepresentation record) {
+		String child = getChild(mainEntity, this.annotation, record);
+		return child;
+	}
+
+	/**
+	 * The child of the record in the groups of one grouping, as the decorator writes it: for the callers that put a record
+	 * back in its groups without saving it again (the resume released from a restriction, for one).
+	 * @param mainEntity the main side of the entity
+	 * @param annotation the grouping
+	 * @param record the record, its fields already transformed
+	 * @return the child
+	 */
+	public static String getChild(CcpEntity mainEntity, CcpEntityGrouperChild annotation, CcpJsonRepresentation record) {
 		String childId = mainEntity.calculateId(record);
-		String[] childFields = this.annotation.childFields();
+		String[] childFields = annotation.childFields();
 		boolean childIsTheId = childFields.length == 0;
 
 		if(childIsTheId) {
@@ -149,7 +162,7 @@ public abstract class JnGrouperChildEntityOnWrite extends CcpEntityDelegator {
 
 		List<String> childFieldsList = Arrays.asList(childFields);
 		CcpJsonRepresentation childRecord = record.getJsonPiece(childFieldsList);
-		Class<?>[] childFieldsProducers = this.annotation.childFieldsProducers();
+		Class<?>[] childFieldsProducers = annotation.childFieldsProducers();
 		for (Class<?> childFieldsProducerClass : childFieldsProducers) {
 			CcpReflectionConstructorDecorator producerConstructor = new CcpReflectionConstructorDecorator(childFieldsProducerClass);
 			Function<CcpJsonRepresentation, CcpJsonRepresentation> childFieldsProducer = producerConstructor.newInstance();
