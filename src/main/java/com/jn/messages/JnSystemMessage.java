@@ -3,14 +3,14 @@ package com.jn.messages;
 import java.util.Arrays;
 import java.util.List;
 
-import com.ccp.business.CcpBusiness;
 import com.ccp.constants.CcpOtherConstants;
 import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.decorators.CcpStringDecorator;
 import com.ccp.decorators.CcpTextDecorator;
+import com.ccp.flow.CcpErrorFlowDisturb;
+import com.ccp.process.CcpProcessStatusDefault;
 import com.ccp.especifications.db.bulk.CcpBulkEntityOperationType;
 import com.ccp.especifications.db.bulk.CcpBulkItem;
-import com.ccp.especifications.db.utils.entity.decorators.engine.CcpEntityMetaData;
 import com.jn.entities.JnEntitySystemMessage;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
 import com.jn.utils.JnLanguage;
@@ -68,17 +68,33 @@ public interface JnSystemMessage {
 	 * @return the text
 	 */
 	default String getMessage(JnLanguage language) {
-		CcpJsonRepresentation systemMessageId = this.getSystemMessageId(language);
-		CcpJsonRepresentation englishSystemMessageId = this.getSystemMessageId(JnLanguage.english);
-
-		CcpBusiness readTheEnglishMessage = notFoundContext -> JnEntitySystemMessage.ENTITY.getOneById(englishSystemMessageId);
-
-		CcpEntityMetaData entityMetaData = JnEntitySystemMessage.ENTITY.getEntityMetaData();
-		CcpJsonRepresentation systemMessage = entityMetaData.getOneByIdOrHandleItIfThisIdWasNotFound(systemMessageId, readTheEnglishMessage);
-
+		CcpJsonRepresentation systemMessage = this.getSystemMessage(language);
 		List<String> messageLines = systemMessage.getAsStringList(JnJsonCommonsFields.message);
 		String message = messageLines.get(0);
 		return message;
+	}
+
+	/**
+	 * The record of this item in the given language, or the English one when the language has no record of its own.
+	 * Read through the entity, so through its cache ({@code @CcpEntityCache}): until 2026-11-25 it went straight to the
+	 * database, one read per text, and a list of 81 resumes spent more than a second only on its labels.
+	 * @param language the language
+	 * @return the record
+	 */
+	private CcpJsonRepresentation getSystemMessage(JnLanguage language) {
+		CcpJsonRepresentation systemMessageId = this.getSystemMessageId(language);
+		try {
+			CcpJsonRepresentation systemMessage = JnEntitySystemMessage.ENTITY.getOneById(systemMessageId);
+			return systemMessage;
+		} catch (CcpErrorFlowDisturb e) {
+			boolean otherError = false == CcpProcessStatusDefault.NOT_FOUND.equals(e.status);
+			if(otherError) {
+				throw e;
+			}
+			CcpJsonRepresentation englishSystemMessageId = this.getSystemMessageId(JnLanguage.english);
+			CcpJsonRepresentation englishSystemMessage = JnEntitySystemMessage.ENTITY.getOneById(englishSystemMessageId);
+			return englishSystemMessage;
+		}
 	}
 
 	/**
