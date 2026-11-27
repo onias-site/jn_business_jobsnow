@@ -7,6 +7,7 @@ import com.ccp.decorators.CcpTimeDecorator;
 import com.ccp.dependency.injection.CcpDependencyInjection;
 import com.ccp.especifications.db.utils.entity.fields.annotations.CcpEntityFieldPrimaryKey;
 import com.ccp.especifications.email.CcpEmailProvider;
+import com.ccp.especifications.http.CcpErrorHttp;
 import com.ccp.especifications.http.CcpHttpApiExecutor;
 import com.ccp.especifications.http.CcpHttpContentType;
 import com.ccp.especifications.http.CcpHttpTooManyRequests;
@@ -14,6 +15,7 @@ import com.ccp.especifications.instant.messenger.CcpErrorInstantMessageThisBotWa
 import com.ccp.json.validations.fields.annotations.CcpJsonCopyFieldValidationsFrom;
 import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidatorRequired;
 import com.jn.entities.JnEntityEmailMessageSent;
+import com.jn.business.http.JnHttpApiErrors;
 import com.jn.entities.JnEntityInstantMessengerBotLocked;
 import com.jn.entities.JnEntityInstantMessengerMessageSent;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
@@ -66,7 +68,12 @@ public enum JnMessageType implements CcpHttpApiExecutor{
 			CcpHttpContentType contentType = json.getAsEnum(JnJsonCommonsFields.contentType, CcpHttpContentType.class, CcpHttpContentType.TEXT_HTML);
 			String[] recipients = json.getAsStringArray(JnJsonCommonsFields.email, CcpJsonCommonsFields.emails);
 			CcpJsonRepresentation emailHeaders = json.getInnerJson(JnJsonCommonsFields.emailHeaders);
-			emailSender.sendSimpleTextEmailMessage(providerToken, providerUrl, templateId, sender, subject, message, contentType, emailHeaders, recipients);
+			try {
+				emailSender.sendSimpleTextEmailMessage(providerToken, providerUrl, templateId, sender, subject, message, contentType, emailHeaders, recipients);
+			} catch (CcpErrorHttp e) {
+				RuntimeException recordedError = JnHttpApiErrors.record(JnHttpApiErrors.ExternalApi.sendgrid, e);
+				throw recordedError;
+			}
 			CcpJsonRepresentation jsonWithResolvedSubject = json.put(JnJsonCommonsFields.subject, subject);
 			JnEntityEmailMessageSent.ENTITY.save(jsonWithResolvedSubject);
 			return jsonWithResolvedSubject;

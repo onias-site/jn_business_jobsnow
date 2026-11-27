@@ -9,8 +9,10 @@ import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.dependency.injection.CcpDependencyInjection;
 import com.ccp.especifications.db.utils.entity.CcpEntity;
 import com.ccp.especifications.email.CcpEmailProvider;
+import com.ccp.especifications.http.CcpErrorHttp;
 import com.ccp.json.validations.global.engine.CcpJsonValidationError;
 import com.jn.entities.JnEntityEmailSuppressed;
+import com.jn.business.http.JnHttpApiErrors;
 import com.jn.utils.JnSystemProperties;
 
 /**
@@ -64,7 +66,7 @@ public class JnBusinessLoadEmailSuppressions implements CcpBusiness {
 		int ignoredSuppressions = 0;
 
 		for (JnEmailSuppressionTarget target : JnEmailSuppressionTarget.values()) {
-			List<CcpJsonRepresentation> records = emailProvider.getSuppressedEmailsCreatedSince(providerToken, providerUrl, target.suppressionList, startTimeInSeconds);
+			List<CcpJsonRepresentation> records = this.getSuppressedEmails(emailProvider, providerToken, providerUrl, target, startTimeInSeconds);
 			CcpEntity entity = target.getEntity();
 			for (CcpJsonRepresentation record : records) {
 				try {
@@ -79,6 +81,26 @@ public class JnBusinessLoadEmailSuppressions implements CcpBusiness {
 		CcpJsonRepresentation jsonWithSaved = json.put(Fields.savedSuppressions, savedSuppressions);
 		CcpJsonRepresentation jsonWithCounters = jsonWithSaved.put(Fields.ignoredSuppressions, ignoredSuppressions);
 		return jsonWithCounters;
+	}
+
+	/**
+	 * Reads one suppression list of the provider; an HTTP failure is recorded ({@link JnHttpApiErrors}, since 2026-11-27)
+	 * and thrown.
+	 * @param emailProvider the e-mail provider
+	 * @param providerToken the token of the provider
+	 * @param providerUrl the url of the suppressions
+	 * @param target the list
+	 * @param startTimeInSeconds the moment to read from
+	 * @return the records of the list
+	 */
+	private List<CcpJsonRepresentation> getSuppressedEmails(CcpEmailProvider emailProvider, String providerToken, String providerUrl, JnEmailSuppressionTarget target, long startTimeInSeconds) {
+		try {
+			List<CcpJsonRepresentation> records = emailProvider.getSuppressedEmailsCreatedSince(providerToken, providerUrl, target.suppressionList, startTimeInSeconds);
+			return records;
+		} catch (CcpErrorHttp e) {
+			RuntimeException recordedError = JnHttpApiErrors.record(JnHttpApiErrors.ExternalApi.sendgrid, e);
+			throw recordedError;
+		}
 	}
 
 	/**

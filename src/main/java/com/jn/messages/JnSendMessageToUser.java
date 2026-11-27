@@ -20,6 +20,7 @@ import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidatorArray;
 import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidatorRequired;
 import com.ccp.json.validations.fields.annotations.type.CcpJsonFieldTypeString;
 import com.jn.business.http.JnBusinessSendHttpRequest;
+import com.jn.business.http.JnHttpApiErrors;
 import com.jn.business.messages.JnMessageSenderExceptionHandler;
 import com.jn.business.messages.JnMessageType;
 import com.jn.entities.JnEntityEmailMessageSent;
@@ -74,7 +75,7 @@ public class JnSendMessageToUser implements CcpBusiness{
 	 * @return the next part of the fluent API
 	 */
 	public JnAddDefaultStep addDefaultProcessToEmailSending(JnMessageSenderExceptionHandler exceptionHandler) {
-		JnBusinessSendHttpRequest httpRequester = new JnBusinessSendHttpRequest(JnMessageType.email, exceptionHandler);
+		JnBusinessSendHttpRequest httpRequester = new JnBusinessSendHttpRequest(JnHttpApiErrors.ExternalApi.sendgrid, JnMessageType.email, exceptionHandler);
 		JnSendMessageToUser addOneStep = this.addOneStep(
 				httpRequester,
 				JnEntityEmailParametersToSend.ENTITY,
@@ -91,7 +92,7 @@ public class JnSendMessageToUser implements CcpBusiness{
 	 * @return the next part of the fluent API
 	 */
 	public JnAddDefaultStep addDefaultStepToInstantMessageSending(JnMessageSenderExceptionHandler exceptionHandler) {
-		JnBusinessSendHttpRequest httpRequester = new JnBusinessSendHttpRequest(JnMessageType.instantMessenger, exceptionHandler);
+		JnBusinessSendHttpRequest httpRequester = new JnBusinessSendHttpRequest(JnHttpApiErrors.ExternalApi.telegram, JnMessageType.instantMessenger, exceptionHandler);
 		JnSendMessageToUser addOneStep = this.addOneStep(
 				httpRequester,
 				JnEntityInstantMessengerParametersToSend.ENTITY,

@@ -7,17 +7,19 @@ import com.ccp.decorators.CcpJsonRepresentation;
 import com.ccp.decorators.CcpStringDecorator;
 import com.ccp.decorators.CcpTextDecorator;
 import com.ccp.dependency.injection.CcpDependencyInjection;
+import com.ccp.especifications.http.CcpErrorHttp;
 import com.ccp.especifications.instant.messenger.CcpInstantMessenger;
 import com.ccp.json.validations.fields.annotations.CcpJsonCopyFieldValidationsFrom;
 import com.ccp.json.validations.fields.annotations.CcpJsonFieldValidatorRequired;
 import com.jn.json.fields.validation.JnJsonCommonsFields;
+import com.jn.business.http.JnHttpApiErrors;
 import com.jn.json.fields.validation.JnJsonInstantMessengerFields;
 
 import com.ccp.json.fields.validation.CcpJsonCommonsFields;
 
 /**
  * Kinds of instant message: a text or a file. Each one has its own input rules and sends through
- * {@code CcpInstantMessenger}; the {@code message}, {@code caption} and {@code fileName} are templates resolved with the
+ * {@code CcpInstantMessenger} (its HTTP failures recorded by {@link JnHttpApiErrors} since 2026-11-27); the {@code message}, {@code caption} and {@code fileName} are templates resolved with the
  * values of the JSON.
  */
 public enum JnInstantMessageType implements CcpBusiness{
@@ -38,9 +40,14 @@ public enum JnInstantMessageType implements CcpBusiness{
 			Long messageThreadId = super.getMessageThreadId(json);
 			CcpStringDecorator botNameDecorator = json.getAsStringDecorator(JnJsonInstantMessengerFields.botName);
 			CcpJsonFieldName botName = botNameDecorator.jsonFieldName();
-			CcpJsonRepresentation result = instantMessenger.sendTextMessage(botName, botToken, chatId, messageThreadId, replyTo, message);
-			CcpJsonRepresentation jsonWithResult = json.mergeWithAnotherJson(result);
-			return jsonWithResult;
+			try {
+				CcpJsonRepresentation result = instantMessenger.sendTextMessage(botName, botToken, chatId, messageThreadId, replyTo, message);
+				CcpJsonRepresentation jsonWithResult = json.mergeWithAnotherJson(result);
+				return jsonWithResult;
+			} catch (CcpErrorHttp e) {
+				RuntimeException recordedError = JnHttpApiErrors.record(JnHttpApiErrors.ExternalApi.telegram, e);
+				throw recordedError;
+			}
 		}
 
 	},
@@ -68,9 +75,14 @@ public enum JnInstantMessageType implements CcpBusiness{
 			Byte[] bytes = messageDecorator.getBytes();
 			CcpStringDecorator botNameDecorator = json.getAsStringDecorator(JnJsonInstantMessengerFields.botName);
 			CcpJsonFieldName botName = botNameDecorator.jsonFieldName();
-			CcpJsonRepresentation result = instantMessenger.sendFile(botName, botToken, chatId, messageThreadId, replyTo, fileName, caption, bytes);
-			CcpJsonRepresentation jsonWithResult = json.mergeWithAnotherJson(result);
-			return jsonWithResult;
+			try {
+				CcpJsonRepresentation result = instantMessenger.sendFile(botName, botToken, chatId, messageThreadId, replyTo, fileName, caption, bytes);
+				CcpJsonRepresentation jsonWithResult = json.mergeWithAnotherJson(result);
+				return jsonWithResult;
+			} catch (CcpErrorHttp e) {
+				RuntimeException recordedError = JnHttpApiErrors.record(JnHttpApiErrors.ExternalApi.telegram, e);
+				throw recordedError;
+			}
 		}
 	}
 	;
